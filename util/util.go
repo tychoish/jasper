@@ -5,7 +5,7 @@ import (
 	"io"
 	"sync"
 
-	"github.com/mongodb/grip/send"
+	"github.com/deciduosity/grip/send"
 )
 
 // CloseFunc is a function used to close a service or close the client

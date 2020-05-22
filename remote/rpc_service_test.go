@@ -6,9 +6,9 @@ import (
 	"net"
 	"testing"
 
-	"github.com/mongodb/jasper"
-	"github.com/mongodb/jasper/remote/internal"
-	"github.com/mongodb/jasper/testutil"
+	"github.com/deciduosity/jasper"
+	"github.com/deciduosity/jasper/remote/internal"
+	"github.com/deciduosity/jasper/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"

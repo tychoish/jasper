@@ -9,11 +9,11 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/deciduosity/utility"
 	"github.com/evergreen-ci/shrub"
-	"github.com/evergreen-ci/utility"
 
-	// "github.com/evergreen-ci/utility"
-	"github.com/mongodb/grip"
+	// "github.com/deciduosity/utility"
+	"github.com/deciduosity/grip"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 )
@@ -26,7 +26,7 @@ type Golang struct {
 	// as a subdirectory of the working directory.
 	Environment map[string]string `yaml:"environment"`
 	// RootPackage is the name of the root package for the project (e.g.
-	// github.com/mongodb/jasper).
+	// github.com/deciduosity/jasper).
 	RootPackage string `yaml:"root_package"`
 	// Packages explicitly sets options for packages that should be tested.
 	Packages []GolangPackage `yaml:"packages,omitempty"`

@@ -7,10 +7,10 @@ import (
 	"io"
 	"strings"
 
-	"github.com/mongodb/jasper"
-	"github.com/mongodb/jasper/options"
-	"github.com/mongodb/jasper/remote"
-	"github.com/mongodb/jasper/scripting"
+	"github.com/deciduosity/jasper"
+	"github.com/deciduosity/jasper/options"
+	"github.com/deciduosity/jasper/remote"
+	"github.com/deciduosity/jasper/scripting"
 	"github.com/pkg/errors"
 )
 

@@ -7,7 +7,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/mongodb/grip"
+	"github.com/deciduosity/grip"
 	cryptossh "golang.org/x/crypto/ssh"
 )
 

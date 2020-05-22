@@ -8,12 +8,12 @@ import (
 
 	"github.com/cheynewallace/tabby"
 	"github.com/google/uuid"
-	"github.com/mongodb/grip"
-	"github.com/mongodb/grip/message"
-	"github.com/mongodb/grip/recovery"
-	"github.com/mongodb/jasper"
-	"github.com/mongodb/jasper/options"
-	"github.com/mongodb/jasper/remote"
+	"github.com/deciduosity/grip"
+	"github.com/deciduosity/grip/message"
+	"github.com/deciduosity/grip/recovery"
+	"github.com/deciduosity/jasper"
+	"github.com/deciduosity/jasper/options"
+	"github.com/deciduosity/jasper/remote"
 	"github.com/pkg/errors"
 	"github.com/urfave/cli"
 )

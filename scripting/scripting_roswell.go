@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mongodb/grip"
-	"github.com/mongodb/jasper"
-	"github.com/mongodb/jasper/options"
+	"github.com/deciduosity/grip"
+	"github.com/deciduosity/jasper"
+	"github.com/deciduosity/jasper/options"
 	"github.com/pkg/errors"
 )
 

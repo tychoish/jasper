@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/deciduosity/jasper/testutil"
+	"github.com/deciduosity/utility"
 	"github.com/evergreen-ci/shrub"
-	"github.com/evergreen-ci/utility"
-	"github.com/mongodb/jasper/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

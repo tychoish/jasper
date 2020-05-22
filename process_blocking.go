@@ -10,9 +10,9 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/mongodb/grip"
-	"github.com/mongodb/jasper/internal/executor"
-	"github.com/mongodb/jasper/options"
+	"github.com/deciduosity/grip"
+	"github.com/deciduosity/jasper/internal/executor"
+	"github.com/deciduosity/jasper/options"
 	"github.com/pkg/errors"
 )
 

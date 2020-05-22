@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mongodb/amboy"
-	"github.com/mongodb/amboy/registry"
-	"github.com/mongodb/jasper/options"
+	"github.com/deciduosity/amboy"
+	"github.com/deciduosity/amboy/registry"
+	"github.com/deciduosity/jasper/options"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

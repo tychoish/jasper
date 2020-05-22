@@ -4,10 +4,10 @@ import (
 	"context"
 	"io"
 
-	"github.com/evergreen-ci/mrpc/mongowire"
-	"github.com/evergreen-ci/mrpc/shell"
-	"github.com/mongodb/jasper/options"
-	"github.com/mongodb/jasper/scripting"
+	"github.com/deciduosity/mrpc/mongowire"
+	"github.com/deciduosity/mrpc/shell"
+	"github.com/deciduosity/jasper/options"
+	"github.com/deciduosity/jasper/scripting"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 )

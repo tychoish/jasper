@@ -9,11 +9,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mongodb/jasper"
-	"github.com/mongodb/jasper/mock"
-	"github.com/mongodb/jasper/options"
-	"github.com/mongodb/jasper/scripting"
-	"github.com/mongodb/jasper/testutil"
+	"github.com/deciduosity/jasper"
+	"github.com/deciduosity/jasper/mock"
+	"github.com/deciduosity/jasper/options"
+	"github.com/deciduosity/jasper/scripting"
+	"github.com/deciduosity/jasper/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

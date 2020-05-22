@@ -5,10 +5,10 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/deciduosity/bond"
+	"github.com/deciduosity/grip"
 	"github.com/mholt/archiver"
-	"github.com/mongodb/grip"
 	"github.com/pkg/errors"
-	"github.com/tychoish/bond"
 )
 
 // Download represents the options to download a file to a given path and
@@ -71,23 +71,27 @@ func (opts Download) Download() error {
 // Extract extracts the download to the path specified, using the archive format
 // specified.
 func (opts Download) Extract() error {
-	var archiveHandler archiver.Archiver
+	var archiveHandler archiver.Unarchiver
 	switch opts.ArchiveOpts.Format {
 	case ArchiveAuto:
-		unzipper := archiver.MatchingFormat(opts.Path)
+		unzipper, _ := archiver.ByExtension(opts.Path)
 		if unzipper == nil {
 			return errors.Errorf("could not detect archive format for %s", opts.Path)
 		}
-		archiveHandler = unzipper
+		var ok bool
+		archiveHandler, ok = unzipper.(archiver.Unarchiver)
+		if !ok {
+			return errors.Errorf("%s was not a supported archive format [%T]", opts.Path, unzipper)
+		}
 	case ArchiveTarGz:
-		archiveHandler = archiver.TarGz
+		archiveHandler = archiver.NewTarGz()
 	case ArchiveZip:
-		archiveHandler = archiver.Zip
+		archiveHandler = archiver.NewZip()
 	default:
 		return errors.Errorf("unrecognized archive format %s", opts.ArchiveOpts.Format)
 	}
 
-	if err := archiveHandler.Open(opts.Path, opts.ArchiveOpts.TargetPath); err != nil {
+	if err := archiveHandler.Unarchive(opts.Path, opts.ArchiveOpts.TargetPath); err != nil {
 		return errors.Wrapf(err, "problem extracting archive %s to %s", opts.Path, opts.ArchiveOpts.TargetPath)
 	}
 

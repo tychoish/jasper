@@ -5,9 +5,9 @@ import (
 	"syscall"
 	"testing"
 
-	"github.com/mongodb/jasper"
-	"github.com/mongodb/jasper/mock"
-	"github.com/mongodb/jasper/testutil"
+	"github.com/deciduosity/jasper"
+	"github.com/deciduosity/jasper/mock"
+	"github.com/deciduosity/jasper/testutil"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

@@ -3,8 +3,8 @@ package main
 import (
 	"os"
 
-	"github.com/mongodb/grip"
-	jcli "github.com/mongodb/jasper/cli"
+	"github.com/deciduosity/grip"
+	jcli "github.com/deciduosity/jasper/cli"
 	"github.com/urfave/cli"
 )
 

@@ -5,10 +5,10 @@ import (
 	"io/ioutil"
 	"time"
 
-	"github.com/mongodb/grip"
-	"github.com/mongodb/grip/level"
-	"github.com/mongodb/grip/send"
-	"github.com/mongodb/jasper/util"
+	"github.com/deciduosity/grip"
+	"github.com/deciduosity/grip/level"
+	"github.com/deciduosity/grip/send"
+	"github.com/deciduosity/jasper/util"
 	"github.com/pkg/errors"
 )
 

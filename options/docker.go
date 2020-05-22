@@ -6,7 +6,7 @@ import (
 	"runtime"
 
 	"github.com/docker/docker/client"
-	"github.com/mongodb/grip"
+	"github.com/deciduosity/grip"
 	"github.com/pkg/errors"
 )
 

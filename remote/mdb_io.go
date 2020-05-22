@@ -3,10 +3,10 @@ package remote
 import (
 	"time"
 
-	"github.com/evergreen-ci/mrpc/shell"
-	"github.com/mongodb/jasper"
-	"github.com/mongodb/jasper/options"
-	"github.com/mongodb/jasper/scripting"
+	"github.com/deciduosity/mrpc/shell"
+	"github.com/deciduosity/jasper"
+	"github.com/deciduosity/jasper/options"
+	"github.com/deciduosity/jasper/scripting"
 )
 
 // infoRequest represents a request for runtime information regarding the

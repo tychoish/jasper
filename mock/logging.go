@@ -3,7 +3,7 @@ package mock
 import (
 	"time"
 
-	"github.com/mongodb/jasper/options"
+	"github.com/deciduosity/jasper/options"
 	"github.com/pkg/errors"
 )
 

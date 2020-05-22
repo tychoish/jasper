@@ -5,10 +5,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/mongodb/grip"
-	"github.com/mongodb/grip/message"
-	"github.com/mongodb/jasper/options"
-	"github.com/mongodb/jasper/util"
+	"github.com/deciduosity/grip"
+	"github.com/deciduosity/grip/message"
+	"github.com/deciduosity/jasper/options"
+	"github.com/deciduosity/jasper/util"
 	"github.com/pkg/errors"
 )
 

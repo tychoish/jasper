@@ -6,11 +6,11 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/evergreen-ci/birch"
-	"github.com/mongodb/grip"
-	"github.com/mongodb/grip/level"
-	"github.com/mongodb/grip/message"
-	"github.com/mongodb/grip/send"
+	"github.com/deciduosity/birch"
+	"github.com/deciduosity/grip"
+	"github.com/deciduosity/grip/level"
+	"github.com/deciduosity/grip/message"
+	"github.com/deciduosity/grip/send"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

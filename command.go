@@ -7,13 +7,13 @@ import (
 	"strings"
 
 	"github.com/google/shlex"
-	"github.com/mongodb/amboy"
-	"github.com/mongodb/grip"
-	"github.com/mongodb/grip/level"
-	"github.com/mongodb/grip/message"
-	"github.com/mongodb/grip/recovery"
-	"github.com/mongodb/grip/send"
-	"github.com/mongodb/jasper/options"
+	"github.com/deciduosity/amboy"
+	"github.com/deciduosity/grip"
+	"github.com/deciduosity/grip/level"
+	"github.com/deciduosity/grip/message"
+	"github.com/deciduosity/grip/recovery"
+	"github.com/deciduosity/grip/send"
+	"github.com/deciduosity/jasper/options"
 	"github.com/pkg/errors"
 )
 

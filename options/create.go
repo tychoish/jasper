@@ -12,10 +12,10 @@ import (
 	"time"
 
 	"github.com/google/shlex"
-	"github.com/mongodb/grip"
-	"github.com/mongodb/grip/level"
-	"github.com/mongodb/grip/send"
-	"github.com/mongodb/jasper/internal/executor"
+	"github.com/deciduosity/grip"
+	"github.com/deciduosity/grip/level"
+	"github.com/deciduosity/grip/send"
+	"github.com/deciduosity/jasper/internal/executor"
 	"github.com/pkg/errors"
 )
 

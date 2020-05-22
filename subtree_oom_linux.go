@@ -7,7 +7,7 @@ import (
 	"context"
 	"os/exec"
 
-	"github.com/mongodb/grip/recovery"
+	"github.com/deciduosity/grip/recovery"
 	"github.com/pkg/errors"
 )
 

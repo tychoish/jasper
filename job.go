@@ -7,14 +7,14 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/mongodb/amboy"
-	"github.com/mongodb/amboy/dependency"
-	"github.com/mongodb/amboy/job"
-	"github.com/mongodb/amboy/registry"
-	"github.com/mongodb/grip"
-	"github.com/mongodb/grip/level"
-	"github.com/mongodb/grip/send"
-	"github.com/mongodb/jasper/options"
+	"github.com/deciduosity/amboy"
+	"github.com/deciduosity/amboy/dependency"
+	"github.com/deciduosity/amboy/job"
+	"github.com/deciduosity/amboy/registry"
+	"github.com/deciduosity/grip"
+	"github.com/deciduosity/grip/level"
+	"github.com/deciduosity/grip/send"
+	"github.com/deciduosity/jasper/options"
 )
 
 // Job is an alias for an amboy.Job

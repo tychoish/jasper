@@ -3,8 +3,8 @@ package mock
 import (
 	"testing"
 
-	"github.com/mongodb/jasper"
-	"github.com/mongodb/jasper/remote"
+	"github.com/deciduosity/jasper"
+	"github.com/deciduosity/jasper/remote"
 	"github.com/stretchr/testify/assert"
 )
 

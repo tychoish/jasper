@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mongodb/jasper/options"
+	"github.com/deciduosity/jasper/options"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

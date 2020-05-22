@@ -11,16 +11,16 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/deciduosity/amboy/queue"
+	"github.com/deciduosity/bond/recall"
+	"github.com/deciduosity/grip"
+	"github.com/deciduosity/jasper/options"
+	"github.com/deciduosity/jasper/testutil"
+	"github.com/deciduosity/lru"
 	"github.com/mholt/archiver"
-	"github.com/mongodb/amboy/queue"
-	"github.com/mongodb/grip"
-	"github.com/mongodb/jasper/options"
-	"github.com/mongodb/jasper/testutil"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tychoish/bond/recall"
-	"github.com/tychoish/lru"
 )
 
 func TestSetupDownloadMongoDBReleasesFailsWithZeroOptions(t *testing.T) {

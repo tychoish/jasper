@@ -8,7 +8,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/mongodb/grip/recovery"
+	"github.com/deciduosity/grip/recovery"
 	"github.com/pkg/errors"
 )
 

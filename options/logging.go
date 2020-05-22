@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/evergreen-ci/birch"
-	"github.com/mongodb/grip/level"
-	"github.com/mongodb/grip/message"
-	"github.com/mongodb/grip/send"
+	"github.com/deciduosity/birch"
+	"github.com/deciduosity/grip/level"
+	"github.com/deciduosity/grip/message"
+	"github.com/deciduosity/grip/send"
 	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 )

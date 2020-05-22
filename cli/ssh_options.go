@@ -3,8 +3,8 @@ package cli
 import (
 	"fmt"
 
-	"github.com/mongodb/grip"
-	"github.com/mongodb/jasper/options"
+	"github.com/deciduosity/grip"
+	"github.com/deciduosity/jasper/options"
 )
 
 // ClientOptions represents the options to connect the CLI client to the Jasper

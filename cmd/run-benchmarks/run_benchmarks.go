@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/mongodb/jasper/benchmarks"
+	"github.com/deciduosity/jasper/benchmarks"
 )
 
 func main() {

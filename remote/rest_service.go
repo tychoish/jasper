@@ -12,15 +12,15 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/evergreen-ci/gimlet"
-	"github.com/mongodb/grip"
-	"github.com/mongodb/grip/message"
-	"github.com/mongodb/grip/recovery"
-	"github.com/mongodb/jasper"
-	"github.com/mongodb/jasper/options"
-	"github.com/mongodb/jasper/scripting"
+	"github.com/deciduosity/gimlet"
+	"github.com/deciduosity/grip"
+	"github.com/deciduosity/grip/message"
+	"github.com/deciduosity/grip/recovery"
+	"github.com/deciduosity/jasper"
+	"github.com/deciduosity/jasper/options"
+	"github.com/deciduosity/jasper/scripting"
 	"github.com/pkg/errors"
-	"github.com/tychoish/lru"
+	"github.com/deciduosity/lru"
 )
 
 // Service defines a REST service that provides a remote manager, using

@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mongodb/jasper"
-	"github.com/mongodb/jasper/testutil"
+	"github.com/deciduosity/jasper"
+	"github.com/deciduosity/jasper/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

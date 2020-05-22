@@ -4,8 +4,8 @@ import (
 	"context"
 	"io"
 
-	"github.com/mongodb/grip/send"
-	"github.com/mongodb/jasper/options"
+	"github.com/deciduosity/grip/send"
+	"github.com/deciduosity/jasper/options"
 	"github.com/pkg/errors"
 )
 

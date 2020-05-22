@@ -1,8 +1,9 @@
 package options
 
 import (
-	"github.com/mongodb/grip"
-	"github.com/mongodb/grip/send"
+	"github.com/deciduosity/grip"
+	"github.com/deciduosity/grip/send"
+	"github.com/deciduosity/sumogrip"
 	"github.com/pkg/errors"
 )
 
@@ -207,7 +208,7 @@ func (opts *SumoLogicLoggerOptions) Configure() (send.Sender, error) {
 		return nil, errors.Wrap(err, "invalid config")
 	}
 
-	sender, err := send.NewSumo(DefaultLogName, opts.SumoEndpoint)
+	sender, err := sumogrip.NewSumo(DefaultLogName, opts.SumoEndpoint)
 	if err != nil {
 		return nil, errors.Wrap(err, "problem creating base sumo logic logger")
 	}

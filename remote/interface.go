@@ -3,9 +3,9 @@ package remote
 import (
 	"context"
 
-	"github.com/mongodb/jasper"
-	"github.com/mongodb/jasper/options"
-	"github.com/mongodb/jasper/scripting"
+	"github.com/deciduosity/jasper"
+	"github.com/deciduosity/jasper/options"
+	"github.com/deciduosity/jasper/scripting"
 )
 
 // Manager provides an interface to access all functionality from a Jasper

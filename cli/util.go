@@ -14,10 +14,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/deciduosity/grip"
+	"github.com/deciduosity/jasper/remote"
+	"github.com/deciduosity/jasper/util"
 	"github.com/evergreen-ci/service"
-	"github.com/mongodb/grip"
-	"github.com/mongodb/jasper/remote"
-	"github.com/mongodb/jasper/util"
 	"github.com/pkg/errors"
 	"github.com/urfave/cli"
 )

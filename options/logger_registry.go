@@ -3,7 +3,7 @@ package options
 import (
 	"sync"
 
-	"github.com/mongodb/grip/send"
+	"github.com/deciduosity/grip/send"
 )
 
 var globalLoggerRegistry LoggerRegistry = &basicLoggerRegistry{

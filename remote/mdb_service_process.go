@@ -5,9 +5,9 @@ import (
 	"io"
 	"syscall"
 
-	"github.com/evergreen-ci/mrpc/mongowire"
-	"github.com/evergreen-ci/mrpc/shell"
-	"github.com/mongodb/jasper"
+	"github.com/deciduosity/mrpc/mongowire"
+	"github.com/deciduosity/mrpc/shell"
+	"github.com/deciduosity/jasper"
 	"github.com/pkg/errors"
 )
 

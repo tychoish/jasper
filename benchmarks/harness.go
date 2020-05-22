@@ -1,3 +1,4 @@
+// +build ignore
 package benchmarks
 
 import (
@@ -8,12 +9,12 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/evergreen-ci/poplar"
-	"github.com/mongodb/grip"
-	"github.com/mongodb/grip/send"
-	"github.com/mongodb/jasper"
-	"github.com/mongodb/jasper/options"
-	"github.com/mongodb/jasper/testutil"
+	"github.com/deciduosity/grip"
+	"github.com/deciduosity/grip/send"
+	"github.com/deciduosity/jasper"
+	"github.com/deciduosity/jasper/options"
+	"github.com/deciduosity/jasper/testutil"
+	"github.com/deciduosity/poplar"
 	"github.com/pkg/errors"
 )
 

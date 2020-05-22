@@ -6,14 +6,19 @@ import (
 	"path/filepath"
 	"runtime"
 
+	"github.com/deciduosity/grip"
 	"github.com/mholt/archiver"
-	"github.com/mongodb/grip"
+	"github.com/pkg/errors"
 )
 
 // AddFileToDirectory adds an archive file given by fileName with the given
 // fileContents to the directory.
 func AddFileToDirectory(dir string, fileName string, fileContents string) error {
-	if format := archiver.MatchingFormat(fileName); format != nil {
+	if format, _ := archiver.ByExtension(fileName); format != nil {
+		builder, ok := format.(archiver.Archiver)
+		if !ok {
+			return errors.New("unsupported archive format")
+		}
 		tmpFile, err := ioutil.TempFile(dir, "tmp.txt")
 		if err != nil {
 			return err
@@ -29,7 +34,7 @@ func AddFileToDirectory(dir string, fileName string, fileContents string) error 
 			return err
 		}
 
-		if err := format.Make(filepath.Join(dir, fileName), []string{tmpFile.Name()}); err != nil {
+		if err := builder.Archive([]string{tmpFile.Name()}, filepath.Join(dir, fileName)); err != nil {
 			return err
 		}
 		return nil

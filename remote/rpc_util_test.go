@@ -7,11 +7,11 @@ import (
 	"net"
 	"path/filepath"
 
-	"github.com/evergreen-ci/certdepot"
-	"github.com/mongodb/grip"
-	"github.com/mongodb/jasper"
-	"github.com/mongodb/jasper/options"
-	"github.com/mongodb/jasper/testutil"
+	"github.com/deciduosity/certdepot"
+	"github.com/deciduosity/grip"
+	"github.com/deciduosity/jasper"
+	"github.com/deciduosity/jasper/options"
+	"github.com/deciduosity/jasper/testutil"
 	"github.com/pkg/errors"
 )
 

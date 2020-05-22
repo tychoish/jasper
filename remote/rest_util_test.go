@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/mongodb/grip"
-	"github.com/mongodb/jasper"
-	"github.com/mongodb/jasper/testutil"
+	"github.com/deciduosity/grip"
+	"github.com/deciduosity/jasper"
+	"github.com/deciduosity/jasper/testutil"
 	"github.com/pkg/errors"
 )
 

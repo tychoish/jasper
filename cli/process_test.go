@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/mongodb/jasper"
-	"github.com/mongodb/jasper/testutil"
-	"github.com/mongodb/jasper/util"
+	"github.com/deciduosity/jasper"
+	"github.com/deciduosity/jasper/testutil"
+	"github.com/deciduosity/jasper/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/urfave/cli"

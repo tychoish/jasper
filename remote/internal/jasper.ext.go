@@ -8,14 +8,14 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/ptypes"
-	"github.com/mongodb/grip/level"
-	"github.com/mongodb/grip/message"
-	"github.com/mongodb/grip/send"
-	"github.com/mongodb/jasper"
-	"github.com/mongodb/jasper/options"
-	"github.com/mongodb/jasper/scripting"
+	"github.com/deciduosity/grip/level"
+	"github.com/deciduosity/grip/message"
+	"github.com/deciduosity/grip/send"
+	"github.com/deciduosity/jasper"
+	"github.com/deciduosity/jasper/options"
+	"github.com/deciduosity/jasper/scripting"
 	"github.com/pkg/errors"
-	"github.com/tychoish/bond"
+	"github.com/deciduosity/bond"
 	"go.mongodb.org/mongo-driver/bson"
 )
 

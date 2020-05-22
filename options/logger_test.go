@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/mongodb/grip/level"
-	"github.com/mongodb/grip/send"
+	"github.com/deciduosity/grip/level"
+	"github.com/deciduosity/grip/send"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/bson"

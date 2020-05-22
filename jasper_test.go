@@ -3,8 +3,8 @@ package jasper
 import (
 	"context"
 
-	"github.com/mongodb/grip"
-	"github.com/mongodb/jasper/options"
+	"github.com/deciduosity/grip"
+	"github.com/deciduosity/jasper/options"
 )
 
 func makeLockingProcess(pmake ProcessConstructor) ProcessConstructor {

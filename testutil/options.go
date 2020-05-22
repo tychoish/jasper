@@ -5,8 +5,8 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/mongodb/jasper/options"
-	"github.com/tychoish/bond"
+	"github.com/deciduosity/jasper/options"
+	"github.com/deciduosity/bond"
 )
 
 // YesCreateOpts creates the options to run the "yes" command for the given
