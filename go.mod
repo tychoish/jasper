@@ -16,11 +16,11 @@ require (
 	github.com/deciduosity/bond v0.0.0-20200522145941-231267898d4d
 	github.com/deciduosity/certdepot v0.0.0-20200522025604-e2d347fb8f4f
 	github.com/deciduosity/gimlet v0.0.0-20200521211013-ce6f8e51110b
-	github.com/deciduosity/grip v0.0.0-20200520213429-c8f813068d51
+	github.com/deciduosity/grip v0.0.0-20200523175710-fd8be2e0aab0
 	github.com/deciduosity/lru v0.0.0-20200522031817-e881bfa9cfbf
 	github.com/deciduosity/mrpc v0.0.0-20200522024533-7ae3f79d4717
 	github.com/deciduosity/poplar v0.0.0-20200522022346-28353d080bd9
-	github.com/deciduosity/sumogrip v0.0.0-20200521160444-a4f7601b7614
+	github.com/deciduosity/sumogrip v0.0.0-20200523225900-94b5cd1845de
 	github.com/deciduosity/utility v0.0.0-20200521233144-556c4888c866
 	github.com/docker/distribution v2.7.1+incompatible // indirect
 	github.com/docker/docker v17.12.0-ce-rc1.0.20200309214505-aa6a9891b09c+incompatible
