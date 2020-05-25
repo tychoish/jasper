@@ -16,7 +16,7 @@ require (
 	github.com/deciduosity/bond v0.0.0-20200522145941-231267898d4d
 	github.com/deciduosity/certdepot v0.0.0-20200522025604-e2d347fb8f4f
 	github.com/deciduosity/gimlet v0.0.0-20200521211013-ce6f8e51110b
-	github.com/deciduosity/grip v0.0.0-20200523175710-fd8be2e0aab0
+	github.com/deciduosity/grip v0.0.0-20200524175003-6ec0c220be09
 	github.com/deciduosity/lru v0.0.0-20200522031817-e881bfa9cfbf
 	github.com/deciduosity/mrpc v0.0.0-20200522024533-7ae3f79d4717
 	github.com/deciduosity/poplar v0.0.0-20200522022346-28353d080bd9
