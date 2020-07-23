@@ -15,6 +15,7 @@ const (
 	GetLogStreamCommand = "get-log-stream"
 	SignalEventCommand  = "signal-event"
 	WriteFileCommand    = "write-file"
+	SendMessagesCommand = "send-messages"
 )
 
 // Remote creates a cli.Command that allows the remote-specific methods in the
@@ -28,6 +29,7 @@ func Remote() cli.Command {
 			remoteGetLogStream(),
 			remoteSignalEvent(),
 			remoteWriteFile(),
+			remoteSendMessages(),
 		},
 	}
 }
@@ -87,6 +89,23 @@ func remoteSignalEvent() cli.Command {
 			input := EventInput{}
 			return doPassthroughInputOutput(c, &input, func(ctx context.Context, client remote.Manager) interface{} {
 				if err := client.SignalEvent(ctx, input.Name); err != nil {
+					return makeOutcomeResponse(err)
+				}
+				return makeOutcomeResponse(nil)
+			})
+		},
+	}
+}
+
+func remoteSendMessages() cli.Command {
+	return cli.Command{
+		Name:   SendMessagesCommand,
+		Flags:  clientFlags(),
+		Before: clientBefore(),
+		Action: func(c *cli.Context) error {
+			input := options.LoggingPayload{}
+			return doPassthroughInputOutput(c, &input, func(ctx context.Context, client remote.Manager) interface{} {
+				if err := client.SendMessages(ctx, input); err != nil {
 					return makeOutcomeResponse(err)
 				}
 				return makeOutcomeResponse(nil)

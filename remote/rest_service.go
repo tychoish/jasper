@@ -77,7 +77,7 @@ func (s *Service) App(ctx context.Context) *gimlet.APIApp {
 	app.AddRoute("/logging/{id}").Version(1).Post().Handler(s.loggingCacheCreate)
 	app.AddRoute("/logging/{id}").Version(1).Delete().Handler(s.loggingCacheDelete)
 	app.AddRoute("/logging/{id}").Version(1).Get().Handler(s.loggingCacheGet)
-	app.AddRoute("/logging/{id}/send").Version(1).Post().Handler(s.loggingSend)
+	app.AddRoute("/logging/{id}/send").Version(1).Post().Handler(s.loggingSendMessages)
 	app.AddRoute("/file/write").Version(1).Put().Handler(s.writeFile)
 	app.AddRoute("/clear").Version(1).Post().Handler(s.clearManager)
 	app.AddRoute("/close").Version(1).Delete().Handler(s.closeManager)
@@ -639,7 +639,7 @@ func (s *Service) loggingCacheGet(rw http.ResponseWriter, r *http.Request) {
 	gimlet.WriteJSON(rw, s.manager.LoggingCache(r.Context()).Get(gimlet.GetVars(r)["id"]))
 }
 
-func (s *Service) loggingSend(rw http.ResponseWriter, r *http.Request) {
+func (s *Service) loggingSendMessages(rw http.ResponseWriter, r *http.Request) {
 	id := gimlet.GetVars(r)["id"]
 	cache := s.manager.LoggingCache(r.Context())
 	logger := cache.Get(id)
@@ -660,8 +660,7 @@ func (s *Service) loggingSend(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := logger.Send(payload)
-	if err != nil {
+	if err := logger.Send(payload); err != nil {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
 			Message:    err.Error(),

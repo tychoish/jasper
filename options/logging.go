@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cdr/grip"
 	"github.com/cdr/grip/level"
 	"github.com/cdr/grip/message"
 	"github.com/cdr/grip/send"
@@ -43,9 +44,9 @@ type LoggingPayload struct {
 	LoggerID          string               `bson:"logger_id" json:"logger_id" yaml:"logger_id"`
 	Data              interface{}          `bson:"data" json:"data" yaml:"data"`
 	Priority          level.Priority       `bson:"priority" json:"priority" yaml:"priority"`
-	IsMulti           bool                 `bson:"multi" json:"multi" yaml:"multi"`
-	PreferSendToError bool                 `bson:"prefer_send_to_error" json:"prefer_send_to_error" yaml:"prefer_send_to_error"`
-	AddMetadata       bool                 `bson:"add_metadata" json:"add_metadata" yaml:"add_metadata"`
+	IsMulti           bool                 `bson:"multi,omitempty" json:"multi,omitempty" yaml:"multi,omitempty"`
+	PreferSendToError bool                 `bson:"prefer_send_to_error,omitempty" json:"prefer_send_to_error,omitempty" yaml:"prefer_send_to_error,omitempty"`
+	AddMetadata       bool                 `bson:"add_metadata,omitempty" json:"add_metadata,omitempty" yaml:"add_metadata,omitempty"`
 	Format            LoggingPayloadFormat `bson:"payload_format,omitempty" json:"payload_format,omitempty" yaml:"payload_format,omitempty"`
 }
 
@@ -59,11 +60,28 @@ const (
 	LoggingPayloadFormatSTRING = "string"
 )
 
+// Validate checks that the required fields are populated for the payload and
+// the format is valid.
+func (lp *LoggingPayload) Validate() error {
+	catcher := grip.NewBasicCatcher()
+	catcher.NewWhen(lp.Data == nil, "data cannot be empty")
+	switch lp.Format {
+	case "", LoggingPayloadFormatBSON, LoggingPayloadFormatJSON, LoggingPayloadFormatString:
+	default:
+		catcher.Errorf("invalid payload format '%s'", lp.Format)
+	}
+	return catcher.Resolve()
+}
+
 // Send resolves a sender from the cached logger (either the error or
 // output endpoint), and then sends the message from the data
 // payload. This method ultimately is responsible for converting the
 // payload to a message format.
 func (cl *CachedLogger) Send(lp *LoggingPayload) error {
+	if err := lp.Validate(); err != nil {
+		return errors.Wrap(err, "invalid logging payload")
+	}
+
 	sender, err := cl.getSender(lp.PreferSendToError)
 	if err != nil {
 		return errors.WithStack(err)
