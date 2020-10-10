@@ -24,7 +24,12 @@ const (
 )
 
 func (s *mdbService) managerID(ctx context.Context, w io.Writer, msg mongowire.Message) {
-	payload, _ := makeIDResponse(s.manager.ID()).MarshalDocument()
+	payload, err := s.makePayload(makeIDResponse(s.manager.ID()))
+	if err != nil {
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.New("could not build response"), ManagerIDCommand)
+		return
+	}
+
 	resp, err := shell.ResponseToMessage(mongowire.OP_REPLY, payload)
 	if err != nil {
 		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.New("could not make response"), ManagerIDCommand)
