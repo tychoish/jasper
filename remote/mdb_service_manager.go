@@ -39,20 +39,16 @@ func (s *mdbService) managerID(ctx context.Context, w io.Writer, msg mongowire.M
 }
 
 func (s *mdbService) managerCreateProcess(ctx context.Context, w io.Writer, msg mongowire.Message) {
-	req := createProcessRequest{}
 	doc, err := shell.RequestMessageToDocument(msg)
 	if err != nil {
 		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not read request"), CreateProcessCommand)
 		return
 	}
-	data, err := doc.MarshalBSON()
-	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not read request body"), CreateProcessCommand)
-		return
-	}
 
-	if err = s.unmarshaler(data, &req); err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse body"), CreateProcessCommand)
+	req := createProcessRequest{}
+	if err = s.readPayload(doc, &req); err != nil {
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse request body"), CreateProcessCommand)
+		return
 	}
 
 	opts := req.Options

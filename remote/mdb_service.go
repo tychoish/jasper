@@ -131,21 +131,29 @@ const (
 	SignalEventCommand  = "signal_event"
 )
 
-func (s *mdbService) downloadFile(ctx context.Context, w io.Writer, msg mongowire.Message) {
+func (s *mdbService) readRequest(msg mongowire.Message, in interface{}) error {
 	doc, err := shell.RequestMessageToDocument(msg)
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not read request"), DownloadFileCommand)
-		return
+		return errors.Wrap(err, "could not read response")
 	}
+
 	data, err := doc.MarshalBSON()
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not read request body"), DownloadFileCommand)
-		return
+		return errors.Wrap(err, "could not read response data")
 	}
 
+	if err := s.unmarshaler(data, in); err != nil {
+		return errors.Wrap(err, "problem parsing response body")
+
+	}
+
+	return nil
+}
+
+func (s *mdbService) downloadFile(ctx context.Context, w io.Writer, msg mongowire.Message) {
 	req := downloadFileRequest{}
 
-	if err = s.unmarshaler(data, &req); err != nil {
+	if err := s.readRequest(msg, &req); err != nil {
 		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse request"), DownloadFileCommand)
 		return
 	}
@@ -167,18 +175,7 @@ func (s *mdbService) downloadFile(ctx context.Context, w io.Writer, msg mongowir
 
 func (s *mdbService) getLogStream(ctx context.Context, w io.Writer, msg mongowire.Message) {
 	req := getLogStreamRequest{}
-	doc, err := shell.RequestMessageToDocument(msg)
-	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not read request"), GetLogStreamCommand)
-		return
-	}
-	data, err := doc.MarshalBSON()
-	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not read request body"), GetLogStreamCommand)
-		return
-	}
-
-	if err = s.unmarshaler(data, &req); err != nil {
+	if err := s.readRequest(msg, &req); err != nil {
 		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse request"), GetLogStreamCommand)
 		return
 	}
@@ -225,19 +222,8 @@ func (s *mdbService) makePayload(in interface{}) (*birch.Document, error) {
 }
 
 func (s *mdbService) signalEvent(ctx context.Context, w io.Writer, msg mongowire.Message) {
-	doc, err := shell.RequestMessageToDocument(msg)
-	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not read request"), SignalEventCommand)
-		return
-	}
-	data, err := doc.MarshalBSON()
-	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not read request body"), SignalEventCommand)
-		return
-	}
-
-	req := &signalEventRequest{}
-	if err = s.unmarshaler(data, &req); err != nil {
+	req := signalEventRequest{}
+	if err := s.readRequest(msg, &req); err != nil {
 		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse request"), SignalEventCommand)
 		return
 	}

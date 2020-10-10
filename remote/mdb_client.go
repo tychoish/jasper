@@ -562,18 +562,8 @@ func (c *mdbClient) List(ctx context.Context, f options.Filter) ([]jasper.Proces
 		return nil, errors.Wrap(err, "failed during request")
 	}
 
-	doc, err := shell.ResponseMessageToDocument(msg)
-	if err != nil {
-		return nil, errors.Wrap(err, "problem reading response")
-	}
-
-	data, err := doc.MarshalBSON()
-	if err != nil {
-		return nil, errors.Wrap(err, "problem reading response")
-	}
-
 	resp := infosResponse{}
-	if err = c.unmarshaler(data, &resp); err != nil {
+	if err = c.readRequest(msg, &resp); err != nil {
 		return nil, errors.Wrap(err, "problem reading response")
 	}
 
@@ -603,18 +593,8 @@ func (c *mdbClient) Group(ctx context.Context, tag string) ([]jasper.Process, er
 		return nil, errors.Wrap(err, "failed during request")
 	}
 
-	doc, err := shell.ResponseMessageToDocument(msg)
-	if err != nil {
-		return nil, errors.Wrap(err, "problem reading response")
-	}
-
-	data, err := doc.MarshalBSON()
-	if err != nil {
-		return nil, errors.Wrap(err, "problem reading response")
-	}
-
 	resp := infosResponse{}
-	if err = c.unmarshaler(data, &resp); err != nil {
+	if err = c.readRequest(msg, &resp); err != nil {
 		return nil, errors.Wrap(err, "problem reading response")
 	}
 
@@ -789,18 +769,8 @@ func (c *mdbClient) GetLogStream(ctx context.Context, id string, count int) (jas
 		return jasper.LogStream{}, errors.Wrap(err, "failed during request")
 	}
 
-	doc, err := shell.ResponseMessageToDocument(msg)
-	if err != nil {
-		return jasper.LogStream{}, errors.Wrap(err, "problem reading response")
-	}
-
-	data, err = doc.MarshalBSON()
-	if err != nil {
-		return jasper.LogStream{}, errors.Wrap(err, "problem reading response")
-	}
-
 	var resp getLogStreamResponse
-	if err = c.unmarshaler(data, &resp); err != nil {
+	if err := c.readRequest(msg, &resp); err != nil {
 		return jasper.LogStream{}, errors.Wrap(err, "problem reading response")
 	}
 

@@ -4,7 +4,6 @@ import (
 	"context"
 	"io"
 
-	"github.com/deciduosity/birch"
 	"github.com/deciduosity/jasper"
 	"github.com/deciduosity/mrpc/mongowire"
 	"github.com/deciduosity/mrpc/shell"
@@ -113,18 +112,7 @@ func (s *mdbService) serviceLoggingCacheRequest(ctx context.Context, w io.Writer
 	}
 
 	if req != nil {
-		doc, err := shell.RequestMessageToDocument(msg)
-		if err != nil {
-			shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not read request"), command)
-			return nil
-		}
-		data, err := doc.MarshalBSON()
-		if err != nil {
-			shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not read request body"), command)
-			return nil
-		}
-
-		if err = s.unmarshaler(data, req); err != nil {
+		if err := s.readRequest(msg, req); err != nil {
 			shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse request"), command)
 			return nil
 		}
@@ -135,12 +123,7 @@ func (s *mdbService) serviceLoggingCacheRequest(ctx context.Context, w io.Writer
 
 func (s *mdbService) serviceLoggingCacheResponse(ctx context.Context, w io.Writer, resp interface{}, command string) {
 	if resp != nil {
-		data, err := s.marshaler(resp)
-		if err != nil {
-			shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not read payload"), command)
-			return
-		}
-		doc, err := birch.ReadDocument(data)
+		doc, err := s.makePayload(resp)
 		if err != nil {
 			shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse payload"), command)
 			return
