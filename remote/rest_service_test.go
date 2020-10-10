@@ -12,7 +12,6 @@ import (
 	"strings"
 	"syscall"
 	"testing"
-	"time"
 
 	"github.com/deciduosity/jasper"
 	"github.com/deciduosity/jasper/mock"
@@ -84,19 +83,7 @@ func TestRestService(t *testing.T) {
 			assert.Error(t, err)
 			assert.Contains(t, err.Error(), "problem building request")
 
-			_, err = client.GetBuildloggerURLs(ctx, "foo")
-			assert.Error(t, err)
-			assert.Contains(t, err.Error(), "problem building request")
-
 			err = client.DownloadFile(ctx, options.Download{URL: "foo", Path: "bar"})
-			assert.Error(t, err)
-			assert.Contains(t, err.Error(), "problem building request")
-
-			err = client.DownloadMongoDB(ctx, options.MongoDBDownload{})
-			assert.Error(t, err)
-			assert.Contains(t, err.Error(), "problem building request")
-
-			err = client.ConfigureCache(ctx, options.Cache{})
 			assert.Error(t, err)
 			assert.Contains(t, err.Error(), "problem building request")
 		},
@@ -131,19 +118,7 @@ func TestRestService(t *testing.T) {
 			assert.Error(t, err)
 			assert.Contains(t, err.Error(), "problem making request")
 
-			_, err = client.GetBuildloggerURLs(ctx, "foo")
-			assert.Error(t, err)
-			assert.Contains(t, err.Error(), "problem making request")
-
 			err = client.DownloadFile(ctx, options.Download{URL: "foo", Path: "bar"})
-			assert.Error(t, err)
-			assert.Contains(t, err.Error(), "problem making request")
-
-			err = client.DownloadMongoDB(ctx, options.MongoDBDownload{})
-			assert.Error(t, err)
-			assert.Contains(t, err.Error(), "problem making request")
-
-			err = client.ConfigureCache(ctx, options.Cache{})
 			assert.Error(t, err)
 			assert.Contains(t, err.Error(), "problem making request")
 		},
@@ -372,74 +347,6 @@ func TestRestService(t *testing.T) {
 			stream, err := client.GetLogStream(ctx, proc.ID(), 1)
 			assert.Error(t, err)
 			assert.Zero(t, stream)
-		},
-		"InitialCacheOptionsMatchDefault": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
-			assert.Equal(t, jasper.DefaultMaxCacheSize, srv.cacheOpts.MaxSize)
-			assert.Equal(t, jasper.DefaultCachePruneDelay, srv.cacheOpts.PruneDelay)
-			assert.Equal(t, false, srv.cacheOpts.Disabled)
-		},
-		"ConfigureCacheFailsWithInvalidOptions": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
-			opts := options.Cache{PruneDelay: -1}
-			assert.Error(t, client.ConfigureCache(ctx, opts))
-			assert.Equal(t, jasper.DefaultMaxCacheSize, srv.cacheOpts.MaxSize)
-			assert.Equal(t, jasper.DefaultCachePruneDelay, srv.cacheOpts.PruneDelay)
-
-			opts = options.Cache{MaxSize: -1}
-			assert.Error(t, client.ConfigureCache(ctx, opts))
-			assert.Equal(t, jasper.DefaultMaxCacheSize, srv.cacheOpts.MaxSize)
-			assert.Equal(t, jasper.DefaultCachePruneDelay, srv.cacheOpts.PruneDelay)
-		},
-		"ConfigureCachePassesWithZeroOptions": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
-			opts := options.Cache{}
-			assert.NoError(t, client.ConfigureCache(ctx, opts))
-		},
-		"ConfigureCachePassesWithValidOptions": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
-			opts := options.Cache{PruneDelay: 5 * time.Second, MaxSize: 1024}
-			assert.NoError(t, client.ConfigureCache(ctx, opts))
-		},
-		"ConfigureCacheFailsWithBadRequest": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
-			var opts struct {
-				MaxSize string `json:"max_size"`
-			}
-			opts.MaxSize = "foo"
-			body, err := makeBody(opts)
-			require.NoError(t, err)
-			req, err := http.NewRequest(http.MethodPost, client.getURL("/configure-cache"), body)
-			require.NoError(t, err)
-			rw := httptest.NewRecorder()
-
-			srv.configureCache(rw, req)
-			assert.Equal(t, http.StatusBadRequest, rw.Code)
-		},
-		"DownloadMongoDBFailsWithBadRequest": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
-			var opts struct {
-				BuildOpts string
-			}
-			body, err := makeBody(opts)
-			require.NoError(t, err)
-			req, err := http.NewRequest(http.MethodPost, client.getURL("/download-mongodb"), body)
-			require.NoError(t, err)
-			rw := httptest.NewRecorder()
-
-			srv.downloadMongoDB(rw, req)
-			assert.Equal(t, http.StatusBadRequest, rw.Code)
-		},
-		"DownloadMongoDBFailsWithZeroOptions": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
-			err := client.DownloadMongoDB(ctx, options.MongoDBDownload{})
-			assert.Error(t, err)
-		},
-		"DownloadMongoDBPassesWithValidOptions": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
-			dir, err := ioutil.TempDir(tempDir, "mongodb")
-			require.NoError(t, err)
-			defer os.RemoveAll(dir)
-			absDir, err := filepath.Abs(dir)
-			require.NoError(t, err)
-
-			opts := testutil.ValidMongoDBDownloadOptions()
-			opts.Path = absDir
-
-			err = client.DownloadMongoDB(ctx, opts)
-			assert.NoError(t, err)
 		},
 		"CreateWithMultipleLoggers": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
 			file, err := ioutil.TempFile(tempDir, "out.txt")

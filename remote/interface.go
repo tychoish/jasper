@@ -15,11 +15,8 @@ type Manager interface {
 	jasper.Manager
 
 	CloseConnection() error
-	ConfigureCache(ctx context.Context, opts options.Cache) error
 	DownloadFile(ctx context.Context, opts options.Download) error
-	DownloadMongoDB(ctx context.Context, opts options.MongoDBDownload) error
 	GetLogStream(ctx context.Context, id string, count int) (jasper.LogStream, error)
-	GetBuildloggerURLs(ctx context.Context, id string) ([]string, error)
 	SignalEvent(ctx context.Context, name string) error
 
 	CreateScripting(context.Context, options.ScriptingHarness) (scripting.Harness, error)

@@ -173,7 +173,7 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 				opts := testutil.SleepCreateOpts(3)
 				proc, err := makep(ctx, opts)
 				require.NoError(t, err)
-				assert.Error(t, proc.RegisterSignalTriggerID(ctx, jasper.SignalTriggerID(-1)))
+				assert.Error(t, proc.RegisterSignalTriggerID(ctx, jasper.SignalTriggerID(fmt.Sprintln(-1))))
 			},
 		},
 		{

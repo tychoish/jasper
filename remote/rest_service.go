@@ -8,30 +8,23 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"sync"
 	"syscall"
 	"time"
 
 	"github.com/deciduosity/gimlet"
-	"github.com/deciduosity/grip"
 	"github.com/deciduosity/grip/message"
-	"github.com/deciduosity/grip/recovery"
 	"github.com/deciduosity/jasper"
 	"github.com/deciduosity/jasper/options"
 	"github.com/deciduosity/jasper/scripting"
 	"github.com/pkg/errors"
-	"github.com/deciduosity/lru"
 )
 
 // Service defines a REST service that provides a remote manager, using
 // gimlet to publish routes.
 type Service struct {
-	hostID     string
-	manager    jasper.Manager
-	harnesses  scripting.HarnessCache
-	cache      *lru.Cache
-	cacheOpts  options.Cache
-	cacheMutex sync.RWMutex
+	hostID    string
+	manager   jasper.Manager
+	harnesses scripting.HarnessCache
 }
 
 // NewManagerService creates a service object around an existing
@@ -42,7 +35,6 @@ func NewRestService(m jasper.Manager) *Service {
 	return &Service{
 		manager:   m,
 		harnesses: scripting.NewCache(),
-		cache:     lru.NewCache(),
 	}
 }
 
@@ -51,20 +43,12 @@ func NewRestService(m jasper.Manager) *Service {
 func (s *Service) App(ctx context.Context) *gimlet.APIApp {
 	s.hostID, _ = os.Hostname()
 
-	s.cacheMutex.Lock()
-	defer s.cacheMutex.Unlock()
-	s.cacheOpts.PruneDelay = jasper.DefaultCachePruneDelay
-	s.cacheOpts.MaxSize = jasper.DefaultMaxCacheSize
-	s.cacheOpts.Disabled = false
-
 	app := gimlet.NewApp()
 
 	app.AddRoute("/").Version(1).Get().Handler(s.rootRoute)
 	app.AddRoute("/id").Version(1).Get().Handler(s.id)
 	app.AddRoute("/create").Version(1).Post().Handler(s.createProcess)
 	app.AddRoute("/download").Version(1).Post().Handler(s.downloadFile)
-	app.AddRoute("/download/cache").Version(1).Post().Handler(s.configureCache)
-	app.AddRoute("/download/mongodb").Version(1).Post().Handler(s.downloadMongoDB)
 	app.AddRoute("/list/oom").Version(1).Get().Handler(s.oomTrackerList)
 	app.AddRoute("/list/oom").Version(1).Delete().Handler(s.oomTrackerClear)
 	app.AddRoute("/list/{filter}").Version(1).Get().Handler(s.listProcesses)
@@ -77,7 +61,6 @@ func (s *Service) App(ctx context.Context) *gimlet.APIApp {
 	app.AddRoute("/process/{id}/respawn").Version(1).Get().Handler(s.respawnProcess)
 	app.AddRoute("/process/{id}/metrics").Version(1).Get().Handler(s.processMetrics)
 	app.AddRoute("/process/{id}/logs/{count}").Version(1).Get().Handler(s.getLogStream)
-	app.AddRoute("/process/{id}/loginfo").Version(1).Get().Handler(s.getBuildloggerURLs)
 	app.AddRoute("/process/{id}/signal/{signal}").Version(1).Patch().Handler(s.signalProcess)
 	app.AddRoute("/process/{id}/trigger/signal/{trigger-id}").Version(1).Patch().Handler(s.registerSignalTriggerID)
 	app.AddRoute("/signal/event/{name}").Version(1).Patch().Handler(s.signalEvent)
@@ -99,66 +82,7 @@ func (s *Service) App(ctx context.Context) *gimlet.APIApp {
 	app.AddRoute("/clear").Version(1).Post().Handler(s.clearManager)
 	app.AddRoute("/close").Version(1).Delete().Handler(s.closeManager)
 
-	go s.pruneCache(ctx)
-
 	return app
-}
-
-// SetDisableCachePruning toggles the underlying option for the
-// services cache.
-func (s *Service) SetDisableCachePruning(v bool) {
-	s.cacheMutex.Lock()
-	defer s.cacheMutex.Unlock()
-
-	s.cacheOpts.Disabled = v
-}
-
-// SetCacheMaxSize sets the underlying option for the
-// services cache.
-func (s *Service) SetCacheMaxSize(size int) {
-	s.cacheMutex.Lock()
-	defer s.cacheMutex.Unlock()
-
-	s.cacheOpts.MaxSize = size
-}
-
-// SetPruneDelay sets the underlying option for the
-// services cache.
-func (s *Service) SetPruneDelay(dur time.Duration) {
-	s.cacheMutex.Lock()
-	defer s.cacheMutex.Unlock()
-
-	s.cacheOpts.PruneDelay = dur
-}
-
-func (s *Service) pruneCache(ctx context.Context) {
-	defer func() {
-		err := recovery.HandlePanicWithError(recover(), nil, "background pruning")
-		if ctx.Err() != nil || err == nil {
-			return
-		}
-		go s.pruneCache(ctx)
-	}()
-
-	s.cacheMutex.RLock()
-	timer := time.NewTimer(s.cacheOpts.PruneDelay)
-	s.cacheMutex.RUnlock()
-
-	for {
-		select {
-		case <-timer.C:
-			s.cacheMutex.RLock()
-			if !s.cacheOpts.Disabled {
-				if err := s.cache.Prune(s.cacheOpts.MaxSize, nil, false); err != nil {
-					grip.Error(errors.Wrap(err, "error during cache pruning"))
-				}
-			}
-			timer.Reset(s.cacheOpts.PruneDelay)
-			s.cacheMutex.RUnlock()
-		case <-ctx.Done():
-			return
-		}
-	}
 }
 
 func getProcInfoNoHang(ctx context.Context, p jasper.Process) jasper.ProcessInfo {
@@ -234,45 +158,6 @@ func (s *Service) createProcess(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	gimlet.WriteJSON(rw, getProcInfoNoHang(ctx, proc))
-}
-
-func (s *Service) getBuildloggerURLs(rw http.ResponseWriter, r *http.Request) {
-	id := gimlet.GetVars(r)["id"]
-	ctx := r.Context()
-
-	proc, err := s.manager.Get(ctx, id)
-	if err != nil {
-		writeError(rw, gimlet.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Message:    errors.Wrapf(err, "no process '%s' found", id).Error(),
-		})
-		return
-	}
-
-	info := getProcInfoNoHang(ctx, proc)
-	urls := []string{}
-	for _, logger := range info.Options.Output.Loggers {
-		if logger.Type() == options.LogBuildloggerV2 {
-			producer := logger.Producer()
-			if producer == nil {
-				continue
-			}
-			rawProducer, ok := producer.(*options.BuildloggerV2Options)
-			if ok {
-				urls = append(urls, rawProducer.Buildlogger.GetGlobalLogURL())
-			}
-		}
-	}
-
-	if len(urls) == 0 {
-		writeError(rw, gimlet.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Message:    errors.Errorf("process '%s' does not use buildlogger", id).Error(),
-		})
-		return
-	}
-
-	gimlet.WriteJSON(rw, urls)
 }
 
 func (s *Service) listProcesses(rw http.ResponseWriter, r *http.Request) {
@@ -659,66 +544,6 @@ func (s *Service) closeManager(rw http.ResponseWriter, r *http.Request) {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
 			Message:    err.Error(),
-		})
-		return
-	}
-
-	gimlet.WriteJSON(rw, struct{}{})
-}
-
-func (s *Service) configureCache(rw http.ResponseWriter, r *http.Request) {
-	opts := options.Cache{}
-	if err := gimlet.GetJSON(r.Body, &opts); err != nil {
-		writeError(rw, gimlet.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Message:    errors.Wrap(err, "problem reading request").Error(),
-		})
-		return
-	}
-
-	if err := opts.Validate(); err != nil {
-		writeError(rw, gimlet.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Message:    errors.Wrap(err, "problem validating cache options").Error(),
-		})
-		return
-	}
-
-	s.cacheMutex.Lock()
-	defer s.cacheMutex.Unlock()
-	if opts.MaxSize > 0 {
-		s.cacheOpts.MaxSize = opts.MaxSize
-	}
-	if opts.PruneDelay > time.Duration(0) {
-		s.cacheOpts.PruneDelay = opts.PruneDelay
-	}
-	s.cacheOpts.Disabled = opts.Disabled
-
-	gimlet.WriteJSON(rw, struct{}{})
-}
-
-func (s *Service) downloadMongoDB(rw http.ResponseWriter, r *http.Request) {
-	opts := options.MongoDBDownload{}
-	if err := gimlet.GetJSON(r.Body, &opts); err != nil {
-		writeError(rw, gimlet.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Message:    errors.Wrap(err, "problem reading request").Error(),
-		})
-		return
-	}
-
-	if err := opts.Validate(); err != nil {
-		writeError(rw, gimlet.ErrorResponse{
-			StatusCode: http.StatusBadRequest,
-			Message:    errors.Wrap(err, "problem validating MongoDB download options").Error(),
-		})
-		return
-	}
-
-	if err := jasper.SetupDownloadMongoDBReleases(r.Context(), s.cache, opts); err != nil {
-		writeError(rw, gimlet.ErrorResponse{
-			StatusCode: http.StatusInternalServerError,
-			Message:    errors.Wrap(err, "problem in download setup").Error(),
 		})
 		return
 	}

@@ -12,33 +12,21 @@ import (
 // to configure and introspect the mock's behavior.
 type RemoteClient struct {
 	Manager
-	FailCloseConnection    bool
-	FailConfigureCache     bool
-	FailDownloadFile       bool
-	FailDownloadMongoDB    bool
-	FailGetLogStream       bool
-	FailGetBuildloggerURLs bool
-	FailSignalEvent        bool
-	FailCreateScripting    bool
-	FailGetScripting       bool
-	FailSendMessages       bool
-
-	// ConfigureCache input
-	CacheOptions options.Cache
+	FailCloseConnection bool
+	FailDownloadFile    bool
+	FailGetLogStream    bool
+	FailSignalEvent     bool
+	FailCreateScripting bool
+	FailGetScripting    bool
+	FailSendMessages    bool
 
 	// DownloadFile input
 	DownloadOptions options.Download
-
-	// DownloadMongoDB input
-	MongoDBDownloadOptions options.MongoDBDownload
 
 	// LogStream input/output
 	LogStreamID    string
 	LogStreamCount int
 	jasper.LogStream
-
-	// GetBuildloggerURLs output
-	BuildloggerURLs []string
 
 	EventName string
 
@@ -54,18 +42,6 @@ func (c *RemoteClient) CloseConnection() error {
 	return nil
 }
 
-// ConfigureCache stores the given cache options. If FailConfigureCache is set,
-// it returns an error.
-func (c *RemoteClient) ConfigureCache(ctx context.Context, opts options.Cache) error {
-	if c.FailConfigureCache {
-		return mockFail()
-	}
-
-	c.CacheOptions = opts
-
-	return nil
-}
-
 // DownloadFile stores the given download options. If FailDownloadFile is set,
 // it returns an error.
 func (c *RemoteClient) DownloadFile(ctx context.Context, opts options.Download) error {
@@ -76,28 +52,6 @@ func (c *RemoteClient) DownloadFile(ctx context.Context, opts options.Download) 
 	c.DownloadOptions = opts
 
 	return nil
-}
-
-// DownloadMongoDB stores the given download options. If FailDownloadMongoDB is
-// set, it returns an error.
-func (c *RemoteClient) DownloadMongoDB(ctx context.Context, opts options.MongoDBDownload) error {
-	if c.FailDownloadMongoDB {
-		return mockFail()
-	}
-
-	c.MongoDBDownloadOptions = opts
-
-	return nil
-}
-
-// GetBuildloggerURLs returns BuildloggerURLs field. If FailGetBuildloggerURLs
-// is set, it returns an error.
-func (c *RemoteClient) GetBuildloggerURLs(ctx context.Context, id string) ([]string, error) {
-	if c.FailGetBuildloggerURLs {
-		return nil, mockFail()
-	}
-
-	return c.BuildloggerURLs, nil
 }
 
 // GetLogStream stores the given log stream ID and count and returns a

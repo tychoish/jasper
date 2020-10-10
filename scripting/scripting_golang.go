@@ -107,7 +107,6 @@ func (e *golangEnvironment) RunScript(ctx context.Context, script string) error 
 		path = filepath.Join(e.opts.Gopath, "tmp", path)
 
 	}
-
 	wo := options.WriteFile{
 		Path:    path,
 		Content: []byte(script),

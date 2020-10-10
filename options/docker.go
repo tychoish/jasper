@@ -5,20 +5,20 @@ import (
 	"net"
 	"runtime"
 
-	"github.com/docker/docker/client"
 	"github.com/deciduosity/grip"
+	"github.com/docker/docker/client"
 	"github.com/pkg/errors"
 )
 
 // Docker encapsulates options related to connecting to a Docker daemon.
 type Docker struct {
-	Host       string
-	Port       int
-	APIVersion string
-	Image      string
+	Host       string `bson:"host" json:"host" yaml:"host"`
+	Port       int    `bson:"port" json:"port" yaml:"port"`
+	APIVersion string `bson:"api_version" json:"api_version" yaml:"api_version"`
+	Image      string `bson:"image" json:"image" yaml:"image"`
 	// Platform refers to the major operating system on which the Docker
 	// container runs.
-	Platform string
+	Platform string `bson:"platform" json:"platform" yaml:"platform"`
 }
 
 // Validate checks whether all the required fields are set and sets defaults if

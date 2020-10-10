@@ -3,16 +3,21 @@ package remote
 import (
 	"time"
 
-	"github.com/deciduosity/mrpc/shell"
+	"github.com/deciduosity/birch"
 	"github.com/deciduosity/jasper"
 	"github.com/deciduosity/jasper/options"
 	"github.com/deciduosity/jasper/scripting"
+	"github.com/deciduosity/mrpc/shell"
 )
 
 // infoRequest represents a request for runtime information regarding the
 // process given by ID.
 type infoRequest struct {
 	ID string `bson:"info"`
+}
+
+func (r infoRequest) MarshalDocument() (*birch.Document, error) {
+	return birch.DC.Elements(birch.EC.String("info", r.ID)), nil
 }
 
 // infoResponse represents a response indicating runtime information for a
@@ -197,16 +202,8 @@ type writeFileRequest struct {
 	Options options.WriteFile `bson:"write_file"`
 }
 
-type configureCacheRequest struct {
-	Options options.Cache `bson:"configure_cache"`
-}
-
 type downloadFileRequest struct {
 	Options options.Download `bson:"download_file"`
-}
-
-type downloadMongoDBRequest struct {
-	Options options.MongoDBDownload `bson:"download_mongodb"`
 }
 
 type getLogStreamRequest struct {

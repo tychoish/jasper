@@ -50,11 +50,8 @@ func TestBuildSubcommands(t *testing.T) {
 		{subcommand: []string{binary, JasperCommand, ClientCommand, ProcessCommand, WaitCommand}, buildSubcommand: BuildProcessWaitCommand},
 
 		{subcommand: []string{binary, JasperCommand, ClientCommand, RemoteCommand}, buildSubcommand: BuildRemoteCommand},
-		{subcommand: []string{binary, JasperCommand, ClientCommand, RemoteCommand, ConfigureCacheCommand}, buildSubcommand: BuildRemoteConfigureCacheCommand},
 		{subcommand: []string{binary, JasperCommand, ClientCommand, RemoteCommand, DownloadFileCommand}, buildSubcommand: BuildRemoteDownloadFileCommand},
-		{subcommand: []string{binary, JasperCommand, ClientCommand, RemoteCommand, DownloadMongoDBCommand}, buildSubcommand: BuildRemoteDownloadMongoDBCommand},
 		{subcommand: []string{binary, JasperCommand, ClientCommand, RemoteCommand, GetLogStreamCommand}, buildSubcommand: BuildRemoteGetLogStreamCommand},
-		{subcommand: []string{binary, JasperCommand, ClientCommand, RemoteCommand, GetBuildloggerURLsCommand}, buildSubcommand: BuildRemoteGetBuildloggerURLsCommand},
 		{subcommand: []string{binary, JasperCommand, ClientCommand, RemoteCommand, SignalEventCommand}, buildSubcommand: BuildRemoteSignalEventCommand},
 		{subcommand: []string{binary, JasperCommand, ClientCommand, RemoteCommand, WriteFileCommand}, buildSubcommand: BuildRemoteWriteFileCommand},
 	} {

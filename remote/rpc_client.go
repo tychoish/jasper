@@ -8,8 +8,6 @@ import (
 	"time"
 
 	"github.com/deciduosity/certdepot"
-	"github.com/golang/protobuf/ptypes"
-	empty "github.com/golang/protobuf/ptypes/empty"
 	"github.com/deciduosity/grip"
 	"github.com/deciduosity/grip/message"
 	"github.com/deciduosity/jasper"
@@ -17,6 +15,8 @@ import (
 	internal "github.com/deciduosity/jasper/remote/internal"
 	"github.com/deciduosity/jasper/scripting"
 	"github.com/deciduosity/jasper/util"
+	"github.com/golang/protobuf/ptypes"
+	empty "github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
 	grpc "google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -219,36 +219,12 @@ func (c *rpcClient) CloseConnection() error {
 	return c.clientCloser()
 }
 
-func (c *rpcClient) ConfigureCache(ctx context.Context, opts options.Cache) error {
-	resp, err := c.client.ConfigureCache(ctx, internal.ConvertCacheOptions(opts))
-	if err != nil {
-		return errors.WithStack(err)
-	}
-	if !resp.Success {
-		return errors.New(resp.Text)
-	}
-
-	return nil
-}
-
 func (c *rpcClient) DownloadFile(ctx context.Context, opts options.Download) error {
 	resp, err := c.client.DownloadFile(ctx, internal.ConvertDownloadOptions(opts))
 	if err != nil {
 		return errors.WithStack(err)
 	}
 
-	if !resp.Success {
-		return errors.New(resp.Text)
-	}
-
-	return nil
-}
-
-func (c *rpcClient) DownloadMongoDB(ctx context.Context, opts options.MongoDBDownload) error {
-	resp, err := c.client.DownloadMongoDB(ctx, internal.ConvertMongoDBDownloadOptions(opts))
-	if err != nil {
-		return errors.WithStack(err)
-	}
 	if !resp.Success {
 		return errors.New(resp.Text)
 	}
@@ -265,14 +241,6 @@ func (c *rpcClient) GetLogStream(ctx context.Context, id string, count int) (jas
 		return jasper.LogStream{}, errors.WithStack(err)
 	}
 	return stream.Export(), nil
-}
-
-func (c *rpcClient) GetBuildloggerURLs(ctx context.Context, id string) ([]string, error) {
-	resp, err := c.client.GetBuildloggerURLs(ctx, &internal.JasperProcessID{Value: id})
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	return resp.Urls, nil
 }
 
 func (c *rpcClient) SignalEvent(ctx context.Context, name string) error {

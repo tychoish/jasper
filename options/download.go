@@ -3,10 +3,9 @@ package options
 import (
 	"net/http"
 	"path/filepath"
-	"time"
 
-	"github.com/deciduosity/bond"
 	"github.com/deciduosity/grip"
+	"github.com/deciduosity/utility"
 	"github.com/mholt/archiver"
 	"github.com/pkg/errors"
 )
@@ -14,9 +13,9 @@ import (
 // Download represents the options to download a file to a given path and
 // optionally extract its contents.
 type Download struct {
-	URL         string  `json:"url"`
-	Path        string  `json:"path"`
-	ArchiveOpts Archive `json:"archive_opts"`
+	URL         string  `json:"url" bson:"url"`
+	Path        string  `json:"path" bson:"path"`
+	ArchiveOpts Archive `json:"archive_opts" bson:"archive_opts"`
 }
 
 // Validate checks the download options.
@@ -43,8 +42,8 @@ func (opts Download) Download() error {
 		return errors.Wrap(err, "problem building request")
 	}
 
-	client := bond.GetHTTPClient()
-	defer bond.PutHTTPClient(client)
+	client := utility.GetHTTPClient()
+	defer utility.PutHTTPClient(client)
 
 	resp, err := client.Do(req)
 	if err != nil {
@@ -96,47 +95,4 @@ func (opts Download) Extract() error {
 	}
 
 	return nil
-}
-
-// MongoDBDownload represents the options to download MongoDB on a target
-// platform.
-type MongoDBDownload struct {
-	BuildOpts bond.BuildOptions `json:"build_opts"`
-	Path      string            `json:"path"`
-	Releases  []string          `json:"releases"`
-}
-
-// Validate checks for valid MongoDB download options.
-func (opts MongoDBDownload) Validate() error {
-	catcher := grip.NewBasicCatcher()
-
-	if !filepath.IsAbs(opts.Path) {
-		catcher.Add(errors.New("download path must be an absolute path"))
-	}
-
-	catcher.Add(opts.BuildOpts.Validate())
-
-	return catcher.Resolve()
-}
-
-// Cache represent the configuration options for the LRU cache.
-type Cache struct {
-	Disabled   bool          `json:"disabled"`
-	PruneDelay time.Duration `json:"prune_delay"`
-	MaxSize    int           `json:"max_size"`
-}
-
-// Validate checks for valid cache options.
-func (opts Cache) Validate() error {
-	catcher := grip.NewBasicCatcher()
-
-	if opts.MaxSize < 0 {
-		catcher.Add(errors.New("max size cannot be negative"))
-	}
-
-	if opts.PruneDelay < 0 {
-		catcher.Add(errors.New("prune delay cannot be negative"))
-	}
-
-	return catcher.Resolve()
 }

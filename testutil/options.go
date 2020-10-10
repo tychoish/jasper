@@ -2,11 +2,9 @@ package testutil
 
 import (
 	"fmt"
-	"runtime"
 	"time"
 
 	"github.com/deciduosity/jasper/options"
-	"github.com/deciduosity/bond"
 )
 
 // YesCreateOpts creates the options to run the "yes" command for the given
@@ -34,30 +32,6 @@ func FalseCreateOpts() *options.Create {
 func SleepCreateOpts(num int) *options.Create {
 	return &options.Create{
 		Args: []string{"sleep", fmt.Sprint(num)},
-	}
-}
-
-// ValidMongoDBDownloadOptions returns valid options for downloading a MongoDB
-// archive file.
-func ValidMongoDBDownloadOptions() options.MongoDBDownload {
-	target := runtime.GOOS
-	if target == "darwin" {
-		target = "osx"
-	}
-
-	edition := "enterprise"
-	if target == "linux" {
-		edition = "base"
-	}
-
-	return options.MongoDBDownload{
-		BuildOpts: bond.BuildOptions{
-			Target:  target,
-			Arch:    bond.MongoDBArch("x86_64"),
-			Edition: bond.MongoDBEdition(edition),
-			Debug:   false,
-		},
-		Releases: []string{"4.0-current"},
 	}
 }
 

@@ -12,7 +12,6 @@ import (
 	"github.com/deciduosity/grip/message"
 	"github.com/deciduosity/grip/send"
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 // CachedLogger is the cached item representing a processes normal
@@ -163,10 +162,12 @@ func (lp *LoggingPayload) produceMessage(data []byte) (message.Composer, error) 
 
 		return message.NewSimpleFields(lp.Priority, payload), nil
 	case LoggingPayloadFormatBSON:
-		payload := message.Fields{}
-		if err := bson.Unmarshal(data, &payload); err != nil {
+		doc, err := birch.ReadDocument(data)
+		if err != nil {
 			return nil, errors.Wrap(err, "problem parsing bson from message body")
 		}
+
+		payload := message.Fields(doc.ExportMap())
 
 		if lp.AddMetadata {
 			return message.NewFields(lp.Priority, payload), nil
