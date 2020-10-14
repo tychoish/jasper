@@ -5,7 +5,6 @@ import (
 	"io"
 	"os"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/deciduosity/jasper"
@@ -46,10 +45,9 @@ func getProcInfoNoHang(ctx context.Context, p jasper.Process) jasper.ProcessInfo
 }
 
 type jasperService struct {
-	hostID     string
-	manager    jasper.Manager
-	scripting  scripting.HarnessCache
-	cacheMutex sync.RWMutex
+	hostID    string
+	manager   jasper.Manager
+	scripting scripting.HarnessCache
 }
 
 func (s *jasperService) Status(ctx context.Context, _ *empty.Empty) (*StatusResponse, error) {

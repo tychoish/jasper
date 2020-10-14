@@ -3,7 +3,6 @@ package remote
 import (
 	"time"
 
-	"github.com/deciduosity/birch"
 	"github.com/deciduosity/jasper"
 	"github.com/deciduosity/jasper/options"
 	"github.com/deciduosity/jasper/scripting"
@@ -14,10 +13,6 @@ import (
 // process given by ID.
 type infoRequest struct {
 	ID string `bson:"info"`
-}
-
-func (r infoRequest) MarshalDocument() (*birch.Document, error) {
-	return birch.DC.Elements(birch.EC.String("info", r.ID)), nil
 }
 
 // infoResponse represents a response indicating runtime information for a
@@ -223,15 +218,6 @@ func makeGetLogStreamResponse(logs []string, done bool) getLogStreamResponse {
 		LogStream:     jasper.LogStream{Logs: logs, Done: done},
 		ErrorResponse: shell.MakeSuccessResponse(),
 	}
-}
-
-type getBuildloggerURLsRequest struct {
-	ID string `bson:"get_buildlogger_urls"`
-}
-
-type getBuildloggerURLsResponse struct {
-	shell.ErrorResponse `bson:"error_response,inline"`
-	URLs                []string `bson:"urls,omitempty"`
 }
 
 type signalEventRequest struct {

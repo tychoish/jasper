@@ -3,8 +3,6 @@ package scripting
 import (
 	"context"
 	"time"
-
-	"github.com/deciduosity/birch"
 )
 
 // TestOutcome reflects the task status.
@@ -23,15 +21,6 @@ type TestOptions struct {
 	Pattern string        `bson:"pattern" json:"pattern" yaml:"pattern"`
 	Timeout time.Duration `bson:"timeout" json:"timeout" yaml:"timeout"`
 	Count   int           `bson:"count" json:"count" yaml:"count"`
-}
-
-func (opt TestOptions) MarshalDocument() (*birch.Document, error) {
-	return birch.DC.Elements(
-		birch.EC.String("name", opt.Name),
-		birch.EC.SliceString("args", opt.Args),
-		birch.EC.String("pattern", opt.Pattern),
-		birch.EC.Duration("timeout", opt.Timeout),
-		birch.EC.Int("count", opt.Count)), nil
 }
 
 // TestResults capture the data about a specific test run.

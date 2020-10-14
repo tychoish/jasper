@@ -6,7 +6,6 @@ import (
 	"io"
 	"strings"
 
-	"github.com/google/shlex"
 	"github.com/deciduosity/amboy"
 	"github.com/deciduosity/grip"
 	"github.com/deciduosity/grip/level"
@@ -14,6 +13,7 @@ import (
 	"github.com/deciduosity/grip/recovery"
 	"github.com/deciduosity/grip/send"
 	"github.com/deciduosity/jasper/options"
+	"github.com/google/shlex"
 	"github.com/pkg/errors"
 )
 

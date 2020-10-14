@@ -9,10 +9,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/deciduosity/grip"
 	"github.com/deciduosity/jasper/internal/executor"
 	"github.com/deciduosity/jasper/options"
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
 )
 

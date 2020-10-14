@@ -17,13 +17,11 @@ ifeq ($(gobin),)
 gobin := go
 endif
 gopath := $(GOPATH)
-gocache := $(abspath $(buildDir)/.cache)
 ifeq ($(OS),Windows_NT)
-gocache := $(shell cygpath -m $(gocache))
 gopath := $(shell cygpath -m $(gopath))
 endif
 
-goEnv := GOPATH=$(gopath) GOCACHE=$(gocache)$(if $(GO_BIN_PATH), PATH="$(shell dirname $(GO_BIN_PATH)):$(PATH)")
+goEnv := GOPATH=$(gopath) $(if $(GO_BIN_PATH), PATH="$(shell dirname $(GO_BIN_PATH)):$(PATH)")
 # end environment setup
 
 compile $(buildDir):

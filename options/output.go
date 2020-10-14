@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"time"
 
-	"github.com/deciduosity/birch"
 	"github.com/deciduosity/grip"
 	"github.com/deciduosity/grip/level"
 	"github.com/deciduosity/grip/send"
@@ -63,14 +62,6 @@ func (o Output) errorIsNull() bool {
 	}
 
 	return false
-}
-
-func convertLoggersToMarshalers(in []*LoggerConfig) []birch.Marshaler {
-	out := make([]birch.Marshaler, len(in))
-	for idx := range in {
-		out[idx] = in[idx]
-	}
-	return out
 }
 
 // Validate ensures that the Output it is called on has reasonable

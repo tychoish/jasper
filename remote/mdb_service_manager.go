@@ -95,7 +95,7 @@ func (s *mdbService) managerCreateProcess(ctx context.Context, w io.Writer, msg 
 	shell.WriteResponse(ctx, w, resp, CreateProcessCommand)
 }
 
-func (s *mdbService) readPayload(doc *birch.Document, in interface{}) error {
+func (s *mdbService) readPayload(doc birch.Marshaler, in interface{}) error {
 	data, err := doc.MarshalBSON()
 	if err != nil {
 		return errors.Wrap(err, "problem reading payload")
@@ -111,7 +111,7 @@ func (s *mdbService) managerList(ctx context.Context, w io.Writer, msg mongowire
 		return
 	}
 	req := listRequest{}
-	if s.readPayload(doc, &req); err != nil {
+	if err = s.readPayload(doc, &req); err != nil {
 		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse request"), ListCommand)
 		return
 	}
@@ -144,7 +144,6 @@ func (s *mdbService) managerList(ctx context.Context, w io.Writer, msg mongowire
 }
 
 func (s *mdbService) managerGroup(ctx context.Context, w io.Writer, msg mongowire.Message) {
-
 	doc, err := shell.RequestMessageToDocument(msg)
 	if err != nil {
 		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not read request"), GroupCommand)
@@ -152,7 +151,7 @@ func (s *mdbService) managerGroup(ctx context.Context, w io.Writer, msg mongowir
 	}
 
 	req := groupRequest{}
-	if s.readPayload(doc, &req); err != nil {
+	if err = s.readPayload(doc, &req); err != nil {
 		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse request"), GroupCommand)
 		return
 	}
@@ -192,7 +191,7 @@ func (s *mdbService) managerGetProcess(ctx context.Context, w io.Writer, msg mon
 	}
 
 	req := getProcessRequest{}
-	if s.readPayload(doc, &req); err != nil {
+	if err = s.readPayload(doc, &req); err != nil {
 		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse request"), GetProcessCommand)
 		return
 	}
@@ -240,7 +239,7 @@ func (s *mdbService) managerWriteFile(ctx context.Context, w io.Writer, msg mong
 	}
 
 	req := &writeFileRequest{}
-	if s.readPayload(doc, req); err != nil {
+	if err = s.readPayload(doc, req); err != nil {
 		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse request"), WriteFileCommand)
 		return
 	}

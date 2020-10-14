@@ -11,8 +11,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/deciduosity/grip/level"
-	"github.com/deciduosity/grip/send"
 	"github.com/deciduosity/jasper"
 	"github.com/deciduosity/jasper/options"
 	"github.com/deciduosity/jasper/testutil"
@@ -49,22 +47,6 @@ func TestScriptingHarness(t *testing.T) {
 		assert.NoError(t, os.RemoveAll(tmpdir))
 	}()
 
-	output := options.Output{
-		SendErrorToOutput: true,
-		Loggers: []options.Logger{
-			{
-				Type: options.LogDefault,
-				Options: options.Log{
-					Format: options.LogFormatDefault,
-					Level: send.LevelInfo{
-						Threshold: level.Debug,
-						Default:   level.Info,
-					},
-				},
-			},
-		},
-	}
-
 	type seTest struct {
 		Name string
 		Case func(*testing.T, options.ScriptingHarness)
@@ -82,7 +64,7 @@ func TestScriptingHarness(t *testing.T) {
 			DefaultOptions: &options.ScriptingRoswell{
 				Path:   filepath.Join(tmpdir, "roswell"),
 				Lisp:   "sbcl-bin",
-				Output: output,
+				Output: options.Output{},
 			},
 			Tests: []seTest{
 				{
@@ -122,7 +104,7 @@ func TestScriptingHarness(t *testing.T) {
 				VirtualEnvPath:    filepath.Join(tmpdir, "python3"),
 				LegacyPython:      false,
 				InterpreterBinary: "python3",
-				Output:            output,
+				Output:            options.Output{},
 			},
 			Tests: []seTest{
 				{
@@ -163,7 +145,7 @@ func TestScriptingHarness(t *testing.T) {
 				LegacyPython:      true,
 				InterpreterBinary: "python",
 				Packages:          []string{"wheel"},
-				Output:            output,
+				Output:            options.Output{},
 			},
 			Tests: []seTest{
 				{
@@ -205,7 +187,7 @@ func TestScriptingHarness(t *testing.T) {
 				Packages: []string{
 					"github.com/pkg/errors",
 				},
-				Output: output,
+				Output: options.Output{},
 			},
 			Tests: []seTest{
 				{

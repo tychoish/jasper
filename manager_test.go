@@ -39,7 +39,7 @@ func TestManagerInterface(t *testing.T) {
 			return selfClearingManager
 		},
 		"Remote/NoLock/NilOptions": func(_ context.Context, t *testing.T) Manager {
-			m, err := newBasicProcessManagermakemap[string]Process{}, false, false)
+			m, err := newBasicProcessManager(map[string]Process{}, false, false)
 			require.NoError(t, err)
 			return NewRemoteManager(m, nil)
 		},
