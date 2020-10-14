@@ -23,13 +23,6 @@ func TestCLIRemote(t *testing.T) {
 	} {
 		t.Run(remoteType, func(t *testing.T) {
 			for testName, testCase := range map[string]func(ctx context.Context, t *testing.T, c *cli.Context){
-				"ConfigureCacheSucceeds": func(ctx context.Context, t *testing.T, c *cli.Context) {
-					input, err := json.Marshal(options.Cache{})
-					require.NoError(t, err)
-					resp := &OutcomeResponse{}
-					require.NoError(t, execCLICommandInputOutput(t, c, remoteConfigureCache(), input, resp))
-					assert.True(t, resp.Successful())
-				},
 				"DownloadFileSucceeds": func(ctx context.Context, t *testing.T, c *cli.Context) {
 					tmpFile, err := ioutil.TempFile(testutil.BuildDirectory(), "out.txt")
 					require.NoError(t, err)
@@ -50,27 +43,6 @@ func TestCLIRemote(t *testing.T) {
 					info, err := os.Stat(tmpFile.Name())
 					require.NoError(t, err)
 					assert.NotZero(t, info.Size)
-				},
-				"DownloadMongoDBSucceeds": func(ctx context.Context, t *testing.T, c *cli.Context) {
-					tmpDir, err := ioutil.TempDir(testutil.BuildDirectory(), "out")
-					require.NoError(t, err)
-					defer func() {
-						assert.NoError(t, os.RemoveAll(tmpDir))
-					}()
-
-					opts := testutil.ValidMongoDBDownloadOptions()
-					opts.Path = tmpDir
-					input, err := json.Marshal(opts)
-					require.NoError(t, err)
-					resp := &OutcomeResponse{}
-					require.NoError(t, execCLICommandInputOutput(t, c, remoteDownloadMongoDB(), input, resp))
-				},
-				"GetBuildloggerURLsFailsWithNonexistentProcess": func(ctx context.Context, t *testing.T, c *cli.Context) {
-					input, err := json.Marshal(IDInput{ID: "foo"})
-					require.NoError(t, err)
-					resp := &OutcomeResponse{}
-					require.NoError(t, execCLICommandInputOutput(t, c, remoteGetBuildloggerURLs(), input, resp))
-					assert.False(t, resp.Successful())
 				},
 				"GetLogStreamSucceeds": func(ctx context.Context, t *testing.T, c *cli.Context) {
 					inMemLogger, err := jasper.NewInMemoryLogger(10)

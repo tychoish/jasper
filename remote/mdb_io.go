@@ -3,10 +3,10 @@ package remote
 import (
 	"time"
 
-	"github.com/deciduosity/mrpc/shell"
 	"github.com/deciduosity/jasper"
 	"github.com/deciduosity/jasper/options"
 	"github.com/deciduosity/jasper/scripting"
+	"github.com/deciduosity/mrpc/shell"
 )
 
 // infoRequest represents a request for runtime information regarding the
@@ -197,16 +197,8 @@ type writeFileRequest struct {
 	Options options.WriteFile `bson:"write_file"`
 }
 
-type configureCacheRequest struct {
-	Options options.Cache `bson:"configure_cache"`
-}
-
 type downloadFileRequest struct {
 	Options options.Download `bson:"download_file"`
-}
-
-type downloadMongoDBRequest struct {
-	Options options.MongoDBDownload `bson:"download_mongodb"`
 }
 
 type getLogStreamRequest struct {
@@ -226,15 +218,6 @@ func makeGetLogStreamResponse(logs []string, done bool) getLogStreamResponse {
 		LogStream:     jasper.LogStream{Logs: logs, Done: done},
 		ErrorResponse: shell.MakeSuccessResponse(),
 	}
-}
-
-type getBuildloggerURLsRequest struct {
-	ID string `bson:"get_buildlogger_urls"`
-}
-
-type getBuildloggerURLsResponse struct {
-	shell.ErrorResponse `bson:"error_response,inline"`
-	URLs                []string `bson:"urls,omitempty"`
 }
 
 type signalEventRequest struct {

@@ -4,17 +4,54 @@ import (
 	"context"
 	"syscall"
 
-	"github.com/deciduosity/mrpc/mongowire"
-	"github.com/deciduosity/mrpc/shell"
+	"github.com/deciduosity/birch"
 	"github.com/deciduosity/grip"
 	"github.com/deciduosity/grip/message"
 	"github.com/deciduosity/jasper"
+	"github.com/deciduosity/jasper/options"
+	"github.com/deciduosity/mrpc/mongowire"
+	"github.com/deciduosity/mrpc/shell"
 	"github.com/pkg/errors"
 )
 
 type mdbProcess struct {
-	info      jasper.ProcessInfo
-	doRequest func(context.Context, mongowire.Message) (mongowire.Message, error)
+	info        jasper.ProcessInfo
+	doRequest   func(context.Context, mongowire.Message) (mongowire.Message, error)
+	marshaler   options.Marshaler
+	unmarshaler options.Unmarshaler
+}
+
+func (p *mdbProcess) readRequest(msg mongowire.Message, in interface{}) error {
+	doc, err := shell.ResponseMessageToDocument(msg)
+	if err != nil {
+		return errors.Wrap(err, "could not read response")
+	}
+
+	data, err := doc.MarshalBSON()
+	if err != nil {
+		return errors.Wrap(err, "could not read response data")
+	}
+
+	if err := p.unmarshaler(data, in); err != nil {
+		return errors.Wrap(err, "problem parsing response body")
+
+	}
+
+	return nil
+}
+
+func (p *mdbProcess) makeRequest(in interface{}) (*birch.Document, error) {
+	data, err := p.marshaler(in)
+	if err != nil {
+		return nil, err
+	}
+
+	doc, err := birch.ReadDocument(data)
+	if err != nil {
+		return nil, err
+	}
+
+	return doc, nil
 }
 
 func (p *mdbProcess) ID() string { return p.info.ID }
@@ -23,7 +60,14 @@ func (p *mdbProcess) Info(ctx context.Context) jasper.ProcessInfo {
 	if p.info.Complete {
 		return p.info
 	}
-	req, err := shell.RequestToMessage(mongowire.OP_QUERY, infoRequest{ID: p.ID()})
+
+	payload, err := p.makeRequest(infoRequest{ID: p.ID()})
+	if err != nil {
+		grip.Warning(errors.Wrap(err, "problem marshalling request"))
+		return jasper.ProcessInfo{}
+	}
+
+	req, err := shell.RequestToMessage(mongowire.OP_QUERY, payload)
 	if err != nil {
 		grip.Warning(message.WrapErrorf(err, "failed to get process info for process %s", p.ID()))
 		return jasper.ProcessInfo{}
@@ -33,9 +77,10 @@ func (p *mdbProcess) Info(ctx context.Context) jasper.ProcessInfo {
 		grip.Warning(message.WrapErrorf(err, "failed to get process info for process %s", p.ID()))
 		return jasper.ProcessInfo{}
 	}
-	var resp infoResponse
-	if err := shell.MessageToResponse(msg, &resp); err != nil {
-		grip.Warning(message.WrapErrorf(err, "failed to get process info for process %s", p.ID()))
+
+	resp := &infoResponse{}
+	if err := p.readRequest(msg, resp); err != nil {
+		grip.Warning(message.WrapErrorf(err, "failed to parse process info for %s", p.ID()))
 		return jasper.ProcessInfo{}
 	}
 	if err := resp.SuccessOrError(); err != nil {
@@ -50,7 +95,14 @@ func (p *mdbProcess) Running(ctx context.Context) bool {
 	if p.info.Complete {
 		return false
 	}
-	req, err := shell.RequestToMessage(mongowire.OP_QUERY, runningRequest{ID: p.ID()})
+
+	payload, err := p.makeRequest(runningRequest{ID: p.ID()})
+	if err != nil {
+		grip.Warning(errors.Wrap(err, "problem marshalling request"))
+		return false
+	}
+
+	req, err := shell.RequestToMessage(mongowire.OP_QUERY, payload)
 	if err != nil {
 		grip.Warning(message.WrapErrorf(err, "failed to get process running status for process %s", p.ID()))
 		return false
@@ -60,11 +112,13 @@ func (p *mdbProcess) Running(ctx context.Context) bool {
 		grip.Warning(message.WrapErrorf(err, "failed to get process running status for process %s", p.ID()))
 		return false
 	}
+
 	var resp runningResponse
-	if err := shell.MessageToResponse(msg, &resp); err != nil {
-		grip.Warning(message.WrapErrorf(err, "failed to get process running status for process %s", p.ID()))
+	if err := p.readRequest(msg, &resp); err != nil {
+		grip.Warning(errors.Wrap(err, "problem reading response"))
 		return false
 	}
+
 	grip.Warning(message.WrapErrorf(resp.SuccessOrError(), "failed to get process running status for process %s", p.ID()))
 	return resp.Running
 }
@@ -73,7 +127,14 @@ func (p *mdbProcess) Complete(ctx context.Context) bool {
 	if p.info.Complete {
 		return true
 	}
-	req, err := shell.RequestToMessage(mongowire.OP_QUERY, completeRequest{ID: p.ID()})
+
+	payload, err := p.makeRequest(completeRequest{ID: p.ID()})
+	if err != nil {
+		grip.Warning(errors.Wrap(err, "problem marshalling request"))
+		return false
+	}
+
+	req, err := shell.RequestToMessage(mongowire.OP_QUERY, payload)
 	if err != nil {
 		grip.Warning(message.WrapErrorf(err, "failed to get process completion status for process %s", p.ID()))
 		return false
@@ -83,11 +144,13 @@ func (p *mdbProcess) Complete(ctx context.Context) bool {
 		grip.Warning(message.WrapErrorf(err, "failed to get process completion status for process %s", p.ID()))
 		return false
 	}
+
 	var resp completeResponse
-	if err := shell.MessageToResponse(msg, &resp); err != nil {
-		grip.Warning(message.WrapErrorf(err, "failed to get process completion status for process %s", p.ID()))
+	if err := p.readRequest(msg, &resp); err != nil {
+		grip.Warning(errors.Wrap(err, "problem reading response"))
 		return false
 	}
+
 	grip.Warning(message.WrapErrorf(resp.SuccessOrError(), "failed to get process completion status for process %s", p.ID()))
 	return resp.Complete
 }
@@ -96,7 +159,13 @@ func (p *mdbProcess) Signal(ctx context.Context, sig syscall.Signal) error {
 	r := signalRequest{}
 	r.Params.ID = p.ID()
 	r.Params.Signal = int(sig)
-	req, err := shell.RequestToMessage(mongowire.OP_QUERY, r)
+
+	payload, err := p.makeRequest(r)
+	if err != nil {
+		return errors.Wrap(err, "problem marshalling request")
+	}
+
+	req, err := shell.RequestToMessage(mongowire.OP_QUERY, payload)
 	if err != nil {
 		return errors.Wrap(err, "could not create request")
 	}
@@ -104,15 +173,22 @@ func (p *mdbProcess) Signal(ctx context.Context, sig syscall.Signal) error {
 	if err != nil {
 		return errors.Wrap(err, "failed during request")
 	}
+
 	var resp shell.ErrorResponse
-	if err := shell.MessageToResponse(msg, &resp); err != nil {
-		return errors.Wrapf(err, "failed to get signal response for process %s", p.ID())
+	if err := p.readRequest(msg, &resp); err != nil {
+		return errors.Wrap(err, "problem reading response")
 	}
+
 	return errors.Wrap(resp.SuccessOrError(), "error in response")
 }
 
 func (p *mdbProcess) Wait(ctx context.Context) (int, error) {
-	req, err := shell.RequestToMessage(mongowire.OP_QUERY, waitRequest{p.ID()})
+	payload, err := p.makeRequest(waitRequest{p.ID()})
+	if err != nil {
+		return -1, errors.Wrap(err, "problem marshalling request")
+	}
+
+	req, err := shell.RequestToMessage(mongowire.OP_QUERY, payload)
 	if err != nil {
 		return -1, errors.Wrap(err, "could not create request")
 	}
@@ -120,15 +196,22 @@ func (p *mdbProcess) Wait(ctx context.Context) (int, error) {
 	if err != nil {
 		return -1, errors.Wrap(err, "failed during request")
 	}
+
 	var resp waitResponse
-	if err := shell.MessageToResponse(msg, &resp); err != nil {
-		return -1, errors.Wrap(err, "failed to get wait response for process %s")
+	if err := p.readRequest(msg, &resp); err != nil {
+		return -1, errors.Wrap(err, "problem reading response")
 	}
+
 	return resp.ExitCode, errors.Wrap(resp.SuccessOrError(), "error in response")
 }
 
 func (p *mdbProcess) Respawn(ctx context.Context) (jasper.Process, error) {
-	req, err := shell.RequestToMessage(mongowire.OP_QUERY, respawnRequest{ID: p.ID()})
+	payload, err := p.makeRequest(respawnRequest{ID: p.ID()})
+	if err != nil {
+		return nil, errors.Wrap(err, "problem marshalling request")
+	}
+
+	req, err := shell.RequestToMessage(mongowire.OP_QUERY, payload)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not create request")
 	}
@@ -137,13 +220,11 @@ func (p *mdbProcess) Respawn(ctx context.Context) (jasper.Process, error) {
 		return nil, errors.Wrap(err, "failed during request")
 	}
 	var resp infoResponse
-	if err := shell.MessageToResponse(msg, &resp); err != nil {
-		return nil, errors.Wrap(err, "problem with received response")
+	if err := p.readRequest(msg, &resp); err != nil {
+		return nil, errors.Wrap(err, "problem reading response")
 	}
-	if err := resp.SuccessOrError(); err != nil {
-		return nil, errors.Wrap(err, "error in response")
-	}
-	return &mdbProcess{info: resp.Info, doRequest: p.doRequest}, nil
+
+	return &mdbProcess{info: resp.Info, doRequest: p.doRequest, marshaler: p.marshaler, unmarshaler: p.unmarshaler}, nil
 }
 
 func (p *mdbProcess) RegisterTrigger(ctx context.Context, t jasper.ProcessTrigger) error {
@@ -158,7 +239,13 @@ func (p *mdbProcess) RegisterSignalTriggerID(ctx context.Context, sigID jasper.S
 	r := registerSignalTriggerIDRequest{}
 	r.Params.ID = p.ID()
 	r.Params.SignalTriggerID = sigID
-	req, err := shell.RequestToMessage(mongowire.OP_QUERY, r)
+
+	payload, err := p.makeRequest(r)
+	if err != nil {
+		return errors.Wrap(err, "problem marshalling request")
+	}
+
+	req, err := shell.RequestToMessage(mongowire.OP_QUERY, payload)
 	if err != nil {
 		return errors.Wrap(err, "could not create request")
 	}
@@ -167,9 +254,10 @@ func (p *mdbProcess) RegisterSignalTriggerID(ctx context.Context, sigID jasper.S
 		return errors.Wrap(err, "failed during request")
 	}
 	var resp shell.ErrorResponse
-	if err := shell.MessageToResponse(msg, &resp); err != nil {
-		return errors.Wrap(err, "problem with received response")
+	if err := p.readRequest(msg, &resp); err != nil {
+		return errors.Wrap(err, "problem reading response")
 	}
+
 	return errors.Wrap(resp.SuccessOrError(), "error in response")
 }
 
@@ -177,7 +265,13 @@ func (p *mdbProcess) Tag(tag string) {
 	r := tagRequest{}
 	r.Params.ID = p.ID()
 	r.Params.Tag = tag
-	req, err := shell.RequestToMessage(mongowire.OP_QUERY, r)
+
+	payload, err := p.makeRequest(r)
+	if err != nil {
+		grip.Warning(errors.Wrap(err, "problem marshalling request"))
+		return
+	}
+	req, err := shell.RequestToMessage(mongowire.OP_QUERY, payload)
 	if err != nil {
 		grip.Warningf("failed to tag process %s with tag %s", p.ID(), tag)
 		return
@@ -188,15 +282,22 @@ func (p *mdbProcess) Tag(tag string) {
 		return
 	}
 	var resp shell.ErrorResponse
-	if err := shell.MessageToResponse(msg, &resp); err != nil {
-		grip.Warning(message.WrapErrorf(err, "failed to get tags for process %s", p.ID()))
+	if err := p.readRequest(msg, &resp); err != nil {
+		grip.Warning(message.WrapErrorf(err, "failed to tag process %s", p.ID()))
 		return
 	}
+
 	grip.Warning(message.WrapErrorf(resp.SuccessOrError(), "failed to tag process %s with tag %s", p.ID(), tag))
 }
 
 func (p *mdbProcess) GetTags() []string {
-	req, err := shell.RequestToMessage(mongowire.OP_QUERY, getTagsRequest{p.ID()})
+	payload, err := p.makeRequest(getTagsRequest{p.ID()})
+	if err != nil {
+		grip.Warning(errors.Wrap(err, "problem marshalling request"))
+		return nil
+	}
+
+	req, err := shell.RequestToMessage(mongowire.OP_QUERY, payload)
 	if err != nil {
 		grip.Warningf("failed to get tags for process %s", p.ID())
 		return nil
@@ -206,16 +307,24 @@ func (p *mdbProcess) GetTags() []string {
 		grip.Warningf("failed to get tags for process %s", p.ID())
 		return nil
 	}
+
 	var resp getTagsResponse
-	if err := shell.MessageToResponse(msg, &resp); err != nil {
+	if err = p.readRequest(msg, &resp); err != nil {
 		grip.Warning(message.WrapErrorf(err, "failed to get tags for process %s", p.ID()))
 		return nil
 	}
+
 	return resp.Tags
 }
 
 func (p *mdbProcess) ResetTags() {
-	req, err := shell.RequestToMessage(mongowire.OP_QUERY, resetTagsRequest{p.ID()})
+	payload, err := p.makeRequest(resetTagsRequest{p.ID()})
+	if err != nil {
+		grip.Warning(errors.Wrap(err, "problem marshalling request"))
+		return
+	}
+
+	req, err := shell.RequestToMessage(mongowire.OP_QUERY, payload)
 	if err != nil {
 		grip.Warningf("failed to reset tags for process %s", p.ID())
 		return
@@ -228,9 +337,10 @@ func (p *mdbProcess) ResetTags() {
 		return
 	}
 	var resp shell.ErrorResponse
-	if err := shell.MessageToResponse(msg, &resp); err != nil {
+	if err := p.readRequest(msg, &resp); err != nil {
 		grip.Warning(message.WrapErrorf(err, "failed to reset tags for process %s", p.ID()))
 		return
 	}
+
 	grip.Warning(message.WrapErrorf(resp.SuccessOrError(), "failed to reset tags for process %s", p.ID()))
 }

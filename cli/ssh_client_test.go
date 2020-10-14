@@ -305,32 +305,6 @@ func TestSSHClient(t *testing.T) {
 		"CloseConnectionPasses": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
 			assert.NoError(t, client.CloseConnection())
 		},
-		"ConfigureCachePassesWithValidResponse": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
-			inputChecker := options.Cache{}
-			baseManager.Create = makeCreateFunc(
-				t, client,
-				[]string{RemoteCommand, ConfigureCacheCommand},
-				&inputChecker,
-				makeOutcomeResponse(nil),
-			)
-			opts := options.Cache{PruneDelay: 10, MaxSize: 100}
-			require.NoError(t, client.ConfigureCache(ctx, opts))
-
-			assert.Equal(t, opts, inputChecker)
-		},
-		"ConfigureCacheFailsWithInvalidResponse": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
-			baseManager.Create = makeCreateFunc(
-				t, client,
-				[]string{RemoteCommand, ConfigureCacheCommand},
-				nil,
-				invalidResponse(),
-			)
-			assert.Error(t, client.ConfigureCache(ctx, options.Cache{}))
-		},
-		"ConfigureCacheFailsIfBaseManagerCreateFails": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
-			baseManager.FailCreate = true
-			assert.Error(t, client.ConfigureCache(ctx, options.Cache{}))
-		},
 		"DownloadFilePassesWithValidResponse": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
 			inputChecker := options.Download{}
 			baseManager.Create = makeCreateFunc(
@@ -358,37 +332,6 @@ func TestSSHClient(t *testing.T) {
 			baseManager.FailCreate = true
 			opts := options.Download{URL: "https://example.com", Path: "/foo"}
 			assert.Error(t, client.DownloadFile(ctx, opts))
-		},
-		"DownloadMongoDBPassesWithValidResponse": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
-			inputChecker := options.MongoDBDownload{}
-			baseManager.Create = makeCreateFunc(
-				t, client,
-				[]string{RemoteCommand, DownloadMongoDBCommand},
-				&inputChecker,
-				makeOutcomeResponse(nil),
-			)
-			opts := testutil.ValidMongoDBDownloadOptions()
-			opts.Path = "/foo"
-			require.NoError(t, client.DownloadMongoDB(ctx, opts))
-
-			assert.Equal(t, opts, inputChecker)
-		},
-		"DownloadMongoDBFailsWithInvalidResponse": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
-			baseManager.Create = makeCreateFunc(
-				t, client,
-				[]string{RemoteCommand, DownloadMongoDBCommand},
-				nil,
-				invalidResponse(),
-			)
-			opts := testutil.ValidMongoDBDownloadOptions()
-			opts.Path = "/foo"
-			assert.Error(t, client.DownloadMongoDB(ctx, opts))
-		},
-		"DownloadMongoDBFailsIfBaseManagerCreateFails": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
-			baseManager.FailCreate = true
-			opts := testutil.ValidMongoDBDownloadOptions()
-			opts.Path = "/foo"
-			assert.Error(t, client.DownloadMongoDB(ctx, opts))
 		},
 		"GetLogStreamPassesWithValidResponse": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
 			inputChecker := LogStreamInput{}
@@ -425,38 +368,6 @@ func TestSSHClient(t *testing.T) {
 		"GetLogStreamFailsIfBaseManagerCreateFails": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
 			baseManager.FailCreate = true
 			_, err := client.GetLogStream(ctx, "foo", 10)
-			assert.Error(t, err)
-		},
-		"GetBuildloggerURLsPassesWithValidInput": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
-			inputChecker := &IDInput{}
-			resp := &BuildloggerURLsResponse{URLs: []string{"bar"}, OutcomeResponse: *makeOutcomeResponse(nil)}
-			baseManager.Create = makeCreateFunc(
-				t, client,
-				[]string{RemoteCommand, GetBuildloggerURLsCommand},
-				&inputChecker,
-				resp,
-			)
-			id := "foo"
-			urls, err := client.GetBuildloggerURLs(ctx, id)
-			require.NoError(t, err)
-
-			assert.Equal(t, id, inputChecker.ID)
-
-			assert.Equal(t, resp.URLs, urls)
-		},
-		"GetBuildloggerURLsFailsWithInvalidResponse": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
-			baseManager.Create = makeCreateFunc(
-				t, client,
-				[]string{RemoteCommand, GetBuildloggerURLsCommand},
-				nil,
-				invalidResponse(),
-			)
-			_, err := client.GetBuildloggerURLs(ctx, "foo")
-			assert.Error(t, err)
-		},
-		"GetBuildloggerURLsFailsIfBaseManagerCreateFails": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
-			baseManager.FailCreate = true
-			_, err := client.GetBuildloggerURLs(ctx, "foo")
 			assert.Error(t, err)
 		},
 		"SignalEventPassesWithValidResponse": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {

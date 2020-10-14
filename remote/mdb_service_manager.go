@@ -4,9 +4,10 @@ import (
 	"context"
 	"io"
 
+	"github.com/deciduosity/birch"
+	"github.com/deciduosity/jasper"
 	"github.com/deciduosity/mrpc/mongowire"
 	"github.com/deciduosity/mrpc/shell"
-	"github.com/deciduosity/jasper"
 	"github.com/pkg/errors"
 )
 
@@ -23,7 +24,13 @@ const (
 )
 
 func (s *mdbService) managerID(ctx context.Context, w io.Writer, msg mongowire.Message) {
-	resp, err := shell.ResponseToMessage(mongowire.OP_REPLY, makeIDResponse(s.manager.ID()))
+	payload, err := s.makePayload(makeIDResponse(s.manager.ID()))
+	if err != nil {
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.New("could not build response"), ManagerIDCommand)
+		return
+	}
+
+	resp, err := shell.ResponseToMessage(mongowire.OP_REPLY, payload)
 	if err != nil {
 		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.New("could not make response"), ManagerIDCommand)
 		return
@@ -32,11 +39,18 @@ func (s *mdbService) managerID(ctx context.Context, w io.Writer, msg mongowire.M
 }
 
 func (s *mdbService) managerCreateProcess(ctx context.Context, w io.Writer, msg mongowire.Message) {
-	req := createProcessRequest{}
-	if err := shell.MessageToRequest(msg, &req); err != nil {
+	doc, err := shell.RequestMessageToDocument(msg)
+	if err != nil {
 		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not read request"), CreateProcessCommand)
 		return
 	}
+
+	req := createProcessRequest{}
+	if err = s.readPayload(doc, &req); err != nil {
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse request body"), CreateProcessCommand)
+		return
+	}
+
 	opts := req.Options
 
 	// Spawn a new context so that the process' context is not potentially
@@ -65,7 +79,14 @@ func (s *mdbService) managerCreateProcess(ctx context.Context, w io.Writer, msg 
 		}
 	}
 
-	resp, err := shell.ResponseToMessage(mongowire.OP_REPLY, makeInfoResponse(getProcInfoNoHang(ctx, proc)))
+	payload, err := s.makePayload(makeInfoResponse(getProcInfoNoHang(ctx, proc)))
+	if err != nil {
+		cancel()
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "problem building response"), CreateProcessCommand)
+		return
+	}
+
+	resp, err := shell.ResponseToMessage(mongowire.OP_REPLY, payload)
 	if err != nil {
 		cancel()
 		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not make response"), CreateProcessCommand)
@@ -74,12 +95,27 @@ func (s *mdbService) managerCreateProcess(ctx context.Context, w io.Writer, msg 
 	shell.WriteResponse(ctx, w, resp, CreateProcessCommand)
 }
 
+func (s *mdbService) readPayload(doc birch.Marshaler, in interface{}) error {
+	data, err := doc.MarshalBSON()
+	if err != nil {
+		return errors.Wrap(err, "problem reading payload")
+	}
+
+	return errors.Wrap(s.unmarshaler(data, in), "problem parsing document")
+}
+
 func (s *mdbService) managerList(ctx context.Context, w io.Writer, msg mongowire.Message) {
-	req := listRequest{}
-	if err := shell.MessageToRequest(msg, &req); err != nil {
+	doc, err := shell.RequestMessageToDocument(msg)
+	if err != nil {
 		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not read request"), ListCommand)
 		return
 	}
+	req := listRequest{}
+	if err = s.readPayload(doc, &req); err != nil {
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse request"), ListCommand)
+		return
+	}
+
 	filter := req.Filter
 
 	procs, err := s.manager.List(ctx, filter)
@@ -92,7 +128,14 @@ func (s *mdbService) managerList(ctx context.Context, w io.Writer, msg mongowire
 	for _, proc := range procs {
 		infos = append(infos, proc.Info(ctx))
 	}
-	resp, err := shell.ResponseToMessage(mongowire.OP_REPLY, makeInfosResponse(infos))
+
+	payload, err := s.makePayload(makeInfosResponse(infos))
+	if err != nil {
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "problem building response"), ListCommand)
+		return
+	}
+
+	resp, err := shell.ResponseToMessage(mongowire.OP_REPLY, payload)
 	if err != nil {
 		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not make response"), ListCommand)
 		return
@@ -101,11 +144,18 @@ func (s *mdbService) managerList(ctx context.Context, w io.Writer, msg mongowire
 }
 
 func (s *mdbService) managerGroup(ctx context.Context, w io.Writer, msg mongowire.Message) {
-	req := groupRequest{}
-	if err := shell.MessageToRequest(msg, &req); err != nil {
+	doc, err := shell.RequestMessageToDocument(msg)
+	if err != nil {
 		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not read request"), GroupCommand)
 		return
 	}
+
+	req := groupRequest{}
+	if err = s.readPayload(doc, &req); err != nil {
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse request"), GroupCommand)
+		return
+	}
+
 	tag := req.Tag
 
 	procs, err := s.manager.Group(ctx, tag)
@@ -119,7 +169,13 @@ func (s *mdbService) managerGroup(ctx context.Context, w io.Writer, msg mongowir
 		infos = append(infos, proc.Info(ctx))
 	}
 
-	resp, err := shell.ResponseToMessage(mongowire.OP_REPLY, makeInfosResponse(infos))
+	payload, err := s.makePayload(makeInfosResponse(infos))
+	if err != nil {
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not build response"), GroupCommand)
+		return
+	}
+
+	resp, err := shell.ResponseToMessage(mongowire.OP_REPLY, payload)
 	if err != nil {
 		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not make response"), GroupCommand)
 		return
@@ -128,11 +184,18 @@ func (s *mdbService) managerGroup(ctx context.Context, w io.Writer, msg mongowir
 }
 
 func (s *mdbService) managerGetProcess(ctx context.Context, w io.Writer, msg mongowire.Message) {
-	req := getProcessRequest{}
-	if err := shell.MessageToRequest(msg, &req); err != nil {
+	doc, err := shell.RequestMessageToDocument(msg)
+	if err != nil {
 		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not read request"), GetProcessCommand)
 		return
 	}
+
+	req := getProcessRequest{}
+	if err = s.readPayload(doc, &req); err != nil {
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse request"), GetProcessCommand)
+		return
+	}
+
 	id := req.ID
 
 	proc, err := s.manager.Get(ctx, id)
@@ -141,7 +204,13 @@ func (s *mdbService) managerGetProcess(ctx context.Context, w io.Writer, msg mon
 		return
 	}
 
-	resp, err := shell.ResponseToMessage(mongowire.OP_REPLY, makeInfoResponse(proc.Info(ctx)))
+	payload, err := s.makePayload(makeInfoResponse(proc.Info(ctx)))
+	if err != nil {
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not build response"), GetProcessCommand)
+		return
+	}
+
+	resp, err := shell.ResponseToMessage(mongowire.OP_REPLY, payload)
 	if err != nil {
 		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not make response"), GetProcessCommand)
 		return
@@ -163,11 +232,18 @@ func (s *mdbService) managerClose(ctx context.Context, w io.Writer, msg mongowir
 }
 
 func (s *mdbService) managerWriteFile(ctx context.Context, w io.Writer, msg mongowire.Message) {
-	req := &writeFileRequest{}
-	if err := shell.MessageToRequest(msg, &req); err != nil {
+	doc, err := shell.RequestMessageToDocument(msg)
+	if err != nil {
 		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not read request"), WriteFileCommand)
 		return
 	}
+
+	req := &writeFileRequest{}
+	if err = s.readPayload(doc, req); err != nil {
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse request"), WriteFileCommand)
+		return
+	}
+
 	opts := req.Options
 
 	if err := opts.Validate(); err != nil {

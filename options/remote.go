@@ -33,8 +33,8 @@ type RemoteConfig struct {
 
 // Remote represents options to SSH into a remote machine.
 type Remote struct {
-	RemoteConfig
-	Proxy *Proxy
+	RemoteConfig `bson:"remote_config" json:"remote_config" yaml:"remote_config"`
+	Proxy        *Proxy `bson:"proxy" json:"proxy" yaml:"proxy,omitempty"`
 }
 
 // Copy returns a copy of the options for only the exported fields.
@@ -48,7 +48,7 @@ func (opts *Remote) Copy() *Remote {
 
 // Proxy represents the remote configuration to access a remote proxy machine.
 type Proxy struct {
-	RemoteConfig
+	RemoteConfig `bson:"remote_config,inline" json:"remote_config" yaml:"remote_config"`
 }
 
 // Copy returns a copy of the options for only the exported fields.

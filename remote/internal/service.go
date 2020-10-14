@@ -5,11 +5,8 @@ import (
 	"io"
 	"os"
 	"strings"
-	"sync"
 	"time"
 
-	"github.com/deciduosity/grip"
-	"github.com/deciduosity/grip/recovery"
 	"github.com/deciduosity/jasper"
 	"github.com/deciduosity/jasper/options"
 	"github.com/deciduosity/jasper/scripting"
@@ -17,7 +14,6 @@ import (
 	empty "github.com/golang/protobuf/ptypes/empty"
 	timestamp "github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/pkg/errors"
-	"github.com/deciduosity/lru"
 	context "golang.org/x/net/context"
 	grpc "google.golang.org/grpc"
 )
@@ -34,49 +30,12 @@ func AttachService(ctx context.Context, manager jasper.Manager, s *grpc.Server) 
 	srv := &jasperService{
 		hostID:    hn,
 		manager:   manager,
-		cache:     lru.NewCache(),
 		scripting: scripting.NewCache(),
-		cacheOpts: options.Cache{
-			PruneDelay: jasper.DefaultCachePruneDelay,
-			MaxSize:    jasper.DefaultMaxCacheSize,
-		},
 	}
 
 	RegisterJasperProcessManagerServer(s, srv)
 
-	go srv.pruneCache(ctx)
-
 	return nil
-}
-
-func (s *jasperService) pruneCache(ctx context.Context) {
-	defer func() {
-		err := recovery.HandlePanicWithError(recover(), nil, "cache pruning")
-		if ctx.Err() != nil || err == nil {
-			return
-		}
-		go s.pruneCache(ctx)
-	}()
-
-	s.cacheMutex.RLock()
-	timer := time.NewTimer(s.cacheOpts.PruneDelay)
-	s.cacheMutex.RUnlock()
-
-	for {
-		select {
-		case <-timer.C:
-			s.cacheMutex.RLock()
-			if !s.cacheOpts.Disabled {
-				if err := s.cache.Prune(s.cacheOpts.MaxSize, nil, false); err != nil {
-					grip.Error(errors.Wrap(err, "error during cache pruning"))
-				}
-			}
-			timer.Reset(s.cacheOpts.PruneDelay)
-			s.cacheMutex.RUnlock()
-		case <-ctx.Done():
-			return
-		}
-	}
 }
 
 func getProcInfoNoHang(ctx context.Context, p jasper.Process) jasper.ProcessInfo {
@@ -86,12 +45,9 @@ func getProcInfoNoHang(ctx context.Context, p jasper.Process) jasper.ProcessInfo
 }
 
 type jasperService struct {
-	hostID     string
-	manager    jasper.Manager
-	scripting  scripting.HarnessCache
-	cache      *lru.Cache
-	cacheOpts  options.Cache
-	cacheMutex sync.RWMutex
+	hostID    string
+	manager   jasper.Manager
+	scripting scripting.HarnessCache
 }
 
 func (s *jasperService) Status(ctx context.Context, _ *empty.Empty) (*StatusResponse, error) {
@@ -358,48 +314,6 @@ func (s *jasperService) ResetTags(ctx context.Context, id *JasperProcessID) (*Op
 	return &OperationOutcome{Success: true, Text: "set tags", ExitCode: 0}, nil
 }
 
-func (s *jasperService) DownloadMongoDB(ctx context.Context, opts *MongoDBDownloadOptions) (*OperationOutcome, error) {
-	jopts := opts.Export()
-	if err := jopts.Validate(); err != nil {
-		return &OperationOutcome{
-			Success:  false,
-			Text:     errors.Wrap(err, "problem validating MongoDB download options").Error(),
-			ExitCode: -2,
-		}, nil
-	}
-
-	if err := jasper.SetupDownloadMongoDBReleases(ctx, s.cache, jopts); err != nil {
-		err = errors.Wrap(err, "problem in download setup")
-		return &OperationOutcome{Success: false, Text: err.Error(), ExitCode: -3}, nil
-	}
-
-	return &OperationOutcome{Success: true, Text: "download jobs started"}, nil
-}
-
-func (s *jasperService) ConfigureCache(ctx context.Context, opts *CacheOptions) (*OperationOutcome, error) {
-	jopts := opts.Export()
-	if err := jopts.Validate(); err != nil {
-		err = errors.Wrap(err, "problem validating cache options")
-		return &OperationOutcome{
-			Success:  false,
-			Text:     errors.Wrap(err, "problem validating cache options").Error(),
-			ExitCode: -2,
-		}, nil
-	}
-
-	s.cacheMutex.Lock()
-	if jopts.MaxSize > 0 {
-		s.cacheOpts.MaxSize = jopts.MaxSize
-	}
-	if jopts.PruneDelay > time.Duration(0) {
-		s.cacheOpts.PruneDelay = jopts.PruneDelay
-	}
-	s.cacheOpts.Disabled = jopts.Disabled
-	s.cacheMutex.Unlock()
-
-	return &OperationOutcome{Success: true, Text: "cache configured"}, nil
-}
-
 func (s *jasperService) DownloadFile(ctx context.Context, opts *DownloadInfo) (*OperationOutcome, error) {
 	jopts := opts.Export()
 
@@ -434,34 +348,6 @@ func (s *jasperService) GetLogStream(ctx context.Context, request *LogRequest) (
 		return nil, errors.Wrapf(err, "could not get logs for process '%s'", request.Id.Value)
 	}
 	return stream, nil
-}
-
-func (s *jasperService) GetBuildloggerURLs(ctx context.Context, id *JasperProcessID) (*BuildloggerURLs, error) {
-	proc, err := s.manager.Get(ctx, id.Value)
-	if err != nil {
-		err = errors.Wrapf(err, "problem finding process '%s'", id.Value)
-		return nil, err
-	}
-
-	urls := []string{}
-	for _, logger := range getProcInfoNoHang(ctx, proc).Options.Output.Loggers {
-		if logger.Type() == options.LogBuildloggerV2 {
-			producer := logger.Producer()
-			if producer == nil {
-				continue
-			}
-			rawProducer, ok := producer.(*options.BuildloggerV2Options)
-			if ok {
-				urls = append(urls, rawProducer.Buildlogger.GetGlobalLogURL())
-			}
-		}
-	}
-
-	if len(urls) == 0 {
-		return nil, errors.Errorf("process '%s' does not use buildlogger", id.Value)
-	}
-
-	return &BuildloggerURLs{Urls: urls}, nil
 }
 
 func (s *jasperService) RegisterSignalTriggerID(ctx context.Context, params *SignalTriggerParams) (*OperationOutcome, error) {

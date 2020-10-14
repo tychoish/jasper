@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/sha1"
 	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -107,7 +106,6 @@ func (e *golangEnvironment) RunScript(ctx context.Context, script string) error 
 		path = filepath.Join(e.opts.Gopath, "tmp", path)
 
 	}
-
 	wo := options.WriteFile{
 		Path:    path,
 		Content: []byte(script),
@@ -121,14 +119,8 @@ func (e *golangEnvironment) RunScript(ctx context.Context, script string) error 
 }
 
 func (e *golangEnvironment) Cleanup(ctx context.Context) error {
-	switch mgr := e.manager.(type) {
-	case remote:
-		return errors.Wrapf(mgr.CreateCommand(ctx).SetOutputOptions(e.opts.Output).AppendArgs("rm", "-rf", e.opts.Gopath).Run(ctx),
-			"problem removing remote golang environment '%s'", e.opts.Gopath)
-	default:
-		return errors.Wrapf(os.RemoveAll(e.opts.Gopath),
-			"problem removing local golang environment '%s'", e.opts.Gopath)
-	}
+	return errors.Wrapf(e.manager.CreateCommand(ctx).SetOutputOptions(e.opts.Output).Sudo(true).AppendArgs("rm", "-rf", e.opts.Gopath).Run(ctx),
+		"problem removing golang environment '%s'", e.opts.Gopath)
 }
 
 func (e *golangEnvironment) Test(ctx context.Context, dir string, tests ...TestOptions) ([]TestResult, error) {

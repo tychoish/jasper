@@ -12,6 +12,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/deciduosity/bond"
 	"github.com/deciduosity/gimlet"
 	"github.com/deciduosity/grip"
 	"github.com/deciduosity/grip/message"
@@ -19,7 +20,6 @@ import (
 	"github.com/deciduosity/jasper/options"
 	"github.com/deciduosity/jasper/scripting"
 	"github.com/pkg/errors"
-	"github.com/deciduosity/bond"
 )
 
 // NewRestClient creates a REST client that connecst to the given address
@@ -304,21 +304,6 @@ func (c *restClient) Close(ctx context.Context) error {
 	return nil
 }
 
-func (c *restClient) GetBuildloggerURLs(ctx context.Context, id string) ([]string, error) {
-	resp, err := c.doRequest(ctx, http.MethodGet, c.getURL("/process/%s/buildlogger-urls", id), nil)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	urls := []string{}
-	if err = gimlet.GetJSON(resp.Body, &urls); err != nil {
-		return nil, errors.Wrap(err, "problem reading urls from response")
-	}
-
-	return urls, nil
-}
-
 func (c *restClient) GetLogStream(ctx context.Context, id string, count int) (jasper.LogStream, error) {
 	resp, err := c.doRequest(ctx, http.MethodGet, c.getURL("/process/%s/logs/%d", id, count), nil)
 	if err != nil {
@@ -343,38 +328,6 @@ func (c *restClient) DownloadFile(ctx context.Context, opts options.Download) er
 	resp, err := c.doRequest(ctx, http.MethodPost, c.getURL("/download"), body)
 	if err != nil {
 		return errors.Wrap(err, "problem downloading file")
-	}
-	defer resp.Body.Close()
-
-	return nil
-}
-
-// DownloadMongoDB downloads the desired version of MongoDB.
-func (c *restClient) DownloadMongoDB(ctx context.Context, opts options.MongoDBDownload) error {
-	body, err := makeBody(opts)
-	if err != nil {
-		return err
-	}
-
-	resp, err := c.doRequest(ctx, http.MethodPost, c.getURL("/download/mongodb"), body)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	return nil
-}
-
-// ConfigureCache changes the cache configurations.
-func (c *restClient) ConfigureCache(ctx context.Context, opts options.Cache) error {
-	body, err := makeBody(opts)
-	if err != nil {
-		return err
-	}
-
-	resp, err := c.doRequest(ctx, http.MethodPost, c.getURL("/download/cache"), body)
-	if err != nil {
-		return err
 	}
 	defer resp.Body.Close()
 

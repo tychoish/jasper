@@ -194,19 +194,6 @@ func (c *sshClient) CloseConnection() error {
 	return nil
 }
 
-func (c *sshClient) ConfigureCache(ctx context.Context, opts options.Cache) error {
-	output, err := c.runRemoteCommand(ctx, ConfigureCacheCommand, &opts)
-	if err != nil {
-		return errors.WithStack(err)
-	}
-
-	if _, err := ExtractOutcomeResponse(output); err != nil {
-		return errors.WithStack(err)
-	}
-
-	return nil
-}
-
 func (c *sshClient) DownloadFile(ctx context.Context, opts options.Download) error {
 	output, err := c.runRemoteCommand(ctx, DownloadFileCommand, &opts)
 	if err != nil {
@@ -235,19 +222,6 @@ func (c *sshClient) WriteFile(ctx context.Context, opts options.WriteFile) error
 	})
 }
 
-func (c *sshClient) DownloadMongoDB(ctx context.Context, opts options.MongoDBDownload) error {
-	output, err := c.runRemoteCommand(ctx, DownloadMongoDBCommand, &opts)
-	if err != nil {
-		return errors.WithStack(err)
-	}
-
-	if _, err := ExtractOutcomeResponse(output); err != nil {
-		return errors.WithStack(err)
-	}
-
-	return nil
-}
-
 func (c *sshClient) GetLogStream(ctx context.Context, id string, count int) (jasper.LogStream, error) {
 	output, err := c.runRemoteCommand(ctx, GetLogStreamCommand, &LogStreamInput{ID: id, Count: count})
 	if err != nil {
@@ -260,20 +234,6 @@ func (c *sshClient) GetLogStream(ctx context.Context, id string, count int) (jas
 	}
 
 	return resp.LogStream, nil
-}
-
-func (c *sshClient) GetBuildloggerURLs(ctx context.Context, id string) ([]string, error) {
-	output, err := c.runRemoteCommand(ctx, GetBuildloggerURLsCommand, &IDInput{ID: id})
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	resp, err := ExtractBuildloggerURLsResponse(output)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	return resp.URLs, nil
 }
 
 func (c *sshClient) SignalEvent(ctx context.Context, name string) error {

@@ -1,6 +1,7 @@
 package options
 
 import (
+	"encoding/json"
 	"sync"
 
 	"github.com/deciduosity/grip/send"
@@ -8,13 +9,18 @@ import (
 
 var globalLoggerRegistry LoggerRegistry = &basicLoggerRegistry{
 	factories: map[string]LoggerProducerFactory{
-		LogDefault:       NewDefaultLoggerProducer,
-		LogFile:          NewFileLoggerProducer,
-		LogInherited:     NewInheritedLoggerProducer,
-		LogSumoLogic:     NewSumoLogicLoggerProducer,
-		LogInMemory:      NewInMemoryLoggerProducer,
-		LogSplunk:        NewSplunkLoggerProducer,
-		LogBuildloggerV2: NewBuildloggerV2LoggerProducer,
+		LogDefault:   NewDefaultLoggerProducer,
+		LogFile:      NewFileLoggerProducer,
+		LogInherited: NewInheritedLoggerProducer,
+		LogSumoLogic: NewSumoLogicLoggerProducer,
+		LogInMemory:  NewInMemoryLoggerProducer,
+		LogSplunk:    NewSplunkLoggerProducer,
+	},
+	marshalers: map[RawLoggerConfigFormat]Marshaler{
+		RawLoggerConfigFormatJSON: json.Marshal,
+	},
+	unmarshalers: map[RawLoggerConfigFormat]Unmarshaler{
+		RawLoggerConfigFormatJSON: json.Unmarshal,
 	},
 }
 
@@ -27,11 +33,21 @@ type LoggerRegistry interface {
 	Check(string) bool
 	Names() []string
 	Resolve(string) (LoggerProducerFactory, bool)
+
+	RegisterUnmarshaler(RawLoggerConfigFormat, Unmarshaler)
+	RegisterMarshaler(RawLoggerConfigFormat, Marshaler)
+	Unmarshaler(RawLoggerConfigFormat) Unmarshaler
+	Marshaler(RawLoggerConfigFormat) Marshaler
 }
 
+type Marshaler func(interface{}) ([]byte, error)
+type Unmarshaler func([]byte, interface{}) error
+
 type basicLoggerRegistry struct {
-	mu        sync.RWMutex
-	factories map[string]LoggerProducerFactory
+	mu           sync.RWMutex
+	factories    map[string]LoggerProducerFactory
+	marshalers   map[RawLoggerConfigFormat]Marshaler
+	unmarshalers map[RawLoggerConfigFormat]Unmarshaler
 }
 
 // NewBasicLoggerRegsitry returns a new LoggerRegistry backed by the
@@ -40,6 +56,33 @@ func NewBasicLoggerRegistry() LoggerRegistry {
 	return &basicLoggerRegistry{
 		factories: map[string]LoggerProducerFactory{},
 	}
+}
+
+func (r *basicLoggerRegistry) RegisterUnmarshaler(f RawLoggerConfigFormat, um Unmarshaler) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	r.unmarshalers[f] = um
+}
+func (r *basicLoggerRegistry) RegisterMarshaler(f RawLoggerConfigFormat, m Marshaler) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	r.marshalers[f] = m
+}
+
+func (r *basicLoggerRegistry) Unmarshaler(f RawLoggerConfigFormat) Unmarshaler {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	return r.unmarshalers[f]
+}
+
+func (r *basicLoggerRegistry) Marshaler(f RawLoggerConfigFormat) Marshaler {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	return r.marshalers[f]
 }
 
 func (r *basicLoggerRegistry) Register(factory LoggerProducerFactory) {

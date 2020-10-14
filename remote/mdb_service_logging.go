@@ -4,9 +4,9 @@ import (
 	"context"
 	"io"
 
+	"github.com/deciduosity/jasper"
 	"github.com/deciduosity/mrpc/mongowire"
 	"github.com/deciduosity/mrpc/shell"
-	"github.com/deciduosity/jasper"
 	"github.com/pkg/errors"
 )
 
@@ -112,8 +112,8 @@ func (s *mdbService) serviceLoggingCacheRequest(ctx context.Context, w io.Writer
 	}
 
 	if req != nil {
-		if err := shell.MessageToRequest(msg, req); err != nil {
-			shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not read request"), command)
+		if err := s.readRequest(msg, req); err != nil {
+			shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse request"), command)
 			return nil
 		}
 	}
@@ -123,7 +123,13 @@ func (s *mdbService) serviceLoggingCacheRequest(ctx context.Context, w io.Writer
 
 func (s *mdbService) serviceLoggingCacheResponse(ctx context.Context, w io.Writer, resp interface{}, command string) {
 	if resp != nil {
-		shellResp, err := shell.ResponseToMessage(mongowire.OP_REPLY, resp)
+		doc, err := s.makePayload(resp)
+		if err != nil {
+			shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse payload"), command)
+			return
+		}
+
+		shellResp, err := shell.ResponseToMessage(mongowire.OP_REPLY, doc)
 		if err != nil {
 			shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not make response"), command)
 			return

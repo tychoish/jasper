@@ -7,16 +7,14 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/golang/protobuf/ptypes"
 	"github.com/deciduosity/grip/level"
 	"github.com/deciduosity/grip/message"
 	"github.com/deciduosity/grip/send"
 	"github.com/deciduosity/jasper"
 	"github.com/deciduosity/jasper/options"
 	"github.com/deciduosity/jasper/scripting"
+	"github.com/golang/protobuf/ptypes"
 	"github.com/pkg/errors"
-	"github.com/deciduosity/bond"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 // Export takes a protobuf RPC CreateOptions struct and returns the analogous
@@ -294,10 +292,6 @@ func (logger LoggerConfig) Export() (*options.LoggerConfig, error) {
 		producer = logger.GetInMemory().Export()
 	case logger.GetSplunk() != nil:
 		producer = logger.GetSplunk().Export()
-	case logger.GetBuildloggerv2() != nil:
-		producer = logger.GetBuildloggerv2().Export()
-	case logger.GetBuildloggerv3() != nil:
-		return logger.GetBuildloggerv3().Export()
 	case logger.GetRaw() != nil:
 		return logger.GetRaw().Export()
 	}
@@ -477,53 +471,6 @@ func (opts SplunkLoggerOptions) Export() options.LoggerProducer {
 	}
 }
 
-// Export takes a protobuf RPC BuildloggerV2Info struct and returns the
-// analogous grip send.BuildloggerConfig struct.
-func (opts BuildloggerV2Info) Export() send.BuildloggerConfig {
-	return send.BuildloggerConfig{
-		CreateTest: opts.CreateTest,
-		URL:        opts.Url,
-		Number:     int(opts.Number),
-		Phase:      opts.Phase,
-		Builder:    opts.Builder,
-		Test:       opts.Test,
-		Command:    opts.Command,
-	}
-}
-
-// ConvertBuildloggerV2Info takes a grip send.BuildloggerConfig and returns an
-// equivalent protobuf RPC BuildloggerV2Info struct. ConvertBuildloggerV2Info
-// is the inverse of (BuildloggerV2Info) Export().
-func ConvertBuildloggerOptions(opts send.BuildloggerConfig) *BuildloggerV2Info {
-	return &BuildloggerV2Info{
-		CreateTest: opts.CreateTest,
-		Url:        opts.URL,
-		Number:     int64(opts.Number),
-		Phase:      opts.Phase,
-		Builder:    opts.Builder,
-		Test:       opts.Test,
-		Command:    opts.Command,
-	}
-}
-
-// Export takes a protobuf RPC BuildloggerV2Options struct and returns the
-// analogous Jasper options.LoggerProducer.
-func (opts BuildloggerV2Options) Export() options.LoggerProducer {
-	return &options.BuildloggerV2Options{
-		Buildlogger: opts.Buildlogger.Export(),
-		Base:        opts.Base.Export(),
-	}
-}
-
-func (opts BuildloggerV3Options) Export() (*options.LoggerConfig, error) {
-	data, err := json.Marshal(&opts)
-	if err != nil {
-		return nil, errors.Wrap(err, "problem marshaling buildlogger v3 options")
-	}
-
-	return options.NewLoggerConfig("BuildloggerV3", options.RawLoggerConfigFormatJSON, data), nil
-}
-
 // Export takes a protobuf RPC RawLoggerConfigFormat enum and returns the
 // analogous Jasper options.RawLoggerConfigFormat type.
 func (f RawLoggerConfigFormat) Export() options.RawLoggerConfigFormat {
@@ -559,91 +506,6 @@ func (logger RawLoggerConfig) Export() (*options.LoggerConfig, error) {
 		return nil, errors.Wrap(err, "problem unmarshalling raw config")
 	}
 	return config, nil
-}
-
-// Export takes a protobuf RPC BuildloggerURLs struct and returns the analogous
-// []string.
-func (u *BuildloggerURLs) Export() []string {
-	return append([]string{}, u.Urls...)
-}
-
-// ConvertBuildloggerURLs takes a []string and returns the analogous protobuf
-// RPC BuildloggerURLs struct. ConvertBuildloggerURLs is the
-// inverse of (*BuildloggerURLs) Export().
-func ConvertBuildloggerURLs(urls []string) *BuildloggerURLs {
-	u := &BuildloggerURLs{Urls: []string{}}
-	u.Urls = append(u.Urls, urls...)
-	return u
-}
-
-// Export takes a protobuf RPC BuildOptions struct and returns the analogous
-// bond.BuildOptions struct.
-func (opts *BuildOptions) Export() bond.BuildOptions {
-	return bond.BuildOptions{
-		Target:  opts.Target,
-		Arch:    bond.MongoDBArch(opts.Arch),
-		Edition: bond.MongoDBEdition(opts.Edition),
-		Debug:   opts.Debug,
-	}
-}
-
-// ConvertBuildOptions takes a bond BuildOptions struct and returns an
-// equivalent protobuf RPC BuildOptions struct. ConvertBuildOptions is the
-// inverse of (*BuildOptions) Export().
-func ConvertBuildOptions(opts bond.BuildOptions) *BuildOptions {
-	return &BuildOptions{
-		Target:  opts.Target,
-		Arch:    string(opts.Arch),
-		Edition: string(opts.Edition),
-		Debug:   opts.Debug,
-	}
-}
-
-// Export takes a protobuf RPC MongoDBDownloadOptions struct and returns the
-// analogous Jasper MongoDBDownloadOptions struct.
-func (opts *MongoDBDownloadOptions) Export() options.MongoDBDownload {
-	jopts := options.MongoDBDownload{
-		BuildOpts: opts.BuildOpts.Export(),
-		Path:      opts.Path,
-		Releases:  make([]string, 0, len(opts.Releases)),
-	}
-	jopts.Releases = append(jopts.Releases, opts.Releases...)
-	return jopts
-}
-
-// ConvertMongoDBDownloadOptions takes a Jasper MongoDBDownloadOptions struct
-// and returns an equivalent protobuf RPC MongoDBDownloadOptions struct.
-// ConvertMongoDBDownloadOptions is the
-// inverse of (*MongoDBDownloadOptions) Export().
-func ConvertMongoDBDownloadOptions(jopts options.MongoDBDownload) *MongoDBDownloadOptions {
-	opts := &MongoDBDownloadOptions{
-		BuildOpts: ConvertBuildOptions(jopts.BuildOpts),
-		Path:      jopts.Path,
-		Releases:  make([]string, 0, len(jopts.Releases)),
-	}
-	opts.Releases = append(opts.Releases, jopts.Releases...)
-	return opts
-}
-
-// Export takes a protobuf RPC CacheOptions struct and returns the analogous
-// Jasper CacheOptions struct.
-func (opts *CacheOptions) Export() options.Cache {
-	return options.Cache{
-		Disabled:   opts.Disabled,
-		PruneDelay: time.Duration(opts.PruneDelaySeconds) * time.Second,
-		MaxSize:    int(opts.MaxSize),
-	}
-}
-
-// ConvertCacheOptions takes a Jasper CacheOptions struct and returns an
-// equivalent protobuf RPC CacheOptions struct. ConvertCacheOptions is the
-// inverse of (*CacheOptions) Export().
-func ConvertCacheOptions(jopts options.Cache) *CacheOptions {
-	return &CacheOptions{
-		Disabled:          jopts.Disabled,
-		PruneDelaySeconds: int64(jopts.PruneDelay / time.Second),
-		MaxSize:           int64(jopts.MaxSize),
-	}
 }
 
 // Export takes a protobuf RPC DownloadInfo struct and returns the analogous
@@ -1062,7 +924,13 @@ func convertMessage(format options.LoggingPayloadFormat, m interface{}) *Logging
 		case options.LoggingPayloadFormatSTRING:
 			out.Data = &LoggingPayloadData_Msg{Msg: m.String()}
 		case options.LoggingPayloadFormatBSON:
-			payload, _ := bson.Marshal(m.Raw())
+			var payload []byte
+
+			marshaler := options.GetGlobalLoggerRegistry().Marshaler(options.RawLoggerConfigFormatBSON)
+			if marshaler != nil {
+				payload, _ = marshaler(m.Raw())
+			}
+
 			out.Data = &LoggingPayloadData_Raw{Raw: payload}
 		case options.LoggingPayloadFormatJSON:
 			payload, _ := json.Marshal(m.Raw())

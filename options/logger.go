@@ -1,14 +1,12 @@
 package options
 
 import (
-	"encoding/json"
 	"time"
 
 	"github.com/deciduosity/grip"
 	"github.com/deciduosity/grip/level"
 	"github.com/deciduosity/grip/send"
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 const (
@@ -80,19 +78,13 @@ func (f RawLoggerConfigFormat) Validate() error {
 // Unmarshal unmarshals the given data using the corresponding unmarshaler for
 // the RawLoggerConfigFormat type.
 func (f RawLoggerConfigFormat) Unmarshal(data []byte, out interface{}) error {
-	switch f {
-	case RawLoggerConfigFormatBSON:
-		if err := bson.Unmarshal(data, out); err != nil {
-			return errors.Wrapf(err, "could not render '%s' input into '%s'", data, out)
-
-		}
-	case RawLoggerConfigFormatJSON:
-		if err := json.Unmarshal(data, out); err != nil {
-			return errors.Wrapf(err, "could not render '%s' input into '%s'", data, out)
-
-		}
-	default:
+	unmarshaler := GetGlobalLoggerRegistry().Unmarshaler(f)
+	if unmarshaler == nil {
 		return errors.Errorf("unsupported format '%s'", f)
+	}
+
+	if err := unmarshaler(data, out); err != nil {
+		return errors.Wrapf(err, "could not render '%s' [%s] input into '%s'", f, data, out)
 	}
 
 	return nil
@@ -207,22 +199,40 @@ func (lc *LoggerConfig) MarshalBSON() ([]byte, error) {
 		return nil, errors.Wrap(err, "problem resolving logger producer")
 	}
 
-	data, err := bson.Marshal(lc.producer)
+	marshaler := lc.getRegistry().Marshaler(RawLoggerConfigFormatBSON)
+	if marshaler == nil {
+		return nil, errors.New("bson marshalling not supported")
+	}
+
+	data, err := marshaler(lc.producer)
 	if err != nil {
 		return nil, errors.Wrap(err, "problem producing logger config")
 	}
 
-	return bson.Marshal(&loggerConfigInfo{
+	return marshaler(&loggerConfigInfo{
 		Type:   lc.producer.Type(),
 		Format: RawLoggerConfigFormatBSON,
 		Config: data,
 	})
 }
 
+func (lc *LoggerConfig) getRegistry() LoggerRegistry {
+	if lc.Registry == nil {
+		return GetGlobalLoggerRegistry()
+	}
+
+	return lc.Registry
+}
+
 func (lc *LoggerConfig) UnmarshalBSON(b []byte) error {
+	unmarshaler := lc.getRegistry().Unmarshaler(RawLoggerConfigFormatBSON)
+	if unmarshaler == nil {
+		return errors.New("bson unmarshaling not supported")
+	}
+
 	info := loggerConfigInfo{}
-	if err := bson.Unmarshal(b, &info); err != nil {
-		return errors.Wrap(err, "problem unmarshalling config logger info")
+	if err := unmarshaler(b, &info); err != nil {
+		return errors.Wrap(err, "problem unmarshaling config logger info")
 	}
 
 	lc.info = info
@@ -234,12 +244,17 @@ func (lc *LoggerConfig) MarshalJSON() ([]byte, error) {
 		return nil, errors.Wrap(err, "problem resolving logger producer")
 	}
 
-	data, err := json.Marshal(lc.producer)
+	marshaler := lc.getRegistry().Marshaler(RawLoggerConfigFormatJSON)
+	if marshaler == nil {
+		return nil, errors.New("json marshalling not supported")
+	}
+
+	data, err := marshaler(lc.producer)
 	if err != nil {
 		return nil, errors.Wrap(err, "problem producing logger config")
 	}
 
-	return json.Marshal(&loggerConfigInfo{
+	return marshaler(&loggerConfigInfo{
 		Type:   lc.producer.Type(),
 		Format: RawLoggerConfigFormatJSON,
 		Config: data,
@@ -247,8 +262,13 @@ func (lc *LoggerConfig) MarshalJSON() ([]byte, error) {
 }
 
 func (lc *LoggerConfig) UnmarshalJSON(b []byte) error {
+	unmarshaler := lc.getRegistry().Unmarshaler(RawLoggerConfigFormatJSON)
+	if unmarshaler == nil {
+		return errors.New("bson unmarshaling not supported")
+	}
+
 	info := loggerConfigInfo{}
-	if err := json.Unmarshal(b, &info); err != nil {
+	if err := unmarshaler(b, &info); err != nil {
 		return errors.Wrap(err, "problem unmarshalling config logger info")
 	}
 
@@ -262,7 +282,7 @@ func (lc *LoggerConfig) resolveProducer() error {
 			return errors.Wrap(err, "invalid logger config")
 		}
 
-		factory, ok := lc.Registry.Resolve(lc.info.Type)
+		factory, ok := lc.getRegistry().Resolve(lc.info.Type)
 		if !ok {
 			return errors.Errorf("unregistered logger type '%s'", lc.info.Type)
 		}

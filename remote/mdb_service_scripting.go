@@ -4,12 +4,11 @@ import (
 	"context"
 	"io"
 
-	"github.com/deciduosity/mrpc/mongowire"
-	"github.com/deciduosity/mrpc/shell"
 	"github.com/deciduosity/jasper/options"
 	"github.com/deciduosity/jasper/scripting"
+	"github.com/deciduosity/mrpc/mongowire"
+	"github.com/deciduosity/mrpc/shell"
 	"github.com/pkg/errors"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 const (
@@ -48,7 +47,8 @@ func (s *mdbService) scriptingCreate(ctx context.Context, w io.Writer, msg mongo
 		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "problem creating harness options"), ScriptingCreateCommand)
 		return
 	}
-	if err = bson.Unmarshal(req.Params.Options, opts); err != nil {
+
+	if err = s.unmarshaler(req.Params.Options, opts); err != nil {
 		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "problem unmarshalling options"), ScriptingCreateCommand)
 		return
 	}
@@ -179,8 +179,13 @@ func (s *mdbService) serviceScriptingRequest(ctx context.Context, w io.Writer, m
 	}
 
 	if req != nil {
-		if err := shell.MessageToRequest(msg, req); err != nil {
+		doc, err := shell.RequestMessageToDocument(msg)
+		if err != nil {
 			shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not read request"), command)
+			return false
+		}
+		if err := s.readPayload(doc, req); err != nil {
+			shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse request"), command)
 			return false
 		}
 	}
@@ -200,7 +205,13 @@ func (s *mdbService) getHarness(ctx context.Context, w io.Writer, id, command st
 
 func (s *mdbService) serviceScriptingResponse(ctx context.Context, w io.Writer, resp interface{}, command string) {
 	if resp != nil {
-		shellResp, err := shell.ResponseToMessage(mongowire.OP_REPLY, resp)
+		payload, err := s.makePayload(resp)
+		if err != nil {
+			shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse response"), command)
+			return
+		}
+
+		shellResp, err := shell.ResponseToMessage(mongowire.OP_REPLY, payload)
 		if err != nil {
 			shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not make response"), command)
 			return

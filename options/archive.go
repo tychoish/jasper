@@ -32,9 +32,9 @@ func (f ArchiveFormat) Validate() error {
 
 // Archive encapsulates options related to management of archive files.
 type Archive struct {
-	ShouldExtract bool
-	Format        ArchiveFormat
-	TargetPath    string
+	ShouldExtract bool          `bson:"should_extract" json:"should_extract" yaml:"should_extract"`
+	Format        ArchiveFormat `bson:"format" json:"format" yaml:"format"`
+	TargetPath    string        `bson:"target_path" json:"target_path" yaml:"target_path"`
 }
 
 // Validate checks the archive file options.

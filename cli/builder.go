@@ -211,13 +211,6 @@ func BuildRemoteCommand(basePrefix ...string) []string {
 	return append(BuildClientCommand(basePrefix...), RemoteCommand)
 }
 
-// BuildRemoteConfigureCacheCommand is a convenience function to generate the
-// slice of strings to invoke the Jasper.Client.Remote.ConfigureCache
-// subcommand.
-func BuildRemoteConfigureCacheCommand(basePrefix ...string) []string {
-	return append(BuildRemoteCommand(basePrefix...), ConfigureCacheCommand)
-}
-
 // BuildRemoteDownloadFileCommand is a convenience function to generate the
 // slice of strings to invoke the Jasper.Client.Remote.DownloadFile
 // subcommand.
@@ -225,25 +218,11 @@ func BuildRemoteDownloadFileCommand(basePrefix ...string) []string {
 	return append(BuildRemoteCommand(basePrefix...), DownloadFileCommand)
 }
 
-// BuildRemoteDownloadMongoDBCommand is a convenience function to generate the
-// slice of strings to invoke the Jasper.Client.Remote.DownloadMongoDB
-// subcommand.
-func BuildRemoteDownloadMongoDBCommand(basePrefix ...string) []string {
-	return append(BuildRemoteCommand(basePrefix...), DownloadMongoDBCommand)
-}
-
 // BuildRemoteGetLogStreamCommand is a convenience function to generate the
 // slice of strings to invoke the Jasper.Client.Remote.GetLogStream
 // subcommand.
 func BuildRemoteGetLogStreamCommand(basePrefix ...string) []string {
 	return append(BuildRemoteCommand(basePrefix...), GetLogStreamCommand)
-}
-
-// BuildRemoteGetBuildloggerURLsCommand is a convenience function to generate the
-// slice of strings to invoke the Jasper.Client.Remote.GetBuildloggerURLs
-// subcommand.
-func BuildRemoteGetBuildloggerURLsCommand(basePrefix ...string) []string {
-	return append(BuildRemoteCommand(basePrefix...), GetBuildloggerURLsCommand)
 }
 
 // BuildRemoteSignalEventCommand is a convenience function to generate the

@@ -24,12 +24,17 @@ import (
 	"github.com/deciduosity/jasper/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 func init() {
 	sender := grip.GetSender()
 	grip.Error(sender.SetLevel(send.LevelInfo{Default: level.Info, Threshold: level.Info}))
 	grip.Error(grip.SetSender(sender))
+
+	reg := options.GetGlobalLoggerRegistry()
+	reg.RegisterMarshaler(options.RawLoggerConfigFormatBSON, bson.Marshal)
+	reg.RegisterUnmarshaler(options.RawLoggerConfigFormatBSON, bson.Unmarshal)
 }
 
 type clientTestCase struct {
@@ -369,8 +374,8 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 				assert.NotZero(t, proc.ID())
 
 				fetched, err := client.Get(ctx, proc.ID())
-				assert.NoError(t, err)
-				assert.NotNil(t, fetched)
+				require.NoError(t, err)
+				require.NotNil(t, fetched)
 				assert.Equal(t, proc.ID(), fetched.ID())
 			},
 		},
@@ -896,38 +901,6 @@ func TestManager(t *testing.T) {
 										testCase(ctx, t, client, tempDir)
 									})
 								}
-							},
-						},
-						clientTestCase{
-							Name: "GetBuildloggerURLsFailsWithoutBuildlogger",
-							Case: func(ctx context.Context, t *testing.T, client Manager) {
-								logger := &options.LoggerConfig{}
-								require.NoError(t, logger.Set(&options.DefaultLoggerOptions{
-									Base: options.BaseOptions{Format: options.LogFormatPlain},
-								}))
-								opts := &options.Create{
-									Args: []string{"echo", "foobar"},
-									Output: options.Output{
-										Loggers: []*options.LoggerConfig{logger},
-									},
-								}
-
-								info, err := client.CreateProcess(ctx, opts)
-								require.NoError(t, err)
-								id := info.ID()
-								assert.NotEmpty(t, id)
-
-								urls, err := client.GetBuildloggerURLs(ctx, id)
-								assert.Error(t, err)
-								assert.Nil(t, urls)
-							},
-						},
-						clientTestCase{
-							Name: "GetBuildloggerURLsFailsWithNonexistentProcess",
-							Case: func(ctx context.Context, t *testing.T, client Manager) {
-								urls, err := client.GetBuildloggerURLs(ctx, "foo")
-								assert.Error(t, err)
-								assert.Nil(t, urls)
 							},
 						},
 						clientTestCase{

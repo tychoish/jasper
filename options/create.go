@@ -11,11 +11,11 @@ import (
 	"sort"
 	"time"
 
-	"github.com/google/shlex"
 	"github.com/deciduosity/grip"
 	"github.com/deciduosity/grip/level"
 	"github.com/deciduosity/grip/send"
 	"github.com/deciduosity/jasper/internal/executor"
+	"github.com/google/shlex"
 	"github.com/pkg/errors"
 )
 

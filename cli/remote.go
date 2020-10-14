@@ -10,14 +10,11 @@ import (
 
 // Constants representing the Jasper RemoteClient interface as CLI commands.
 const (
-	RemoteCommand             = "remote"
-	ConfigureCacheCommand     = "configure-cache"
-	DownloadFileCommand       = "download-file"
-	DownloadMongoDBCommand    = "download-mongodb"
-	GetBuildloggerURLsCommand = "get-buildlogger-urls"
-	GetLogStreamCommand       = "get-log-stream"
-	SignalEventCommand        = "signal-event"
-	WriteFileCommand          = "write-file"
+	RemoteCommand       = "remote"
+	DownloadFileCommand = "download-file"
+	GetLogStreamCommand = "get-log-stream"
+	SignalEventCommand  = "signal-event"
+	WriteFileCommand    = "write-file"
 )
 
 // Remote creates a cli.Command that allows the remote-specific methods in the
@@ -27,27 +24,10 @@ func Remote() cli.Command {
 	return cli.Command{
 		Name: RemoteCommand,
 		Subcommands: []cli.Command{
-			remoteConfigureCache(),
 			remoteDownloadFile(),
-			remoteDownloadMongoDB(),
 			remoteGetLogStream(),
-			remoteGetBuildloggerURLs(),
 			remoteSignalEvent(),
 			remoteWriteFile(),
-		},
-	}
-}
-
-func remoteConfigureCache() cli.Command {
-	return cli.Command{
-		Name:   ConfigureCacheCommand,
-		Flags:  clientFlags(),
-		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
-			input := options.Cache{}
-			return doPassthroughInputOutput(c, &input, func(ctx context.Context, client remote.Manager) interface{} {
-				return makeOutcomeResponse(client.ConfigureCache(ctx, input))
-			})
 		},
 	}
 }
@@ -80,20 +60,6 @@ func remoteDownloadFile() cli.Command {
 	}
 }
 
-func remoteDownloadMongoDB() cli.Command {
-	return cli.Command{
-		Name:   DownloadMongoDBCommand,
-		Flags:  clientFlags(),
-		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
-			input := options.MongoDBDownload{}
-			return doPassthroughInputOutput(c, &input, func(ctx context.Context, client remote.Manager) interface{} {
-				return makeOutcomeResponse(client.DownloadMongoDB(ctx, input))
-			})
-		},
-	}
-}
-
 func remoteGetLogStream() cli.Command {
 	return cli.Command{
 		Name:   GetLogStreamCommand,
@@ -107,24 +73,6 @@ func remoteGetLogStream() cli.Command {
 					return &LogStreamResponse{OutcomeResponse: *makeOutcomeResponse(err)}
 				}
 				return &LogStreamResponse{LogStream: logs, OutcomeResponse: *makeOutcomeResponse(nil)}
-			})
-		},
-	}
-}
-
-func remoteGetBuildloggerURLs() cli.Command {
-	return cli.Command{
-		Name:   GetBuildloggerURLsCommand,
-		Flags:  clientFlags(),
-		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
-			input := IDInput{}
-			return doPassthroughInputOutput(c, &input, func(ctx context.Context, client remote.Manager) interface{} {
-				urls, err := client.GetBuildloggerURLs(ctx, input.ID)
-				if err != nil {
-					return &BuildloggerURLsResponse{OutcomeResponse: *makeOutcomeResponse(err)}
-				}
-				return &BuildloggerURLsResponse{URLs: urls, OutcomeResponse: *makeOutcomeResponse(nil)}
 			})
 		},
 	}

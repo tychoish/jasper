@@ -4,11 +4,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/deciduosity/grip"
 	"github.com/deciduosity/grip/message"
 	"github.com/deciduosity/jasper/options"
 	"github.com/deciduosity/jasper/util"
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
 )
 

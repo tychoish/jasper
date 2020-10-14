@@ -16,56 +16,11 @@ import (
 	"github.com/deciduosity/grip"
 	"github.com/deciduosity/jasper/options"
 	"github.com/deciduosity/jasper/testutil"
-	"github.com/deciduosity/lru"
 	"github.com/mholt/archiver"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
-func TestSetupDownloadMongoDBReleasesFailsWithZeroOptions(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), testutil.TestTimeout)
-	defer cancel()
-
-	opts := options.MongoDBDownload{}
-	err := SetupDownloadMongoDBReleases(ctx, lru.NewCache(), opts)
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "problem creating enclosing directories")
-}
-
-func TestSetupDownloadMongoDBReleasesWithInvalidPath(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), testutil.TestTimeout)
-	defer cancel()
-
-	opts := testutil.ValidMongoDBDownloadOptions()
-	_, path, _, ok := runtime.Caller(0)
-	require.True(t, ok)
-	absPath, err := filepath.Abs(path)
-	require.NoError(t, err)
-	opts.Path = absPath
-
-	err = SetupDownloadMongoDBReleases(ctx, lru.NewCache(), opts)
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "problem creating enclosing directories")
-}
-
-func TestSetupDownloadMongoDBReleasesWithInvalidArtifactsFeed(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), testutil.TestTimeout)
-	defer cancel()
-
-	dir, err := ioutil.TempDir(testutil.BuildDirectory(), "out")
-	require.NoError(t, err)
-	defer os.RemoveAll(dir)
-
-	opts := testutil.ValidMongoDBDownloadOptions()
-	absDir, err := filepath.Abs(dir)
-	require.NoError(t, err)
-	opts.Path = filepath.Join(absDir, "full.json")
-
-	err = SetupDownloadMongoDBReleases(ctx, lru.NewCache(), opts)
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "problem making artifacts feed")
-}
 
 func TestCreateValidDownloadJobs(t *testing.T) {
 	dir, err := ioutil.TempDir(testutil.BuildDirectory(), "out")
@@ -163,72 +118,71 @@ func TestProcessDownloadJobs(t *testing.T) {
 	assert.NoError(t, processDownloadJobs(ctx, checkFileNonempty)(q))
 }
 
-func TestAddMongoDBFilesToCacheWithInvalidPath(t *testing.T) {
-	fileName := "foo.txt"
-	_, err := os.Stat(fileName)
-	require.True(t, os.IsNotExist(err))
-
-	absPath, err := filepath.Abs(testutil.BuildDirectory())
-	require.NoError(t, err)
-
-	err = addMongoDBFilesToCache(lru.NewCache(), absPath)(fileName)
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "problem adding file "+filepath.Join(absPath, fileName)+" to cache")
-}
-
 func TestDoExtract(t *testing.T) {
 	for testName, testCase := range map[string]struct {
 		archiveMaker  archiver.Archiver
 		expectSuccess bool
+		invalidCreate bool
 		fileExtension string
 		format        options.ArchiveFormat
 	}{
 		"Auto": {
-			archiveMaker:  archiver.TarGz,
+			archiveMaker:  archiver.NewTarGz(),
 			expectSuccess: true,
 			fileExtension: ".tar.gz",
 			format:        options.ArchiveAuto,
 		},
 		"TarGz": {
-			archiveMaker:  archiver.TarGz,
+			archiveMaker:  archiver.NewTarGz(),
 			expectSuccess: true,
 			fileExtension: ".tar.gz",
 			format:        options.ArchiveTarGz,
 		},
 		"Zip": {
-			archiveMaker:  archiver.Zip,
+			archiveMaker:  archiver.NewZip(),
 			expectSuccess: true,
 			fileExtension: ".zip",
 			format:        options.ArchiveZip,
 		},
 		"InvalidArchiveFormat": {
-			archiveMaker:  archiver.TarGz,
+			archiveMaker:  archiver.NewTarGz(),
 			expectSuccess: false,
+			invalidCreate: true,
 			fileExtension: ".foo",
 			format:        options.ArchiveFormat("foo"),
 		},
 		"MismatchedArchiveFileAndFormat": {
-			archiveMaker:  archiver.TarGz,
+			archiveMaker:  archiver.NewTarGz(),
 			expectSuccess: false,
 			fileExtension: ".tar.gz",
 			format:        options.ArchiveZip,
 		},
 	} {
 		t.Run(testName, func(t *testing.T) {
-			file, err := ioutil.TempFile(testutil.BuildDirectory(), "out.txt")
+			tempDir, err := ioutil.TempDir(testutil.BuildDirectory(), "")
+			require.NoError(t, err)
+			defer os.RemoveAll(tempDir)
+
+			file, err := os.Create(filepath.Join(tempDir, "out.txt"))
 			require.NoError(t, err)
 			defer os.Remove(file.Name())
-			archiveFile, err := ioutil.TempFile(testutil.BuildDirectory(), "out"+testCase.fileExtension)
+
+			archiveFile, err := os.Create(filepath.Join(tempDir, "out"+testCase.fileExtension))
 			require.NoError(t, err)
 			defer os.Remove(archiveFile.Name())
-			extractDir, err := ioutil.TempDir(testutil.BuildDirectory(), "out")
-			require.NoError(t, err)
+			extractDir := filepath.Join(testutil.BuildDirectory(), "out")
+			require.NoError(t, os.MkdirAll(extractDir, 0755))
 			defer os.RemoveAll(extractDir)
 
-			require.NoError(t, testCase.archiveMaker.Make(archiveFile.Name(), []string{file.Name()}))
+			err = testCase.archiveMaker.Archive([]string{file.Name()}, "second-"+archiveFile.Name())
+			if testCase.invalidCreate {
+				require.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
 
 			opts := options.Download{
-				Path: archiveFile.Name(),
+				Path: "second-" + archiveFile.Name(),
 				ArchiveOpts: options.Archive{
 					ShouldExtract: true,
 					Format:        testCase.format,
@@ -241,7 +195,7 @@ func TestDoExtract(t *testing.T) {
 			}
 			assert.NoError(t, opts.Extract())
 
-			fileInfo, err := os.Stat(archiveFile.Name())
+			fileInfo, err := os.Stat("second-" + archiveFile.Name())
 			require.NoError(t, err)
 			assert.NotZero(t, fileInfo.Size())
 
