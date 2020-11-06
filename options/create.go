@@ -51,10 +51,19 @@ type Create struct {
 	Implementation   string `bson:"implementation,omitempty" json:"implementation,omitempty" yaml:"implementation,omitempty"`
 	WorkingDirectory string `bson:"working_directory,omitempty" json:"working_directory,omitempty" yaml:"working_directory,omitempty"`
 	Output           Output `bson:"output" json:"output" yaml:"output"`
+
+	// Executor Configuration - if no executor is configured, a
+	// local Executor will run all processes. Specify no more than
+	// one executor.
+	//
 	// Remote specifies options for creating processes over SSH.
 	Remote *Remote `bson:"remote,omitempty" json:"remote,omitempty" yaml:"remote,omitempty"`
 	// Docker specifies options for creating processes in Docker containers.
 	Docker *Docker `bson:"docker,omitempty" json:"docker,omitempty" yaml:"docker,omitempty"`
+	// WebSocketExec is a synchronous protocol that executes
+	// processes over websockets.
+	WebSocketExec *WebSocketExec `bson:"wsep,omitempty" json:"wsep,omitempty" yaml:"wsep,omitempty"`
+
 	// TimeoutSecs takes precedence over Timeout. On remote interfaces,
 	// TimeoutSecs should be set instead of Timeout.
 	TimeoutSecs int           `bson:"timeout_secs,omitempty" json:"timeout_secs,omitempty" yaml:"timeout_secs,omitempty"`
@@ -120,12 +129,17 @@ func (opts *Create) Validate() error {
 		}
 	}
 
-	catcher.NewWhen(opts.Docker != nil && opts.Remote != nil, "cannot specify both Docker and SSH options")
+	catcher.NewWhen(opts.Docker != nil && opts.Remote != nil && opts.WebSocketExec != nil,
+		"cannot specify more than one remote execution framework")
 	if opts.Remote != nil {
 		catcher.Wrap(opts.Remote.Validate(), "invalid SSH options")
 	}
 	if opts.Docker != nil {
 		catcher.Wrap(opts.Docker.Validate(), "invalid Docker options")
+	}
+
+	if opts.WebSocketExec != nil {
+		catcher.Wrap(opts.WebSocketExec.Validate(), "invalid wsep options")
 	}
 
 	if catcher.HasErrors() {
@@ -152,7 +166,7 @@ func (opts *Create) Validate() error {
 // isLocal returns whether or not the process to be created will be a local
 // process.
 func (opts *Create) isLocal() bool {
-	return opts.Remote == nil && opts.Docker == nil
+	return opts.Remote == nil && opts.Docker == nil && opts.WebSocketExec == nil
 }
 
 // Hash returns the canonical hash implementation for the create
@@ -279,6 +293,16 @@ func (opts *Create) resolveExecutor(ctx context.Context) (executor.Executor, err
 			return nil, errors.Wrap(err, "could not resolve Docker options")
 		}
 		return executor.NewDocker(ctx, client, opts.Docker.Platform, opts.Docker.Image, opts.Args), nil
+	}
+
+	if opts.WebSocketExec != nil {
+		execer, closer, err := opts.WebSocketExec.Resolve(ctx)
+		if err != nil {
+			return nil, errors.Wrap(err, "could not resolve wsep options")
+		}
+		opts.RegisterCloser(closer)
+
+		return executor.NewWsepExecer(ctx, execer, opts.Args), nil
 	}
 
 	return executor.NewLocal(ctx, opts.Args), nil

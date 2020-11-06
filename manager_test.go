@@ -6,6 +6,7 @@ import (
 	"runtime"
 	"testing"
 
+	"cdr.dev/wsep"
 	"github.com/deciduosity/jasper/options"
 	"github.com/deciduosity/jasper/testutil"
 	"github.com/stretchr/testify/assert"
@@ -53,6 +54,15 @@ func TestManagerInterface(t *testing.T) {
 			return NewDockerManager(m, &options.Docker{
 				Image: image,
 			})
+		},
+		"WSEP/NoLock": func(ctx context.Context, t *testing.T) Manager {
+			var execer = wsep.LocalExecer{}
+
+			go func() {
+				<-ctx.Done()
+
+			}()
+
 		},
 	} {
 		if testutil.IsDockerCase(mname) {
