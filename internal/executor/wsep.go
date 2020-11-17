@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"syscall"
 
 	"cdr.dev/wsep"
@@ -23,6 +24,7 @@ type wsepExec struct {
 	stdout   io.Writer
 	stderr   io.Writer
 	exitCode int
+	pid      int
 	sigSent  syscall.Signal
 }
 
@@ -33,10 +35,12 @@ func NewWsepExecer(ctx context.Context, client wsep.Execer, args []string) Execu
 		cancel:   pcancel,
 		client:   client,
 		catcher:  grip.NewBasicCatcher(),
+		pid:      -1,
 		exitCode: -1,
 		sigSent:  -1,
 		command: wsep.Command{
-			Args: args,
+			Command: args[0],
+			Args:    args[1:],
 		},
 	}
 }
@@ -55,7 +59,7 @@ func (exec *wsepExec) SetEnv(e []string)       { exec.command.Env = append(exec.
 func (exec *wsepExec) Env() []string           { return exec.command.Env }
 func (exec *wsepExec) SetDir(d string)         { exec.command.WorkingDir = d }
 func (exec *wsepExec) Dir() string             { return exec.command.WorkingDir }
-func (exec *wsepExec) PID() int                { return exec.proc.Pid() }
+func (exec *wsepExec) PID() int                { return exec.pid }
 func (exec *wsepExec) Close() error            { exec.cancel(); return exec.proc.Close() }
 
 func (exec *wsepExec) ExitCode() int                      { return exec.exitCode }
@@ -108,23 +112,26 @@ func (exec *wsepExec) Start() error {
 
 	if exec.command.Stdin {
 		go func() {
-			defer exec.recoveryHandler("standard input")
+			defer exec.recoveryHandler("wsep: standard input")
 			stdin := exec.proc.Stdin()
 			defer func() { exec.catcher.Add(stdin.Close()) }()
 			_, err := io.Copy(stdin, exec.stdin)
+			grip.Debug(err)
 			exec.catcher.AddWhen(err != io.EOF, err)
 		}()
 	}
 
 	go func() {
-		defer exec.recoveryHandler("standard output")
+		defer exec.recoveryHandler("wsep: standard output")
 		_, err := io.Copy(exec.stdout, exec.proc.Stdout())
+		grip.Debug(err)
 		exec.catcher.AddWhen(err != io.EOF, err)
 	}()
 
 	go func() {
-		defer exec.recoveryHandler("standard error")
-		_, err := io.Copy(exec.stdout, exec.proc.Stdout())
+		defer exec.recoveryHandler("wsep: standard error")
+		_, err := io.Copy(exec.stderr, exec.proc.Stderr())
+		grip.Debug(err)
 		exec.catcher.AddWhen(err != io.EOF, err)
 	}()
 
@@ -132,11 +139,16 @@ func (exec *wsepExec) Start() error {
 }
 
 func (exec *wsepExec) startProc() error {
+	if exec.command.WorkingDir == "" {
+		exec.command.WorkingDir, _ = os.Getwd()
+	}
+
 	var err error
 	exec.proc, err = exec.client.Start(exec.ctx, exec.command)
 	if err != nil {
 		return err
 	}
+	exec.pid = exec.PID()
 	return nil
 }
 

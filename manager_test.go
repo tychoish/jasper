@@ -2,11 +2,14 @@ package jasper
 
 import (
 	"context"
+	"fmt"
+	"net"
+	"net/http"
 	"os"
 	"runtime"
 	"testing"
+	"time"
 
-	"cdr.dev/wsep"
 	"github.com/deciduosity/jasper/options"
 	"github.com/deciduosity/jasper/testutil"
 	"github.com/stretchr/testify/assert"
@@ -56,13 +59,23 @@ func TestManagerInterface(t *testing.T) {
 			})
 		},
 		"WSEP/NoLock": func(ctx context.Context, t *testing.T) Manager {
-			var execer = wsep.LocalExecer{}
+			srv := &http.Server{
+				Handler: &wsepService{},
+				Addr:    net.JoinHostPort("", fmt.Sprint(testutil.GetPortNumber())),
+			}
 
+			go func() { srv.ListenAndServe() }()
 			go func() {
 				<-ctx.Done()
-
+				ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+				defer cancel()
+				srv.Shutdown(ctx)
 			}()
 
+			m, err := newBasicProcessManager(map[string]Process{}, false, false)
+			require.NoError(t, err)
+
+			return NewWebSocketExecManager(m, &options.WebSocketExec{URL: fmt.Sprint("ws://", srv.Addr)})
 		},
 	} {
 		if testutil.IsDockerCase(mname) {

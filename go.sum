@@ -107,6 +107,8 @@ github.com/deciduosity/grip v0.0.0-20200523175710-fd8be2e0aab0 h1:2Fsw5Jy/jbjHKb
 github.com/deciduosity/grip v0.0.0-20200523175710-fd8be2e0aab0/go.mod h1:EBn3L+ZaVs/Ddcf50u9MJhWg/YQXLBt3kbuaUgcq7N4=
 github.com/deciduosity/grip v0.0.0-20200904025049-9d4d4cfca8ac h1:UplLhQXah3TQ4DXfD35A0QSla3r64E8Sc9KMTYm1UDM=
 github.com/deciduosity/grip v0.0.0-20200904025049-9d4d4cfca8ac/go.mod h1:hXIuEBX4fetrHgV+AK01wstdS35i5lJpTiV+xvUNxQo=
+github.com/deciduosity/grip v0.0.0-20201110205946-2b9edd514c63 h1:1snJAXLX73fRHJy+eZ4iyIgjyMnxdfUGkIPYYNpu1dA=
+github.com/deciduosity/grip v0.0.0-20201110205946-2b9edd514c63/go.mod h1:hXIuEBX4fetrHgV+AK01wstdS35i5lJpTiV+xvUNxQo=
 github.com/deciduosity/mrpc v0.0.0-20201009161736-2009d6849cd4 h1:C2NGA7OK2HZ5CfGkAoaYXUDFngHOuqVUo8rqcOallPw=
 github.com/deciduosity/mrpc v0.0.0-20201009161736-2009d6849cd4/go.mod h1:bB9qBLP51Bxl2CY9aR/1SE57qwdBFnqfrT+E2VKIp6g=
 github.com/deciduosity/sumogrip v0.0.0-20200523225900-94b5cd1845de h1:SWgC3qYfrcl9MHykUALD7EQxjqOOyIFk35WZsx5w08I=

@@ -19,7 +19,7 @@ require (
 	github.com/deciduosity/bond v0.0.0-20200522145941-231267898d4d
 	github.com/deciduosity/certdepot v0.0.0-20200522025604-e2d347fb8f4f
 	github.com/deciduosity/gimlet v0.0.0-20200521211013-ce6f8e51110b
-	github.com/deciduosity/grip v0.0.0-20200904025049-9d4d4cfca8ac
+	github.com/deciduosity/grip v0.0.0-20201110205946-2b9edd514c63
 	github.com/deciduosity/mrpc v0.0.0-20201009161736-2009d6849cd4
 	github.com/deciduosity/sumogrip v0.0.0-20200523225900-94b5cd1845de
 	github.com/deciduosity/utility v0.0.0-20200521233144-556c4888c866

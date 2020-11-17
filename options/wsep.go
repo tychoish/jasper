@@ -5,7 +5,6 @@ import (
 
 	"cdr.dev/wsep"
 	"github.com/deciduosity/jasper/util"
-	"github.com/deciduosity/utility"
 	"github.com/pkg/errors"
 	"nhooyr.io/websocket"
 )
@@ -22,12 +21,11 @@ func (opts *WebSocketExec) Validate() error {
 	}
 
 	if opts.URL == "" {
-		return errors.New("must specify a ")
+		return errors.New("must specify a URL")
 
 	}
 
-	return errors.New("not implemented")
-
+	return nil
 }
 
 func (opts *WebSocketExec) Resolve(ctx context.Context) (wsep.Execer, util.CloseFunc, error) {
@@ -42,13 +40,15 @@ func (opts *WebSocketExec) Resolve(ctx context.Context) (wsep.Execer, util.Close
 		opts.DialOptions = &websocket.DialOptions{}
 	}
 
-	if opts.DialOptions.HTTPClient == nil {
-		opts.DialOptions.HTTPClient = utility.GetHTTPClient()
-		closer = func() error {
-			utility.PutHTTPClient(opts.DialOptions.HTTPClient)
-			return nil
-		}
-	}
+	// TODO -- make writable for websocket
+	// if opts.DialOptions.HTTPClient == nil {
+	//	opts.DialOptions.HTTPClient = utility.GetHTTPClient()
+	//	opts.DialOptions.HTTPClient.Timeout = 0
+	//	closer = func() error {
+	//		utility.PutHTTPClient(opts.DialOptions.HTTPClient)
+	//		return nil
+	//	}
+	// }
 
 	conn, resp, err := websocket.Dial(ctx, opts.URL, opts.DialOptions)
 	if err != nil {
