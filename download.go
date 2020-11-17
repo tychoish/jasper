@@ -46,7 +46,10 @@ func processDownloadJobs(ctx context.Context, processFile func(string) error) fu
 		}
 
 		catcher := grip.NewBasicCatcher()
-		for job := range q.Results(ctx) {
+		for job := range q.Jobs(ctx) {
+			if !job.Status().Completed {
+				continue
+			}
 			catcher.Add(job.Error())
 			downloadJob, ok := job.(*recall.DownloadFileJob)
 			if !ok {
