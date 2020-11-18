@@ -2,6 +2,7 @@ package cli
 
 import (
 	"encoding/json"
+	"time"
 
 	"github.com/cdr/grip"
 	"github.com/deciduosity/jasper"
@@ -422,4 +423,63 @@ func (e *EventInput) Validate() error {
 		return errors.New("event name cannot be empty")
 	}
 	return nil
+}
+
+// LoggingCacheCreateInput represents CLI-specific input to create a cached
+// logger.
+type LoggingCacheCreateInput struct {
+	ID     string         `json:"id"`
+	Output options.Output `json:"options"`
+}
+
+// Validate checks that a cached logger ID has been given and the logger options
+// are valid.
+func (in *LoggingCacheCreateInput) Validate() error {
+	catcher := grip.NewBasicCatcher()
+	catcher.NewWhen(in.ID == "", "ID must not be empty")
+	catcher.Wrap(in.Output.Validate(), "invalid output options")
+	return catcher.Resolve()
+}
+
+// CachedLoggerResponse represents CLI-specific output describing the logger
+// that has been cached in the remote service.
+type CachedLoggerResponse struct {
+	OutcomeResponse `json:"outcome"`
+	Logger          options.CachedLogger `json:"logger"`
+}
+
+// ExtractCachedLoggerResponse unmarshals the input bytes into a
+// CachedLoggerResponse and checks if the request was successful.
+func ExtractCachedLoggerResponse(input json.RawMessage) (CachedLoggerResponse, error) {
+	var resp CachedLoggerResponse
+	if err := json.Unmarshal(input, &resp); err != nil {
+		return resp, errors.Wrap(err, unmarshalFailed)
+	}
+	return resp, resp.successOrError()
+}
+
+// LoggingCachePruneInput represents CLI-specific input to prune the loggers
+// that were accessed before the given time.
+type LoggingCachePruneInput struct {
+	LastAccessed time.Time `json:"last_accessed"`
+}
+
+// Validate is a no-op.
+func (in *LoggingCachePruneInput) Validate() error { return nil }
+
+// LoggingCacheLenResponse represents CLI-specific output describing the
+// number of cached loggers.
+type LoggingCacheLenResponse struct {
+	OutcomeResponse `json:"outcome"`
+	Length          int `json:"length"`
+}
+
+// ExtractLoggingCacheLenResponse unmarshals the input bytes into a
+// LoggingCacheLenResponse and checks if the request was successful.
+func ExtractLoggingCacheLenResponse(input json.RawMessage) (LoggingCacheLenResponse, error) {
+	var resp LoggingCacheLenResponse
+	if err := json.Unmarshal(input, &resp); err != nil {
+		return resp, errors.Wrap(err, unmarshalFailed)
+	}
+	return resp, resp.successOrError()
 }

@@ -5,7 +5,6 @@ import (
 	"io"
 	"net"
 	"syscall"
-	"time"
 
 	"github.com/cdr/grip"
 	"github.com/cdr/grip/message"
@@ -14,7 +13,6 @@ import (
 	internal "github.com/deciduosity/jasper/remote/internal"
 	"github.com/deciduosity/jasper/scripting"
 	"github.com/deciduosity/jasper/util"
-	"github.com/golang/protobuf/ptypes"
 	empty "github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
 	grpc "google.golang.org/grpc"
@@ -299,74 +297,6 @@ func (c *rpcClient) SendMessages(ctx context.Context, lp options.LoggingPayload)
 
 func (c *rpcClient) LoggingCache(ctx context.Context) jasper.LoggingCache {
 	return &rpcLoggingCache{ctx: ctx, client: c.client}
-}
-
-type rpcLoggingCache struct {
-	client internal.JasperProcessManagerClient
-	ctx    context.Context
-}
-
-func (lc *rpcLoggingCache) Create(id string, opts *options.Output) (*options.CachedLogger, error) {
-	args, err := internal.ConvertLoggingCreateArgs(id, opts)
-	if err != nil {
-		return nil, errors.Wrap(err, "problem converting create args")
-	}
-	resp, err := lc.client.LoggingCacheCreate(lc.ctx, args)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	out, err := resp.Export()
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	return out, nil
-}
-
-func (lc *rpcLoggingCache) Put(id string, opts *options.CachedLogger) error {
-	return errors.New("operation not supported for remote managers")
-}
-
-func (lc *rpcLoggingCache) Get(id string) *options.CachedLogger {
-	resp, err := lc.client.LoggingCacheGet(lc.ctx, &internal.LoggingCacheArgs{Name: id})
-	if err != nil {
-		return nil
-	}
-	if !resp.Outcome.Success {
-		return nil
-	}
-
-	out, err := resp.Export()
-	if err != nil {
-		return nil
-	}
-
-	return out
-}
-
-func (lc *rpcLoggingCache) Remove(id string) {
-	_, _ = lc.client.LoggingCacheRemove(lc.ctx, &internal.LoggingCacheArgs{Name: id})
-}
-
-func (lc *rpcLoggingCache) Prune(ts time.Time) {
-	pbts, err := ptypes.TimestampProto(ts)
-	if err != nil {
-		grip.Warning(message.WrapError(err, message.Fields{
-			"message": "could not convert prune timestamp to equivalent protobuf RPC timestamp",
-		}))
-		return
-	}
-	_, _ = lc.client.LoggingCachePrune(lc.ctx, pbts)
-}
-
-func (lc *rpcLoggingCache) Len() int {
-	resp, err := lc.client.LoggingCacheLen(lc.ctx, &empty.Empty{})
-	if err != nil {
-		return 0
-	}
-
-	return int(resp.Size)
 }
 
 type rpcProcess struct {

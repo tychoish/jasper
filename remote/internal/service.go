@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -14,9 +15,17 @@ import (
 	empty "github.com/golang/protobuf/ptypes/empty"
 	timestamp "github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/pkg/errors"
-	context "golang.org/x/net/context"
 	grpc "google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
+
+func newGRPCError(code codes.Code, err error) error {
+	if err == nil {
+		return nil
+	}
+	return status.Errorf(code, "%v", err)
+}
 
 // AttachService attaches the given manager to the jasper GRPC server. This
 // function eventually calls generated Protobuf code for registering the
@@ -767,6 +776,32 @@ func (s *jasperService) LoggingCacheRemove(ctx context.Context, args *LoggingCac
 	return &OperationOutcome{
 		Success: true,
 	}, nil
+}
+
+func (s *jasperService) LoggingCacheCloseAndRemove(ctx context.Context, args *LoggingCacheArgs) (*OperationOutcome, error) {
+	lc := s.manager.LoggingCache(ctx)
+	if lc == nil {
+		return nil, newGRPCError(codes.FailedPrecondition, errors.New("logging cache not supported"))
+	}
+
+	if err := lc.CloseAndRemove(ctx, args.Name); err != nil {
+		return nil, newGRPCError(codes.Internal, err)
+	}
+
+	return &OperationOutcome{Success: true}, nil
+}
+
+func (s *jasperService) LoggingCacheClear(ctx context.Context, _ *empty.Empty) (*OperationOutcome, error) {
+	lc := s.manager.LoggingCache(ctx)
+	if lc == nil {
+		return nil, newGRPCError(codes.FailedPrecondition, errors.New("logging cache not supported"))
+	}
+
+	if err := lc.Clear(ctx); err != nil {
+		return nil, newGRPCError(codes.Internal, err)
+	}
+
+	return &OperationOutcome{Success: true}, nil
 }
 
 func (s *jasperService) LoggingCachePrune(ctx context.Context, arg *timestamp.Timestamp) (*OperationOutcome, error) {

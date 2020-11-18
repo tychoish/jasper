@@ -49,8 +49,6 @@ func (s *Service) App(ctx context.Context) *gimlet.APIApp {
 	app.AddRoute("/id").Version(1).Get().Handler(s.id)
 	app.AddRoute("/create").Version(1).Post().Handler(s.createProcess)
 	app.AddRoute("/download").Version(1).Post().Handler(s.downloadFile)
-	app.AddRoute("/list/oom").Version(1).Get().Handler(s.oomTrackerList)
-	app.AddRoute("/list/oom").Version(1).Delete().Handler(s.oomTrackerClear)
 	app.AddRoute("/list/{filter}").Version(1).Get().Handler(s.listProcesses)
 	app.AddRoute("/list/group/{name}").Version(1).Get().Handler(s.listGroupMembers)
 	app.AddRoute("/process/{id}").Version(1).Get().Handler(s.getProcess)
@@ -72,12 +70,13 @@ func (s *Service) App(ctx context.Context) *gimlet.APIApp {
 	app.AddRoute("/scripting/{id}/script").Version(1).Post().Handler(s.scriptingRunScript)
 	app.AddRoute("/scripting/{id}/build").Version(1).Post().Handler(s.scriptingBuild)
 	app.AddRoute("/scripting/{id}/test").Version(1).Post().Handler(s.scriptingTest)
-	app.AddRoute("/logging/size").Version(1).Get().Handler(s.loggingCacheSize)
+	app.AddRoute("/logging/id/{id}").Version(1).Post().Handler(s.loggingCacheCreate)
+	app.AddRoute("/logging/id/{id}").Version(1).Get().Handler(s.loggingCacheGet)
+	app.AddRoute("/logging/id/{id}").Version(1).Delete().Handler(s.loggingCacheDelete)
+	app.AddRoute("/logging/id/{id}/close").Version(1).Delete().Handler(s.loggingCacheCloseAndRemove)
+	app.AddRoute("/logging/id/{id}/send").Version(1).Post().Handler(s.loggingSendMessages)
+	app.AddRoute("/logging/clear").Version(1).Delete().Handler(s.loggingCacheClear)
 	app.AddRoute("/logging/prune/{time}").Version(1).Delete().Handler(s.loggingCachePrune)
-	app.AddRoute("/logging/{id}").Version(1).Post().Handler(s.loggingCacheCreate)
-	app.AddRoute("/logging/{id}").Version(1).Delete().Handler(s.loggingCacheDelete)
-	app.AddRoute("/logging/{id}").Version(1).Get().Handler(s.loggingCacheGet)
-	app.AddRoute("/logging/{id}/send").Version(1).Post().Handler(s.loggingSendMessages)
 	app.AddRoute("/file/write").Version(1).Put().Handler(s.writeFile)
 	app.AddRoute("/clear").Version(1).Post().Handler(s.clearManager)
 	app.AddRoute("/close").Version(1).Delete().Handler(s.closeManager)
@@ -671,26 +670,47 @@ func (s *Service) loggingSendMessages(rw http.ResponseWriter, r *http.Request) {
 	gimlet.WriteJSON(rw, struct{}{})
 }
 
-func (s *Service) oomTrackerClear(rw http.ResponseWriter, r *http.Request) {
-	resp := jasper.NewOOMTracker()
-
-	if err := resp.Clear(r.Context()); err != nil {
-		gimlet.WriteJSONInternalError(rw, err.Error())
+func (s *Service) loggingCacheCloseAndRemove(rw http.ResponseWriter, r *http.Request) {
+	id := gimlet.GetVars(r)["id"]
+	lc := s.manager.LoggingCache(r.Context())
+	if lc == nil {
+		writeError(rw, gimlet.ErrorResponse{
+			StatusCode: http.StatusInternalServerError,
+			Message:    "logging cache is not supported",
+		})
 		return
 	}
 
-	gimlet.WriteJSON(rw, resp)
+	if err := lc.CloseAndRemove(r.Context(), id); err != nil {
+		writeError(rw, gimlet.ErrorResponse{
+			StatusCode: http.StatusInternalServerError,
+			Message:    err.Error(),
+		})
+		return
+	}
+
+	gimlet.WriteJSON(rw, struct{}{})
 }
 
-func (s *Service) oomTrackerList(rw http.ResponseWriter, r *http.Request) {
-	resp := jasper.NewOOMTracker()
-
-	if err := resp.Check(r.Context()); err != nil {
-		gimlet.WriteJSONInternalError(rw, err.Error())
+func (s *Service) loggingCacheClear(rw http.ResponseWriter, r *http.Request) {
+	lc := s.manager.LoggingCache(r.Context())
+	if lc == nil {
+		writeError(rw, gimlet.ErrorResponse{
+			StatusCode: http.StatusInternalServerError,
+			Message:    "logging cache is not supported",
+		})
 		return
 	}
 
-	gimlet.WriteJSON(rw, resp)
+	if err := lc.Clear(r.Context()); err != nil {
+		writeError(rw, gimlet.ErrorResponse{
+			StatusCode: http.StatusInternalServerError,
+			Message:    err.Error(),
+		})
+		return
+	}
+
+	gimlet.WriteJSON(rw, struct{}{})
 }
 
 func (s *Service) scriptingCreate(rw http.ResponseWriter, r *http.Request) {

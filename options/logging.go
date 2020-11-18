@@ -39,6 +39,18 @@ func (cl *CachedLogger) getSender(preferError bool) (send.Sender, error) {
 	return nil, errors.New("no output configured")
 }
 
+// Close closes the underlying output for the cached logger.
+func (cl *CachedLogger) Close() error {
+	catcher := grip.NewBasicCatcher()
+	if cl.Error != nil {
+		catcher.Check(cl.Error.Close)
+	}
+	if cl.Output != nil {
+		catcher.Check(cl.Output.Close)
+	}
+	return catcher.Resolve()
+}
+
 // LoggingPayload captures the arguments to the SendMessages operation.
 type LoggingPayload struct {
 	LoggerID          string               `bson:"logger_id" json:"logger_id" yaml:"logger_id"`
@@ -66,7 +78,7 @@ func (lp *LoggingPayload) Validate() error {
 	catcher := grip.NewBasicCatcher()
 	catcher.NewWhen(lp.Data == nil, "data cannot be empty")
 	switch lp.Format {
-	case "", LoggingPayloadFormatBSON, LoggingPayloadFormatJSON, LoggingPayloadFormatString:
+	case "", LoggingPayloadFormatBSON, LoggingPayloadFormatJSON, LoggingPayloadFormatSTRING:
 	default:
 		catcher.Errorf("invalid payload format '%s'", lp.Format)
 	}

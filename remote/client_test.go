@@ -1023,7 +1023,39 @@ func TestManager(t *testing.T) {
 							},
 						},
 						clientTestCase{
-							Name: "LoggingCachePrune",
+							Name: "LoggingCacheCloseAndRemoveSucceeds",
+							Case: func(ctx context.Context, t *testing.T, client Manager) {
+								lc := client.LoggingCache(ctx)
+								logger1, err := lc.Create("logger1", &options.Output{})
+								require.NoError(t, err)
+								logger2, err := lc.Create("logger2", &options.Output{})
+								require.NoError(t, err)
+
+								require.NotNil(t, lc.Get(logger1.ID))
+								require.NotNil(t, lc.Get(logger2.ID))
+								require.NoError(t, lc.CloseAndRemove(ctx, logger2.ID))
+								require.NotNil(t, lc.Get(logger1.ID))
+								require.Nil(t, lc.Get(logger2.ID))
+							},
+						},
+						clientTestCase{
+							Name: "LoggingCacheClearSucceeds",
+							Case: func(ctx context.Context, t *testing.T, client Manager) {
+								lc := client.LoggingCache(ctx)
+								logger1, err := lc.Create("logger1", &options.Output{})
+								require.NoError(t, err)
+								logger2, err := lc.Create("logger2", &options.Output{})
+								require.NoError(t, err)
+
+								require.NotNil(t, lc.Get(logger1.ID))
+								require.NotNil(t, lc.Get(logger2.ID))
+								require.NoError(t, lc.Clear(ctx))
+								require.Nil(t, lc.Get(logger1.ID))
+								require.Nil(t, lc.Get(logger2.ID))
+							},
+						},
+						clientTestCase{
+							Name: "LoggingCachePruneSucceeds",
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								lc := client.LoggingCache(ctx)
 								logger1, err := lc.Create("logger1", &options.Output{})
@@ -1076,6 +1108,9 @@ func TestManager(t *testing.T) {
 								lc := client.LoggingCache(ctx)
 								logger1, err := lc.Create("logger1", &options.Output{})
 								require.NoError(t, err)
+								defer func() {
+									assert.NoError(t, lc.Clear(ctx))
+								}()
 
 								payload := options.LoggingPayload{
 									LoggerID: logger1.ID,

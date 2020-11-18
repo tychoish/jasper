@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"strings"
 	"syscall"
-	"time"
 
 	"github.com/cdr/gimlet"
 	"github.com/cdr/grip"
@@ -371,7 +370,7 @@ func (c *restClient) SendMessages(ctx context.Context, lp options.LoggingPayload
 		return errors.WithStack(err)
 	}
 
-	resp, err := c.doRequest(ctx, http.MethodPost, c.getURL("/logging/%s/send", lp.LoggerID), body)
+	resp, err := c.doRequest(ctx, http.MethodPost, c.getURL("/logging/id/%s/send", lp.LoggerID), body)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -389,99 +388,6 @@ func (c *restClient) LoggingCache(ctx context.Context) jasper.LoggingCache {
 		client: c,
 		ctx:    ctx,
 	}
-}
-
-type restLoggingCache struct {
-	client *restClient
-	ctx    context.Context
-}
-
-func (lc *restLoggingCache) Create(id string, opts *options.Output) (*options.CachedLogger, error) {
-	body, err := makeBody(opts)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	resp, err := lc.client.doRequest(lc.ctx, http.MethodPost, lc.client.getURL("/download/cache"), body)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-	defer resp.Body.Close()
-
-	if err = handleError(resp); err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	out := &options.CachedLogger{}
-	if err = gimlet.GetJSON(resp.Body, out); err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	return out, nil
-}
-
-func (lc *restLoggingCache) Put(id string, cl *options.CachedLogger) error {
-	return errors.New("operation not supported for remote managers")
-}
-
-func (lc *restLoggingCache) Get(id string) *options.CachedLogger {
-	resp, err := lc.client.doRequest(lc.ctx, http.MethodGet, lc.client.getURL("/logging/%s", id), nil)
-	if err != nil {
-		return nil
-	}
-	defer resp.Body.Close()
-
-	if err = handleError(resp); err != nil {
-		return nil
-	}
-
-	out := &options.CachedLogger{}
-	if err = gimlet.GetJSON(resp.Body, out); err != nil {
-		return nil
-	}
-	return out
-}
-
-func (lc *restLoggingCache) Remove(id string) {
-	resp, err := lc.client.doRequest(lc.ctx, http.MethodDelete, lc.client.getURL("/logging/%s", id), nil)
-	grip.Info(message.Fields{
-		"has_error": err == nil,
-		"code":      resp.StatusCode,
-		"status":    resp.Status,
-		"op":        "delete",
-		"logger":    id,
-		"err":       err,
-	})
-}
-
-func (lc *restLoggingCache) Prune(ts time.Time) {
-	resp, err := lc.client.doRequest(lc.ctx, http.MethodDelete, lc.client.getURL("/logging/prune/%s", ts.Format(time.RFC3339)), nil)
-	grip.Info(message.Fields{
-		"has_error": err == nil,
-		"code":      resp.StatusCode,
-		"status":    resp.Status,
-		"op":        "prune",
-		"err":       err,
-	})
-}
-
-func (lc *restLoggingCache) Len() int {
-	resp, err := lc.client.doRequest(lc.ctx, http.MethodDelete, lc.client.getURL("/logging/size"), nil)
-	if err != nil {
-		return 0
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return 0
-	}
-
-	out := restLoggingCacheSize{}
-	if err = gimlet.GetJSON(resp.Body, &out); err != nil {
-		return 0
-	}
-
-	return out.Size
 }
 
 type restProcess struct {

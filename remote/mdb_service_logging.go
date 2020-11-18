@@ -4,19 +4,21 @@ import (
 	"context"
 	"io"
 
-	"github.com/deciduosity/jasper"
 	"github.com/deciduosity/birch/mrpc/mongowire"
 	"github.com/deciduosity/birch/mrpc/shell"
+	"github.com/deciduosity/jasper"
 	"github.com/pkg/errors"
 )
 
 const (
-	LoggingCacheSizeCommand    = "logging_cache_size"
-	LoggingCacheCreateCommand  = "create_logging_cache"
-	LoggingCacheDeleteCommand  = "delete_logging_cache"
-	LoggingCacheGetCommand     = "get_logging_cache"
-	LoggingCachePruneCommand   = "logging_cache_prune"
-	LoggingSendMessagesCommand = "send_messages"
+	LoggingSendMessagesCommand        = "send_messages"
+	LoggingCacheSizeCommand           = "logging_cache_size"
+	LoggingCacheCreateCommand         = "logging_cache_create"
+	LoggingCacheDeleteCommand         = "logging_cache_remove"
+	LoggingCacheCloseAndRemoveCommand = "logging_cache_close_and_remove"
+	LoggingCacheClearCommand          = "logging_cache_clear"
+	LoggingCacheGetCommand            = "logging_cache_get"
+	LoggingCachePruneCommand          = "logging_cache_prune"
 )
 
 func (s *mdbService) loggingSize(ctx context.Context, w io.Writer, msg mongowire.Message) {
@@ -70,6 +72,35 @@ func (s *mdbService) loggingDelete(ctx context.Context, w io.Writer, msg mongowi
 	lc.Remove(req.ID)
 
 	s.serviceLoggingCacheResponse(ctx, w, nil, LoggingCacheDeleteCommand)
+}
+
+func (s *mdbService) loggingCloseAndRemove(ctx context.Context, w io.Writer, msg mongowire.Message) {
+	req := &loggingCacheCloseAndRemoveRequest{}
+	lc := s.serviceLoggingCacheRequest(ctx, w, msg, req, LoggingCacheCloseAndRemoveCommand)
+	if lc == nil {
+		return
+	}
+
+	if err := lc.CloseAndRemove(ctx, req.ID); err != nil {
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, err, LoggingCacheCloseAndRemoveCommand)
+		return
+	}
+
+	s.serviceLoggingCacheResponse(ctx, w, nil, LoggingCacheCloseAndRemoveCommand)
+}
+
+func (s *mdbService) loggingClear(ctx context.Context, w io.Writer, msg mongowire.Message) {
+	lc := s.serviceLoggingCacheRequest(ctx, w, msg, nil, LoggingCacheClearCommand)
+	if lc == nil {
+		return
+	}
+
+	if err := lc.Clear(ctx); err != nil {
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, err, LoggingCacheClearCommand)
+		return
+	}
+
+	s.serviceLoggingCacheResponse(ctx, w, nil, LoggingCacheClearCommand)
 }
 
 func (s *mdbService) loggingPrune(ctx context.Context, w io.Writer, msg mongowire.Message) {
