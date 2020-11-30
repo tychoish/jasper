@@ -2,8 +2,6 @@ module github.com/deciduosity/jasper
 
 go 1.14
 
-replace github.com/nutmegdevelopment/sumologic => github.com/tychoish/sumologic v1.0.0
-
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
 	github.com/Microsoft/go-winio v0.4.14 // indirect
