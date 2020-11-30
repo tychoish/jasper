@@ -7,8 +7,6 @@ replace github.com/nutmegdevelopment/sumologic => github.com/tychoish/sumologic 
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
 	github.com/Microsoft/go-winio v0.4.14 // indirect
-	github.com/aybabtme/iocontrol v0.0.0-20150809002002-ad15bcfc95a0 // indirect
-	github.com/benbjohnson/clock v1.0.2 // indirect
 	github.com/cheynewallace/tabby v1.1.0
 	github.com/containerd/cgroups v0.0.0-20200520162414-666f4a009ffb
 	github.com/containerd/containerd v1.3.4 // indirect
@@ -20,12 +18,10 @@ require (
 	github.com/deciduosity/gimlet v0.0.0-20200521211013-ce6f8e51110b
 	github.com/deciduosity/grip v0.0.0-20201110205946-2b9edd514c63
 	github.com/deciduosity/mrpc v0.0.0-20201009161736-2009d6849cd4
-	github.com/deciduosity/sumogrip v0.0.0-20200523225900-94b5cd1845de
 	github.com/deciduosity/utility v0.0.0-20200521233144-556c4888c866
 	github.com/docker/distribution v2.7.1+incompatible // indirect
 	github.com/docker/docker v17.12.0-ce-rc1.0.20200309214505-aa6a9891b09c+incompatible
 	github.com/docker/go-connections v0.4.0 // indirect
-	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/evergreen-ci/service v1.0.1-0.20200225230430-d9382e39d768
 	github.com/evergreen-ci/shrub v0.0.0-20200519135032-6be7bcc0614c
 	github.com/frankban/quicktest v1.11.2 // indirect

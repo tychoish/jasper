@@ -2,10 +2,8 @@ package jasper
 
 import (
 	"context"
-	"strings"
 	"testing"
 
-	"github.com/deciduosity/amboy"
 	"github.com/deciduosity/amboy/registry"
 	"github.com/deciduosity/jasper/options"
 	"github.com/stretchr/testify/assert"
@@ -36,25 +34,6 @@ func TestAmboyJob(t *testing.T) {
 		}
 
 		assert.Equal(t, 3, numJobs())
-	})
-	t.Run("RoundTripMarshal", func(t *testing.T) {
-		for _, frm := range []amboy.Format{amboy.BSON2, amboy.JSON} {
-			t.Run(strings.ToUpper(frm.String()), func(t *testing.T) {
-				for _, j := range []amboy.Job{
-					NewJob(newBasicProcess, "ls"),
-					NewJobOptions(newBasicProcess, &options.Create{}),
-					NewJobForeground(newBasicProcess, &options.Create{}),
-				} {
-					ic, err := registry.MakeJobInterchange(j, frm)
-					require.NoError(t, err)
-					require.NotNil(t, ic)
-
-					j2, err := ic.Resolve(frm)
-					require.NoError(t, err)
-					require.Equal(t, j2.Type(), j.Type())
-				}
-			})
-		}
 	})
 	t.Run("TypeCheck", func(t *testing.T) {
 		t.Run("Default", func(t *testing.T) {

@@ -3,7 +3,6 @@ package options
 import (
 	"github.com/deciduosity/grip"
 	"github.com/deciduosity/grip/send"
-	"github.com/deciduosity/sumogrip"
 	"github.com/pkg/errors"
 )
 
@@ -172,53 +171,6 @@ func (opts *InMemoryLoggerOptions) Configure() (send.Sender, error) {
 	sender, err = NewSafeSender(sender, opts.Base)
 	if err != nil {
 		return nil, errors.Wrap(err, "problem creating safe in-memory logger")
-	}
-	return sender, nil
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Sumo Logic Logger
-///////////////////////////////////////////////////////////////////////////////
-
-// LogSumoLogic is the type name for the sumo logic logger.
-const LogSumoLogic = "sumo-logic"
-
-// SumoLogicLoggerOptions packages the options for creating a sumo logic
-// logger.
-type SumoLogicLoggerOptions struct {
-	SumoEndpoint string      `json:"sumo_endpoint" bson:"sumo_endpoint"`
-	Base         BaseOptions `json:"base" bson:"base"`
-}
-
-// SumoLogicLoggerProducer returns a LoggerProducer backed by
-// SumoLogicLoggerOptions.
-func NewSumoLogicLoggerProducer() LoggerProducer { return &SumoLogicLoggerOptions{} }
-
-func (opts *SumoLogicLoggerOptions) Validate() error {
-	catcher := grip.NewBasicCatcher()
-
-	catcher.NewWhen(opts.SumoEndpoint == "", "must specify a sumo endpoint")
-	catcher.Add(opts.Base.Validate())
-	return catcher.Resolve()
-}
-
-func (*SumoLogicLoggerOptions) Type() string { return LogSumoLogic }
-func (opts *SumoLogicLoggerOptions) Configure() (send.Sender, error) {
-	if err := opts.Validate(); err != nil {
-		return nil, errors.Wrap(err, "invalid config")
-	}
-
-	sender, err := sumogrip.NewSumo(DefaultLogName, opts.SumoEndpoint)
-	if err != nil {
-		return nil, errors.Wrap(err, "problem creating base sumo logic logger")
-	}
-	if err = sender.SetLevel(opts.Base.Level); err != nil {
-		return nil, errors.Wrap(err, "problem setting level for sumo logic logger")
-	}
-
-	sender, err = NewSafeSender(sender, opts.Base)
-	if err != nil {
-		return nil, errors.Wrap(err, "problem creating safe sumo logic logger")
 	}
 	return sender, nil
 }

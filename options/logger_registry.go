@@ -12,7 +12,6 @@ var globalLoggerRegistry LoggerRegistry = &basicLoggerRegistry{
 		LogDefault:   NewDefaultLoggerProducer,
 		LogFile:      NewFileLoggerProducer,
 		LogInherited: NewInheritedLoggerProducer,
-		LogSumoLogic: NewSumoLogicLoggerProducer,
 		LogInMemory:  NewInMemoryLoggerProducer,
 		LogSplunk:    NewSplunkLoggerProducer,
 	},

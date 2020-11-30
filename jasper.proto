@@ -12,10 +12,9 @@ message LoggerConfig {
     DefaultLoggerOptions default = 1;
     FileLoggerOptions file = 2;
     InheritedLoggerOptions inherited = 3;
-    SumoLogicLoggerOptions sumo = 4;
-    InMemoryLoggerOptions in_memory = 5;
+    InMemoryLoggerOptions in_memory = 4;
+    RawLoggerConfig raw = 5;
     SplunkLoggerOptions splunk = 6;
-    RawLoggerConfig raw = 7;
   }
 }
 
@@ -55,11 +54,6 @@ message FileLoggerOptions {
 
 message InheritedLoggerOptions {
   BaseOptions base = 1;
-}
-
-message SumoLogicLoggerOptions {
-  string sumo_endpoint = 1;
-  BaseOptions base = 2;
 }
 
 message InMemoryLoggerOptions {

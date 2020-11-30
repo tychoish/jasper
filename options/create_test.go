@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/deciduosity/grip/send"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/bson"
@@ -258,12 +259,12 @@ func TestCreate(t *testing.T) {
 			assert.Equal(t, 1, opts.TimeoutSecs)
 		},
 		"ResolveFailsWithInvalidLoggerConfiguration": func(t *testing.T, opts *Create) {
-			config, err := bson.Marshal(&SumoLogicLoggerOptions{})
+			config, err := bson.Marshal(&SplunkLoggerOptions{})
 			require.NoError(t, err)
 			opts.Output.Loggers = []*LoggerConfig{
 				{
 					info: loggerConfigInfo{
-						Type:   LogSumoLogic,
+						Type:   LogSplunk,
 						Format: RawLoggerConfigFormatBSON,
 						Config: config,
 					},
@@ -274,14 +275,16 @@ func TestCreate(t *testing.T) {
 			assert.Nil(t, cmd)
 		},
 		"ResolveFailsWithMismatchingLoggerConfiguration": func(t *testing.T, opts *Create) {
-			config, err := json.Marshal(&SumoLogicLoggerOptions{
-				SumoEndpoint: "endpoint",
+			config, err := json.Marshal(&SplunkLoggerOptions{
+				Splunk: send.SplunkConnectionInfo{
+					ServerURL: "https://example.com/",
+				},
 			})
 			require.NoError(t, err)
 			opts.Output.Loggers = []*LoggerConfig{
 				{
 					info: loggerConfigInfo{
-						Type:   LogSumoLogic,
+						Type:   LogSplunk,
 						Format: RawLoggerConfigFormatBSON,
 						Config: config,
 					},
@@ -292,14 +295,16 @@ func TestCreate(t *testing.T) {
 			assert.Nil(t, cmd)
 		},
 		"ResolveFailsWithInvalidErrorLoggingConfiguration": func(t *testing.T, opts *Create) {
-			config, err := json.Marshal(&SumoLogicLoggerOptions{
-				SumoEndpoint: "endpoint",
+			config, err := json.Marshal(&SplunkLoggerOptions{
+				Splunk: send.SplunkConnectionInfo{
+					ServerURL: "https://example.com/",
+				},
 			})
 			require.NoError(t, err)
 			opts.Output.Loggers = []*LoggerConfig{
 				{
 					info: loggerConfigInfo{
-						Type:   LogSumoLogic,
+						Type:   LogSplunk,
 						Format: RawLoggerConfigFormatJSON,
 						Config: config,
 					},

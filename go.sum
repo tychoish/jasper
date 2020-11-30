@@ -71,8 +71,6 @@ github.com/deciduosity/gimlet v0.0.0-20200521211013-ce6f8e51110b h1:aXFF4XSwHg0J
 github.com/deciduosity/gimlet v0.0.0-20200521211013-ce6f8e51110b/go.mod h1:DjzkFh0eOo3xNF7rUZ1XQprOFdbb+LGjqXRM9zNKyBk=
 github.com/deciduosity/grip v0.0.0-20200520213429-c8f813068d51 h1:M2jf5QQbGFxRGFLGekvomdaGYWMmmeAGFp0qMVrnILw=
 github.com/deciduosity/grip v0.0.0-20200520213429-c8f813068d51/go.mod h1:b6GM0mzkZSiswpJnou7nL+fAvp1H/xhThepl8t/xx1w=
-github.com/deciduosity/grip v0.0.0-20200523175710-fd8be2e0aab0 h1:2Fsw5Jy/jbjHKbqtKbRVf2Vp8Svq5gWIRa0elncUJ5o=
-github.com/deciduosity/grip v0.0.0-20200523175710-fd8be2e0aab0/go.mod h1:EBn3L+ZaVs/Ddcf50u9MJhWg/YQXLBt3kbuaUgcq7N4=
 github.com/deciduosity/grip v0.0.0-20200904025049-9d4d4cfca8ac h1:UplLhQXah3TQ4DXfD35A0QSla3r64E8Sc9KMTYm1UDM=
 github.com/deciduosity/grip v0.0.0-20200904025049-9d4d4cfca8ac/go.mod h1:hXIuEBX4fetrHgV+AK01wstdS35i5lJpTiV+xvUNxQo=
 github.com/deciduosity/grip v0.0.0-20201110205946-2b9edd514c63 h1:1snJAXLX73fRHJy+eZ4iyIgjyMnxdfUGkIPYYNpu1dA=
@@ -81,8 +79,6 @@ github.com/deciduosity/mrpc v0.0.0-20201009161736-2009d6849cd4 h1:C2NGA7OK2HZ5Cf
 github.com/deciduosity/mrpc v0.0.0-20201009161736-2009d6849cd4/go.mod h1:bB9qBLP51Bxl2CY9aR/1SE57qwdBFnqfrT+E2VKIp6g=
 github.com/deciduosity/pail v0.0.0-20200521232416-8106863854c7/go.mod h1:IfeDkBEE4cJr2tLl2fiv9MA/Sb/pLKi5cpUdA3x69DQ=
 github.com/deciduosity/poplar v0.0.0-20200522022346-28353d080bd9/go.mod h1:kPtqwVH9EsftvIj15xGehXQ5iVpr4VS42eoRWlNC4WY=
-github.com/deciduosity/sumogrip v0.0.0-20200523225900-94b5cd1845de h1:SWgC3qYfrcl9MHykUALD7EQxjqOOyIFk35WZsx5w08I=
-github.com/deciduosity/sumogrip v0.0.0-20200523225900-94b5cd1845de/go.mod h1:Wvrqy3fHqnLQX6XrCXnrDcj89B0FuuU8LAM9bLed2Is=
 github.com/deciduosity/utility v0.0.0-20200521233144-556c4888c866 h1:GrCxqlBQWBcsSoLDz74LUcyVW1vkpC7FEqSrsqqzLTU=
 github.com/deciduosity/utility v0.0.0-20200521233144-556c4888c866/go.mod h1:6tW78Irsx6a38rZR218CQwh6UUw8sYZ57uz3IftGubw=
 github.com/dghubble/go-twitter v0.0.0-20190719072343-39e5462e111f h1:M2wB039zeS1/LZtN/3A7tWyfctiOBL4ty5PURBmDdWU=
@@ -117,7 +113,6 @@ github.com/evergreen-ci/shrub v0.0.0-20200519135032-6be7bcc0614c/go.mod h1:kVPnc
 github.com/fatih/structs v1.0.0 h1:BrX964Rv5uQ3wwS+KRUAJCBBw5PQmgJfJ6v4yly5QwU=
 github.com/fatih/structs v1.0.0/go.mod h1:9NiDSp5zOcgEDl+j00MP/WkGVPOlPRLejGD8Ga6PJ7M=
 github.com/fogleman/gg v1.2.1-0.20190220221249-0403632d5b90/go.mod h1:R/bRT+9gY/C5z7JzPU0zXsXHKM4/ayA+zqcVNZzPa1k=
-github.com/fortytw2/leaktest v1.3.0/go.mod h1:jDsjWgpAGjm2CA7WthBh/CdZYEPF31XHquHwclZch5g=
 github.com/frankban/quicktest v1.11.2 h1:mjwHjStlXWibxOohM7HYieIViKyh56mmt3+6viyhDDI=
 github.com/frankban/quicktest v1.11.2/go.mod h1:K+q6oSqb0W0Ininfk863uOk1lMy69l/P6txr3mVT54s=
 github.com/fsnotify/fsnotify v1.4.9 h1:hsms1Qyu0jgnwNXIxa+/V/PDsU6CfLf6CNO8H7IWoS4=
@@ -205,12 +200,12 @@ github.com/gopherjs/gopherwasm v1.1.0/go.mod h1:SkZ8z7CWBz5VXbhJel8TxCmAcsQqzgWG
 github.com/gorilla/mux v1.7.4 h1:VuZ8uybHlWmqV03+zRzdwKL4tUnIp1MAQtp1mIFE1bc=
 github.com/gorilla/mux v1.7.4/go.mod h1:DVbg23sWSpFRCP0SfiEN6jmj59UnW/n46BH5rLB71So=
 github.com/howeyc/gopass v0.0.0-20170109162249-bf9dde6d0d2c/go.mod h1:lADxMC39cJJqL93Duh1xhAs4I2Zs8mKS89XWXFGp9cs=
-github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=
 github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=
 github.com/jmespath/go-jmespath v0.3.0 h1:OS12ieG61fsCg5+qLJ+SsW9NicxNkg3b25OyT2yCeUc=
 github.com/jmespath/go-jmespath v0.3.0/go.mod h1:9QtRXoHjLGCJ5IBSaohpXITPlowMeeYCZ7fLUTSywik=
 github.com/jmespath/go-jmespath v0.4.0 h1:BEgLn5cpjn8UN1mAw4NjwDrS35OdebyEtFe+9YPoQUg=
 github.com/jmespath/go-jmespath v0.4.0/go.mod h1:T8mJZnbsbmF+m6zOOFylbeCJqk5+pHWvzYPziyZiYoo=
+github.com/jmespath/go-jmespath/internal/testify v1.5.1 h1:shLQSRRSCCPj3f2gpwzGwWFoC7ycTf1rcQZHOlsJ6N8=
 github.com/jmespath/go-jmespath/internal/testify v1.5.1/go.mod h1:L3OGu8Wl2/fWfCI6z80xFu9LTZmf1ZRjMHUOPmWr69U=
 github.com/jmoiron/sqlx v1.2.0/go.mod h1:1FEQNm3xlJgrMD+FBdI9+xvCksHtbpVBBw5dYhBSsks=
 github.com/joho/godotenv v1.3.0/go.mod h1:7hK45KPybAkOC6peb+G5yklZfMxEjkZhHbwpqxOKXbg=
@@ -323,8 +318,6 @@ github.com/tidwall/pretty v1.0.0/go.mod h1:XNkn88O1ChpSDQmQeStsy+sBenx6DDtFZJxhV
 github.com/trivago/tgo v1.0.1/go.mod h1:w4dpD+3tzNIIiIfkWWa85w5/B77tlvdZckQ+6PkFnhc=
 github.com/trivago/tgo v1.0.7 h1:uaWH/XIy9aWYWpjm2CU3RpcqZXmX2ysQ9/Go+d9gyrM=
 github.com/trivago/tgo v1.0.7/go.mod h1:w4dpD+3tzNIIiIfkWWa85w5/B77tlvdZckQ+6PkFnhc=
-github.com/tychoish/sumologic v1.0.0 h1:Np1J+dQBhhi7e7XbnW6hX/689gquD/3SumMBYT5OyqI=
-github.com/tychoish/sumologic v1.0.0/go.mod h1:7b08fDc4aGgPDTz+RQCLIlYH71W17504sQsgF67996I=
 github.com/tychoish/tarjan v0.0.0-20170824211642-fcd3f3321826/go.mod h1:9ldxz2jdgw75YMkrPSevxE1ozaC51voWlXAoN8j0mgk=
 github.com/ulikunitz/xz v0.5.6 h1:jGHAfXawEGZQ3blwU5wnWKQJvAraT7Ftq9EXjnXYgt8=
 github.com/ulikunitz/xz v0.5.6/go.mod h1:2bypXElzHzzJZwzH67Y6wb67pO62Rzfn7BSiF4ABRW8=
@@ -458,11 +451,9 @@ gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127/go.mod h1:Co6ibVJAznAaIkqp8
 gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f h1:BLraFXnmrev5lT+xlilqcH8XK9/i0At2xKjWk4p6zsU=
 gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/errgo.v2 v2.1.0/go.mod h1:hNsd1EY+bozCKY1Ytp96fpM3vjJbqLJn88ws8XvfDNI=
-gopkg.in/fsnotify.v1 v1.4.7/go.mod h1:Tz8NjZHkW78fSQdbUxIjBTcgA1z1m8ZHf0WmKUhAMys=
 gopkg.in/ldap.v3 v3.1.0/go.mod h1:dQjCc0R0kfyFjIlWNMH1DORwUASZyDxo2Ry1B51dXaQ=
 gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22 h1:VpOs+IwYnYBaFnrNAeB8UUWtL3vEUnzSCL1nVjPhqrw=
 gopkg.in/mgo.v2 v2.0.0-20190816093944-a6b53ec6cb22/go.mod h1:yeKp02qBN3iKW1OzL3MGk2IdtZzaj7SFntXj72NppTA=
-gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7/go.mod h1:dt/ZhP58zS4L8KSrWDmTeBkI65Dw0HsyUHuEVlX15mw=
 gopkg.in/yaml.v2 v2.2.2/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
 gopkg.in/yaml.v2 v2.2.8/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
 gopkg.in/yaml.v2 v2.3.0 h1:clyUAQHOM3G0M3f5vQj7LuJrETvjVot3Z5el9nffUtU=
