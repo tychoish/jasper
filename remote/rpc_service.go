@@ -6,9 +6,9 @@ import (
 
 	"github.com/deciduosity/aviation"
 	"github.com/deciduosity/certdepot"
-	"github.com/deciduosity/grip"
-	"github.com/deciduosity/grip/logging"
-	"github.com/deciduosity/grip/recovery"
+	"github.com/cdr/grip"
+	"github.com/cdr/grip/logging"
+	"github.com/cdr/grip/recovery"
 	"github.com/deciduosity/jasper"
 	"github.com/deciduosity/jasper/remote/internal"
 	"github.com/deciduosity/jasper/util"

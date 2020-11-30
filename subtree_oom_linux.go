@@ -7,7 +7,7 @@ import (
 	"context"
 	"os/exec"
 
-	"github.com/deciduosity/grip/recovery"
+	"github.com/cdr/grip/recovery"
 	"github.com/pkg/errors"
 )
 

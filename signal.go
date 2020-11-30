@@ -4,7 +4,7 @@ import (
 	"context"
 	"syscall"
 
-	"github.com/deciduosity/grip"
+	"github.com/cdr/grip"
 	"github.com/pkg/errors"
 )
 

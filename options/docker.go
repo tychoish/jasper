@@ -5,7 +5,7 @@ import (
 	"net"
 	"runtime"
 
-	"github.com/deciduosity/grip"
+	"github.com/cdr/grip"
 	"github.com/docker/docker/client"
 	"github.com/pkg/errors"
 )

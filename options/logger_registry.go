@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"sync"
 
-	"github.com/deciduosity/grip/send"
+	"github.com/cdr/grip/send"
 )
 
 var globalLoggerRegistry LoggerRegistry = &basicLoggerRegistry{

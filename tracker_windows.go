@@ -1,7 +1,7 @@
 package jasper
 
 import (
-	"github.com/deciduosity/grip"
+	"github.com/cdr/grip"
 	"github.com/pkg/errors"
 )
 

@@ -4,7 +4,7 @@ import (
 	"context"
 	"io"
 
-	"github.com/deciduosity/grip/send"
+	"github.com/cdr/grip/send"
 	"github.com/deciduosity/jasper/options"
 	"github.com/pkg/errors"
 )

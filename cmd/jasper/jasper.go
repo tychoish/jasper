@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/deciduosity/grip"
+	"github.com/cdr/grip"
 	jcli "github.com/deciduosity/jasper/cli"
 	"github.com/urfave/cli"
 )

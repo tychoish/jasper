@@ -13,7 +13,7 @@ import (
 	"github.com/evergreen-ci/shrub"
 
 	// "github.com/deciduosity/utility"
-	"github.com/deciduosity/grip"
+	"github.com/cdr/grip"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
 )

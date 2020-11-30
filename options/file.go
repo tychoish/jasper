@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/deciduosity/grip"
+	"github.com/cdr/grip"
 	"github.com/pkg/errors"
 )
 

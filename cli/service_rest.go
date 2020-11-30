@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/deciduosity/grip"
-	"github.com/deciduosity/grip/recovery"
+	"github.com/cdr/grip"
+	"github.com/cdr/grip/recovery"
 	"github.com/deciduosity/jasper"
 	"github.com/deciduosity/jasper/options"
 	"github.com/deciduosity/jasper/remote"

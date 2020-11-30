@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"path/filepath"
 
-	"github.com/deciduosity/grip"
+	"github.com/cdr/grip"
 	"github.com/deciduosity/utility"
 	"github.com/mholt/archiver"
 	"github.com/pkg/errors"

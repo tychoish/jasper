@@ -3,11 +3,11 @@ package options
 import (
 	"testing"
 
-	"github.com/deciduosity/grip"
-	"github.com/deciduosity/grip/level"
-	"github.com/deciduosity/grip/logging"
-	"github.com/deciduosity/grip/message"
-	"github.com/deciduosity/grip/send"
+	"github.com/cdr/grip"
+	"github.com/cdr/grip/level"
+	"github.com/cdr/grip/logging"
+	"github.com/cdr/grip/message"
+	"github.com/cdr/grip/send"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

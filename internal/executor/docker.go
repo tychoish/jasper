@@ -8,8 +8,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/deciduosity/grip"
-	"github.com/deciduosity/grip/message"
+	"github.com/cdr/grip"
+	"github.com/cdr/grip/message"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"

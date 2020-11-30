@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/deciduosity/birch"
-	"github.com/deciduosity/grip/level"
-	"github.com/deciduosity/grip/message"
-	"github.com/deciduosity/grip/send"
+	"github.com/cdr/grip/level"
+	"github.com/cdr/grip/message"
+	"github.com/cdr/grip/send"
 	"github.com/pkg/errors"
 )
 

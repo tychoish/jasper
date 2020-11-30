@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/deciduosity/grip"
+	"github.com/cdr/grip"
 	"github.com/deciduosity/jasper/internal/executor"
 	"github.com/deciduosity/jasper/options"
 	"github.com/deciduosity/jasper/testutil"

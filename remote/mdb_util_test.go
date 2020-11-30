@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/deciduosity/grip"
+	"github.com/cdr/grip"
 	"github.com/deciduosity/jasper"
 	"github.com/deciduosity/jasper/testutil"
 	"github.com/pkg/errors"

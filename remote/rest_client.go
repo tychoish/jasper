@@ -13,9 +13,9 @@ import (
 	"time"
 
 	"github.com/deciduosity/bond"
-	"github.com/deciduosity/gimlet"
-	"github.com/deciduosity/grip"
-	"github.com/deciduosity/grip/message"
+	"github.com/cdr/gimlet"
+	"github.com/cdr/grip"
+	"github.com/cdr/grip/message"
 	"github.com/deciduosity/jasper"
 	"github.com/deciduosity/jasper/options"
 	"github.com/deciduosity/jasper/scripting"

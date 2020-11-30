@@ -1,8 +1,8 @@
 package options
 
 import (
-	"github.com/deciduosity/grip"
-	"github.com/deciduosity/grip/send"
+	"github.com/cdr/grip"
+	"github.com/cdr/grip/send"
 	"github.com/pkg/errors"
 )
 
