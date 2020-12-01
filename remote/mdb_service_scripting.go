@@ -6,8 +6,8 @@ import (
 
 	"github.com/deciduosity/jasper/options"
 	"github.com/deciduosity/jasper/scripting"
-	"github.com/deciduosity/mrpc/mongowire"
-	"github.com/deciduosity/mrpc/shell"
+	"github.com/deciduosity/birch/mrpc/mongowire"
+	"github.com/deciduosity/birch/mrpc/shell"
 	"github.com/pkg/errors"
 )
 

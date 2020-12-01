@@ -2,10 +2,10 @@ name := jasper
 buildDir := build
 srcFiles := $(shell find . -name "*.go" -not -path "./$(buildDir)/*" -not -name "*_test.go" -not -path "*\#*")
 testFiles := $(shell find . -name "*.go" -not -path "./$(buildDir)/*" -not -path "*\#*")
-packages := $(name) cli remote remote-internal options mock testutil internal-executor buildsystem-generator
+packages := $(name) cli remote remote-internal options mock testutil internal-executor
 lintPackages := $(packages) mock testutil
 testPackages := $(packages) mock
-projectPath := github.com/mongodb/jasper
+projectPath := github.com/deciduosity/jasper
 
 _compilePackages := $(subst $(name),,$(subst -,/,$(foreach target,$(testPackages),./$(target))))
 coverageOutput := $(foreach target,$(testPackages),$(buildDir)/output.$(target).coverage)
@@ -33,13 +33,13 @@ compile-base:
 # convenience targets for runing tests and coverage tasks on a
 # specific package.
 test-%:$(buildDir)/output.%.test
-	
+
 coverage-%:$(buildDir)/output.%.coverage
-	
+
 html-coverage-%:$(buildDir)/output.%.coverage.html
-	
+
 lint-%:$(buildDir)/output.%.lint
-	
+
 # end convienence targets
 
 # start lint setup targets
@@ -138,7 +138,7 @@ phony += build lint $(buildDir) test coverage coverage-html docker-setup docker-
 .FORCE:
 
 clean:
-	rm -rf $(lintDeps) *.pb.go 
+	rm -rf $(lintDeps) *.pb.go
 
 clean-results:
 	rm -rf $(buildDir)/output.*

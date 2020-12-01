@@ -9,8 +9,8 @@ import (
 	"github.com/cdr/grip/message"
 	"github.com/deciduosity/jasper"
 	"github.com/deciduosity/jasper/options"
-	"github.com/deciduosity/mrpc/mongowire"
-	"github.com/deciduosity/mrpc/shell"
+	"github.com/deciduosity/birch/mrpc/mongowire"
+	"github.com/deciduosity/birch/mrpc/shell"
 	"github.com/pkg/errors"
 )
 

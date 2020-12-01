@@ -12,7 +12,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/deciduosity/bond"
 	"github.com/cdr/gimlet"
 	"github.com/cdr/grip"
 	"github.com/cdr/grip/message"
@@ -22,12 +21,19 @@ import (
 	"github.com/pkg/errors"
 )
 
-// NewRestClient creates a REST client that connecst to the given address
-// running the Jasper REST service.
+// NewRestClient creates a REST client that connects to the given address
+// running the Jasper REST service. This function uses the http
+// package's default client.
 func NewRestClient(addr net.Addr) Manager {
+	return MakeRestClient(addr, http.DefaultClient)
+}
+
+// MakeRestClient constructs a REST client that connects to the given
+// address running the Jasper REST service and the specified HTTP client.
+func MakeRestClient(addr net.Addr, client *http.Client) Manager {
 	return &restClient{
 		prefix: fmt.Sprintf("http://%s/jasper/v1", addr),
-		client: bond.GetHTTPClient(),
+		client: client,
 	}
 }
 
@@ -37,7 +43,6 @@ type restClient struct {
 }
 
 func (c *restClient) CloseConnection() error {
-	bond.PutHTTPClient(c.client)
 	return nil
 }
 

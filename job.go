@@ -17,7 +17,8 @@ import (
 	"github.com/deciduosity/jasper/options"
 )
 
-// Job is an alias for an amboy.Job
+// Job is an alias for an amboy.Job, mostly for purposes of making the
+// godoc for the package appear reasonable.
 type Job amboy.Job
 
 type amboyJob struct {
@@ -36,7 +37,7 @@ type amboyJob struct {
 		Error  string `bson:"error" json:"error" yaml:"error"`
 		Output string `bson:"output" json:"output" yaml:"output"`
 	} `bson:"output" json:"output" yaml:"output"`
-	job.Base `bson:"metadata" json:"metadata" yaml:"metadata"`
+	*job.Base `bson:"metadata" json:"metadata" yaml:"metadata"`
 
 	makep ProcessConstructor
 }
@@ -54,13 +55,14 @@ func RegisterJobs(pc ProcessConstructor) {
 	registry.AddJobType(amboyJobName, func() amboy.Job { return amboyJobFactory(pc) })
 	registry.AddJobType(amboySimpleCapturedOutputJobName, func() amboy.Job { return amboySimpleCapturedOutputJobFactory(pc) })
 	registry.AddJobType(amboyForegroundOutputJobName, func() amboy.Job { return amboyForegroundOutputJobFactory(pc) })
+	registry.AddJobType(downloadJobName, func() amboy.Job { return newDownloadJob() })
 }
 
 func amboyJobFactory(pc ProcessConstructor) *amboyJob {
 	j := &amboyJob{
 		makep:    pc,
 		ExitCode: -1,
-		Base: job.Base{
+		Base: &job.Base{
 			JobType: amboy.JobType{
 				Name:    amboyJobName,
 				Version: 0,
@@ -170,8 +172,8 @@ type amboySimpleCapturedOutputJob struct {
 		Error  string `bson:"error," json:"error," yaml:"error,"`
 		Output string `bson:"output" json:"output" yaml:"output"`
 	} `bson:"output" json:"output" yaml:"output"`
-	ExitCode int `bson:"exit_code" json:"exit_code" yaml:"exit_code"`
-	job.Base `bson:"metadata" json:"metadata" yaml:"metadata"`
+	ExitCode  int `bson:"exit_code" json:"exit_code" yaml:"exit_code"`
+	*job.Base `bson:"metadata" json:"metadata" yaml:"metadata"`
 
 	makep ProcessConstructor
 }
@@ -180,7 +182,7 @@ func amboySimpleCapturedOutputJobFactory(pc ProcessConstructor) *amboySimpleCapt
 	j := &amboySimpleCapturedOutputJob{
 		makep:    pc,
 		ExitCode: -1,
-		Base: job.Base{
+		Base: &job.Base{
 			JobType: amboy.JobType{
 				Name:    amboySimpleCapturedOutputJobName,
 				Version: 0,
@@ -231,9 +233,9 @@ func (j *amboySimpleCapturedOutputJob) Run(ctx context.Context) {
 }
 
 type amboyForegroundOutputJob struct {
-	Options  *options.Create `bson:"options" json:"options" yaml:"options"`
-	ExitCode int             `bson:"exit_code" json:"exit_code" yaml:"exit_code"`
-	job.Base `bson:"metadata" json:"metadata" yaml:"metadata"`
+	Options   *options.Create `bson:"options" json:"options" yaml:"options"`
+	ExitCode  int             `bson:"exit_code" json:"exit_code" yaml:"exit_code"`
+	*job.Base `bson:"metadata" json:"metadata" yaml:"metadata"`
 
 	makep ProcessConstructor
 }
@@ -242,7 +244,7 @@ func amboyForegroundOutputJobFactory(pc ProcessConstructor) *amboyForegroundOutp
 	j := &amboyForegroundOutputJob{
 		ExitCode: -1,
 		makep:    pc,
-		Base: job.Base{
+		Base: &job.Base{
 			JobType: amboy.JobType{
 				Name:    amboyForegroundOutputJobName,
 				Version: 0,

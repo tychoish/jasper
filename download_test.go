@@ -12,7 +12,6 @@ import (
 	"testing"
 
 	"github.com/cdr/amboy/queue"
-	"github.com/deciduosity/bond/recall"
 	"github.com/cdr/grip"
 	"github.com/deciduosity/jasper/options"
 	"github.com/deciduosity/jasper/testutil"
@@ -98,7 +97,7 @@ func TestProcessDownloadJobs(t *testing.T) {
 	baseURL := fmt.Sprintf("http://%s", fileServerAddr)
 	require.NoError(t, testutil.WaitForRESTService(ctx, baseURL))
 
-	job, err := recall.NewDownloadJob(fmt.Sprintf("%s/%s", baseURL, fileName), downloadDir, true)
+	job, err := NewDownloadJob(fmt.Sprintf("%s/%s", baseURL, fileName), downloadDir, true)
 	require.NoError(t, err)
 
 	q := queue.NewLocalLimitedSize(2, 1048)

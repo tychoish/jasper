@@ -6,16 +6,16 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/deciduosity/birch"
 	"github.com/cdr/grip"
 	"github.com/cdr/grip/recovery"
+	"github.com/deciduosity/birch"
+	"github.com/deciduosity/birch/mrpc"
+	"github.com/deciduosity/birch/mrpc/mongowire"
+	"github.com/deciduosity/birch/mrpc/shell"
 	"github.com/deciduosity/jasper"
 	"github.com/deciduosity/jasper/options"
 	"github.com/deciduosity/jasper/scripting"
 	"github.com/deciduosity/jasper/util"
-	"github.com/deciduosity/mrpc"
-	"github.com/deciduosity/mrpc/mongowire"
-	"github.com/deciduosity/mrpc/shell"
 	"github.com/pkg/errors"
 )
 
@@ -165,7 +165,7 @@ func (s *mdbService) downloadFile(ctx context.Context, w io.Writer, msg mongowir
 		return
 	}
 
-	if err := opts.Download(); err != nil {
+	if err := opts.Download(ctx); err != nil {
 		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not download file"), DownloadFileCommand)
 		return
 	}

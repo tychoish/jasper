@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/cdr/amboy"
-	"github.com/deciduosity/bond/recall"
 	"github.com/cdr/grip"
 	"github.com/cdr/grip/recovery"
 	"github.com/pkg/errors"
@@ -19,7 +18,7 @@ func createDownloadJobs(path string, urls <-chan string, catcher grip.Catcher) <
 		defer recovery.LogStackTraceAndContinue("download generator")
 
 		for url := range urls {
-			j, err := recall.NewDownloadJob(url, path, true)
+			j, err := NewDownloadJob(url, path, true)
 			if err != nil {
 				catcher.Add(errors.Wrapf(err, "problem creating download job for %s", url))
 				continue
@@ -51,7 +50,7 @@ func processDownloadJobs(ctx context.Context, processFile func(string) error) fu
 				continue
 			}
 			catcher.Add(job.Error())
-			downloadJob, ok := job.(*recall.DownloadFileJob)
+			downloadJob, ok := job.(*downloadFileJob)
 			if !ok {
 				catcher.Add(errors.New("problem retrieving download job from queue"))
 				continue

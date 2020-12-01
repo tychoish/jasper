@@ -11,6 +11,11 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
+func init() {
+	GetGlobalLoggerRegistry().RegisterMarshaler(RawLoggerConfigFormatBSON, bson.Marshal)
+	GetGlobalLoggerRegistry().RegisterUnmarshaler(RawLoggerConfigFormatBSON, bson.Unmarshal)
+}
+
 func TestLoggerConfigValidate(t *testing.T) {
 	t.Run("NoType", func(t *testing.T) {
 		config := LoggerConfig{

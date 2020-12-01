@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/deciduosity/birch"
 	"github.com/cdr/grip/level"
 	"github.com/cdr/grip/message"
 	"github.com/cdr/grip/send"
+	"github.com/deciduosity/birch"
 	"github.com/pkg/errors"
 )
 
@@ -141,6 +141,22 @@ func (lp *LoggingPayload) convertMessage(value interface{}) (message.Composer, e
 		return message.ConvertToComposer(lp.Priority, data), nil
 	case [][]byte:
 		return message.NewLineMessage(lp.Priority, byteSlicesToStringSlice(data)), nil
+	case message.Fields:
+		if lp.AddMetadata {
+			return message.NewFields(lp.Priority, data), nil
+		}
+		return message.NewSimpleFields(lp.Priority, data), nil
+	case []message.Fields:
+		msgs := make([]message.Composer, len(data))
+		for idx := range data {
+			if lp.AddMetadata {
+				msgs[idx] = message.NewFields(lp.Priority, data[idx])
+			} else {
+				msgs[idx] = message.NewSimpleFields(lp.Priority, data[idx])
+			}
+		}
+
+		return message.NewGroupComposer(msgs), nil
 	case []interface{}:
 		return message.NewLineMessage(lp.Priority, data...), nil
 	default:
@@ -162,13 +178,15 @@ func (lp *LoggingPayload) produceMessage(data []byte) (message.Composer, error) 
 
 		return message.NewSimpleFields(lp.Priority, payload), nil
 	case LoggingPayloadFormatBSON:
-		doc, err := birch.ReadDocument(data)
-		if err != nil {
-			return nil, errors.Wrap(err, "problem parsing bson from message body")
+		unmarshler := GetGlobalLoggerRegistry().Unmarshaler(RawLoggerConfigFormatBSON)
+		if unmarshler == nil {
+			return nil, errors.New("no suitable unmarshaller provided")
 		}
 
-		payload := message.Fields(doc.ExportMap())
-
+		payload := message.Fields{}
+		if err := unmarshler(data, &payload); err != nil {
+			return nil, errors.Wrap(err, "problem parsing bson from message body")
+		}
 		if lp.AddMetadata {
 			return message.NewFields(lp.Priority, payload), nil
 		}
@@ -206,6 +224,7 @@ func (lp *LoggingPayload) splitByteSlice(data []byte) (interface{}, error) {
 		}
 		out = append(out, payload)
 	}
+
 	return out, nil
 }
 

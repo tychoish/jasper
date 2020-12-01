@@ -1,11 +1,11 @@
 package options
 
 import (
+	"context"
 	"net/http"
 	"path/filepath"
 
 	"github.com/cdr/grip"
-	"github.com/deciduosity/utility"
 	"github.com/mholt/archiver"
 	"github.com/pkg/errors"
 )
@@ -13,9 +13,10 @@ import (
 // Download represents the options to download a file to a given path and
 // optionally extract its contents.
 type Download struct {
-	URL         string  `json:"url" bson:"url"`
-	Path        string  `json:"path" bson:"path"`
-	ArchiveOpts Archive `json:"archive_opts" bson:"archive_opts"`
+	URL         string       `json:"url" bson:"url"`
+	Path        string       `json:"path" bson:"path"`
+	ArchiveOpts Archive      `json:"archive_opts" bson:"archive_opts"`
+	HTTPClient  *http.Client `json:"-" bson:"-"`
 }
 
 // Validate checks the download options.
@@ -36,16 +37,17 @@ func (opts Download) Validate() error {
 }
 
 // Download executes the download operation.
-func (opts Download) Download() error {
-	req, err := http.NewRequest(http.MethodGet, opts.URL, nil)
+func (opts Download) Download(ctx context.Context) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, opts.URL, nil)
 	if err != nil {
 		return errors.Wrap(err, "problem building request")
 	}
 
-	client := utility.GetHTTPClient()
-	defer utility.PutHTTPClient(client)
+	if opts.HTTPClient == nil {
+		opts.HTTPClient = http.DefaultClient
+	}
 
-	resp, err := client.Do(req)
+	resp, err := opts.HTTPClient.Do(req)
 	if err != nil {
 		return errors.Wrapf(err, "problem downloading file for url %s", opts.URL)
 	}

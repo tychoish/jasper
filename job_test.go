@@ -18,9 +18,6 @@ func TestAmboyJob(t *testing.T) {
 		numJobs := func() int {
 			count := 0
 			for n := range registry.JobTypeNames() {
-				if n == "bond-recall-download-file" {
-					continue
-				}
 				if n != "" {
 					count++
 				}
@@ -28,12 +25,8 @@ func TestAmboyJob(t *testing.T) {
 			return count
 		}
 
-		// We may run this test multiple times, so make it idempotent.
-		if numJobs() == 0 {
-			RegisterJobs(newBasicProcess)
-		}
-
-		assert.Equal(t, 3, numJobs())
+		RegisterJobs(newBasicProcess)
+		assert.Equal(t, 4, numJobs())
 	})
 	t.Run("TypeCheck", func(t *testing.T) {
 		t.Run("Default", func(t *testing.T) {

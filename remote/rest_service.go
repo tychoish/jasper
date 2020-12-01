@@ -431,7 +431,7 @@ func (s *Service) downloadFile(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := opts.Download(); err != nil {
+	if err := opts.Download(r.Context()); err != nil {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusInternalServerError,
 			Message:    errors.Wrapf(err, "problem occurred during file download for URL %s", opts.URL).Error(),

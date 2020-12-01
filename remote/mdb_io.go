@@ -6,7 +6,7 @@ import (
 	"github.com/deciduosity/jasper"
 	"github.com/deciduosity/jasper/options"
 	"github.com/deciduosity/jasper/scripting"
-	"github.com/deciduosity/mrpc/shell"
+	"github.com/deciduosity/birch/mrpc/shell"
 )
 
 // infoRequest represents a request for runtime information regarding the

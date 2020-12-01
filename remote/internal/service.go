@@ -322,7 +322,7 @@ func (s *jasperService) DownloadFile(ctx context.Context, opts *DownloadInfo) (*
 		return &OperationOutcome{Success: false, Text: err.Error(), ExitCode: -2}, nil
 	}
 
-	if err := jopts.Download(); err != nil {
+	if err := jopts.Download(ctx); err != nil {
 		err = errors.Wrapf(err, "problem occurred during file download for URL %s to path %s", jopts.URL, jopts.Path)
 		return &OperationOutcome{Success: false, Text: err.Error(), ExitCode: -3}, nil
 	}

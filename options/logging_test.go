@@ -6,13 +6,13 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/deciduosity/birch"
 	"github.com/cdr/grip"
 	"github.com/cdr/grip/level"
 	"github.com/cdr/grip/message"
 	"github.com/cdr/grip/send"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 func TestLogging(t *testing.T) {
@@ -94,15 +94,15 @@ func TestLogging(t *testing.T) {
 			})
 			t.Run("BSON", func(t *testing.T) {
 				lp := &LoggingPayload{Format: LoggingPayloadFormatBSON}
-				doc := birch.DC.Elements(birch.EC.String("msg", "hello world!"))
+				doc, err := bson.Marshal(map[string]string{"msg": "hello world!"})
+				require.NoError(t, err)
+
 				t.Run("Invalid", func(t *testing.T) {
 					_, err := lp.produceMessage([]byte("\x01\x00"))
 					require.Error(t, err)
 				})
 				t.Run("Valid", func(t *testing.T) {
-					data, err := doc.MarshalBSON()
-					require.NoError(t, err)
-					msg, err := lp.produceMessage(data)
+					msg, err := lp.produceMessage(doc)
 					require.NoError(t, err)
 
 					require.Equal(t, `[msg='hello world!']`, msg.String())
@@ -112,9 +112,7 @@ func TestLogging(t *testing.T) {
 				})
 				t.Run("ValidMetadata", func(t *testing.T) {
 					lp.AddMetadata = true
-					data, err := doc.MarshalBSON()
-					require.NoError(t, err)
-					msg, err := lp.produceMessage(data)
+					msg, err := lp.produceMessage(doc)
 					require.NoError(t, err)
 
 					require.Equal(t, `[msg='hello world!']`, msg.String())
@@ -217,11 +215,14 @@ func TestLogging(t *testing.T) {
 					defer func() { lp.Format = "" }()
 					buf := &bytes.Buffer{}
 					for i := 0; i < 10; i++ {
-						_, err := birch.DC.Elements(
-							birch.EC.String("hello", "world"),
-							birch.EC.Int("idx", i),
-							birch.EC.Int64("val", rand.Int63n(1+int64(i*42))),
-						).WriteTo(buf)
+
+						doc, err := bson.Marshal(map[string]interface{}{
+							"msg": "hello world!",
+							"idx": i,
+							"val": rand.Int63n(1 + int64(i*42)),
+						})
+						require.NoError(t, err)
+						_, err = buf.Write(doc)
 						require.NoError(t, err)
 					}
 
