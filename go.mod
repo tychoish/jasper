@@ -11,9 +11,7 @@ require (
 	github.com/cheynewallace/tabby v1.1.0
 	github.com/containerd/cgroups v0.0.0-20200520162414-666f4a009ffb
 	github.com/containerd/containerd v1.4.3 // indirect
-	github.com/deciduosity/aviation v0.0.0-20201130220403-7a49c5dba581
 	github.com/deciduosity/birch v0.0.0-20201201184152-93862ce16edd
-	github.com/deciduosity/certdepot v0.0.0-20201201185614-6d15469d4600
 	github.com/docker/distribution v2.7.1+incompatible // indirect
 	github.com/docker/docker v17.12.0-ce-rc1.0.20200309214505-aa6a9891b09c+incompatible
 	github.com/docker/go-connections v0.4.0 // indirect

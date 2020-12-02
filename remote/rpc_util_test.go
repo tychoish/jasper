@@ -7,7 +7,6 @@ import (
 	"net"
 	"path/filepath"
 
-	"github.com/deciduosity/certdepot"
 	"github.com/cdr/grip"
 	"github.com/deciduosity/jasper"
 	"github.com/deciduosity/jasper/options"
@@ -74,7 +73,7 @@ func makeTLSRPCServiceAndClient(ctx context.Context, mngr jasper.Manager) (Manag
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to read key file")
 	}
-	serverCreds, err := certdepot.NewCredentials(caCert, serverCert, serverKey)
+	serverCreds, err := options.NewCredentials(caCert, serverCert, serverKey)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to initialize test server credentials")
 	}
@@ -94,7 +93,7 @@ func makeTLSRPCServiceAndClient(ctx context.Context, mngr jasper.Manager) (Manag
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to read key file")
 	}
-	clientCreds, err := certdepot.NewCredentials(caCert, clientCert, clientKey)
+	clientCreds, err := options.NewCredentials(caCert, clientCert, clientKey)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to initialize test client credentials")
 	}
@@ -104,7 +103,7 @@ func makeTLSRPCServiceAndClient(ctx context.Context, mngr jasper.Manager) (Manag
 
 // startTestService creates a server for testing purposes that terminates when
 // the context is done.
-func startTestRPCService(ctx context.Context, mngr jasper.Manager, addr net.Addr, creds *certdepot.Credentials) error {
+func startTestRPCService(ctx context.Context, mngr jasper.Manager, addr net.Addr, creds *options.CertificateCredentials) error {
 	closeService, err := StartRPCService(ctx, mngr, addr, creds)
 	if err != nil {
 		return errors.Wrap(err, "could not start server")
@@ -120,7 +119,7 @@ func startTestRPCService(ctx context.Context, mngr jasper.Manager, addr net.Addr
 
 // newTestClient establishes a client for testing purposes that closes when
 // the context is done.
-func newTestRPCClient(ctx context.Context, addr net.Addr, creds *certdepot.Credentials) (Manager, error) {
+func newTestRPCClient(ctx context.Context, addr net.Addr, creds *options.CertificateCredentials) (Manager, error) {
 	client, err := NewRPCClient(ctx, addr, creds)
 	if err != nil {
 		return nil, errors.Wrap(err, "could not get client")

@@ -4,16 +4,14 @@ import (
 	"context"
 	"net"
 
-	"github.com/deciduosity/aviation"
-	"github.com/deciduosity/certdepot"
 	"github.com/cdr/grip"
-	"github.com/cdr/grip/logging"
 	"github.com/cdr/grip/recovery"
 	"github.com/deciduosity/jasper"
+	"github.com/deciduosity/jasper/options"
 	"github.com/deciduosity/jasper/remote/internal"
 	"github.com/deciduosity/jasper/util"
 	"github.com/pkg/errors"
-	grpc "google.golang.org/grpc"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
 
@@ -29,16 +27,17 @@ func AttachService(ctx context.Context, manager jasper.Manager, s *grpc.Server) 
 // a secure TLS connection with clients; otherwise, it will start an insecure
 // service. The caller is responsible for closing the connection using the
 // returned jasper.CloseFunc.
-func StartRPCService(ctx context.Context, manager jasper.Manager, addr net.Addr, creds *certdepot.Credentials) (util.CloseFunc, error) {
+//
+// This service does not have any kind of interceptors (middleware) or
+// logging configured, and panics are not handled. Passing
+// interceptors from the aviation package or grpc-middleware as
+// gprc.ServerOptions to this function can handle that.
+func StartRPCService(ctx context.Context, manager jasper.Manager, addr net.Addr, creds *options.CertificateCredentials, opts ...grpc.ServerOption) (util.CloseFunc, error) {
 	lis, err := net.Listen(addr.Network(), addr.String())
 	if err != nil {
 		return nil, errors.Wrapf(err, "error listening on %s", addr.String())
 	}
 
-	opts := []grpc.ServerOption{
-		grpc.UnaryInterceptor(aviation.MakeGripUnaryInterceptor(logging.MakeGrip(grip.GetSender()))),
-		grpc.StreamInterceptor(aviation.MakeGripStreamInterceptor(logging.MakeGrip(grip.GetSender()))),
-	}
 	if creds != nil {
 		tlsConf, err := creds.Resolve()
 		if err != nil {
@@ -66,15 +65,15 @@ func StartRPCService(ctx context.Context, manager jasper.Manager, addr net.Addr,
 // read from the file given by filePath if the filePath is non-empty. The
 // credentials file should contain the JSON-encoded bytes from
 // (*Credentials).Export().
-func StartRPCServiceWithFile(ctx context.Context, manager jasper.Manager, addr net.Addr, filePath string) (util.CloseFunc, error) {
-	var creds *certdepot.Credentials
+func StartRPCServiceWithFile(ctx context.Context, manager jasper.Manager, addr net.Addr, filePath string, opts ...grpc.ServerOption) (util.CloseFunc, error) {
+	var creds *options.CertificateCredentials
 	if filePath != "" {
 		var err error
-		creds, err = certdepot.NewCredentialsFromFile(filePath)
+		creds, err = options.NewCredentialsFromFile(filePath)
 		if err != nil {
 			return nil, errors.Wrap(err, "error getting credentials from file")
 		}
 	}
 
-	return StartRPCService(ctx, manager, addr, creds)
+	return StartRPCService(ctx, manager, addr, creds, opts...)
 }

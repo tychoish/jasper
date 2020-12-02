@@ -7,7 +7,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/deciduosity/certdepot"
 	"github.com/cdr/grip"
 	"github.com/cdr/grip/message"
 	"github.com/deciduosity/jasper"
@@ -32,7 +31,7 @@ type rpcClient struct {
 // TLS connection with the service; otherwise, it will establish an insecure
 // connection. The caller is responsible for closing the connection using the
 // returned jasper.CloseFunc.
-func NewRPCClient(ctx context.Context, addr net.Addr, creds *certdepot.Credentials) (Manager, error) {
+func NewRPCClient(ctx context.Context, addr net.Addr, creds *options.CertificateCredentials) (Manager, error) {
 	opts := []grpc.DialOption{
 		grpc.WithBlock(),
 		grpc.WithDefaultCallOptions(grpc.WaitForReady(true)),
@@ -60,10 +59,10 @@ func NewRPCClient(ctx context.Context, addr net.Addr, creds *certdepot.Credentia
 // credentials file should contain the JSON-encoded bytes from
 // (*Credentials).Export().
 func NewRPCClientWithFile(ctx context.Context, addr net.Addr, filePath string) (Manager, error) {
-	var creds *certdepot.Credentials
+	var creds *options.CertificateCredentials
 	if filePath != "" {
 		var err error
-		creds, err = certdepot.NewCredentialsFromFile(filePath)
+		creds, err = options.NewCredentialsFromFile(filePath)
 		if err != nil {
 			return nil, errors.Wrap(err, "error getting credentials from file")
 		}
