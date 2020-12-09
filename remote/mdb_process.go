@@ -4,13 +4,13 @@ import (
 	"context"
 	"syscall"
 
-	"github.com/deciduosity/birch"
+	"github.com/tychoish/birch"
 	"github.com/cdr/grip"
 	"github.com/cdr/grip/message"
 	"github.com/deciduosity/jasper"
 	"github.com/deciduosity/jasper/options"
-	"github.com/deciduosity/birch/mrpc/mongowire"
-	"github.com/deciduosity/birch/mrpc/shell"
+	"github.com/tychoish/birch/mrpc/mongowire"
+	"github.com/tychoish/birch/mrpc/shell"
 	"github.com/pkg/errors"
 )
 

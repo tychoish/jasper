@@ -11,7 +11,6 @@ require (
 	github.com/cheynewallace/tabby v1.1.0
 	github.com/containerd/cgroups v0.0.0-20200520162414-666f4a009ffb
 	github.com/containerd/containerd v1.4.3 // indirect
-	github.com/deciduosity/birch v0.0.0-20201201184152-93862ce16edd
 	github.com/docker/distribution v2.7.1+incompatible // indirect
 	github.com/docker/docker v17.12.0-ce-rc1.0.20200309214505-aa6a9891b09c+incompatible
 	github.com/docker/go-connections v0.4.0 // indirect
@@ -31,11 +30,12 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/shirou/gopsutil v3.20.11+incompatible // indirect
 	github.com/stretchr/testify v1.6.1
+	github.com/tychoish/birch v0.0.0-20201209214013-d16c48deb418
 	github.com/urfave/cli v1.22.4
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	go.mongodb.org/mongo-driver v1.4.2
 	golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37
-	golang.org/x/net v0.0.0-20200520182314-0ba52f642ac2
+	golang.org/x/net v0.0.0-20200520182314-0ba52f642ac2 // indirect
 	golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e // indirect
 	google.golang.org/grpc v1.29.1
 	gotest.tools v2.2.0+incompatible // indirect

@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/deciduosity/birch/mrpc/mongowire"
-	"github.com/deciduosity/birch/mrpc/shell"
+	"github.com/tychoish/birch/mrpc/mongowire"
+	"github.com/tychoish/birch/mrpc/shell"
 	"github.com/deciduosity/jasper/options"
 	"github.com/pkg/errors"
 )

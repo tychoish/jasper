@@ -11,7 +11,7 @@ import (
 	"github.com/cdr/grip/level"
 	"github.com/cdr/grip/message"
 	"github.com/cdr/grip/send"
-	"github.com/deciduosity/birch"
+	"github.com/tychoish/birch"
 	"github.com/pkg/errors"
 )
 

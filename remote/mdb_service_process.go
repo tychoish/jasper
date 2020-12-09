@@ -6,8 +6,8 @@ import (
 	"syscall"
 
 	"github.com/deciduosity/jasper"
-	"github.com/deciduosity/birch/mrpc/mongowire"
-	"github.com/deciduosity/birch/mrpc/shell"
+	"github.com/tychoish/birch/mrpc/mongowire"
+	"github.com/tychoish/birch/mrpc/shell"
 	"github.com/pkg/errors"
 )
 
