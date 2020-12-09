@@ -76,6 +76,7 @@ func (s *Service) App(ctx context.Context) *gimlet.APIApp {
 	app.AddRoute("/logging/id/{id}/close").Version(1).Delete().Handler(s.loggingCacheCloseAndRemove)
 	app.AddRoute("/logging/id/{id}/send").Version(1).Post().Handler(s.loggingSendMessages)
 	app.AddRoute("/logging/clear").Version(1).Delete().Handler(s.loggingCacheClear)
+	app.AddRoute("/logging/size").Version(1).Delete().Handler(s.loggingCacheSize)
 	app.AddRoute("/logging/prune/{time}").Version(1).Delete().Handler(s.loggingCachePrune)
 	app.AddRoute("/file/write").Version(1).Put().Handler(s.writeFile)
 	app.AddRoute("/clear").Version(1).Post().Handler(s.clearManager)

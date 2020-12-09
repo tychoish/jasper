@@ -2,7 +2,7 @@ package internal
 
 import (
 	"context"
-	"fmt"
+	fmt "fmt"
 	"io"
 	"os"
 	"strings"

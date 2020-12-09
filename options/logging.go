@@ -42,11 +42,12 @@ func (cl *CachedLogger) getSender(preferError bool) (send.Sender, error) {
 // Close closes the underlying output for the cached logger.
 func (cl *CachedLogger) Close() error {
 	catcher := grip.NewBasicCatcher()
-	if cl.Error != nil {
-		catcher.Check(cl.Error.Close)
-	}
 	if cl.Output != nil {
 		catcher.Check(cl.Output.Close)
+	}
+
+	if cl.Error != nil && cl.Output != cl.Error {
+		catcher.Check(cl.Error.Close)
 	}
 	return catcher.Resolve()
 }

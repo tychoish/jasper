@@ -27,7 +27,6 @@ func TestCLILoggingCache(t *testing.T) {
 					logger := createCachedLoggerFromCLI(t, c, id)
 					assert.Equal(t, id, logger.ID)
 					assert.NotZero(t, logger.Accessed)
-					assert.NotZero(t, logger.Manager)
 				},
 				"CreateWithEmptyIDFails": func(ctx context.Context, t *testing.T, c *cli.Context) {
 					logger, err := jasper.NewInMemoryLogger(100)
@@ -83,8 +82,8 @@ func TestCLILoggingCache(t *testing.T) {
 
 					getResp := &CachedLoggerResponse{}
 					require.NoError(t, execCLICommandInputOutput(t, c, loggingCacheGet(), input, getResp))
-					assert.False(t, getResp.Successful())
 					assert.Zero(t, getResp.Logger)
+					assert.False(t, getResp.Successful(), "%+v", getResp) // it's deleted
 				},
 				"CloseAndRemoveSucceeds": func(ctx context.Context, t *testing.T, c *cli.Context) {
 					logger := createCachedLoggerFromCLI(t, c, "id")
@@ -197,7 +196,6 @@ func createCachedLoggerFromCLI(t *testing.T, c *cli.Context, id string) options.
 	resp := &CachedLoggerResponse{}
 	require.NoError(t, execCLICommandInputOutput(t, c, loggingCacheCreate(), input, resp))
 	require.True(t, resp.Successful())
-	require.NotZero(t, resp.Logger.Manager)
 	require.Equal(t, id, resp.Logger.ID)
 
 	return resp.Logger

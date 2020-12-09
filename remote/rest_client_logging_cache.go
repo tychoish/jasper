@@ -25,7 +25,7 @@ func (lc *restLoggingCache) Create(id string, opts *options.Output) (*options.Ca
 		return nil, errors.WithStack(err)
 	}
 
-	resp, err := lc.client.doRequest(lc.ctx, http.MethodPost, lc.client.getURL("/download/cache"), body)
+	resp, err := lc.client.doRequest(lc.ctx, http.MethodPost, lc.client.getURL("/logging/id/%s", id), body)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -62,6 +62,11 @@ func (lc *restLoggingCache) Get(id string) *options.CachedLogger {
 	if err = gimlet.GetJSON(resp.Body, out); err != nil {
 		return nil
 	}
+
+	if out.ID == "" {
+		return nil
+	}
+
 	return out
 }
 
