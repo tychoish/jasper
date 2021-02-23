@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/tychoish/grip"
-	"github.com/deciduosity/jasper/options"
 	"github.com/pkg/errors"
+	"github.com/tychoish/grip"
+	"github.com/tychoish/jasper/options"
 )
 
 // LoggingCache implements the LoggingCache interfaces based on an in-memory

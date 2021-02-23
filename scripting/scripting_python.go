@@ -10,11 +10,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tychoish/grip"
-	"github.com/deciduosity/jasper"
-	"github.com/deciduosity/jasper/options"
-	"github.com/deciduosity/jasper/util"
 	"github.com/pkg/errors"
+	"github.com/tychoish/grip"
+	"github.com/tychoish/jasper"
+	"github.com/tychoish/jasper/options"
+	"github.com/tychoish/jasper/util"
 )
 
 type pythonEnvironment struct {

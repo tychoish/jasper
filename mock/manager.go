@@ -4,10 +4,10 @@ import (
 	"context"
 	"runtime"
 
-	"github.com/deciduosity/jasper"
-	"github.com/deciduosity/jasper/options"
-	"github.com/deciduosity/jasper/scripting"
 	"github.com/pkg/errors"
+	"github.com/tychoish/jasper"
+	"github.com/tychoish/jasper/options"
+	"github.com/tychoish/jasper/scripting"
 )
 
 // Manager implements the Manager interface with exported fields to

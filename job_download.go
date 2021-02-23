@@ -8,13 +8,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pkg/errors"
 	"github.com/tychoish/amboy"
 	"github.com/tychoish/amboy/dependency"
 	"github.com/tychoish/amboy/job"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
-	"github.com/deciduosity/jasper/options"
-	"github.com/pkg/errors"
+	"github.com/tychoish/jasper/options"
 )
 
 const downloadJobName = "jasper-download-job"

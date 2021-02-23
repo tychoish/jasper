@@ -5,8 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/tychoish/grip"
 	"github.com/pkg/errors"
+	"github.com/tychoish/grip"
 )
 
 func makeEnclosingDirectories(path string) error {

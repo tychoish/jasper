@@ -4,11 +4,11 @@ import (
 	"context"
 	"io"
 
-	"github.com/deciduosity/jasper/options"
-	"github.com/deciduosity/jasper/scripting"
+	"github.com/pkg/errors"
 	"github.com/tychoish/birch/mrpc/mongowire"
 	"github.com/tychoish/birch/mrpc/shell"
-	"github.com/pkg/errors"
+	"github.com/tychoish/jasper/options"
+	"github.com/tychoish/jasper/scripting"
 )
 
 const (

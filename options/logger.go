@@ -3,10 +3,10 @@ package options
 import (
 	"time"
 
+	"github.com/pkg/errors"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/send"
-	"github.com/pkg/errors"
 )
 
 const (

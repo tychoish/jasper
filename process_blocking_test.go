@@ -8,14 +8,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tychoish/grip"
-	"github.com/deciduosity/jasper/internal/executor"
-	"github.com/deciduosity/jasper/options"
-	"github.com/deciduosity/jasper/testutil"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/grip"
+	"github.com/tychoish/jasper/internal/executor"
+	"github.com/tychoish/jasper/options"
+	"github.com/tychoish/jasper/testutil"
 )
 
 const gracefulTimeout = 1000 * time.Millisecond

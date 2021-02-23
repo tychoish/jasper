@@ -9,10 +9,10 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/deciduosity/jasper/options"
-	"github.com/deciduosity/jasper/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/jasper/options"
+	"github.com/tychoish/jasper/testutil"
 )
 
 func makeTracker() (*windowsProcessTracker, error) {

@@ -6,11 +6,11 @@ import (
 	"net"
 	"testing"
 
-	"github.com/deciduosity/jasper"
-	"github.com/deciduosity/jasper/remote/internal"
-	"github.com/deciduosity/jasper/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/jasper"
+	"github.com/tychoish/jasper/remote/internal"
+	"github.com/tychoish/jasper/testutil"
 	"google.golang.org/grpc"
 )
 

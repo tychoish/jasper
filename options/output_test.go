@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tychoish/grip/send"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/grip/send"
 )
 
 func TestOutputOptions(t *testing.T) {

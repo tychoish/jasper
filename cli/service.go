@@ -10,14 +10,14 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/evergreen-ci/service"
+	"github.com/pkg/errors"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/grip/recovery"
 	"github.com/tychoish/grip/send"
-	"github.com/deciduosity/jasper/options"
-	"github.com/evergreen-ci/service"
-	"github.com/pkg/errors"
+	"github.com/tychoish/jasper/options"
 	"github.com/urfave/cli"
 )
 

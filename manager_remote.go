@@ -3,7 +3,7 @@ package jasper
 import (
 	"context"
 
-	"github.com/deciduosity/jasper/options"
+	"github.com/tychoish/jasper/options"
 )
 
 type remoteOverrideMgr struct {

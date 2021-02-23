@@ -1,8 +1,8 @@
 package jasper
 
 import (
-	"github.com/tychoish/grip"
 	"github.com/pkg/errors"
+	"github.com/tychoish/grip"
 )
 
 type windowsProcessTracker struct {

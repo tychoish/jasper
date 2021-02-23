@@ -11,12 +11,12 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/pkg/errors"
 	"github.com/tychoish/gimlet"
 	"github.com/tychoish/grip/message"
-	"github.com/deciduosity/jasper"
-	"github.com/deciduosity/jasper/options"
-	"github.com/deciduosity/jasper/scripting"
-	"github.com/pkg/errors"
+	"github.com/tychoish/jasper"
+	"github.com/tychoish/jasper/options"
+	"github.com/tychoish/jasper/scripting"
 )
 
 // Service defines a REST service that provides a remote manager, using

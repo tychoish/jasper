@@ -3,8 +3,8 @@ package cli
 import (
 	"context"
 
-	"github.com/deciduosity/jasper/options"
-	"github.com/deciduosity/jasper/remote"
+	"github.com/tychoish/jasper/options"
+	"github.com/tychoish/jasper/remote"
 	"github.com/urfave/cli"
 )
 

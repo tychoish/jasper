@@ -14,11 +14,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tychoish/grip"
-	"github.com/deciduosity/jasper/remote"
-	"github.com/deciduosity/jasper/util"
 	"github.com/evergreen-ci/service"
 	"github.com/pkg/errors"
+	"github.com/tychoish/grip"
+	"github.com/tychoish/jasper/remote"
+	"github.com/tychoish/jasper/util"
 	"github.com/urfave/cli"
 )
 

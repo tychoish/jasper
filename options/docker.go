@@ -5,9 +5,9 @@ import (
 	"net"
 	"runtime"
 
-	"github.com/tychoish/grip"
 	"github.com/docker/docker/client"
 	"github.com/pkg/errors"
+	"github.com/tychoish/grip"
 )
 
 // Docker encapsulates options related to connecting to a Docker daemon.

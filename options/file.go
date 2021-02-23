@@ -7,8 +7,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/tychoish/grip"
 	"github.com/pkg/errors"
+	"github.com/tychoish/grip"
 )
 
 // WriteFile represents the options necessary to write to a file.

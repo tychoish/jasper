@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/tychoish/grip"
-	"github.com/deciduosity/jasper/options"
+	"github.com/tychoish/jasper/options"
 )
 
 func makeLockingProcess(pmake ProcessConstructor) ProcessConstructor {

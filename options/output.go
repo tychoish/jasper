@@ -5,11 +5,11 @@ import (
 	"io/ioutil"
 	"time"
 
+	"github.com/pkg/errors"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/send"
-	"github.com/deciduosity/jasper/util"
-	"github.com/pkg/errors"
+	"github.com/tychoish/jasper/util"
 )
 
 // Output provides a common way to define and represent the

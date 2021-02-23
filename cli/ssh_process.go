@@ -4,8 +4,8 @@ import (
 	"context"
 	"syscall"
 
-	"github.com/deciduosity/jasper"
 	"github.com/pkg/errors"
+	"github.com/tychoish/jasper"
 )
 
 // clientFunc is a function that runs the given Jasper CLI command with the

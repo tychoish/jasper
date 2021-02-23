@@ -11,12 +11,12 @@ import (
 	"sort"
 	"time"
 
+	"github.com/google/shlex"
+	"github.com/pkg/errors"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/send"
-	"github.com/deciduosity/jasper/internal/executor"
-	"github.com/google/shlex"
-	"github.com/pkg/errors"
+	"github.com/tychoish/jasper/internal/executor"
 )
 
 const (

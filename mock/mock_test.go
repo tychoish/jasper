@@ -3,9 +3,9 @@ package mock
 import (
 	"testing"
 
-	"github.com/deciduosity/jasper"
-	"github.com/deciduosity/jasper/remote"
 	"github.com/stretchr/testify/assert"
+	"github.com/tychoish/jasper"
+	"github.com/tychoish/jasper/remote"
 )
 
 func TestMockInterfaces(t *testing.T) {

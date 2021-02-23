@@ -4,8 +4,8 @@ import (
 	"context"
 	"sync"
 
-	"github.com/deciduosity/jasper/options"
 	"github.com/pkg/errors"
+	"github.com/tychoish/jasper/options"
 )
 
 // MakeSynchronizedManager wraps the given manager in a thread-safe Manager.

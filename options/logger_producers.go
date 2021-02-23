@@ -1,9 +1,9 @@
 package options
 
 import (
+	"github.com/pkg/errors"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/send"
-	"github.com/pkg/errors"
 )
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -3,8 +3,8 @@ package jasper
 import (
 	"context"
 
-	"github.com/deciduosity/jasper/options"
 	"github.com/pkg/errors"
+	"github.com/tychoish/jasper/options"
 )
 
 // NewProcess is a factory function which constructs a local Process outside

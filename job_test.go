@@ -4,10 +4,10 @@ import (
 	"context"
 	"testing"
 
-	"github.com/tychoish/amboy/registry"
-	"github.com/deciduosity/jasper/options"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/amboy/registry"
+	"github.com/tychoish/jasper/options"
 )
 
 func TestAmboyJob(t *testing.T) {

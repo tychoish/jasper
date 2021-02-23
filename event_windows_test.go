@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/deciduosity/jasper/options"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/jasper/options"
 )
 
 const (

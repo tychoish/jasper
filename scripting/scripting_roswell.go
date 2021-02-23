@@ -9,10 +9,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tychoish/grip"
-	"github.com/deciduosity/jasper"
-	"github.com/deciduosity/jasper/options"
 	"github.com/pkg/errors"
+	"github.com/tychoish/grip"
+	"github.com/tychoish/jasper"
+	"github.com/tychoish/jasper/options"
 )
 
 type roswellEnvironment struct {

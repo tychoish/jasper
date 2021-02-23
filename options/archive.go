@@ -3,8 +3,8 @@ package options
 import (
 	"path/filepath"
 
-	"github.com/tychoish/grip"
 	"github.com/pkg/errors"
+	"github.com/tychoish/grip"
 )
 
 // ArchiveFormat represents an archive file type.

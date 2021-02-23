@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/pkg/errors"
 	"github.com/tychoish/gimlet"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
-	"github.com/deciduosity/jasper/options"
-	"github.com/pkg/errors"
+	"github.com/tychoish/jasper/options"
 )
 
 // restLoggingCache is the client-side representation of a jasper.LoggingCache

@@ -3,9 +3,9 @@ package scripting
 import (
 	"sync"
 
-	"github.com/deciduosity/jasper"
-	"github.com/deciduosity/jasper/options"
 	"github.com/pkg/errors"
+	"github.com/tychoish/jasper"
+	"github.com/tychoish/jasper/options"
 )
 
 // NewCache constructs a threadsafe HarnessCache instance.

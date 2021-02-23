@@ -5,7 +5,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/deciduosity/jasper/options"
+	"github.com/tychoish/jasper/options"
 )
 
 const (

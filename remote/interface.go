@@ -3,9 +3,9 @@ package remote
 import (
 	"context"
 
-	"github.com/deciduosity/jasper"
-	"github.com/deciduosity/jasper/options"
-	"github.com/deciduosity/jasper/scripting"
+	"github.com/tychoish/jasper"
+	"github.com/tychoish/jasper/options"
+	"github.com/tychoish/jasper/scripting"
 )
 
 // Manager provides an interface to access all functionality from a Jasper

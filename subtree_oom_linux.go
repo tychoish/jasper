@@ -7,8 +7,8 @@ import (
 	"context"
 	"os/exec"
 
-	"github.com/tychoish/grip/recovery"
 	"github.com/pkg/errors"
+	"github.com/tychoish/grip/recovery"
 )
 
 func (o *oomTrackerImpl) Clear(ctx context.Context) error {

@@ -3,10 +3,10 @@ package cli
 import (
 	"fmt"
 
-	"github.com/tychoish/grip"
-	"github.com/deciduosity/jasper"
 	"github.com/evergreen-ci/service"
 	"github.com/pkg/errors"
+	"github.com/tychoish/grip"
+	"github.com/tychoish/jasper"
 	"github.com/urfave/cli"
 )
 

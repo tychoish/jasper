@@ -8,10 +8,10 @@ import (
 	"syscall"
 	"testing"
 
-	"github.com/deciduosity/jasper/options"
-	"github.com/deciduosity/jasper/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/jasper/options"
+	"github.com/tychoish/jasper/testutil"
 )
 
 func TestBasicManagerWithTrackedProcesses(t *testing.T) {

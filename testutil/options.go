@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/deciduosity/jasper/options"
+	"github.com/tychoish/jasper/options"
 )
 
 // YesCreateOpts creates the options to run the "yes" command for the given

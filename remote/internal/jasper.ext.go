@@ -7,14 +7,14 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/golang/protobuf/ptypes"
+	"github.com/pkg/errors"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/grip/send"
-	"github.com/deciduosity/jasper"
-	"github.com/deciduosity/jasper/options"
-	"github.com/deciduosity/jasper/scripting"
-	"github.com/golang/protobuf/ptypes"
-	"github.com/pkg/errors"
+	"github.com/tychoish/jasper"
+	"github.com/tychoish/jasper/options"
+	"github.com/tychoish/jasper/scripting"
 )
 
 // Export takes a protobuf RPC CreateOptions struct and returns the analogous

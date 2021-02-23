@@ -4,12 +4,12 @@ import (
 	"context"
 	"time"
 
-	"github.com/tychoish/grip"
-	"github.com/tychoish/grip/message"
-	"github.com/deciduosity/jasper/options"
-	"github.com/deciduosity/jasper/util"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	"github.com/tychoish/grip"
+	"github.com/tychoish/grip/message"
+	"github.com/tychoish/jasper/options"
+	"github.com/tychoish/jasper/util"
 )
 
 type basicProcessManager struct {

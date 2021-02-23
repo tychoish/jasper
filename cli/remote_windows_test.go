@@ -6,11 +6,11 @@ import (
 	"syscall"
 	"testing"
 
-	"github.com/deciduosity/jasper"
-	"github.com/deciduosity/jasper/testutil"
-	"github.com/deciduosity/jasper/util"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/jasper"
+	"github.com/tychoish/jasper/testutil"
+	"github.com/tychoish/jasper/util"
 	"github.com/urfave/cli"
 )
 

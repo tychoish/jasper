@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/tychoish/grip"
 	"github.com/pkg/errors"
+	"github.com/tychoish/grip"
 )
 
 var httpClientPool *sync.Pool

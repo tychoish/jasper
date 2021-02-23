@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/tychoish/grip"
-	"github.com/deciduosity/jasper"
-	"github.com/deciduosity/jasper/options"
-	"github.com/deciduosity/jasper/remote"
-	"github.com/deciduosity/jasper/util"
 	"github.com/evergreen-ci/service"
 	"github.com/pkg/errors"
+	"github.com/tychoish/grip"
+	"github.com/tychoish/jasper"
+	"github.com/tychoish/jasper/options"
+	"github.com/tychoish/jasper/remote"
+	"github.com/tychoish/jasper/util"
 	"github.com/urfave/cli"
 )
 

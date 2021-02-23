@@ -4,13 +4,13 @@ import (
 	"context"
 	"time"
 
-	"github.com/tychoish/grip"
-	"github.com/tychoish/grip/message"
-	"github.com/deciduosity/jasper/options"
-	internal "github.com/deciduosity/jasper/remote/internal"
 	"github.com/golang/protobuf/ptypes"
 	empty "github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
+	"github.com/tychoish/grip"
+	"github.com/tychoish/grip/message"
+	"github.com/tychoish/jasper/options"
+	internal "github.com/tychoish/jasper/remote/internal"
 )
 
 // rpcLoggingCache is the client-side representation of a jasper.LoggingCache

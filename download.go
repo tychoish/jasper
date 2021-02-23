@@ -5,10 +5,10 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/pkg/errors"
 	"github.com/tychoish/amboy"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/recovery"
-	"github.com/pkg/errors"
 )
 
 func createDownloadJobs(path string, urls <-chan string, catcher grip.Catcher) <-chan amboy.Job {

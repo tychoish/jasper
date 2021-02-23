@@ -9,11 +9,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/tychoish/grip"
-	"github.com/deciduosity/jasper/internal/executor"
-	"github.com/deciduosity/jasper/options"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	"github.com/tychoish/grip"
+	"github.com/tychoish/jasper/internal/executor"
+	"github.com/tychoish/jasper/options"
 )
 
 type blockingProcess struct {

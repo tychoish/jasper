@@ -5,10 +5,10 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/pkg/errors"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
-	"github.com/deciduosity/jasper/options"
-	"github.com/pkg/errors"
+	"github.com/tychoish/jasper/options"
 )
 
 // ProcessTrigger describes the way to write cleanup functions for

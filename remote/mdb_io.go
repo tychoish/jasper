@@ -3,10 +3,10 @@ package remote
 import (
 	"time"
 
-	"github.com/deciduosity/jasper"
-	"github.com/deciduosity/jasper/options"
-	"github.com/deciduosity/jasper/scripting"
 	"github.com/tychoish/birch/mrpc/shell"
+	"github.com/tychoish/jasper"
+	"github.com/tychoish/jasper/options"
+	"github.com/tychoish/jasper/scripting"
 )
 
 // infoRequest represents a request for runtime information regarding the

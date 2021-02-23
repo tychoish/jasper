@@ -8,8 +8,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/tychoish/grip"
-	"github.com/tychoish/grip/message"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/network"
@@ -17,6 +15,8 @@ import (
 	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	"github.com/tychoish/grip"
+	"github.com/tychoish/grip/message"
 )
 
 type docker struct {

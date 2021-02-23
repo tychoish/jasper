@@ -11,14 +11,14 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/tychoish/amboy/queue"
-	"github.com/tychoish/grip"
-	"github.com/deciduosity/jasper/options"
-	"github.com/deciduosity/jasper/testutil"
 	"github.com/mholt/archiver"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/amboy/queue"
+	"github.com/tychoish/grip"
+	"github.com/tychoish/jasper/options"
+	"github.com/tychoish/jasper/testutil"
 )
 
 func TestCreateValidDownloadJobs(t *testing.T) {

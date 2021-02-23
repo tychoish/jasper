@@ -4,8 +4,8 @@ import (
 	"context"
 	"syscall"
 
-	"github.com/deciduosity/jasper/remote"
 	"github.com/pkg/errors"
+	"github.com/tychoish/jasper/remote"
 	"github.com/urfave/cli"
 )
 

@@ -7,14 +7,14 @@ import (
 	"time"
 
 	"github.com/cheynewallace/tabby"
+	"github.com/google/uuid"
+	"github.com/pkg/errors"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/grip/recovery"
-	"github.com/deciduosity/jasper"
-	"github.com/deciduosity/jasper/options"
-	"github.com/deciduosity/jasper/remote"
-	"github.com/google/uuid"
-	"github.com/pkg/errors"
+	"github.com/tychoish/jasper"
+	"github.com/tychoish/jasper/options"
+	"github.com/tychoish/jasper/remote"
 	"github.com/urfave/cli"
 )
 

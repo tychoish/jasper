@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/tychoish/grip"
 	"github.com/mholt/archiver"
 	"github.com/pkg/errors"
+	"github.com/tychoish/grip"
 )
 
 // AddFileToDirectory adds an archive file given by fileName with the given

@@ -3,9 +3,9 @@ package scripting
 import (
 	"context"
 
-	"github.com/deciduosity/jasper"
-	"github.com/deciduosity/jasper/options"
 	"github.com/pkg/errors"
+	"github.com/tychoish/jasper"
+	"github.com/tychoish/jasper/options"
 )
 
 // Harness provides an interface to execute code in a

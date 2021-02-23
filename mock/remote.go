@@ -3,9 +3,9 @@ package mock
 import (
 	"context"
 
-	"github.com/deciduosity/jasper"
-	"github.com/deciduosity/jasper/options"
-	"github.com/deciduosity/jasper/scripting"
+	"github.com/tychoish/jasper"
+	"github.com/tychoish/jasper/options"
+	"github.com/tychoish/jasper/scripting"
 )
 
 // RemoteClient implements the RemoteClient interface with exported fields

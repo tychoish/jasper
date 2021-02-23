@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/tychoish/grip"
-	"github.com/deciduosity/jasper"
-	"github.com/deciduosity/jasper/testutil"
 	"github.com/pkg/errors"
+	"github.com/tychoish/grip"
+	"github.com/tychoish/jasper"
+	"github.com/tychoish/jasper/testutil"
 )
 
 func makeTestMDBServiceAndClient(ctx context.Context, mngr jasper.Manager) (Manager, error) {

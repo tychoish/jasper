@@ -3,8 +3,8 @@ package jasper
 import (
 	"sync"
 
-	"github.com/tychoish/grip"
 	"github.com/pkg/errors"
+	"github.com/tychoish/grip"
 )
 
 // SignalTriggerFactory is a function that creates a SignalTrigger.

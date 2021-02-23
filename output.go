@@ -4,9 +4,9 @@ import (
 	"context"
 	"io"
 
-	"github.com/tychoish/grip/send"
-	"github.com/deciduosity/jasper/options"
 	"github.com/pkg/errors"
+	"github.com/tychoish/grip/send"
+	"github.com/tychoish/jasper/options"
 )
 
 // NewInMemoryLogger is a basic constructor that constructs a logger

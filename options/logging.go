@@ -7,12 +7,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pkg/errors"
+	"github.com/tychoish/birch"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/grip/send"
-	"github.com/tychoish/birch"
-	"github.com/pkg/errors"
 )
 
 // CachedLogger is the cached item representing a processes normal

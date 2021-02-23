@@ -1,4 +1,4 @@
-module github.com/deciduosity/jasper
+module github.com/tychoish/jasper
 
 go 1.14
 

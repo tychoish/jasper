@@ -14,7 +14,7 @@ import (
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/send"
-	"github.com/deciduosity/jasper/options"
+	"github.com/tychoish/jasper/options"
 )
 
 // Job is an alias for an amboy.Job, mostly for purposes of making the

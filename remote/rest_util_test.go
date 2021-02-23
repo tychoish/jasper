@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/tychoish/grip"
-	"github.com/deciduosity/jasper"
-	"github.com/deciduosity/jasper/testutil"
 	"github.com/pkg/errors"
+	"github.com/tychoish/grip"
+	"github.com/tychoish/jasper"
+	"github.com/tychoish/jasper/testutil"
 )
 
 func startRESTService(ctx context.Context, client *http.Client) (*Service, int, error) {

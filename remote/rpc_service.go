@@ -4,13 +4,13 @@ import (
 	"context"
 	"net"
 
+	"github.com/pkg/errors"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/recovery"
-	"github.com/deciduosity/jasper"
-	"github.com/deciduosity/jasper/options"
-	"github.com/deciduosity/jasper/remote/internal"
-	"github.com/deciduosity/jasper/util"
-	"github.com/pkg/errors"
+	"github.com/tychoish/jasper"
+	"github.com/tychoish/jasper/options"
+	"github.com/tychoish/jasper/remote/internal"
+	"github.com/tychoish/jasper/util"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )

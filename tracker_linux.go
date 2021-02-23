@@ -4,10 +4,10 @@ import (
 	"syscall"
 
 	"github.com/containerd/cgroups"
-	"github.com/tychoish/grip"
-	"github.com/tychoish/grip/message"
 	specs "github.com/opencontainers/runtime-spec/specs-go"
 	"github.com/pkg/errors"
+	"github.com/tychoish/grip"
+	"github.com/tychoish/grip/message"
 )
 
 const (

@@ -4,8 +4,8 @@ import (
 	"context"
 	"syscall"
 
-	"github.com/tychoish/grip"
 	"github.com/pkg/errors"
+	"github.com/tychoish/grip"
 )
 
 // Terminate sends a SIGTERM signal to the given process under the given

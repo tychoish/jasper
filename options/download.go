@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"path/filepath"
 
-	"github.com/tychoish/grip"
 	"github.com/mholt/archiver"
 	"github.com/pkg/errors"
+	"github.com/tychoish/grip"
 )
 
 // Download represents the options to download a file to a given path and

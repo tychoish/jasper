@@ -4,7 +4,7 @@ import (
 	"context"
 	"syscall"
 
-	"github.com/deciduosity/jasper"
+	"github.com/tychoish/jasper"
 )
 
 // Process implements the Process interface with exported fields to

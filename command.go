@@ -6,15 +6,15 @@ import (
 	"io"
 	"strings"
 
+	"github.com/google/shlex"
+	"github.com/pkg/errors"
 	"github.com/tychoish/amboy"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/grip/recovery"
 	"github.com/tychoish/grip/send"
-	"github.com/deciduosity/jasper/options"
-	"github.com/google/shlex"
-	"github.com/pkg/errors"
+	"github.com/tychoish/jasper/options"
 )
 
 // Command objects allow a quick and lightweight interface for firing off

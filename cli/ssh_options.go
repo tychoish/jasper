@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/tychoish/grip"
-	"github.com/deciduosity/jasper/options"
+	"github.com/tychoish/jasper/options"
 )
 
 // ClientOptions represents the options to connect the CLI client to the Jasper
