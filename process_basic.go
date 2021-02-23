@@ -8,7 +8,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/cdr/grip"
+	"github.com/tychoish/grip"
 	"github.com/deciduosity/jasper/internal/executor"
 	"github.com/deciduosity/jasper/options"
 	"github.com/google/uuid"

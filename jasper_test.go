@@ -3,7 +3,7 @@ package jasper
 import (
 	"context"
 
-	"github.com/cdr/grip"
+	"github.com/tychoish/grip"
 	"github.com/deciduosity/jasper/options"
 )
 

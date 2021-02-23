@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cdr/grip"
+	"github.com/tychoish/grip"
 	"github.com/deciduosity/jasper/remote"
 	"github.com/deciduosity/jasper/util"
 	"github.com/evergreen-ci/service"

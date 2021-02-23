@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/cdr/grip"
+	"github.com/tychoish/grip"
 	"github.com/deciduosity/jasper"
 	"github.com/deciduosity/jasper/testutil"
 	"github.com/pkg/errors"

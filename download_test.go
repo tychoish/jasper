@@ -11,8 +11,8 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/cdr/amboy/queue"
-	"github.com/cdr/grip"
+	"github.com/tychoish/amboy/queue"
+	"github.com/tychoish/grip"
 	"github.com/deciduosity/jasper/options"
 	"github.com/deciduosity/jasper/testutil"
 	"github.com/mholt/archiver"

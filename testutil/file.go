@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/cdr/grip"
+	"github.com/tychoish/grip"
 	"github.com/mholt/archiver"
 	"github.com/pkg/errors"
 )

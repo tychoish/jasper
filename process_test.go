@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cdr/grip"
+	"github.com/tychoish/grip"
 	"github.com/deciduosity/jasper/options"
 	"github.com/deciduosity/jasper/testutil"
 	"github.com/docker/docker/api/types"

@@ -5,8 +5,8 @@ import (
 	"syscall"
 
 	"github.com/tychoish/birch"
-	"github.com/cdr/grip"
-	"github.com/cdr/grip/message"
+	"github.com/tychoish/grip"
+	"github.com/tychoish/grip/message"
 	"github.com/deciduosity/jasper"
 	"github.com/deciduosity/jasper/options"
 	"github.com/tychoish/birch/mrpc/mongowire"

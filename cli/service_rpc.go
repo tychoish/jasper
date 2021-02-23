@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/cdr/grip"
-	"github.com/cdr/grip/recovery"
+	"github.com/tychoish/grip"
+	"github.com/tychoish/grip/recovery"
 	"github.com/deciduosity/jasper"
 	"github.com/deciduosity/jasper/options"
 	"github.com/deciduosity/jasper/remote"

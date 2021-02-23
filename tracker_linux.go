@@ -4,8 +4,8 @@ import (
 	"syscall"
 
 	"github.com/containerd/cgroups"
-	"github.com/cdr/grip"
-	"github.com/cdr/grip/message"
+	"github.com/tychoish/grip"
+	"github.com/tychoish/grip/message"
 	specs "github.com/opencontainers/runtime-spec/specs-go"
 	"github.com/pkg/errors"
 )

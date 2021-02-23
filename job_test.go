@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/cdr/amboy/registry"
+	"github.com/tychoish/amboy/registry"
 	"github.com/deciduosity/jasper/options"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

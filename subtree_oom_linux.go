@@ -7,7 +7,7 @@ import (
 	"context"
 	"os/exec"
 
-	"github.com/cdr/grip/recovery"
+	"github.com/tychoish/grip/recovery"
 	"github.com/pkg/errors"
 )
 

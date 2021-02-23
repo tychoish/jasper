@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/cdr/grip/message"
-	"github.com/cdr/grip/send"
+	"github.com/tychoish/grip/message"
+	"github.com/tychoish/grip/send"
 )
 
 // MockSender is a simple mock implementation of the grip/send.Sender

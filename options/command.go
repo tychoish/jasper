@@ -1,11 +1,11 @@
 package options
 
 import (
-	"github.com/cdr/grip"
-	"github.com/cdr/grip/level"
-	"github.com/cdr/grip/logging"
-	"github.com/cdr/grip/message"
-	"github.com/cdr/grip/send"
+	"github.com/tychoish/grip"
+	"github.com/tychoish/grip/level"
+	"github.com/tychoish/grip/logging"
+	"github.com/tychoish/grip/message"
+	"github.com/tychoish/grip/send"
 )
 
 // Command represents jasper.Command options that are configurable by the

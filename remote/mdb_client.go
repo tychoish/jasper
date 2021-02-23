@@ -5,8 +5,8 @@ import (
 	"net"
 	"time"
 
-	"github.com/cdr/grip"
-	"github.com/cdr/grip/message"
+	"github.com/tychoish/grip"
+	"github.com/tychoish/grip/message"
 	"github.com/tychoish/birch"
 	"github.com/tychoish/birch/mrpc/mongowire"
 	"github.com/tychoish/birch/mrpc/shell"

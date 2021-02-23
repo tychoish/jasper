@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cdr/grip"
+	"github.com/tychoish/grip"
 	"github.com/deciduosity/jasper/options"
 	"github.com/pkg/errors"
 )

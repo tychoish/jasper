@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/cdr/grip"
-	"github.com/cdr/grip/message"
+	"github.com/tychoish/grip"
+	"github.com/tychoish/grip/message"
 	"github.com/deciduosity/jasper/options"
 	internal "github.com/deciduosity/jasper/remote/internal"
 	"github.com/golang/protobuf/ptypes"

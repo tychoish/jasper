@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cdr/grip"
+	"github.com/tychoish/grip"
 	"github.com/pkg/errors"
 )
 

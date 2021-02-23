@@ -6,8 +6,8 @@ import (
 	"net"
 	"syscall"
 
-	"github.com/cdr/grip"
-	"github.com/cdr/grip/message"
+	"github.com/tychoish/grip"
+	"github.com/tychoish/grip/message"
 	"github.com/deciduosity/jasper"
 	"github.com/deciduosity/jasper/options"
 	internal "github.com/deciduosity/jasper/remote/internal"

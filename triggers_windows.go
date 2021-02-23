@@ -3,8 +3,8 @@ package jasper
 import (
 	"syscall"
 
-	"github.com/cdr/grip"
-	"github.com/cdr/grip/message"
+	"github.com/tychoish/grip"
+	"github.com/tychoish/grip/message"
 )
 
 const cleanTerminationSignalTriggerSource = "clean termination trigger"

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"sync"
 
-	"github.com/cdr/grip/send"
+	"github.com/tychoish/grip/send"
 )
 
 var globalLoggerRegistry LoggerRegistry = &basicLoggerRegistry{

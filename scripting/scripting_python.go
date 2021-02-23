@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cdr/grip"
+	"github.com/tychoish/grip"
 	"github.com/deciduosity/jasper"
 	"github.com/deciduosity/jasper/options"
 	"github.com/deciduosity/jasper/util"

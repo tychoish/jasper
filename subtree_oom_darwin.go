@@ -8,7 +8,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/cdr/grip/recovery"
+	"github.com/tychoish/grip/recovery"
 	"github.com/pkg/errors"
 )
 

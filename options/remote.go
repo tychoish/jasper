@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"time"
 
-	"github.com/cdr/grip"
+	"github.com/tychoish/grip"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/ssh"
 )

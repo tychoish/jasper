@@ -5,9 +5,9 @@ import (
 	"io/ioutil"
 	"time"
 
-	"github.com/cdr/grip"
-	"github.com/cdr/grip/level"
-	"github.com/cdr/grip/send"
+	"github.com/tychoish/grip"
+	"github.com/tychoish/grip/level"
+	"github.com/tychoish/grip/send"
 	"github.com/deciduosity/jasper/util"
 	"github.com/pkg/errors"
 )

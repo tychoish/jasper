@@ -5,8 +5,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/cdr/grip"
-	"github.com/cdr/grip/message"
+	"github.com/tychoish/grip"
+	"github.com/tychoish/grip/message"
 	"github.com/deciduosity/jasper/options"
 	"github.com/pkg/errors"
 )

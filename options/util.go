@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/cdr/grip"
+	"github.com/tychoish/grip"
 	"github.com/pkg/errors"
 )
 

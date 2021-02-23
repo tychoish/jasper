@@ -6,8 +6,8 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/cdr/grip"
-	"github.com/cdr/grip/recovery"
+	"github.com/tychoish/grip"
+	"github.com/tychoish/grip/recovery"
 	"github.com/tychoish/birch"
 	"github.com/tychoish/birch/mrpc"
 	"github.com/tychoish/birch/mrpc/mongowire"

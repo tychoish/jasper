@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cdr/grip/level"
-	"github.com/cdr/grip/send"
+	"github.com/tychoish/grip/level"
+	"github.com/tychoish/grip/send"
 	"github.com/deciduosity/jasper/options"
 	"github.com/deciduosity/jasper/testutil"
 	"github.com/deciduosity/jasper/util"

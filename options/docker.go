@@ -5,7 +5,7 @@ import (
 	"net"
 	"runtime"
 
-	"github.com/cdr/grip"
+	"github.com/tychoish/grip"
 	"github.com/docker/docker/client"
 	"github.com/pkg/errors"
 )

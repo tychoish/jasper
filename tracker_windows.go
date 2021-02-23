@@ -1,7 +1,7 @@
 package jasper
 
 import (
-	"github.com/cdr/grip"
+	"github.com/tychoish/grip"
 	"github.com/pkg/errors"
 )
 

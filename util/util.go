@@ -5,7 +5,7 @@ import (
 	"io"
 	"sync"
 
-	"github.com/cdr/grip/send"
+	"github.com/tychoish/grip/send"
 )
 
 // CloseFunc is a function used to close a service or close the client

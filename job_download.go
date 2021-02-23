@@ -8,11 +8,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cdr/amboy"
-	"github.com/cdr/amboy/dependency"
-	"github.com/cdr/amboy/job"
-	"github.com/cdr/grip"
-	"github.com/cdr/grip/message"
+	"github.com/tychoish/amboy"
+	"github.com/tychoish/amboy/dependency"
+	"github.com/tychoish/amboy/job"
+	"github.com/tychoish/grip"
+	"github.com/tychoish/grip/message"
 	"github.com/deciduosity/jasper/options"
 	"github.com/pkg/errors"
 )

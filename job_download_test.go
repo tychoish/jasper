@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/cdr/amboy"
-	"github.com/cdr/amboy/dependency"
-	"github.com/cdr/amboy/registry"
+	"github.com/tychoish/amboy"
+	"github.com/tychoish/amboy/dependency"
+	"github.com/tychoish/amboy/registry"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"

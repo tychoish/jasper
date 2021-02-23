@@ -3,7 +3,7 @@ package cli
 import (
 	"fmt"
 
-	"github.com/cdr/grip"
+	"github.com/tychoish/grip"
 	"github.com/deciduosity/jasper/options"
 )
 
