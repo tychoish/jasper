@@ -219,15 +219,19 @@ func (o *Output) Close() error {
 	catcher := emt.NewBasicCatcher()
 	// Close the outputSender and errorSender, which does not close the
 	// underlying send.Sender.
-	catcher.CheckWhen(o.outputSender != nil, o.outputSender.Close)
-	catcher.CheckWhen(o.errorSender != nil, o.errorSender.Close)
+	if o.outputSender != nil {
+		catcher.Add(o.outputSender.Close())
+		catcher.Add(o.outputSender.Sender.Close())
+	}
+	if o.errorSender != nil {
+		catcher.Add(o.errorSender.Close())
 
-	// Close the sender wrapped by the send.WriterSender.
-	catcher.CheckWhen(o.outputSender != nil, o.outputSender.Sender.Close)
-	// Since senders are shared, only close error's senders if output hasn't
-	// already closed them.
-	catcher.CheckWhen(o.errorSender != nil && (o.SuppressOutput || o.SendOutputToError),
-		o.errorSender.Sender.Close)
+		// Close the sender wrapped by the send.WriterSender.
+		// Since senders are shared, only close error's senders if output hasn't
+		// already closed them.
+		catcher.AddWhen((o.SuppressOutput || o.SendOutputToError),
+			o.errorSender.Sender.Close())
+	}
 
 	return catcher.Resolve()
 }
