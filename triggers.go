@@ -5,7 +5,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/jasper/options"
@@ -61,7 +60,7 @@ const (
 
 func makeOptionsCloseTrigger() ProcessTrigger {
 	return func(info ProcessInfo) {
-		grip.Warning(errors.Wrap(info.Options.Close(), "error occurred while closing creation options"))
+		grip.Warning(info.Options.Close())
 	}
 }
 
