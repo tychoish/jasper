@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/tychoish/grip"
+	"github.com/tychoish/emt"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/send"
 )
@@ -139,7 +139,7 @@ func NewLoggerConfig(producerType string, format RawLoggerConfigFormat, config [
 }
 
 func (lc *LoggerConfig) validate() error {
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 
 	catcher.NewWhen(lc.info.Type == "", "cannot have empty logger type")
 	if len(lc.info.Config) > 0 {
@@ -307,14 +307,14 @@ type BaseOptions struct {
 
 // Validate ensures that BaseOptions is valid.
 func (opts *BaseOptions) Validate() error {
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 
 	if opts.Level.Threshold == 0 && opts.Level.Default == 0 {
 		opts.Level = send.LevelInfo{Default: level.Trace, Threshold: level.Trace}
 	}
 
 	catcher.NewWhen(!opts.Level.Valid(), "invalid log level")
-	catcher.Wrap(opts.Buffer.Validate(), "invalid buffering options")
+	catcher.Add(opts.Buffer.Validate())
 	catcher.Add(opts.Format.Validate())
 	return catcher.Resolve()
 }
@@ -354,7 +354,7 @@ func NewSafeSender(baseSender send.Sender, opts BaseOptions) (send.Sender, error
 
 	sender := &SafeSender{}
 	if opts.Buffer.Buffered {
-		sender.Sender = send.NewBufferedSender(baseSender, opts.Buffer.Duration, opts.Buffer.MaxSize)
+		sender.Sender = send.NewBuffered(baseSender, opts.Buffer.Duration, opts.Buffer.MaxSize)
 		sender.baseSender = baseSender
 	} else {
 		sender.Sender = baseSender
@@ -364,9 +364,7 @@ func NewSafeSender(baseSender send.Sender, opts BaseOptions) (send.Sender, error
 	if err != nil {
 		return nil, err
 	}
-	if err := sender.SetFormatter(formatter); err != nil {
-		return nil, errors.New("failed to set log format")
-	}
+	sender.SetFormatter(formatter)
 
 	return sender, nil
 }
@@ -381,12 +379,10 @@ func (s *SafeSender) GetSender() send.Sender {
 }
 
 func (s *SafeSender) Close() error {
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 
-	catcher.Wrap(s.Sender.Close(), "problem closing sender")
-	if s.baseSender != nil {
-		catcher.Wrap(s.baseSender.Close(), "problem closing base sender")
-	}
+	catcher.Add(s.Sender.Close())
+	catcher.AddWhen(s.baseSender != nil, s.baseSender.Close())
 
 	return catcher.Resolve()
 }

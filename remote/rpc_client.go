@@ -8,6 +8,7 @@ import (
 
 	empty "github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
+	"github.com/tychoish/emt"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/jasper"
@@ -264,9 +265,9 @@ func (c *rpcClient) WriteFile(ctx context.Context, jopts options.WriteFile) erro
 	}
 
 	if err = jopts.WriteBufferedContent(sendOpts); err != nil {
-		catcher := grip.NewBasicCatcher()
-		catcher.Wrapf(err, "error reading from content source")
-		catcher.Wrapf(stream.CloseSend(), "error closing send stream after error during read: %s", err.Error())
+		catcher := emt.NewBasicCatcher()
+		catcher.Add(err)
+		catcher.Add(stream.CloseSend())
 		return catcher.Resolve()
 	}
 

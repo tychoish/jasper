@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/tychoish/grip"
+	"github.com/tychoish/emt"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 )
@@ -130,7 +130,7 @@ func (e *golangEnvironment) Test(ctx context.Context, dir string, tests ...TestO
 
 	out := make([]TestResult, len(tests))
 
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	for idx, t := range tests {
 		startAt := time.Now()
 		args := []string{e.opts.Interpreter(), "test", "-v"}
@@ -154,7 +154,9 @@ func (e *golangEnvironment) Test(ctx context.Context, dir string, tests ...TestO
 			SetOutputOptions(e.opts.Output).
 			Add(args).Run(ctx)
 
-		catcher.Wrapf(err, "golang test %s", t)
+		if err != nil {
+			catcher.Errorf("golang test %q: %w", t, err)
+		}
 
 		out[idx] = t.getResult(ctx, err, startAt)
 	}

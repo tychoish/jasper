@@ -28,9 +28,9 @@ import (
 )
 
 func init() {
-	sender := grip.GetSender()
+	sender := grip.Sender()
 	grip.Error(sender.SetLevel(send.LevelInfo{Default: level.Info, Threshold: level.Info}))
-	grip.Error(grip.SetSender(sender))
+	grip.SetGlobalLogger(grip.NewLogger(sender))
 
 	reg := options.GetGlobalLoggerRegistry()
 	reg.RegisterMarshaler(options.RawLoggerConfigFormatBSON, bson.Marshal)
@@ -1264,8 +1264,8 @@ func TestManager(t *testing.T) {
 func createTestScriptingHarness(ctx context.Context, t *testing.T, client Manager, dir string) scripting.Harness {
 	opts := options.NewGolangScriptingEnvironment(filepath.Join(dir, "gopath"), runtime.GOROOT()).(*options.ScriptingGolang)
 
-	opts.Output.Error = send.MakeWriterSender(grip.GetSender(), level.Error)
-	opts.Output.Output = send.MakeWriterSender(grip.GetSender(), level.Info)
+	opts.Output.Error = send.NewWriter(grip.Sender(), level.Error)
+	opts.Output.Output = send.NewWriter(grip.Sender(), level.Info)
 
 	harness, err := client.CreateScripting(ctx, opts)
 	require.NoError(t, err)

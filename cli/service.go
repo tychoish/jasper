@@ -12,11 +12,13 @@ import (
 
 	"github.com/evergreen-ci/service"
 	"github.com/pkg/errors"
+	"github.com/tychoish/emt"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/grip/recovery"
 	"github.com/tychoish/grip/send"
+	splunk "github.com/tychoish/grip/x/splunk"
 	"github.com/tychoish/jasper/options"
 	"github.com/urfave/cli"
 )
@@ -173,7 +175,7 @@ func serviceFlags() []cli.Flag {
 
 func validateLimits(flagNames ...string) func(*cli.Context) error {
 	return func(c *cli.Context) error {
-		catcher := grip.NewBasicCatcher()
+		catcher := emt.NewBasicCatcher()
 		for _, flagName := range flagNames {
 			l := c.Int(flagName)
 			if l < -1 {
@@ -198,7 +200,7 @@ func validateLogLevel(flagName string) func(*cli.Context) error {
 // makeLogger creates a splunk logger. It may return nil if the splunk flags are
 // not populated or the splunk logger is not registered.
 func makeLogger(c *cli.Context) *options.LoggerConfig {
-	info := send.SplunkConnectionInfo{
+	info := splunk.ConnectionInfo{
 		ServerURL: c.String(splunkURLFlagName),
 		Token:     c.String(splunkTokenFlagName),
 		Channel:   c.String(splunkChannelFlagName),
@@ -244,7 +246,8 @@ func setupLogger(opts *options.LoggerConfig) error {
 	if err != nil {
 		return errors.Wrap(err, "could not configure logging")
 	}
-	return errors.Wrap(grip.SetSender(sender), "could not set grip logger")
+	grip.SetGlobalLogger(grip.NewLogger(sender))
+	return nil
 }
 
 // buildRunCommand builds the command arguments to run the Jasper service with
@@ -410,9 +413,9 @@ func forceReinstall(daemon service.Interface, config *service.Config) error {
 			"config": *config,
 		})
 
-		catcher := grip.NewBasicCatcher()
-		catcher.Wrap(svc.Install(), "error installing service")
-		catcher.Wrap(svc.Start(), "error starting service")
+		catcher := emt.NewBasicCatcher()
+		catcher.Add(svc.Install())
+		catcher.Add(svc.Start())
 		if catcher.HasErrors() {
 			grip.Debug(stopErr)
 			grip.Debug(uninstallErr)

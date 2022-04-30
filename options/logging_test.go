@@ -80,7 +80,7 @@ func TestLoggingCache(t *testing.T) {
 			lp.Format = LoggingPayloadFormatJSON
 			lp.Data = "hello, world!"
 			lp.Priority = level.Trace
-			logger := &CachedLogger{Output: grip.GetSender()}
+			logger := &CachedLogger{Output: grip.Sender()}
 			require.Error(t, logger.Send(lp))
 		})
 
@@ -233,7 +233,7 @@ func TestLoggingCache(t *testing.T) {
 				require.Equal(t, "hello world!", msg.String())
 			})
 			t.Run("Composer", func(t *testing.T) {
-				msg, err := lp.convertMessage(message.NewString("jasper"))
+				msg, err := lp.convertMessage(message.MakeString("jasper"))
 				require.NoError(t, err)
 				require.Equal(t, "jasper", msg.String())
 			})
@@ -295,9 +295,9 @@ func TestLoggingCache(t *testing.T) {
 			})
 			t.Run("Composers", func(t *testing.T) {
 				msg, err := lp.convertMultiMessage([]message.Composer{
-					message.NewString("hello world"),
-					message.NewString("jasper"),
-					message.NewString("grip"),
+					message.MakeString("hello world"),
+					message.MakeString("jasper"),
+					message.MakeString("grip"),
 				})
 				require.NoError(t, err)
 				msgs := requireIsGroup(t, 3, msg)

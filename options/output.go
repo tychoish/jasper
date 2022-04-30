@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/tychoish/grip"
+	"github.com/tychoish/emt"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/send"
 	"github.com/tychoish/jasper/util"
@@ -67,7 +67,7 @@ func (o Output) errorIsNull() bool {
 // Validate ensures that the Output it is called on has reasonable
 // values.
 func (o *Output) Validate() error {
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 
 	if o.SuppressOutput && (!o.outputIsNull() || o.outputLogging()) {
 		catcher.Add(errors.New("cannot suppress output if output is defined"))
@@ -132,12 +132,12 @@ func (o *Output) GetOutput() (io.Writer, error) {
 			outMulti = outLoggers[0]
 		} else {
 			var err error
-			outMulti, err = send.NewMultiSender(DefaultLogName, send.LevelInfo{Default: level.Info, Threshold: level.Trace}, outLoggers)
+			outMulti, err = send.NewMulti(DefaultLogName, send.LevelInfo{Default: level.Info, Threshold: level.Trace}, outLoggers)
 			if err != nil {
 				return ioutil.Discard, err
 			}
 		}
-		o.outputSender = send.NewWriterSender(outMulti)
+		o.outputSender = send.MakeWriter(outMulti)
 	}
 
 	if !o.outputIsNull() && o.outputLogging() {
@@ -177,12 +177,12 @@ func (o *Output) GetError() (io.Writer, error) {
 			errSenders = append(errSenders, sender)
 		}
 
-		errMulti, err := send.NewMultiSender(DefaultLogName, send.LevelInfo{Default: level.Error, Threshold: level.Trace}, errSenders)
+		errMulti, err := send.NewMulti(DefaultLogName, send.LevelInfo{Default: level.Error, Threshold: level.Trace}, errSenders)
 		if err != nil {
 			return ioutil.Discard, err
 		}
 		// This will not close the Loggers' underlying senders.
-		o.errorSender = send.NewWriterSender(errMulti)
+		o.errorSender = send.MakeWriter(errMulti)
 	}
 
 	if !o.errorIsNull() && o.errorLogging() {
@@ -216,24 +216,18 @@ func (o *Output) Copy() *Output {
 
 // Close calls all of the processes' output senders' Close method.
 func (o *Output) Close() error {
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	// Close the outputSender and errorSender, which does not close the
 	// underlying send.Sender.
-	if o.outputSender != nil {
-		catcher.Wrap(o.outputSender.Close(), "problem closing output sender")
-	}
-	if o.errorSender != nil {
-		catcher.Wrap(o.errorSender.Close(), "problem closing error sender")
-	}
+	catcher.AddWhen(o.outputSender != nil, o.outputSender.Close())
+	catcher.AddWhen(o.errorSender != nil, o.errorSender.Close())
+
 	// Close the sender wrapped by the send.WriterSender.
-	if o.outputSender != nil {
-		catcher.Wrap(o.outputSender.Sender.Close(), "problem closing wrapped output sender")
-	}
+	catcher.AddWhen(o.outputSender != nil, o.outputSender.Sender.Close())
 	// Since senders are shared, only close error's senders if output hasn't
 	// already closed them.
-	if o.errorSender != nil && (o.SuppressOutput || o.SendOutputToError) {
-		catcher.Wrap(o.errorSender.Sender.Close(), "problem closing wrapped error sender")
-	}
+	catcher.AddWhen(o.errorSender != nil && (o.SuppressOutput || o.SendOutputToError),
+		o.errorSender.Sender.Close())
 
 	return catcher.Resolve()
 }

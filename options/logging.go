@@ -9,7 +9,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/tychoish/birch"
-	"github.com/tychoish/grip"
+	"github.com/tychoish/emt"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/grip/send"
@@ -41,7 +41,7 @@ func (cl *CachedLogger) getSender(preferError bool) (send.Sender, error) {
 
 // Close closes the underlying output for the cached logger.
 func (cl *CachedLogger) Close() error {
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	if cl.Output != nil {
 		catcher.Check(cl.Output.Close)
 	}
@@ -76,7 +76,7 @@ const (
 // Validate checks that the required fields are populated for the payload and
 // the format is valid.
 func (lp *LoggingPayload) Validate() error {
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	catcher.NewWhen(lp.Data == nil, "data cannot be empty")
 	switch lp.Format {
 	case "", LoggingPayloadFormatBSON, LoggingPayloadFormatJSON, LoggingPayloadFormatSTRING:
@@ -136,7 +136,7 @@ func (lp *LoggingPayload) convertMultiMessage(value interface{}) (message.Compos
 			}
 			batch = append(batch, elem)
 		}
-		return message.NewGroupComposer(batch), nil
+		return message.MakeGroupComposer(batch), nil
 	case [][]byte:
 		batch := []message.Composer{}
 		for _, dt := range data {
@@ -146,7 +146,7 @@ func (lp *LoggingPayload) convertMultiMessage(value interface{}) (message.Compos
 			}
 			batch = append(batch, elem)
 		}
-		return message.NewGroupComposer(batch), nil
+		return message.MakeGroupComposer(batch), nil
 	case []interface{}:
 		batch := []message.Composer{}
 		for _, dt := range data {
@@ -156,9 +156,9 @@ func (lp *LoggingPayload) convertMultiMessage(value interface{}) (message.Compos
 			}
 			batch = append(batch, elem)
 		}
-		return message.NewGroupComposer(batch), nil
+		return message.MakeGroupComposer(batch), nil
 	default:
-		return message.ConvertToComposer(lp.Priority, value), nil
+		return message.ConvertWithPriority(lp.Priority, value), nil
 	}
 }
 
@@ -169,9 +169,9 @@ func (lp *LoggingPayload) convertMessage(value interface{}) (message.Composer, e
 	case []byte:
 		return lp.produceMessage(data)
 	case []string:
-		return message.ConvertToComposer(lp.Priority, data), nil
+		return message.ConvertWithPriority(lp.Priority, data), nil
 	case [][]byte:
-		return message.NewLineMessage(lp.Priority, byteSlicesToStringSlice(data)), nil
+		return message.NewLines(lp.Priority, byteSlicesToStringSlice(data)), nil
 	case message.Fields:
 		if lp.AddMetadata {
 			return message.NewFields(lp.Priority, data), nil
@@ -187,11 +187,11 @@ func (lp *LoggingPayload) convertMessage(value interface{}) (message.Composer, e
 			}
 		}
 
-		return message.NewGroupComposer(msgs), nil
+		return message.MakeGroupComposer(msgs), nil
 	case []interface{}:
-		return message.NewLineMessage(lp.Priority, data...), nil
+		return message.NewLines(lp.Priority, data...), nil
 	default:
-		return message.ConvertToComposer(lp.Priority, value), nil
+		return message.ConvertWithPriority(lp.Priority, value), nil
 	}
 }
 
@@ -225,10 +225,10 @@ func (lp *LoggingPayload) produceMessage(data []byte) (message.Composer, error) 
 		return message.NewSimpleFields(lp.Priority, payload), nil
 	default: // includes string case.
 		if lp.AddMetadata {
-			return message.NewBytesMessage(lp.Priority, data), nil
+			return message.NewBytes(lp.Priority, data), nil
 		}
 
-		return message.NewSimpleBytesMessage(lp.Priority, data), nil
+		return message.NewSimpleBytes(lp.Priority, data), nil
 	}
 }
 

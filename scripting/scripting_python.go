@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/tychoish/grip"
+	"github.com/tychoish/emt"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/util"
@@ -127,7 +127,7 @@ func (e *pythonEnvironment) Cleanup(ctx context.Context) error {
 func (e *pythonEnvironment) Test(ctx context.Context, dir string, tests ...TestOptions) ([]TestResult, error) {
 	out := make([]TestResult, len(tests))
 
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	for idx, t := range tests {
 		startAt := time.Now()
 		args := []string{e.opts.Interpreter(), "-m", "pytest"}
@@ -145,7 +145,9 @@ func (e *pythonEnvironment) Test(ctx context.Context, dir string, tests ...TestO
 
 		err := e.manager.CreateCommand(ctx).Directory(dir).Environment(e.opts.Environment).SetOutputOptions(e.opts.Output).Add(args).Run(ctx)
 
-		catcher.Wrapf(err, "python test %s", t)
+		if err != nil {
+			catcher.Errorf("python test %q: %w", t, err)
+		}
 
 		out[idx] = t.getResult(ctx, err, startAt)
 	}

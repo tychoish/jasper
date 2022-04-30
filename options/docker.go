@@ -7,7 +7,7 @@ import (
 
 	"github.com/docker/docker/client"
 	"github.com/pkg/errors"
-	"github.com/tychoish/grip"
+	"github.com/tychoish/emt"
 )
 
 // Docker encapsulates options related to connecting to a Docker daemon.
@@ -24,7 +24,7 @@ type Docker struct {
 // Validate checks whether all the required fields are set and sets defaults if
 // none are specified.
 func (opts *Docker) Validate() error {
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	catcher.NewWhen(opts.Port < 0, "port must be positive value")
 	catcher.NewWhen(opts.Image == "", "Docker image must be specified")
 	if opts.Platform == "" {

@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/pkg/errors"
-	"github.com/tychoish/grip"
+	"github.com/tychoish/emt"
 )
 
 func makeEnclosingDirectories(path string) error {
@@ -31,7 +31,7 @@ func writeFile(reader io.Reader, path string) error {
 		return errors.Wrap(err, "problem creating file")
 	}
 
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	if _, err := io.Copy(file, reader); err != nil {
 		catcher.Add(errors.Wrap(err, "problem writing file"))
 	}

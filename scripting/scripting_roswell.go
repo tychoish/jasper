@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/tychoish/grip"
+	"github.com/tychoish/emt"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 )
@@ -101,7 +101,7 @@ func (e *roswellEnvironment) Cleanup(ctx context.Context) error {
 func (e *roswellEnvironment) Test(ctx context.Context, dir string, tests ...TestOptions) ([]TestResult, error) {
 	out := make([]TestResult, len(tests))
 
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	for idx, t := range tests {
 		if t.Count == 0 {
 			t.Count++
@@ -126,8 +126,9 @@ func (e *roswellEnvironment) Test(ctx context.Context, dir string, tests ...Test
 		}
 
 		err := cmd.Run(tctx)
-
-		catcher.Wrapf(err, "roswell test %s", t)
+		if err != nil {
+			catcher.Errorf("roswell test %q: %w", t, err)
+		}
 
 		out[idx] = t.getResult(ctx, err, startAt)
 		cancel()

@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 
 	"github.com/pkg/errors"
-	"github.com/tychoish/grip"
+	"github.com/tychoish/emt"
 )
 
 // ArchiveFormat represents an archive file type.
@@ -43,7 +43,7 @@ func (opts Archive) Validate() error {
 		return nil
 	}
 
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 
 	if !filepath.IsAbs(opts.TargetPath) {
 		catcher.Add(errors.New("download path must be an absolute path"))

@@ -286,8 +286,8 @@ func (j *amboyForegroundOutputJob) Run(ctx context.Context) {
 		return
 	}
 
-	j.Options.Output.Error = send.MakeWriterSender(grip.GetSender(), level.Error)
-	j.Options.Output.Output = send.MakeWriterSender(grip.GetSender(), level.Info)
+	j.Options.Output.Error = send.NewWriter(grip.Sender(), level.Error)
+	j.Options.Output.Output = send.NewWriter(grip.Sender(), level.Info)
 
 	p, err := j.makep(ctx, j.Options)
 	if err != nil {

@@ -12,6 +12,7 @@ import (
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/grip/send"
+	splunk "github.com/tychoish/grip/x/splunk"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/scripting"
@@ -439,8 +440,8 @@ func (opts InMemoryLoggerOptions) Export() options.LoggerProducer {
 
 // Export takes a protobuf RPC SplunkInfo struct and returns the analogous
 // grip send.SplunkConnectionInfo struct.
-func (opts SplunkInfo) Export() send.SplunkConnectionInfo {
-	return send.SplunkConnectionInfo{
+func (opts SplunkInfo) Export() splunk.ConnectionInfo {
+	return splunk.ConnectionInfo{
 		ServerURL: opts.Url,
 		Token:     opts.Token,
 		Channel:   opts.Channel,
@@ -450,7 +451,7 @@ func (opts SplunkInfo) Export() send.SplunkConnectionInfo {
 // ConvertSplunkInfo takes a grip send.SplunkConnectionInfo and returns the
 // analogous protobuf RPC SplunkInfo struct. ConvertSplunkInfo is the inverse
 // of (SplunkInfo) Export().
-func ConvertSplunkInfo(opts send.SplunkConnectionInfo) *SplunkInfo {
+func ConvertSplunkInfo(opts splunk.ConnectionInfo) *SplunkInfo {
 	return &SplunkInfo{
 		Url:     opts.ServerURL,
 		Token:   opts.Token,

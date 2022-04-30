@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/tychoish/grip"
+	"github.com/tychoish/emt"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -60,7 +60,7 @@ func (opts *Proxy) Copy() *Proxy {
 const defaultSSHPort = 22
 
 func (opts *RemoteConfig) validate() error {
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	if opts.Host == "" {
 		catcher.New("host cannot be empty")
 	}
@@ -135,13 +135,13 @@ func (opts *RemoteConfig) publicKeyAuth() (ssh.AuthMethod, error) {
 // Validate ensures that enough information is provided to connect to a remote
 // host.
 func (opts *Remote) Validate() error {
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 
 	if opts.Proxy != nil {
-		catcher.Wrap(opts.Proxy.validate(), "invalid proxy config")
+		catcher.Add(opts.Proxy.validate())
 	}
 
-	catcher.Wrap(opts.validate(), "invalid remote config")
+	catcher.Add(opts.validate())
 	return catcher.Resolve()
 }
 
@@ -172,25 +172,25 @@ func (opts *Remote) Resolve() (*ssh.Client, *ssh.Session, error) {
 
 		targetConn, err := proxyClient.Dial("tcp", fmt.Sprintf("%s:%d", opts.Host, opts.Port))
 		if err != nil {
-			catcher := grip.NewBasicCatcher()
-			catcher.Wrap(proxyClient.Close(), "error closing connection to proxy")
-			catcher.Wrap(err, "could not dial target host")
+			catcher := emt.NewBasicCatcher()
+			catcher.Add(proxyClient.Close())
+			catcher.Errorf("could not dial target host: %w", err)
 			return nil, nil, catcher.Resolve()
 		}
 
 		targetConfig, err := opts.resolve()
 		if err != nil {
-			catcher := grip.NewBasicCatcher()
-			catcher.Wrap(proxyClient.Close(), "error closing connection to proxy")
-			catcher.Wrap(err, "could not create target config")
+			catcher := emt.NewBasicCatcher()
+			catcher.Add(proxyClient.Close())
+			catcher.Errorf("could not create target config: %w", err)
 			return nil, nil, catcher.Resolve()
 		}
 		gatewayConn, chans, reqs, err := ssh.NewClientConn(targetConn, fmt.Sprintf("%s:%d", opts.Host, opts.Port), targetConfig)
 		if err != nil {
-			catcher := grip.NewBasicCatcher()
-			catcher.Wrap(targetConn.Close(), "error closing connection to target")
-			catcher.Wrap(proxyClient.Close(), "error closing connection to proxy")
-			catcher.Wrap(err, "could not establish connection to target via proxy")
+			catcher := emt.NewBasicCatcher()
+			catcher.Add(targetConn.Close())
+			catcher.Add(proxyClient.Close())
+			catcher.Errorf("could not establish connection to target via proxy: %w", err)
 			return nil, nil, catcher.Resolve()
 		}
 		client = ssh.NewClient(gatewayConn, chans, reqs)
@@ -208,7 +208,7 @@ func (opts *Remote) Resolve() (*ssh.Client, *ssh.Session, error) {
 
 	session, err := client.NewSession()
 	if err != nil {
-		catcher := grip.NewBasicCatcher()
+		catcher := emt.NewBasicCatcher()
 		catcher.Add(client.Close())
 		catcher.Add(err)
 		return nil, nil, errors.Wrap(catcher.Resolve(), "could not establish session")

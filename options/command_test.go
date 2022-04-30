@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
-	"github.com/tychoish/grip/logging"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/grip/send"
 )
@@ -62,7 +61,7 @@ func TestCommand(t *testing.T) {
 	t.Run("LoggingPreHook", func(t *testing.T) {
 		sender, err := send.NewInternalLogger("pre-hook", send.LevelInfo{Default: level.Debug, Threshold: level.Debug})
 		require.NoError(t, err)
-		logger := logging.MakeGrip(sender)
+		logger := grip.NewLogger(sender)
 		hook := NewLoggingPreHook(logger, level.Info)
 		assert.NotNil(t, hook)
 		cmd := &Command{ID: "TEST"}
@@ -76,12 +75,12 @@ func TestCommand(t *testing.T) {
 	})
 	t.Run("PrehookConstrcutors", func(t *testing.T) {
 		assert.NotNil(t, NewDefaultLoggingPreHook(level.Info))
-		assert.NotNil(t, NewLoggingPreHookFromSender(grip.GetSender(), level.Debug))
+		assert.NotNil(t, NewLoggingPreHookFromSender(grip.Sender(), level.Debug))
 	})
 	t.Run("MergePreook", func(t *testing.T) {
 		sender, err := send.NewInternalLogger("pre-hook", send.LevelInfo{Default: level.Debug, Threshold: level.Debug})
 		require.NoError(t, err)
-		logger := logging.MakeGrip(sender)
+		logger := grip.NewLogger(sender)
 
 		hook := MergePreHooks(NewLoggingPreHook(logger, level.Info), NewLoggingPreHook(logger, level.Info), NewLoggingPreHook(logger, level.Info))
 		assert.Equal(t, 0, sender.Len())

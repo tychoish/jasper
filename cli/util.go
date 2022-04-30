@@ -16,7 +16,7 @@ import (
 
 	"github.com/evergreen-ci/service"
 	"github.com/pkg/errors"
-	"github.com/tychoish/grip"
+	"github.com/tychoish/emt"
 	"github.com/tychoish/jasper/remote"
 	"github.com/tychoish/jasper/util"
 	"github.com/urfave/cli"
@@ -26,7 +26,7 @@ import (
 // the errors.
 func mergeBeforeFuncs(funcs ...cli.BeforeFunc) cli.BeforeFunc {
 	return func(c *cli.Context) error {
-		catcher := grip.NewBasicCatcher()
+		catcher := emt.NewBasicCatcher()
 		for _, f := range funcs {
 			catcher.Add(f(c))
 		}
@@ -166,7 +166,7 @@ func withConnection(ctx context.Context, c *cli.Context, operation func(remote.M
 		return errors.Wrap(err, "error setting up remote client")
 	}
 
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	catcher.Add(operation(client))
 	catcher.Add(client.CloseConnection())
 
@@ -187,7 +187,7 @@ func withService(daemon service.Interface, config *service.Config, operation fun
 func runServices(ctx context.Context, makeServices ...func(context.Context) (util.CloseFunc, error)) error {
 	closeServices := []util.CloseFunc{}
 	closeAllServices := func(closeServices []util.CloseFunc) error {
-		catcher := grip.NewBasicCatcher()
+		catcher := emt.NewBasicCatcher()
 		for _, closeService := range closeServices {
 			catcher.Add(errors.Wrap(closeService(), "error closing service"))
 		}
@@ -197,8 +197,8 @@ func runServices(ctx context.Context, makeServices ...func(context.Context) (uti
 	for _, makeService := range makeServices {
 		closeService, err := makeService(ctx)
 		if err != nil {
-			catcher := grip.NewBasicCatcher()
-			catcher.Wrap(err, "failed to create service")
+			catcher := emt.NewBasicCatcher()
+			catcher.Errorf("failed to create service: %w", err)
 			catcher.Add(closeAllServices(closeServices))
 			return catcher.Resolve()
 		}

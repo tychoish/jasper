@@ -6,6 +6,7 @@ import (
 	"github.com/containerd/cgroups"
 	specs "github.com/opencontainers/runtime-spec/specs-go"
 	"github.com/pkg/errors"
+	"github.com/tychoish/emt"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
 )
@@ -112,7 +113,7 @@ func (t *linuxProcessTracker) doCleanupByCgroup() error {
 		return errors.Wrap(err, "could not find tracked processes")
 	}
 
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	for _, pid := range pids {
 		catcher.Add(errors.Wrapf(cleanupProcess(pid), "error while cleaning up process with pid '%d'", pid))
 	}
@@ -127,7 +128,7 @@ func (t *linuxProcessTracker) doCleanupByCgroup() error {
 // value for environment variable ManagerEnvironID equals this process
 // tracker's name.
 func (t *linuxProcessTracker) doCleanupByEnvironmentVariable() error {
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	for _, info := range t.infos {
 		if value, ok := info.Options.Environment[ManagerEnvironID]; ok && value == t.Name {
 			catcher.Add(cleanupProcess(info.PID))
@@ -142,7 +143,7 @@ func (t *linuxProcessTracker) doCleanupByEnvironmentVariable() error {
 func cleanupProcess(pid int) error {
 	// A process returns syscall.ESRCH if it already terminated.
 	if err := syscall.Kill(pid, syscall.SIGTERM); err != nil && err != syscall.ESRCH {
-		catcher := grip.NewBasicCatcher()
+		catcher := emt.NewBasicCatcher()
 		catcher.Add(errors.Wrapf(err, "sending sigterm to process with PID '%d'", pid))
 		catcher.Add(errors.Wrapf(syscall.Kill(pid, syscall.SIGKILL), "sending sigkill to process with PID '%d'", pid))
 		return catcher.Resolve()
@@ -156,7 +157,7 @@ func cleanupProcess(pid int) error {
 // that there should be an environment variable ManagerEnvironID that has a
 // value equal to this process tracker's name.
 func (t *linuxProcessTracker) Cleanup() error {
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	if t.validCgroup() {
 		catcher.Add(errors.Wrap(t.doCleanupByCgroup(), "error occurred while cleaning up processes tracked by cgroup"))
 	}

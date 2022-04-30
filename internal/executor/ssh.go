@@ -7,7 +7,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/tychoish/grip"
+	"github.com/tychoish/emt"
 	cryptossh "golang.org/x/crypto/ssh"
 )
 
@@ -95,7 +95,7 @@ func (e *ssh) Start() error {
 
 // Wait returns the result of waiting for the remote process to finish.
 func (e *ssh) Wait() error {
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	e.exitErr = e.session.Wait()
 	catcher.Add(e.exitErr)
 	e.exited = true
@@ -152,12 +152,12 @@ func (e *ssh) SignalInfo() (sig syscall.Signal, signaled bool) {
 
 // Close closes the SSH connection resources.
 func (e *ssh) Close() error {
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	if err := e.session.Close(); err != nil && err != io.EOF {
-		catcher.Wrap(err, "error closing SSH session")
+		catcher.Errorf("error closing SSH session: %w", err)
 	}
 	if err := e.client.Close(); err != nil && err != io.EOF {
-		catcher.Wrap(err, "error closing SSH client")
+		catcher.Errorf("error closing SSH client: %w", err)
 	}
 	return catcher.Resolve()
 }

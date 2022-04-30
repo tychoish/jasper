@@ -9,6 +9,7 @@ import (
 	"github.com/google/shlex"
 	"github.com/pkg/errors"
 	"github.com/tychoish/amboy"
+	"github.com/tychoish/emt"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
@@ -524,7 +525,7 @@ func (c *Command) Run(ctx context.Context) error {
 		return c.runFunc(c.opts)
 	}
 
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 
 	opts, err := c.getCreateOpts()
 	if err != nil {
@@ -599,7 +600,7 @@ func (c *Command) RunParallel(ctx context.Context) error {
 		}(parallelCmd)
 	}
 
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	for i := 0; i < len(c.opts.Commands); i++ {
 		select {
 		case cmdRes := <-cmdResults:
@@ -643,7 +644,7 @@ func (c *Command) SetInputBytes(b []byte) *Command {
 // SetErrorSender sets a Sender to be used by this Command for its output to
 // stderr.
 func (c *Command) SetErrorSender(l level.Priority, s send.Sender) *Command {
-	writer := send.MakeWriterSender(s, l)
+	writer := send.NewWriter(s, l)
 	c.opts.Process.RegisterCloser(writer.Close)
 	c.opts.Process.Output.Error = writer
 	return c
@@ -652,7 +653,7 @@ func (c *Command) SetErrorSender(l level.Priority, s send.Sender) *Command {
 // SetOutputSender sets a Sender to be used by this Command for its output to
 // stdout.
 func (c *Command) SetOutputSender(l level.Priority, s send.Sender) *Command {
-	writer := send.MakeWriterSender(s, l)
+	writer := send.NewWriter(s, l)
 	c.opts.Process.RegisterCloser(writer.Close)
 	c.opts.Process.Output.Output = writer
 	return c
@@ -661,7 +662,7 @@ func (c *Command) SetOutputSender(l level.Priority, s send.Sender) *Command {
 // SetCombinedSender is the combination of SetErrorSender() and
 // SetOutputSender().
 func (c *Command) SetCombinedSender(l level.Priority, s send.Sender) *Command {
-	writer := send.MakeWriterSender(s, l)
+	writer := send.NewWriter(s, l)
 	c.opts.Process.RegisterCloser(writer.Close)
 	c.opts.Process.Output.Error = writer
 	c.opts.Process.Output.Output = writer
@@ -703,7 +704,7 @@ func (c *Command) EnqueueForeground(ctx context.Context, q amboy.Queue) error {
 		return errors.WithStack(err)
 	}
 
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	for _, j := range jobs {
 		catcher.Add(q.Put(ctx, j))
 	}
@@ -721,7 +722,7 @@ func (c *Command) Enqueue(ctx context.Context, q amboy.Queue) error {
 		return errors.WithStack(err)
 	}
 
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	for _, j := range jobs {
 		catcher.Add(q.Put(ctx, j))
 	}
@@ -806,7 +807,7 @@ func (c *Command) getCreateOpt(args []string) (*options.Create, error) {
 
 func (c *Command) getCreateOpts() ([]*options.Create, error) {
 	out := []*options.Create{}
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	for _, args := range c.opts.Commands {
 		cmd, err := c.getCreateOpt(args)
 		if err != nil {
@@ -842,7 +843,7 @@ func (c *Command) exec(ctx context.Context, opts *options.Create, idx int) error
 	c.procs = append(c.procs, proc)
 
 	if !c.opts.RunBackground {
-		waitCatcher := grip.NewBasicCatcher()
+		waitCatcher := emt.NewBasicCatcher()
 		for _, proc := range c.procs {
 			_, err = proc.Wait(ctx)
 			waitCatcher.Add(errors.Wrapf(err, "error waiting on process '%s'", proc.ID()))
@@ -877,7 +878,7 @@ func getMsgOutput(opts options.Output) func(msg message.Fields) message.Fields {
 		}
 	}
 
-	writer := send.NewWriterSender(sender)
+	writer := send.MakeWriter(sender)
 	if opts.Output == nil {
 		opts.Output = writer
 	}

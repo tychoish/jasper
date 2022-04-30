@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/tychoish/grip"
+	"github.com/tychoish/emt"
 	"github.com/tychoish/jasper/options"
 )
 
@@ -79,7 +79,7 @@ func (c *LoggingCache) CloseAndRemove(_ context.Context, id string) error {
 
 // Clear closes and removes all objects in the in-memory logging cache.
 func (c *LoggingCache) Clear(_ context.Context) error {
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	for _, logger := range c.Cache {
 		catcher.Add(logger.Close())
 	}

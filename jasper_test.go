@@ -3,7 +3,7 @@ package jasper
 import (
 	"context"
 
-	"github.com/tychoish/grip"
+	"github.com/tychoish/emt"
 	"github.com/tychoish/jasper/options"
 )
 
@@ -18,7 +18,7 @@ func makeLockingProcess(pmake ProcessConstructor) ProcessConstructor {
 }
 
 func createProcs(ctx context.Context, opts *options.Create, manager Manager, num int) ([]Process, error) {
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	out := []Process{}
 	for i := 0; i < num; i++ {
 		optsCopy := *opts

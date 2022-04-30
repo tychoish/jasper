@@ -5,7 +5,7 @@ import (
 	"syscall"
 
 	"github.com/pkg/errors"
-	"github.com/tychoish/grip"
+	"github.com/tychoish/emt"
 )
 
 // Terminate sends a SIGTERM signal to the given process under the given
@@ -28,7 +28,7 @@ func Kill(ctx context.Context, p Process) error {
 // signals. On Windows, this function sends a SIGKILL instead of SIGTERM. Use
 // Terminate() in a loop if you do not wish to potentially hang on Wait().
 func TerminateAll(ctx context.Context, procs []Process) error {
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 
 	for _, proc := range procs {
 		if proc.Running(ctx) {
@@ -48,7 +48,7 @@ func TerminateAll(ctx context.Context, procs []Process) error {
 // function calls Wait() on each process after sending them SIGKILL signals.
 // Use Kill() in a loop if you do not wish to potentially hang on Wait().
 func KillAll(ctx context.Context, procs []Process) error {
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 
 	for _, proc := range procs {
 		if proc.Running(ctx) {

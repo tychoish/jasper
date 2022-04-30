@@ -25,11 +25,12 @@ require (
 	github.com/opencontainers/runtime-spec v1.0.2
 	github.com/pierrec/lz4 v2.5.2+incompatible // indirect
 	github.com/pkg/errors v0.9.1
-	github.com/stretchr/testify v1.6.1
-	github.com/tychoish/amboy v0.0.0-20210220045934-f0d4b14a2824
+	github.com/stretchr/testify v1.7.1
+	github.com/tychoish/amboy v0.0.0-20220430162145-d25a56e0afa4
 	github.com/tychoish/birch v0.0.0-20201209214013-d16c48deb418
-	github.com/tychoish/gimlet v0.0.0-20210220034523-404561fa261d
-	github.com/tychoish/grip v0.0.0-20210220033944-241f1175222f
+	github.com/tychoish/emt v0.0.0-20220306153139-74b97c67f209
+	github.com/tychoish/gimlet v0.0.0-20220430160104-9dbd313f23e7
+	github.com/tychoish/grip v0.0.0-20220426125019-871b9a2e8544
 	github.com/urfave/cli v1.22.4
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	go.mongodb.org/mongo-driver v1.4.2

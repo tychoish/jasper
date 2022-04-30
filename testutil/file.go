@@ -8,7 +8,7 @@ import (
 
 	"github.com/mholt/archiver"
 	"github.com/pkg/errors"
-	"github.com/tychoish/grip"
+	"github.com/tychoish/emt"
 )
 
 // AddFileToDirectory adds an archive file given by fileName with the given
@@ -25,7 +25,7 @@ func AddFileToDirectory(dir string, fileName string, fileContents string) error 
 		}
 		defer os.RemoveAll(tmpFile.Name())
 		if _, err := tmpFile.Write([]byte(fileContents)); err != nil {
-			catcher := grip.NewBasicCatcher()
+			catcher := emt.NewBasicCatcher()
 			catcher.Add(err)
 			catcher.Add(tmpFile.Close())
 			return catcher.Resolve()
@@ -45,7 +45,7 @@ func AddFileToDirectory(dir string, fileName string, fileContents string) error 
 		return err
 	}
 	if _, err := file.Write([]byte(fileContents)); err != nil {
-		catcher := grip.NewBasicCatcher()
+		catcher := emt.NewBasicCatcher()
 		catcher.Add(err)
 		catcher.Add(file.Close())
 		return catcher.Resolve()

@@ -3,7 +3,7 @@ package cli
 import (
 	"fmt"
 
-	"github.com/tychoish/grip"
+	"github.com/tychoish/emt"
 	"github.com/tychoish/jasper/options"
 )
 
@@ -20,7 +20,7 @@ type ClientOptions struct {
 // Validate checks that the binary path is set and it is a recognized Jasper
 // client type.
 func (opts *ClientOptions) Validate() error {
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	if opts.BinaryPath == "" {
 		catcher.New("client binary path cannot be empty")
 	}

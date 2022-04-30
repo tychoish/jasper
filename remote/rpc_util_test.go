@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/pkg/errors"
+	"github.com/tychoish/emt"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
@@ -134,7 +135,7 @@ func newTestRPCClient(ctx context.Context, addr net.Addr, creds *options.Certifi
 }
 
 func createProcs(ctx context.Context, opts *options.Create, manager jasper.Manager, num int) ([]jasper.Process, error) {
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	out := []jasper.Process{}
 	for i := 0; i < num; i++ {
 		optsCopy := *opts

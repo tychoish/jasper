@@ -2,8 +2,10 @@ package options
 
 import (
 	"github.com/pkg/errors"
+	"github.com/tychoish/emt"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/send"
+	splunk "github.com/tychoish/grip/x/splunk"
 )
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -38,7 +40,7 @@ func (opts *DefaultLoggerOptions) Configure() (send.Sender, error) {
 		return nil, errors.Wrap(err, "invalid options")
 	}
 
-	sender, err := send.NewNativeLogger(opts.Prefix, opts.Base.Level)
+	sender, err := send.NewPlainStdOutput(opts.Prefix, opts.Base.Level)
 	if err != nil {
 		return nil, errors.Wrap(err, "problem creating base default logger")
 	}
@@ -68,7 +70,7 @@ func NewFileLoggerProducer() LoggerProducer { return &FileLoggerOptions{} }
 
 // Validate ensures FileLoggerOptions is valid.
 func (opts *FileLoggerOptions) Validate() error {
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 
 	catcher.NewWhen(opts.Filename == "", "must specify a filename")
 	catcher.Add(opts.Base.Validate())
@@ -81,7 +83,7 @@ func (opts *FileLoggerOptions) Configure() (send.Sender, error) {
 		return nil, errors.Wrap(err, "invalid options")
 	}
 
-	sender, err := send.NewPlainFileLogger(DefaultLogName, opts.Filename, opts.Base.Level)
+	sender, err := send.NewPlainFile(DefaultLogName, opts.Filename, opts.Base.Level)
 	if err != nil {
 		return nil, errors.Wrap(err, "problem creating base file logger")
 	}
@@ -120,7 +122,7 @@ func (opts *InheritedLoggerOptions) Configure() (send.Sender, error) {
 		return nil, errors.Wrap(err, "invalid options")
 	}
 
-	sender = grip.GetSender()
+	sender = grip.Sender()
 	if err = sender.SetLevel(opts.Base.Level); err != nil {
 		return nil, errors.Wrap(err, "problem creating base inherited logger")
 	}
@@ -150,7 +152,7 @@ type InMemoryLoggerOptions struct {
 func NewInMemoryLoggerProducer() LoggerProducer { return &InMemoryLoggerOptions{} }
 
 func (opts *InMemoryLoggerOptions) Validate() error {
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 
 	catcher.NewWhen(opts.InMemoryCap <= 0, "invalid in-memory capacity")
 	catcher.Add(opts.Base.Validate())
@@ -184,15 +186,15 @@ const LogSplunk = "splunk"
 
 // SplunkLoggerOptions packages the options for creating a splunk logger.
 type SplunkLoggerOptions struct {
-	Splunk send.SplunkConnectionInfo `json:"splunk" bson:"splunk"`
-	Base   BaseOptions               `json:"base" bson:"base"`
+	Splunk splunk.ConnectionInfo `json:"splunk" bson:"splunk"`
+	Base   BaseOptions           `json:"base" bson:"base"`
 }
 
 // SplunkLoggerProducer returns a LoggerProducer backed by SplunkLoggerOptions.
 func NewSplunkLoggerProducer() LoggerProducer { return &SplunkLoggerOptions{} }
 
 func (opts *SplunkLoggerOptions) Validate() error {
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 
 	catcher.NewWhen(opts.Splunk.Populated(), "missing connection info for output type splunk")
 	catcher.Add(opts.Base.Validate())
@@ -205,7 +207,7 @@ func (opts *SplunkLoggerOptions) Configure() (send.Sender, error) {
 		return nil, errors.Wrap(err, "invalid config")
 	}
 
-	sender, err := send.NewSplunkLogger(DefaultLogName, opts.Splunk, opts.Base.Level)
+	sender, err := splunk.NewSender(DefaultLogName, opts.Splunk, opts.Base.Level)
 	if err != nil {
 		return nil, errors.Wrap(err, "problem creating base splunk logger")
 	}

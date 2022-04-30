@@ -1,9 +1,9 @@
 package options
 
 import (
+	"github.com/tychoish/emt"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
-	"github.com/tychoish/grip/logging"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/grip/send"
 )
@@ -28,7 +28,7 @@ type Command struct {
 
 // Validate ensures that the options passed to the command are valid.
 func (opts *Command) Validate() error {
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	// The semantics of a valid options.Create expects Args to be non-empty, but
 	// Command ignores these args, so we insert a dummy argument.
 	if len(opts.Process.Args) == 0 {
@@ -47,7 +47,7 @@ type CommandPreHook func(*Command, *Create)
 
 // NewLoggingPreHook provides a logging message for debugging purposes
 // that prints information from the creation options.
-func NewLoggingPreHook(logger grip.Journaler, lp level.Priority) CommandPreHook {
+func NewLoggingPreHook(logger grip.Logger, lp level.Priority) CommandPreHook {
 	return func(cmd *Command, opt *Create) {
 		logger.Log(lp, message.Fields{
 			"id":     cmd.ID,
@@ -62,12 +62,12 @@ func NewLoggingPreHook(logger grip.Journaler, lp level.Priority) CommandPreHook 
 // NewDefaultLoggingPreHook uses the global grip logger to log a debug
 // message at the specified priority level.
 func NewDefaultLoggingPreHook(lp level.Priority) CommandPreHook {
-	return NewLoggingPreHook(grip.GetDefaultJournaler(), lp)
+	return NewLoggingPreHook(grip.NewLogger(grip.Sender()), lp)
 }
 
 // NewLoggingPreHookFromSender produces a logging prehook that wraps a sender.
 func NewLoggingPreHookFromSender(sender send.Sender, lp level.Priority) CommandPreHook {
-	return NewLoggingPreHook(logging.MakeGrip(sender), lp)
+	return NewLoggingPreHook(grip.NewLogger(sender), lp)
 }
 
 // MergePreHooks produces a single PreHook function that runs all
@@ -89,7 +89,7 @@ type CommandPostHook func(error) error
 // the errors and merging them.
 func MergePostHooks(fns ...CommandPostHook) CommandPostHook {
 	return func(err error) error {
-		catcher := grip.NewBasicCatcher()
+		catcher := emt.NewBasicCatcher()
 		for _, fn := range fns {
 			catcher.Add(fn(err))
 		}

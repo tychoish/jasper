@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/tychoish/grip"
+	"github.com/tychoish/emt"
 	"github.com/tychoish/jasper/options"
 )
 
@@ -131,7 +131,7 @@ func (c *loggingCacheImpl) Clear(_ context.Context) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	for _, logger := range c.cache {
 		catcher.Add(logger.Close())
 	}

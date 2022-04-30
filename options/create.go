@@ -13,6 +13,7 @@ import (
 
 	"github.com/google/shlex"
 	"github.com/pkg/errors"
+	"github.com/tychoish/emt"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/send"
@@ -87,15 +88,15 @@ func MakeCreation(cmdStr string) (*Create, error) {
 	return &Create{
 		Args: args,
 		Output: Output{
-			Output: send.MakeWriterSender(grip.GetSender(), level.Info),
-			Error:  send.MakeWriterSender(grip.GetSender(), level.Error),
+			Output: send.NewWriter(grip.Sender(), level.Info),
+			Error:  send.NewWriter(grip.Sender(), level.Error),
 		},
 	}, nil
 }
 
 // Validate ensures that Create is valid for non-remote interfaces.
 func (opts *Create) Validate() error {
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	catcher.NewWhen(len(opts.Args) == 0, "invalid process, must specify at least one argument")
 
 	catcher.NewWhen(opts.Timeout < 0, "when specifying a timeout, it must be non-negative")
@@ -108,7 +109,7 @@ func (opts *Create) Validate() error {
 			opts.Timeout, opts.TimeoutSecs)
 	}
 
-	catcher.Wrap(opts.Output.Validate(), "invalid output options")
+	catcher.Add(opts.Output.Validate())
 
 	if opts.WorkingDirectory != "" && opts.isLocal() {
 		info, err := os.Stat(opts.WorkingDirectory)
@@ -122,10 +123,10 @@ func (opts *Create) Validate() error {
 
 	catcher.NewWhen(opts.Docker != nil && opts.Remote != nil, "cannot specify both Docker and SSH options")
 	if opts.Remote != nil {
-		catcher.Wrap(opts.Remote.Validate(), "invalid SSH options")
+		catcher.Add(opts.Remote.Validate())
 	}
 	if opts.Docker != nil {
-		catcher.Wrap(opts.Docker.Validate(), "invalid Docker options")
+		catcher.Add(opts.Docker.Validate())
 	}
 
 	if catcher.HasErrors() {
@@ -309,7 +310,7 @@ func (opts *Create) AddEnvVar(k, v string) {
 // function is often called as a trigger at the end of a process' lifetime in
 // Jasper.
 func (opts *Create) Close() error {
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	for _, c := range opts.closers {
 		catcher.Add(c())
 	}

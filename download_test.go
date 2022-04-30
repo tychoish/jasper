@@ -16,6 +16,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tychoish/amboy/queue"
+	"github.com/tychoish/emt"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/testutil"
@@ -32,7 +33,7 @@ func TestCreateValidDownloadJobs(t *testing.T) {
 		close(urls)
 	}()
 
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	jobs := createDownloadJobs(dir, urls, catcher)
 
 	count := 0
@@ -51,7 +52,7 @@ func TestCreateDownloadJobsWithInvalidPath(t *testing.T) {
 	urls := make(chan string)
 	testURL := "https://example.com"
 
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	go func() {
 		urls <- testURL
 		close(urls)
@@ -100,7 +101,10 @@ func TestProcessDownloadJobs(t *testing.T) {
 	job, err := NewDownloadJob(fmt.Sprintf("%s/%s", baseURL, fileName), downloadDir, true)
 	require.NoError(t, err)
 
-	q := queue.NewLocalLimitedSize(2, 1048)
+	q := queue.NewLocalLimitedSize(&queue.FixedSizeQueueOptions{
+		Workers:  2,
+		Capacity: 1048,
+	})
 	require.NoError(t, q.Start(ctx))
 	require.NoError(t, q.Put(ctx, job))
 

@@ -10,7 +10,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
-	"github.com/tychoish/grip"
+	"github.com/tychoish/emt"
 	"github.com/tychoish/jasper/internal/executor"
 	"github.com/tychoish/jasper/options"
 )
@@ -48,18 +48,18 @@ func newBasicProcess(ctx context.Context, opts *options.Create) (Process, error)
 	}
 
 	if err = p.RegisterTrigger(ctx, makeOptionsCloseTrigger()); err != nil {
-		catcher := grip.NewBasicCatcher()
+		catcher := emt.NewBasicCatcher()
 		catcher.Add(err)
-		catcher.Wrap(opts.Close(), "problem closing options")
-		catcher.Wrap(exec.Close(), "problem closing executor")
+		catcher.Add(opts.Close())
+		catcher.Add(exec.Close())
 		return nil, errors.Wrap(catcher.Resolve(), "problem registering options close trigger")
 	}
 
 	if err = exec.Start(); err != nil {
-		catcher := grip.NewBasicCatcher()
+		catcher := emt.NewBasicCatcher()
 		catcher.Add(err)
-		catcher.Wrap(opts.Close(), "problem closing options")
-		catcher.Wrap(exec.Close(), "problem closing executor")
+		catcher.Add(opts.Close())
+		catcher.Add(exec.Close())
 		return nil, errors.Wrap(catcher.Resolve(), "problem starting process execution")
 	}
 

@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/tychoish/grip"
+	"github.com/tychoish/emt"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 )
@@ -259,7 +259,7 @@ type ScriptingOptions struct {
 // Validate ensures that the ScriptingOptions instance is
 // validated.
 func (opts *ScriptingOptions) Validate() error {
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	catcher.NewWhen(opts.ImplementationType == "", "implementation type must be defined")
 	catcher.NewWhen(opts.Payload == nil, "implementation type must be defined")
 
@@ -326,7 +326,7 @@ type SignalInput struct {
 // Validate checks that the SignalInput has a non-empty Jasper process ID and
 // positive Signal.
 func (in *SignalInput) Validate() error {
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	if len(in.ID) == 0 {
 		catcher.Add(errors.New("Jasper process ID must not be empty"))
 	}
@@ -346,7 +346,7 @@ type SignalTriggerIDInput struct {
 // Validate checks that the SignalTriggerIDInput has a non-empty Jasper process
 // ID and a recognized signal trigger ID.
 func (in *SignalTriggerIDInput) Validate() error {
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	if len(in.ID) == 0 {
 		catcher.Add(errors.New("Jasper process ID must not be empty"))
 	}
@@ -435,9 +435,9 @@ type LoggingCacheCreateInput struct {
 // Validate checks that a cached logger ID has been given and the logger options
 // are valid.
 func (in *LoggingCacheCreateInput) Validate() error {
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	catcher.NewWhen(in.ID == "", "ID must not be empty")
-	catcher.Wrap(in.Output.Validate(), "invalid output options")
+	catcher.Add(in.Output.Validate())
 	return catcher.Resolve()
 }
 

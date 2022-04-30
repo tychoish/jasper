@@ -7,11 +7,12 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/tychoish/amboy"
+	"github.com/tychoish/emt"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/recovery"
 )
 
-func createDownloadJobs(path string, urls <-chan string, catcher grip.Catcher) <-chan amboy.Job {
+func createDownloadJobs(path string, urls <-chan string, catcher emt.Catcher) <-chan amboy.Job {
 	output := make(chan amboy.Job)
 
 	go func() {
@@ -44,7 +45,7 @@ func processDownloadJobs(ctx context.Context, processFile func(string) error) fu
 			return errors.Wrap(err, "problem completing download jobs")
 		}
 
-		catcher := grip.NewBasicCatcher()
+		catcher := emt.NewBasicCatcher()
 		for job := range q.Jobs(ctx) {
 			if !job.Status().Completed {
 				continue

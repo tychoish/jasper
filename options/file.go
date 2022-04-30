@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/pkg/errors"
-	"github.com/tychoish/grip"
+	"github.com/tychoish/emt"
 )
 
 // WriteFile represents the options necessary to write to a file.
@@ -44,7 +44,7 @@ func (opts *WriteFile) Validate() error {
 		opts.Perm = 0666
 	}
 
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 	catcher.NewWhen(opts.Path == "", "path to file must be specified")
 	catcher.Add(opts.validateContent())
 	return catcher.Resolve()
@@ -69,19 +69,19 @@ func (opts *WriteFile) DoWrite() error {
 		return errors.Wrapf(err, "error opening file %s", opts.Path)
 	}
 
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 
 	reader, err := opts.ContentReader()
 	if err != nil {
-		catcher.Wrap(file.Close(), "error closing file")
-		catcher.Wrap(err, "error getting file content as bytes")
+		catcher.Errorf("error getting file content as bytes: %w", err)
+		catcher.Add(file.Close())
 		return catcher.Resolve()
 	}
 
 	bufReader := bufio.NewReader(reader)
 	if _, err = io.Copy(file, bufReader); err != nil {
-		catcher.Wrap(file.Close(), "error closing file")
-		catcher.Wrap(err, "error writing content to file")
+		catcher.Errorf("error writing content to file: %w", err)
+		catcher.Add(file.Close())
 		return catcher.Resolve()
 	}
 

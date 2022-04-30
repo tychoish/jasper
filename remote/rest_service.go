@@ -13,7 +13,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/tychoish/gimlet"
-	"github.com/tychoish/grip/message"
+	"github.com/tychoish/grip/x/metrics"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/scripting"
@@ -240,7 +240,7 @@ func (s *Service) processMetrics(rw http.ResponseWriter, r *http.Request) {
 	}
 
 	info := getProcInfoNoHang(ctx, proc)
-	gimlet.WriteJSON(rw, message.CollectProcessInfoWithChildren(int32(info.PID)))
+	gimlet.WriteJSON(rw, metrics.CollectProcessInfoWithChildren(int32(info.PID)))
 }
 
 func (s *Service) getProcessTags(rw http.ResponseWriter, r *http.Request) {

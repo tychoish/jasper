@@ -12,7 +12,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tychoish/grip/send"
+	splunk "github.com/tychoish/grip/x/splunk"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -276,7 +276,7 @@ func TestCreate(t *testing.T) {
 		},
 		"ResolveFailsWithMismatchingLoggerConfiguration": func(t *testing.T, opts *Create) {
 			config, err := json.Marshal(&SplunkLoggerOptions{
-				Splunk: send.SplunkConnectionInfo{
+				Splunk: splunk.ConnectionInfo{
 					ServerURL: "https://example.com/",
 				},
 			})
@@ -296,7 +296,7 @@ func TestCreate(t *testing.T) {
 		},
 		"ResolveFailsWithInvalidErrorLoggingConfiguration": func(t *testing.T, opts *Create) {
 			config, err := json.Marshal(&SplunkLoggerOptions{
-				Splunk: send.SplunkConnectionInfo{
+				Splunk: splunk.ConnectionInfo{
 					ServerURL: "https://example.com/",
 				},
 			})

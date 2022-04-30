@@ -7,7 +7,7 @@ import (
 
 	"github.com/mholt/archiver"
 	"github.com/pkg/errors"
-	"github.com/tychoish/grip"
+	"github.com/tychoish/emt"
 )
 
 // Download represents the options to download a file to a given path and
@@ -21,7 +21,7 @@ type Download struct {
 
 // Validate checks the download options.
 func (opts Download) Validate() error {
-	catcher := grip.NewBasicCatcher()
+	catcher := emt.NewBasicCatcher()
 
 	if opts.URL == "" {
 		catcher.New("download url cannot be empty")
