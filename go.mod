@@ -19,7 +19,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.1
 	github.com/tychoish/amboy v0.0.0-20220430162145-d25a56e0afa4
-	github.com/tychoish/birch v0.0.0-20201209214013-d16c48deb418
+	github.com/tychoish/birch v0.0.0-20220417130718-5fd0f6ed1890
 	github.com/tychoish/emt v0.0.0-20220306153139-74b97c67f209
 	github.com/tychoish/gimlet v0.0.0-20220430160104-9dbd313f23e7
 	github.com/tychoish/grip v0.0.0-20220426125019-871b9a2e8544
