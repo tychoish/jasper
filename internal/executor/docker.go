@@ -16,6 +16,7 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/google/uuid"
+	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 
 	"github.com/tychoish/emt"
 	"github.com/tychoish/grip"
@@ -128,17 +129,22 @@ func (e *docker) Start() error {
 // setupContainer creates a container for the process without starting it.
 func (e *docker) setupContainer() error {
 	containerName := uuid.New().String()
-	createResp, err := e.client.ContainerCreate(e.ctx, &container.Config{
-		Image:        e.image,
-		Cmd:          e.execOpts.Cmd,
-		Env:          e.execOpts.Env,
-		WorkingDir:   e.execOpts.WorkingDir,
-		AttachStdin:  e.execOpts.AttachStdin,
-		StdinOnce:    e.execOpts.AttachStdin,
-		OpenStdin:    e.execOpts.AttachStdin,
-		AttachStdout: e.execOpts.AttachStdout,
-		AttachStderr: e.execOpts.AttachStderr,
-	}, &container.HostConfig{}, &network.NetworkingConfig{}, containerName)
+	createResp, err := e.client.ContainerCreate(e.ctx,
+		&container.Config{
+			Image:        e.image,
+			Cmd:          e.execOpts.Cmd,
+			Env:          e.execOpts.Env,
+			WorkingDir:   e.execOpts.WorkingDir,
+			AttachStdin:  e.execOpts.AttachStdin,
+			StdinOnce:    e.execOpts.AttachStdin,
+			OpenStdin:    e.execOpts.AttachStdin,
+			AttachStdout: e.execOpts.AttachStdout,
+			AttachStderr: e.execOpts.AttachStderr,
+		},
+		&container.HostConfig{},
+		&network.NetworkingConfig{},
+		&v1.Platform{},
+		containerName)
 	if err != nil {
 		return fmt.Errorf("problem creating container for process: %w", err)
 	}
