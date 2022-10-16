@@ -60,7 +60,7 @@ func (c *restClient) getURL(route string, args ...interface{}) string {
 func makeBody(data interface{}) (io.Reader, error) {
 	payload, err := json.Marshal(data)
 	if err != nil {
-		return nil, errors.Wrap(err, "problem marshaling request body")
+		return nil, fmt.Errorf("problem marshaling request body: %w", err)
 	}
 
 	return bytes.NewBuffer(payload), nil
@@ -82,13 +82,13 @@ func handleError(resp *http.Response) error {
 func (c *restClient) doRequest(ctx context.Context, method string, url string, body io.Reader) (*http.Response, error) {
 	req, err := http.NewRequest(method, url, body)
 	if err != nil {
-		return nil, errors.Wrap(err, "problem building request")
+		return nil, fmt.Errorf("problem building request: %w", err)
 	}
 
 	req = req.WithContext(ctx)
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return nil, errors.Wrap(err, "problem making request")
+		return nil, fmt.Errorf("problem making request: %w", err)
 	}
 
 	if err = handleError(resp); err != nil {
@@ -101,7 +101,7 @@ func (c *restClient) doRequest(ctx context.Context, method string, url string, b
 func (c *restClient) ID() string {
 	resp, err := c.doRequest(context.Background(), http.MethodGet, c.getURL("/id"), nil)
 	if err != nil {
-		grip.Debug(errors.Wrap(err, "request returned error"))
+		grip.Debug(fmt.Errorf("request returned error: %w", err))
 		return ""
 	}
 	defer resp.Body.Close()
@@ -117,18 +117,18 @@ func (c *restClient) ID() string {
 func (c *restClient) CreateProcess(ctx context.Context, opts *options.Create) (jasper.Process, error) {
 	body, err := makeBody(opts)
 	if err != nil {
-		return nil, errors.Wrap(err, "problem building request for job create")
+		return nil, fmt.Errorf("problem building request for job create: %w", err)
 	}
 
 	resp, err := c.doRequest(ctx, http.MethodPost, c.getURL("/create"), body)
 	if err != nil {
-		return nil, errors.Wrap(err, "request returned error")
+		return nil, fmt.Errorf("request returned error: %w", err)
 	}
 	defer resp.Body.Close()
 
 	var info jasper.ProcessInfo
 	if err := gimlet.GetJSON(resp.Body, &info); err != nil {
-		return nil, errors.Wrap(err, "problem reading process info from response")
+		return nil, fmt.Errorf("problem reading process info from response: %w", err)
 	}
 
 	return &restProcess{
@@ -143,17 +143,17 @@ func (c *restClient) CreateCommand(ctx context.Context) *jasper.Command {
 
 func (c *restClient) CreateScripting(ctx context.Context, opts options.ScriptingHarness) (scripting.Harness, error) {
 	if err := opts.Validate(); err != nil {
-		return nil, errors.Wrap(err, "problem validating input")
+		return nil, fmt.Errorf("problem validating input: %w", err)
 	}
 
 	body, err := makeBody(opts)
 	if err != nil {
-		return nil, errors.Wrap(err, "problem building request for scripting create")
+		return nil, fmt.Errorf("problem building request for scripting create: %w", err)
 	}
 
 	resp, err := c.doRequest(ctx, http.MethodPost, c.getURL("/scripting/create/%s", opts.Type()), body)
 	if err != nil {
-		return nil, errors.Wrap(err, "request returned error")
+		return nil, fmt.Errorf("request returned error: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -166,7 +166,7 @@ func (c *restClient) CreateScripting(ctx context.Context, opts options.Scripting
 	}{}
 
 	if err = gimlet.GetJSON(resp.Body, &out); err != nil {
-		return nil, errors.Wrap(err, "problem reading response")
+		return nil, fmt.Errorf("problem reading response: %w", err)
 	}
 
 	return &restScripting{
@@ -178,7 +178,7 @@ func (c *restClient) CreateScripting(ctx context.Context, opts options.Scripting
 func (c *restClient) GetScripting(ctx context.Context, id string) (scripting.Harness, error) {
 	resp, err := c.doRequest(ctx, http.MethodPost, c.getURL("/scripting/%s", id), nil)
 	if err != nil {
-		return nil, errors.Wrap(err, "request returned error")
+		return nil, fmt.Errorf("request returned error: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -199,7 +199,7 @@ func (c *restClient) Register(ctx context.Context, proc jasper.Process) error {
 func (c *restClient) getListOfProcesses(resp *http.Response) ([]jasper.Process, error) {
 	payload := []jasper.ProcessInfo{}
 	if err := gimlet.GetJSON(resp.Body, &payload); err != nil {
-		return nil, errors.Wrap(err, "problem reading process info from response")
+		return nil, fmt.Errorf("problem reading process info from response: %w", err)
 	}
 
 	output := []jasper.Process{}
@@ -220,7 +220,7 @@ func (c *restClient) List(ctx context.Context, f options.Filter) ([]jasper.Proce
 
 	resp, err := c.doRequest(ctx, http.MethodGet, c.getURL("/list/%s", string(f)), nil)
 	if err != nil {
-		return nil, errors.Wrap(err, "request returned error")
+		return nil, fmt.Errorf("request returned error: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -236,7 +236,7 @@ func (c *restClient) List(ctx context.Context, f options.Filter) ([]jasper.Proce
 func (c *restClient) Group(ctx context.Context, name string) ([]jasper.Process, error) {
 	resp, err := c.doRequest(ctx, http.MethodGet, c.getURL("/list/group/%s", name), nil)
 	if err != nil {
-		return nil, errors.Wrap(err, "request returned error")
+		return nil, fmt.Errorf("request returned error: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -252,7 +252,7 @@ func (c *restClient) Group(ctx context.Context, name string) ([]jasper.Process, 
 func (c *restClient) getProcess(ctx context.Context, id string) (*http.Response, error) {
 	resp, err := c.doRequest(ctx, http.MethodGet, c.getURL("/process/%s", id), nil)
 	if err != nil {
-		return nil, errors.Wrap(err, "request returned error")
+		return nil, fmt.Errorf("request returned error: %w", err)
 	}
 
 	return resp, nil
@@ -293,7 +293,7 @@ func (c *restClient) Clear(ctx context.Context) {
 	// should not really ever happen.
 	resp, err := c.doRequest(ctx, http.MethodPost, c.getURL("/clear"), nil)
 	if err != nil {
-		grip.Debug(errors.Wrap(err, "request returned error"))
+		grip.Debug(fmt.Errorf("request returned error: %w", err))
 	}
 	defer resp.Body.Close()
 }
@@ -317,7 +317,7 @@ func (c *restClient) GetLogStream(ctx context.Context, id string, count int) (ja
 
 	stream := jasper.LogStream{}
 	if err = gimlet.GetJSON(resp.Body, &stream); err != nil {
-		return jasper.LogStream{}, errors.Wrap(err, "problem reading logs from response")
+		return jasper.LogStream{}, fmt.Errorf("problem reading logs from response: %w", err)
 	}
 
 	return stream, nil
@@ -326,12 +326,12 @@ func (c *restClient) GetLogStream(ctx context.Context, id string, count int) (ja
 func (c *restClient) DownloadFile(ctx context.Context, opts options.Download) error {
 	body, err := makeBody(opts)
 	if err != nil {
-		return errors.Wrap(err, "problem building request")
+		return fmt.Errorf("problem building request: %w", err)
 	}
 
 	resp, err := c.doRequest(ctx, http.MethodPost, c.getURL("/download"), body)
 	if err != nil {
-		return errors.Wrap(err, "problem downloading file")
+		return fmt.Errorf("problem downloading file: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -352,11 +352,11 @@ func (c *restClient) WriteFile(ctx context.Context, opts options.WriteFile) erro
 	sendOpts := func(opts options.WriteFile) error {
 		body, err := makeBody(opts)
 		if err != nil {
-			return errors.Wrap(err, "problem building request")
+			return fmt.Errorf("problem building request: %w", err)
 		}
 		resp, err := c.doRequest(ctx, http.MethodPut, c.getURL("/file/write"), body)
 		if err != nil {
-			return errors.Wrap(err, "problem writing file")
+			return fmt.Errorf("problem writing file: %w", err)
 		}
 		return errors.Wrap(resp.Body.Close(), "problem closing response body")
 	}
@@ -434,7 +434,7 @@ func (p *restProcess) Wait(ctx context.Context) (int, error) {
 
 	var exitCode int
 	if err = gimlet.GetJSON(resp.Body, &exitCode); err != nil {
-		return -1, errors.Wrap(err, "request returned error")
+		return -1, fmt.Errorf("request returned error: %w", err)
 	}
 	if exitCode != 0 {
 		return exitCode, errors.New("operation failed")
@@ -445,7 +445,7 @@ func (p *restProcess) Wait(ctx context.Context) (int, error) {
 func (p *restProcess) Respawn(ctx context.Context) (jasper.Process, error) {
 	resp, err := p.client.doRequest(ctx, http.MethodGet, p.client.getURL("/process/%s/respawn", p.id), nil)
 	if err != nil {
-		return nil, errors.Wrap(err, "request returned error")
+		return nil, fmt.Errorf("request returned error: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -471,7 +471,7 @@ func (p *restProcess) RegisterSignalTrigger(_ context.Context, _ jasper.SignalTr
 func (p *restProcess) RegisterSignalTriggerID(ctx context.Context, triggerID jasper.SignalTriggerID) error {
 	resp, err := p.client.doRequest(ctx, http.MethodPatch, p.client.getURL("/process/%s/trigger/signal/%s", p.id, triggerID), nil)
 	if err != nil {
-		return errors.Wrap(err, "request returned error")
+		return fmt.Errorf("request returned error: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -534,7 +534,7 @@ func (s *restScripting) ID() string { return s.id }
 func (s *restScripting) Setup(ctx context.Context) error {
 	resp, err := s.client.doRequest(ctx, http.MethodPost, s.client.getURL("/scripting/%s/setup", s.id), nil)
 	if err != nil {
-		return errors.Wrap(err, "request returned error")
+		return fmt.Errorf("request returned error: %w", err)
 	}
 	defer resp.Body.Close()
 	return nil
@@ -545,12 +545,12 @@ func (s *restScripting) Run(ctx context.Context, args []string) error {
 		Args []string `json:"args"`
 	}{Args: args})
 	if err != nil {
-		return errors.Wrap(err, "problem building request")
+		return fmt.Errorf("problem building request: %w", err)
 	}
 
 	resp, err := s.client.doRequest(ctx, http.MethodPost, s.client.getURL("/scripting/%s/run", s.id), body)
 	if err != nil {
-		return errors.Wrap(err, "request returned error")
+		return fmt.Errorf("request returned error: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -560,7 +560,7 @@ func (s *restScripting) Run(ctx context.Context, args []string) error {
 func (s *restScripting) RunScript(ctx context.Context, script string) error {
 	resp, err := s.client.doRequest(ctx, http.MethodPost, s.client.getURL("/scripting/%s/script", s.id), bytes.NewBuffer([]byte(script)))
 	if err != nil {
-		return errors.Wrap(err, "request returned error")
+		return fmt.Errorf("request returned error: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -573,12 +573,12 @@ func (s *restScripting) Build(ctx context.Context, dir string, args []string) (s
 		Args      []string `json:"args"`
 	}{Args: args})
 	if err != nil {
-		return "", errors.Wrap(err, "problem building request")
+		return "", fmt.Errorf("problem building request: %w", err)
 	}
 
 	resp, err := s.client.doRequest(ctx, http.MethodPost, s.client.getURL("/scripting/%s/build", s.id), body)
 	if err != nil {
-		return "", errors.Wrap(err, "request returned error")
+		return "", fmt.Errorf("request returned error: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -587,7 +587,7 @@ func (s *restScripting) Build(ctx context.Context, dir string, args []string) (s
 	}{}
 
 	if err = gimlet.GetJSON(resp.Body, &out); err != nil {
-		return "", errors.Wrap(err, "problem reading response")
+		return "", fmt.Errorf("problem reading response: %w", err)
 	}
 
 	return out.Path, nil
@@ -603,12 +603,12 @@ func (s *restScripting) Test(ctx context.Context, dir string, args ...scripting.
 	})
 
 	if err != nil {
-		return nil, errors.Wrap(err, "problem building request")
+		return nil, fmt.Errorf("problem building request: %w", err)
 	}
 
 	resp, err := s.client.doRequest(ctx, http.MethodPost, s.client.getURL("/scripting/%s/test", s.id), body)
 	if err != nil {
-		return nil, errors.Wrap(err, "request returned error")
+		return nil, fmt.Errorf("request returned error: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -618,7 +618,7 @@ func (s *restScripting) Test(ctx context.Context, dir string, args ...scripting.
 	}{}
 
 	if err = gimlet.GetJSON(resp.Body, &out); err != nil {
-		return nil, errors.Wrap(err, "problem reading response")
+		return nil, fmt.Errorf("problem reading response: %w", err)
 	}
 
 	if out.Error != "" {
@@ -631,7 +631,7 @@ func (s *restScripting) Test(ctx context.Context, dir string, args ...scripting.
 func (s *restScripting) Cleanup(ctx context.Context) error {
 	resp, err := s.client.doRequest(ctx, http.MethodDelete, s.client.getURL("/scripting/%s", s.id), nil)
 	if err != nil {
-		return errors.Wrap(err, "request returned error")
+		return fmt.Errorf("request returned error: %w", err)
 	}
 	defer resp.Body.Close()
 

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"strings"
 
@@ -26,7 +27,7 @@ type sshClient struct {
 // machine's Jasper service over SSH using the remote machine's Jasper CLI.
 func NewSSHClient(remoteOpts options.Remote, clientOpts ClientOptions, trackProcs bool) (remote.Manager, error) {
 	if err := remoteOpts.Validate(); err != nil {
-		return nil, errors.Wrap(err, "problem validating remote options")
+		return nil, fmt.Errorf("problem validating remote options: %w", err)
 	}
 	for _, arg := range remoteOpts.Args {
 		if strings.HasPrefix(arg, "-v") {
@@ -42,12 +43,12 @@ func NewSSHClient(remoteOpts options.Remote, clientOpts ClientOptions, trackProc
 	)
 
 	if err := clientOpts.Validate(); err != nil {
-		return nil, errors.Wrap(err, "problem validating client options")
+		return nil, fmt.Errorf("problem validating client options: %w", err)
 	}
 
 	manager, err := jasper.NewSynchronizedManager(trackProcs)
 	if err != nil {
-		return nil, errors.Wrap(err, "problem creating underlying manager")
+		return nil, fmt.Errorf("problem creating underlying manager: %w", err)
 	}
 
 	client := &sshClient{
@@ -95,7 +96,7 @@ func (c *sshClient) CreateCommand(ctx context.Context) *jasper.Command {
 	return c.manager.CreateCommand(ctx).SetRunFunc(func(opts options.Command) error {
 		output, err := c.runManagerCommand(ctx, CreateCommand, &opts)
 		if err != nil {
-			return errors.Wrap(err, "could not run command from given input")
+			return fmt.Errorf("could not run command from given input: %w", err)
 		}
 
 		if _, err := ExtractOutcomeResponse(output); err != nil {
@@ -134,7 +135,7 @@ func (c *sshClient) List(ctx context.Context, f options.Filter) ([]jasper.Proces
 	procs := make([]jasper.Process, len(resp.Infos))
 	for i := range resp.Infos {
 		if procs[i], err = newSSHProcess(c.runClientCommand, resp.Infos[i]); err != nil {
-			return nil, errors.Wrap(err, "problem creating SSH process")
+			return nil, fmt.Errorf("problem creating SSH process: %w", err)
 		}
 	}
 
@@ -155,7 +156,7 @@ func (c *sshClient) Group(ctx context.Context, tag string) ([]jasper.Process, er
 	procs := make([]jasper.Process, len(resp.Infos))
 	for i := range resp.Infos {
 		if procs[i], err = newSSHProcess(c.runClientCommand, resp.Infos[i]); err != nil {
-			return nil, errors.Wrap(err, "problem creating SSH process")
+			return nil, fmt.Errorf("problem creating SSH process: %w", err)
 		}
 	}
 
@@ -284,7 +285,7 @@ func (c *sshClient) runRemoteCommand(ctx context.Context, remoteSubcommand strin
 func (c *sshClient) runClientCommand(ctx context.Context, subcommand []string, subcommandInput interface{}) ([]byte, error) {
 	input, err := clientInput(subcommandInput)
 	if err != nil {
-		return nil, errors.Wrap(err, "problem creating client input")
+		return nil, fmt.Errorf("problem creating client input: %w", err)
 	}
 	output := clientOutput()
 
@@ -329,7 +330,7 @@ func clientInput(input interface{}) ([]byte, error) {
 
 	inputBytes, err := json.MarshalIndent(input, "", "    ")
 	if err != nil {
-		return nil, errors.Wrap(err, "could not encode input as JSON")
+		return nil, fmt.Errorf("could not encode input as JSON: %w", err)
 	}
 
 	return inputBytes, nil

@@ -3,6 +3,7 @@ package cli
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/pkg/errors"
@@ -49,13 +50,13 @@ func (lc *sshLoggingCache) Put(id string, cl *options.CachedLogger) error {
 func (lc *sshLoggingCache) Get(id string) *options.CachedLogger {
 	output, err := lc.runCommand(lc.ctx, LoggingCacheGetCommand, IDInput{ID: id})
 	if err != nil {
-		grip.Warning(errors.Wrap(err, "running command"))
+		grip.Warning(fmt.Errorf("running command: %w", err))
 		return nil
 	}
 
 	resp, err := ExtractCachedLoggerResponse(output)
 	if err != nil {
-		grip.Warning(errors.Wrap(err, "reading cached logger response"))
+		grip.Warning(fmt.Errorf("reading cached logger response: %w", err))
 		return nil
 	}
 
@@ -65,19 +66,19 @@ func (lc *sshLoggingCache) Get(id string) *options.CachedLogger {
 func (lc *sshLoggingCache) Remove(id string) {
 	output, err := lc.runCommand(lc.ctx, LoggingCacheRemoveCommand, IDInput{ID: id})
 	if err != nil {
-		grip.Warning(errors.Wrap(err, "running command"))
+		grip.Warning(fmt.Errorf("running command: %w", err))
 		return
 	}
 
 	if _, err = ExtractOutcomeResponse(output); err != nil {
-		grip.Warning(errors.Wrap(err, "reading outcome response"))
+		grip.Warning(fmt.Errorf("reading outcome response: %w", err))
 	}
 }
 
 func (lc *sshLoggingCache) CloseAndRemove(ctx context.Context, id string) error {
 	output, err := lc.runCommand(ctx, LoggingCacheCloseAndRemoveCommand, IDInput{ID: id})
 	if err != nil {
-		return errors.Wrap(err, "problem running command")
+		return fmt.Errorf("problem running command: %w", err)
 	}
 
 	_, err = ExtractOutcomeResponse(output)
@@ -87,7 +88,7 @@ func (lc *sshLoggingCache) CloseAndRemove(ctx context.Context, id string) error 
 func (lc *sshLoggingCache) Clear(ctx context.Context) error {
 	output, err := lc.runCommand(ctx, LoggingCacheCloseAndRemoveCommand, nil)
 	if err != nil {
-		return errors.Wrap(err, "problem running command")
+		return fmt.Errorf("problem running command: %w", err)
 	}
 
 	_, err = ExtractOutcomeResponse(output)
@@ -97,25 +98,25 @@ func (lc *sshLoggingCache) Clear(ctx context.Context) error {
 func (lc *sshLoggingCache) Prune(ts time.Time) {
 	output, err := lc.runCommand(lc.ctx, LoggingCachePruneCommand, LoggingCachePruneInput{LastAccessed: ts})
 	if err != nil {
-		grip.Warning(errors.Wrap(err, "running command"))
+		grip.Warning(fmt.Errorf("running command: %w", err))
 		return
 	}
 
 	if _, err = ExtractOutcomeResponse(output); err != nil {
-		grip.Warning(errors.Wrap(err, "reading outcome response"))
+		grip.Warning(fmt.Errorf("reading outcome response: %w", err))
 	}
 }
 
 func (lc *sshLoggingCache) Len() int {
 	output, err := lc.runCommand(lc.ctx, LoggingCacheLenCommand, nil)
 	if err != nil {
-		grip.Warning(errors.Wrap(err, "running command"))
+		grip.Warning(fmt.Errorf("running command: %w", err))
 		return -1
 	}
 
 	resp, err := ExtractLoggingCacheLenResponse(output)
 	if err != nil {
-		grip.Warning(errors.Wrap(err, "reading outcome response"))
+		grip.Warning(fmt.Errorf("reading outcome response: %w", err))
 		return -1
 	}
 

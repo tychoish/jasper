@@ -76,7 +76,7 @@ func (opts *Docker) Resolve() (*client.Client, error) {
 
 	client, err := client.NewClientWithOpts(clientOpts...)
 	if err != nil {
-		return nil, errors.Wrap(err, "could not create Docker client")
+		return nil, fmt.Errorf("could not create Docker client: %w", err)
 	}
 	return client, nil
 }

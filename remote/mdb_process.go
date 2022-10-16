@@ -2,6 +2,7 @@ package remote
 
 import (
 	"context"
+	"fmt"
 	"syscall"
 
 	"github.com/pkg/errors"
@@ -24,16 +25,16 @@ type mdbProcess struct {
 func (p *mdbProcess) readRequest(msg mongowire.Message, in interface{}) error {
 	doc, err := shell.ResponseMessageToDocument(msg)
 	if err != nil {
-		return errors.Wrap(err, "could not read response")
+		return fmt.Errorf("could not read response: %w", err)
 	}
 
 	data, err := doc.MarshalBSON()
 	if err != nil {
-		return errors.Wrap(err, "could not read response data")
+		return fmt.Errorf("could not read response data: %w", err)
 	}
 
 	if err := p.unmarshaler(data, in); err != nil {
-		return errors.Wrap(err, "problem parsing response body")
+		return fmt.Errorf("problem parsing response body: %w", err)
 
 	}
 
@@ -63,7 +64,7 @@ func (p *mdbProcess) Info(ctx context.Context) jasper.ProcessInfo {
 
 	payload, err := p.makeRequest(infoRequest{ID: p.ID()})
 	if err != nil {
-		grip.Warning(errors.Wrap(err, "problem marshalling request"))
+		grip.Warning(fmt.Errorf("problem marshalling request: %w", err))
 		return jasper.ProcessInfo{}
 	}
 
@@ -98,7 +99,7 @@ func (p *mdbProcess) Running(ctx context.Context) bool {
 
 	payload, err := p.makeRequest(runningRequest{ID: p.ID()})
 	if err != nil {
-		grip.Warning(errors.Wrap(err, "problem marshalling request"))
+		grip.Warning(fmt.Errorf("problem marshalling request: %w", err))
 		return false
 	}
 
@@ -115,7 +116,7 @@ func (p *mdbProcess) Running(ctx context.Context) bool {
 
 	var resp runningResponse
 	if err := p.readRequest(msg, &resp); err != nil {
-		grip.Warning(errors.Wrap(err, "problem reading response"))
+		grip.Warning(fmt.Errorf("problem reading response: %w", err))
 		return false
 	}
 
@@ -130,7 +131,7 @@ func (p *mdbProcess) Complete(ctx context.Context) bool {
 
 	payload, err := p.makeRequest(completeRequest{ID: p.ID()})
 	if err != nil {
-		grip.Warning(errors.Wrap(err, "problem marshalling request"))
+		grip.Warning(fmt.Errorf("problem marshalling request: %w", err))
 		return false
 	}
 
@@ -147,7 +148,7 @@ func (p *mdbProcess) Complete(ctx context.Context) bool {
 
 	var resp completeResponse
 	if err := p.readRequest(msg, &resp); err != nil {
-		grip.Warning(errors.Wrap(err, "problem reading response"))
+		grip.Warning(fmt.Errorf("problem reading response: %w", err))
 		return false
 	}
 
@@ -162,21 +163,21 @@ func (p *mdbProcess) Signal(ctx context.Context, sig syscall.Signal) error {
 
 	payload, err := p.makeRequest(r)
 	if err != nil {
-		return errors.Wrap(err, "problem marshalling request")
+		return fmt.Errorf("problem marshalling request: %w", err)
 	}
 
 	req, err := shell.RequestToMessage(mongowire.OP_QUERY, payload)
 	if err != nil {
-		return errors.Wrap(err, "could not create request")
+		return fmt.Errorf("could not create request: %w", err)
 	}
 	msg, err := p.doRequest(ctx, req)
 	if err != nil {
-		return errors.Wrap(err, "failed during request")
+		return fmt.Errorf("failed during request: %w", err)
 	}
 
 	var resp shell.ErrorResponse
 	if err := p.readRequest(msg, &resp); err != nil {
-		return errors.Wrap(err, "problem reading response")
+		return fmt.Errorf("problem reading response: %w", err)
 	}
 
 	return errors.Wrap(resp.SuccessOrError(), "error in response")
@@ -185,21 +186,21 @@ func (p *mdbProcess) Signal(ctx context.Context, sig syscall.Signal) error {
 func (p *mdbProcess) Wait(ctx context.Context) (int, error) {
 	payload, err := p.makeRequest(waitRequest{p.ID()})
 	if err != nil {
-		return -1, errors.Wrap(err, "problem marshalling request")
+		return -1, fmt.Errorf("problem marshalling request: %w", err)
 	}
 
 	req, err := shell.RequestToMessage(mongowire.OP_QUERY, payload)
 	if err != nil {
-		return -1, errors.Wrap(err, "could not create request")
+		return -1, fmt.Errorf("could not create request: %w", err)
 	}
 	msg, err := p.doRequest(ctx, req)
 	if err != nil {
-		return -1, errors.Wrap(err, "failed during request")
+		return -1, fmt.Errorf("failed during request: %w", err)
 	}
 
 	var resp waitResponse
 	if err := p.readRequest(msg, &resp); err != nil {
-		return -1, errors.Wrap(err, "problem reading response")
+		return -1, fmt.Errorf("problem reading response: %w", err)
 	}
 
 	return resp.ExitCode, errors.Wrap(resp.SuccessOrError(), "error in response")
@@ -208,20 +209,20 @@ func (p *mdbProcess) Wait(ctx context.Context) (int, error) {
 func (p *mdbProcess) Respawn(ctx context.Context) (jasper.Process, error) {
 	payload, err := p.makeRequest(respawnRequest{ID: p.ID()})
 	if err != nil {
-		return nil, errors.Wrap(err, "problem marshalling request")
+		return nil, fmt.Errorf("problem marshalling request: %w", err)
 	}
 
 	req, err := shell.RequestToMessage(mongowire.OP_QUERY, payload)
 	if err != nil {
-		return nil, errors.Wrap(err, "could not create request")
+		return nil, fmt.Errorf("could not create request: %w", err)
 	}
 	msg, err := p.doRequest(ctx, req)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed during request")
+		return nil, fmt.Errorf("failed during request: %w", err)
 	}
 	var resp infoResponse
 	if err := p.readRequest(msg, &resp); err != nil {
-		return nil, errors.Wrap(err, "problem reading response")
+		return nil, fmt.Errorf("problem reading response: %w", err)
 	}
 
 	return &mdbProcess{info: resp.Info, doRequest: p.doRequest, marshaler: p.marshaler, unmarshaler: p.unmarshaler}, nil
@@ -242,20 +243,20 @@ func (p *mdbProcess) RegisterSignalTriggerID(ctx context.Context, sigID jasper.S
 
 	payload, err := p.makeRequest(r)
 	if err != nil {
-		return errors.Wrap(err, "problem marshalling request")
+		return fmt.Errorf("problem marshalling request: %w", err)
 	}
 
 	req, err := shell.RequestToMessage(mongowire.OP_QUERY, payload)
 	if err != nil {
-		return errors.Wrap(err, "could not create request")
+		return fmt.Errorf("could not create request: %w", err)
 	}
 	msg, err := p.doRequest(ctx, req)
 	if err != nil {
-		return errors.Wrap(err, "failed during request")
+		return fmt.Errorf("failed during request: %w", err)
 	}
 	var resp shell.ErrorResponse
 	if err := p.readRequest(msg, &resp); err != nil {
-		return errors.Wrap(err, "problem reading response")
+		return fmt.Errorf("problem reading response: %w", err)
 	}
 
 	return errors.Wrap(resp.SuccessOrError(), "error in response")
@@ -268,7 +269,7 @@ func (p *mdbProcess) Tag(tag string) {
 
 	payload, err := p.makeRequest(r)
 	if err != nil {
-		grip.Warning(errors.Wrap(err, "problem marshalling request"))
+		grip.Warning(fmt.Errorf("problem marshalling request: %w", err))
 		return
 	}
 	req, err := shell.RequestToMessage(mongowire.OP_QUERY, payload)
@@ -293,7 +294,7 @@ func (p *mdbProcess) Tag(tag string) {
 func (p *mdbProcess) GetTags() []string {
 	payload, err := p.makeRequest(getTagsRequest{p.ID()})
 	if err != nil {
-		grip.Warning(errors.Wrap(err, "problem marshalling request"))
+		grip.Warning(fmt.Errorf("problem marshalling request: %w", err))
 		return nil
 	}
 
@@ -320,7 +321,7 @@ func (p *mdbProcess) GetTags() []string {
 func (p *mdbProcess) ResetTags() {
 	payload, err := p.makeRequest(resetTagsRequest{p.ID()})
 	if err != nil {
-		grip.Warning(errors.Wrap(err, "problem marshalling request"))
+		grip.Warning(fmt.Errorf("problem marshalling request: %w", err))
 		return
 	}
 

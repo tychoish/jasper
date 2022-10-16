@@ -83,7 +83,7 @@ func (e *pythonEnvironment) RunScript(ctx context.Context, script string) error 
 		Content: []byte(script),
 	}
 	if err := e.manager.WriteFile(ctx, wo); err != nil {
-		return errors.Wrap(err, "problem writing script file")
+		return fmt.Errorf("problem writing script file: %w", err)
 	}
 
 	return e.manager.CreateCommand(ctx).Environment(e.opts.Environment).SetOutputOptions(e.opts.Output).AppendArgs(e.opts.Interpreter(), wo.Path).Run(ctx)

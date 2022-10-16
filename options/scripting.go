@@ -1,8 +1,6 @@
 package options
 
-import (
-	"github.com/pkg/errors"
-)
+import "fmt"
 
 // ScriptingHarness defines the interface for all types that
 // define a scripting environment.
@@ -48,5 +46,5 @@ func NewScriptingHarness(se string) (ScriptingHarness, error) {
 			return makeHarness(), nil
 		}
 	}
-	return nil, errors.Errorf("no supported scripting environment named '%s'", se)
+	return nil, fmt.Errorf("no supported scripting environment named '%s'", se)
 }

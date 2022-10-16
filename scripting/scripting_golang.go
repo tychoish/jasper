@@ -111,7 +111,7 @@ func (e *golangEnvironment) RunScript(ctx context.Context, script string) error 
 		Content: []byte(script),
 	}
 	if err := e.manager.WriteFile(ctx, wo); err != nil {
-		return errors.Wrap(err, "problem writing script file")
+		return fmt.Errorf("problem writing script file: %w", err)
 	}
 
 	return e.manager.CreateCommand(ctx).Environment(e.opts.Environment).

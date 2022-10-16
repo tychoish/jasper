@@ -7,7 +7,6 @@ import (
 	"net"
 	"path/filepath"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/emt"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/jasper"
@@ -20,7 +19,7 @@ func makeInsecureRPCServiceAndClient(ctx context.Context, mngr jasper.Manager) (
 		return startTestRPCService(ctx, mngr, addr, nil)
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to start RPC service")
+		return nil, fmt.Errorf("failed to start RPC service: %w", err)
 	}
 	return newTestRPCClient(ctx, addr, nil)
 }
@@ -62,41 +61,41 @@ func makeTLSRPCServiceAndClient(ctx context.Context, mngr jasper.Manager) (Manag
 	// Make CA credentials
 	caCert, err := ioutil.ReadFile(caCertFile)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to read cert file")
+		return nil, fmt.Errorf("failed to read cert file: %w", err)
 	}
 
 	// Make server credentials
 	serverCert, err := ioutil.ReadFile(serverCertFile)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to read cert file")
+		return nil, fmt.Errorf("failed to read cert file: %w", err)
 	}
 	serverKey, err := ioutil.ReadFile(serverKeyFile)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to read key file")
+		return nil, fmt.Errorf("failed to read key file: %w", err)
 	}
 	serverCreds, err := options.NewCredentials(caCert, serverCert, serverKey)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to initialize test server credentials")
+		return nil, fmt.Errorf("failed to initialize test server credentials: %w", err)
 	}
 
 	addr, err := tryStartRPCService(ctx, func(ctx context.Context, addr net.Addr) error {
 		return startTestRPCService(ctx, mngr, addr, serverCreds)
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to start RPC service")
+		return nil, fmt.Errorf("failed to start RPC service: %w", err)
 	}
 
 	clientCert, err := ioutil.ReadFile(clientCertFile)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to read cert file")
+		return nil, fmt.Errorf("failed to read cert file: %w", err)
 	}
 	clientKey, err := ioutil.ReadFile(clientKeyFile)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to read key file")
+		return nil, fmt.Errorf("failed to read key file: %w", err)
 	}
 	clientCreds, err := options.NewCredentials(caCert, clientCert, clientKey)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to initialize test client credentials")
+		return nil, fmt.Errorf("failed to initialize test client credentials: %w", err)
 	}
 
 	return newTestRPCClient(ctx, addr, clientCreds)
@@ -107,7 +106,7 @@ func makeTLSRPCServiceAndClient(ctx context.Context, mngr jasper.Manager) (Manag
 func startTestRPCService(ctx context.Context, mngr jasper.Manager, addr net.Addr, creds *options.CertificateCredentials) error {
 	closeService, err := StartRPCService(ctx, mngr, addr, creds)
 	if err != nil {
-		return errors.Wrap(err, "could not start server")
+		return fmt.Errorf("could not start server: %w", err)
 	}
 
 	go func() {
@@ -123,7 +122,7 @@ func startTestRPCService(ctx context.Context, mngr jasper.Manager, addr net.Addr
 func newTestRPCClient(ctx context.Context, addr net.Addr, creds *options.CertificateCredentials) (Manager, error) {
 	client, err := NewRPCClient(ctx, addr, creds)
 	if err != nil {
-		return nil, errors.Wrap(err, "could not get client")
+		return nil, fmt.Errorf("could not get client: %w", err)
 	}
 
 	go func() {

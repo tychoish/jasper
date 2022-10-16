@@ -2,6 +2,7 @@ package jasper
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"runtime"
 	"sync"
@@ -33,7 +34,7 @@ func newBasicProcess(ctx context.Context, opts *options.Create) (Process, error)
 
 	exec, deadline, err := opts.Resolve(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "problem building command from options")
+		return nil, fmt.Errorf("problem building command from options: %w", err)
 	}
 
 	p := &basicProcess{
@@ -213,7 +214,7 @@ func (p *basicProcess) RegisterSignalTrigger(_ context.Context, trigger SignalTr
 func (p *basicProcess) RegisterSignalTriggerID(ctx context.Context, id SignalTriggerID) error {
 	makeTrigger, ok := GetSignalTriggerFactory(id)
 	if !ok {
-		return errors.Errorf("could not find signal trigger with id '%s'", id)
+		return fmt.Errorf("could not find signal trigger with id '%s'", id)
 	}
 	return errors.Wrap(p.RegisterSignalTrigger(ctx, makeTrigger()), "failed to register signal trigger")
 }

@@ -2,6 +2,7 @@ package cli
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/pkg/errors"
 	"github.com/tychoish/jasper/remote"
@@ -74,7 +75,7 @@ func loggingCacheGet() cli.Command {
 				}
 				logger := lc.Get(input.ID)
 				if logger == nil {
-					return &CachedLoggerResponse{OutcomeResponse: *makeOutcomeResponse(errors.Errorf("logger with id '%s' not found", input.ID))}
+					return &CachedLoggerResponse{OutcomeResponse: *makeOutcomeResponse(fmt.Errorf("logger with id '%s' not found", input.ID))}
 				}
 				return &CachedLoggerResponse{Logger: *logger, OutcomeResponse: *makeOutcomeResponse(nil)}
 			})

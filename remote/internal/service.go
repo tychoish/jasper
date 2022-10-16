@@ -73,7 +73,7 @@ func (s *jasperService) ID(ctx context.Context, _ *empty.Empty) (*IDResponse, er
 func (s *jasperService) Create(ctx context.Context, opts *CreateOptions) (*ProcessInfo, error) {
 	jopts, err := opts.Export()
 	if err != nil {
-		return nil, errors.Wrap(err, "problem exporting create options")
+		return nil, fmt.Errorf("problem exporting create options: %w", err)
 	}
 
 	// Spawn a new context so that the process' context is not potentially
@@ -122,7 +122,7 @@ func (s *jasperService) List(f *Filter, stream JasperProcessManager_ListServer) 
 			return errors.Wrapf(err, "could not convert info for process '%s'", p.ID())
 		}
 		if err := stream.Send(info); err != nil {
-			return errors.Wrap(err, "problem sending process info")
+			return fmt.Errorf("problem sending process info: %w", err)
 		}
 	}
 
@@ -146,7 +146,7 @@ func (s *jasperService) Group(t *TagName, stream JasperProcessManager_GroupServe
 			return errors.Wrapf(err, "could not get info for process '%s'", p.ID())
 		}
 		if err := stream.Send(info); err != nil {
-			return errors.Wrap(err, "problem sending process info")
+			return fmt.Errorf("problem sending process info: %w", err)
 		}
 	}
 
@@ -206,7 +206,7 @@ func (s *jasperService) Wait(ctx context.Context, id *JasperProcessID) (*Operati
 
 	exitCode, err := proc.Wait(ctx)
 	if err != nil {
-		err = errors.Wrap(err, "problem encountered while waiting")
+		err = fmt.Errorf("problem encountered while waiting: %w", err)
 		return &OperationOutcome{
 			Success:  false,
 			Text:     err.Error(),
@@ -234,7 +234,7 @@ func (s *jasperService) Respawn(ctx context.Context, id *JasperProcessID) (*Proc
 	pctx, cancel := context.WithCancel(context.Background())
 	newProc, err := proc.Respawn(pctx)
 	if err != nil {
-		err = errors.Wrap(err, "problem encountered while respawning")
+		err = fmt.Errorf("problem encountered while respawning: %w", err)
 		cancel()
 		return nil, errors.WithStack(err)
 	}
@@ -267,7 +267,7 @@ func (s *jasperService) Clear(ctx context.Context, _ *empty.Empty) (*OperationOu
 
 func (s *jasperService) Close(ctx context.Context, _ *empty.Empty) (*OperationOutcome, error) {
 	if err := s.manager.Close(ctx); err != nil {
-		err = errors.Wrap(err, "problem encountered closing service")
+		err = fmt.Errorf("problem encountered closing service: %w", err)
 		return &OperationOutcome{
 			Success:  false,
 			ExitCode: 1,
@@ -327,7 +327,7 @@ func (s *jasperService) DownloadFile(ctx context.Context, opts *DownloadInfo) (*
 	jopts := opts.Export()
 
 	if err := jopts.Validate(); err != nil {
-		err = errors.Wrap(err, "problem validating download options")
+		err = fmt.Errorf("problem validating download options: %w", err)
 		return &OperationOutcome{Success: false, Text: err.Error(), ExitCode: -2}, nil
 	}
 
@@ -376,7 +376,7 @@ func (s *jasperService) RegisterSignalTriggerID(ctx context.Context, params *Sig
 	if !ok {
 		return &OperationOutcome{
 			Success:  false,
-			Text:     errors.Errorf("could not find signal trigger with id '%s'", signalTriggerID).Error(),
+			Text:     fmt.Errorf("could not find signal trigger with id '%s'", signalTriggerID).Error(),
 			ExitCode: -3,
 		}, nil
 	}
@@ -425,7 +425,7 @@ func (s *jasperService) WriteFile(stream JasperProcessManager_WriteFileServer) e
 		if err != nil {
 			if sendErr := stream.SendAndClose(&OperationOutcome{
 				Success:  false,
-				Text:     errors.Wrap(err, "error receiving from client stream").Error(),
+				Text:     fmt.Errorf("error receiving from client stream: %w", err).Error(),
 				ExitCode: -2,
 			}); sendErr != nil {
 				return errors.Wrapf(sendErr, "could not send error response to client: %s", err.Error())
@@ -438,7 +438,7 @@ func (s *jasperService) WriteFile(stream JasperProcessManager_WriteFileServer) e
 		if err := jopts.Validate(); err != nil {
 			if sendErr := stream.SendAndClose(&OperationOutcome{
 				Success:  false,
-				Text:     errors.Wrap(err, "problem validating file write options").Error(),
+				Text:     fmt.Errorf("problem validating file write options: %w", err).Error(),
 				ExitCode: -3,
 			}); sendErr != nil {
 				return errors.Wrapf(sendErr, "could not send error response to client: %s", err.Error())
@@ -449,7 +449,7 @@ func (s *jasperService) WriteFile(stream JasperProcessManager_WriteFileServer) e
 		if err := jopts.DoWrite(); err != nil {
 			if sendErr := stream.SendAndClose(&OperationOutcome{
 				Success:  false,
-				Text:     errors.Wrap(err, "problem validating file write opts").Error(),
+				Text:     fmt.Errorf("problem validating file write opts: %w", err).Error(),
 				ExitCode: -4,
 			}); sendErr != nil {
 				return errors.Wrapf(sendErr, "could not send error response to client: %s", err.Error())
@@ -478,12 +478,12 @@ func (s *jasperService) WriteFile(stream JasperProcessManager_WriteFileServer) e
 func (s *jasperService) ScriptingHarnessCreate(ctx context.Context, opts *ScriptingOptions) (*ScriptingHarnessID, error) {
 	xopts, err := opts.Export()
 	if err != nil {
-		return nil, errors.Wrap(err, "problem converting options")
+		return nil, fmt.Errorf("problem converting options: %w", err)
 	}
 
 	se, err := s.scripting.Create(s.manager, xopts)
 	if err != nil {
-		return nil, errors.Wrap(err, "problem generating scripting environment")
+		return nil, fmt.Errorf("problem generating scripting environment: %w", err)
 	}
 	return &ScriptingHarnessID{
 		Id:    se.ID(),
@@ -704,7 +704,7 @@ func (s *jasperService) LoggingCacheCreate(ctx context.Context, args *LoggingCac
 	}
 	opt, err := args.Options.Export()
 	if err != nil {
-		return nil, errors.Wrap(err, "problem exporting output options")
+		return nil, fmt.Errorf("problem exporting output options: %w", err)
 	}
 
 	out, err := lc.Create(args.Name, &opt)
@@ -812,7 +812,7 @@ func (s *jasperService) LoggingCachePrune(ctx context.Context, arg *timestamp.Ti
 
 	ts, err := ptypes.Timestamp(arg)
 	if err != nil {
-		return nil, errors.Wrap(err, "could not convert prune timestamp to equivalent protobuf RPC timestamp")
+		return nil, fmt.Errorf("could not convert prune timestamp to equivalent protobuf RPC timestamp: %w", err)
 	}
 	lc.Prune(ts)
 

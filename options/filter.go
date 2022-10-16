@@ -1,6 +1,6 @@
 package options
 
-import "github.com/pkg/errors"
+import "fmt"
 
 // Filter is type for classifying and grouping types of processes in filter
 // operations, such as that found in List() on Managers.
@@ -26,6 +26,6 @@ func (f Filter) Validate() error {
 	case Running, Terminated, All, Failed, Successful:
 		return nil
 	default:
-		return errors.Errorf("%s is not a valid filter", f)
+		return fmt.Errorf("%s is not a valid filter", f)
 	}
 }

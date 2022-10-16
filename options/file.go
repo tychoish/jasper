@@ -3,6 +3,7 @@ package options
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -54,7 +55,7 @@ func (opts *WriteFile) Validate() error {
 // needed and the file if it does not exist yet.
 func (opts *WriteFile) DoWrite() error {
 	if err := makeEnclosingDirectories(filepath.Dir(opts.Path)); err != nil {
-		return errors.Wrap(err, "problem making enclosing directories")
+		return fmt.Errorf("problem making enclosing directories: %w", err)
 	}
 
 	openFlags := os.O_RDWR | os.O_CREATE
@@ -93,12 +94,12 @@ func (opts *WriteFile) DoWrite() error {
 // WriteFile containing the next content to write to the file.
 func (opts *WriteFile) WriteBufferedContent(doWrite func(bufopts WriteFile) error) error {
 	if err := opts.validateContent(); err != nil {
-		return errors.Wrap(err, "could not validate file content source")
+		return fmt.Errorf("could not validate file content source: %w", err)
 	}
 	didWrite := false
 	for buf, err := opts.contentBytes(); len(buf) != 0; buf, err = opts.contentBytes() {
 		if err != nil && err != io.EOF {
-			return errors.Wrap(err, "error getting content bytes")
+			return fmt.Errorf("error getting content bytes: %w", err)
 		}
 
 		bufOpts := *opts
@@ -137,7 +138,7 @@ func (opts *WriteFile) SetPerm() error {
 // should process the byte slice before checking for the io.EOF condition.
 func (opts *WriteFile) contentBytes() ([]byte, error) {
 	if err := opts.validateContent(); err != nil {
-		return nil, errors.Wrap(err, "could not validate file content source")
+		return nil, fmt.Errorf("could not validate file content source: %w", err)
 	}
 
 	if opts.Reader != nil {
@@ -153,7 +154,7 @@ func (opts *WriteFile) contentBytes() ([]byte, error) {
 // ContentReader returns the contents to be written to the file as an io.Reader.
 func (opts *WriteFile) ContentReader() (io.Reader, error) {
 	if err := opts.validateContent(); err != nil {
-		return nil, errors.Wrap(err, "could not validate file content source")
+		return nil, fmt.Errorf("could not validate file content source: %w", err)
 	}
 
 	if opts.Reader != nil {

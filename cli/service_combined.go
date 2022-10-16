@@ -62,7 +62,7 @@ func serviceCommandCombined(cmd string, operation serviceOperation) cli.Command 
 		Action: func(c *cli.Context) error {
 			manager, err := jasper.NewSynchronizedManager(false)
 			if err != nil {
-				return errors.Wrap(err, "error creating combined manager")
+				return fmt.Errorf("error creating combined manager: %w", err)
 			}
 
 			daemon := newCombinedDaemon(

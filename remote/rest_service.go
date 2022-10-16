@@ -114,7 +114,7 @@ func (s *Service) createProcess(rw http.ResponseWriter, r *http.Request) {
 	if err := gimlet.GetJSON(r.Body, opts); err != nil {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Message:    errors.Wrap(err, "problem reading request").Error(),
+			Message:    fmt.Errorf("problem reading request: %w", err).Error(),
 		})
 		return
 	}
@@ -123,7 +123,7 @@ func (s *Service) createProcess(rw http.ResponseWriter, r *http.Request) {
 	if err := opts.Validate(); err != nil {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Message:    errors.Wrap(err, "invalid creation options").Error(),
+			Message:    fmt.Errorf("invalid creation options: %w", err).Error(),
 		})
 		return
 	}
@@ -135,7 +135,7 @@ func (s *Service) createProcess(rw http.ResponseWriter, r *http.Request) {
 		cancel()
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Message:    errors.Wrap(err, "problem submitting request").Error(),
+			Message:    fmt.Errorf("problem submitting request: %w", err).Error(),
 		})
 		return
 	}
@@ -151,7 +151,7 @@ func (s *Service) createProcess(rw http.ResponseWriter, r *http.Request) {
 		if !info.Complete {
 			writeError(rw, gimlet.ErrorResponse{
 				StatusCode: http.StatusInternalServerError,
-				Message:    errors.Wrap(err, "problem registering trigger").Error(),
+				Message:    fmt.Errorf("problem registering trigger: %w", err).Error(),
 			})
 			return
 		}
@@ -165,7 +165,7 @@ func (s *Service) listProcesses(rw http.ResponseWriter, r *http.Request) {
 	if err := filter.Validate(); err != nil {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Message:    errors.Wrap(err, "invalid input").Error(),
+			Message:    fmt.Errorf("invalid input: %w", err).Error(),
 		})
 		return
 	}
@@ -418,7 +418,7 @@ func (s *Service) downloadFile(rw http.ResponseWriter, r *http.Request) {
 	if err := gimlet.GetJSON(r.Body, &opts); err != nil {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Message:    errors.Wrap(err, "problem reading request").Error(),
+			Message:    fmt.Errorf("problem reading request: %w", err).Error(),
 		})
 		return
 	}
@@ -426,7 +426,7 @@ func (s *Service) downloadFile(rw http.ResponseWriter, r *http.Request) {
 	if err := opts.Validate(); err != nil {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Message:    errors.Wrap(err, "problem validating download options").Error(),
+			Message:    fmt.Errorf("problem validating download options: %w", err).Error(),
 		})
 		return
 	}
@@ -502,7 +502,7 @@ func (s *Service) writeFile(rw http.ResponseWriter, r *http.Request) {
 	if err := gimlet.GetJSON(r.Body, &opts); err != nil {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Message:    errors.Wrap(err, "problem reading request").Error(),
+			Message:    fmt.Errorf("problem reading request: %w", err).Error(),
 		})
 		return
 	}
@@ -510,7 +510,7 @@ func (s *Service) writeFile(rw http.ResponseWriter, r *http.Request) {
 	if err := opts.Validate(); err != nil {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Message:    errors.Wrap(err, "problem validating file write options").Error(),
+			Message:    fmt.Errorf("problem validating file write options: %w", err).Error(),
 		})
 		return
 	}
@@ -571,7 +571,7 @@ func (s *Service) registerSignalTriggerID(rw http.ResponseWriter, r *http.Reques
 	if !ok {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Message:    errors.Errorf("could not find signal trigger with id '%s'", sigTriggerID).Error(),
+			Message:    fmt.Errorf("could not find signal trigger with id '%s'", sigTriggerID).Error(),
 		})
 		return
 	}
@@ -601,7 +601,7 @@ func (s *Service) loggingCacheCreate(rw http.ResponseWriter, r *http.Request) {
 	if err := gimlet.GetJSON(r.Body, args); err != nil {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Message:    errors.Wrap(err, "problem parsing options").Error(),
+			Message:    fmt.Errorf("problem parsing options: %w", err).Error(),
 		})
 		return
 	}
@@ -610,7 +610,7 @@ func (s *Service) loggingCacheCreate(rw http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Message:    errors.Wrap(err, "problem creating loggers").Error(),
+			Message:    fmt.Errorf("problem creating loggers: %w", err).Error(),
 		})
 		return
 	}

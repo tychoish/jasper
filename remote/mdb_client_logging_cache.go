@@ -2,6 +2,7 @@ package remote
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/pkg/errors"
@@ -21,26 +22,26 @@ func (lc *mdbLoggingCache) Create(id string, opts *options.Output) (*options.Cac
 	r.Params.Options = opts
 	payload, err := lc.client.makeRequest(r)
 	if err != nil {
-		return nil, errors.Wrap(err, "could not build request")
+		return nil, fmt.Errorf("could not build request: %w", err)
 	}
 
 	req, err := shell.RequestToMessage(mongowire.OP_QUERY, payload)
 	if err != nil {
-		return nil, errors.Wrap(err, "could not create request")
+		return nil, fmt.Errorf("could not create request: %w", err)
 	}
 
 	msg, err := lc.client.doRequest(lc.ctx, req)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed during request")
+		return nil, fmt.Errorf("failed during request: %w", err)
 	}
 
 	resp := &loggingCacheCreateAndGetResponse{}
 	if err := lc.client.readRequest(msg, resp); err != nil {
-		return nil, errors.Wrap(err, "could not parse response document")
+		return nil, fmt.Errorf("could not parse response document: %w", err)
 	}
 
 	if err = resp.SuccessOrError(); err != nil {
-		return nil, errors.Wrap(err, "error in response")
+		return nil, fmt.Errorf("error in response: %w", err)
 	}
 
 	return resp.CachedLogger, nil
@@ -100,7 +101,7 @@ func (lc *mdbLoggingCache) CloseAndRemove(ctx context.Context, id string) error 
 
 	req, err := shell.RequestToMessage(mongowire.OP_QUERY, payload)
 	if err != nil {
-		return errors.Wrap(err, "could not create request")
+		return fmt.Errorf("could not create request: %w", err)
 	}
 
 	msg, err := lc.client.doRequest(ctx, req)
@@ -110,7 +111,7 @@ func (lc *mdbLoggingCache) CloseAndRemove(ctx context.Context, id string) error 
 
 	resp := &shell.ErrorResponse{}
 	if err := lc.client.readRequest(msg, resp); err != nil {
-		return errors.Wrap(err, "could not read response")
+		return fmt.Errorf("could not read response: %w", err)
 	}
 
 	return resp.SuccessOrError()
@@ -124,7 +125,7 @@ func (lc *mdbLoggingCache) Clear(ctx context.Context) error {
 
 	req, err := shell.RequestToMessage(mongowire.OP_QUERY, payload)
 	if err != nil {
-		return errors.Wrap(err, "could not create request")
+		return fmt.Errorf("could not create request: %w", err)
 	}
 
 	msg, err := lc.client.doRequest(ctx, req)
@@ -134,7 +135,7 @@ func (lc *mdbLoggingCache) Clear(ctx context.Context) error {
 
 	resp := &shell.ErrorResponse{}
 	if err := lc.client.readRequest(msg, resp); err != nil {
-		return errors.Wrap(err, "could not read response")
+		return fmt.Errorf("could not read response: %w", err)
 	}
 
 	return resp.SuccessOrError()

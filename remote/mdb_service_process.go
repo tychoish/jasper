@@ -2,10 +2,10 @@ package remote
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"syscall"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/birch/mrpc/mongowire"
 	"github.com/tychoish/birch/mrpc/shell"
 	"github.com/tychoish/jasper"
@@ -29,12 +29,12 @@ const (
 func (s *mdbService) processInfo(ctx context.Context, w io.Writer, msg mongowire.Message) {
 	doc, err := shell.RequestMessageToDocument(msg)
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not read request"), InfoCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not read request: %w", err), InfoCommand)
 		return
 	}
 	req := infoRequest{}
 	if err = s.readPayload(doc, &req); err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse request"), InfoCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not parse request: %w", err), InfoCommand)
 		return
 	}
 
@@ -42,19 +42,19 @@ func (s *mdbService) processInfo(ctx context.Context, w io.Writer, msg mongowire
 
 	proc, err := s.manager.Get(ctx, id)
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not get process"), InfoCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not get process: %w", err), InfoCommand)
 		return
 	}
 
 	payload, err := s.makePayload(makeInfoResponse(proc.Info(ctx)))
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not build response"), InfoCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not build response: %w", err), InfoCommand)
 		return
 	}
 
 	resp, err := shell.ResponseToMessage(mongowire.OP_REPLY, payload)
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not make response"), InfoCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not make response: %w", err), InfoCommand)
 		return
 	}
 	shell.WriteResponse(ctx, w, resp, InfoCommand)
@@ -63,12 +63,12 @@ func (s *mdbService) processInfo(ctx context.Context, w io.Writer, msg mongowire
 func (s *mdbService) processRunning(ctx context.Context, w io.Writer, msg mongowire.Message) {
 	doc, err := shell.RequestMessageToDocument(msg)
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not read request"), RunningCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not read request: %w", err), RunningCommand)
 		return
 	}
 	req := runningRequest{}
 	if err = s.readPayload(doc, &req); err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse request"), RunningCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not parse request: %w", err), RunningCommand)
 		return
 	}
 
@@ -76,19 +76,19 @@ func (s *mdbService) processRunning(ctx context.Context, w io.Writer, msg mongow
 
 	proc, err := s.manager.Get(ctx, id)
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not get process"), RunningCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not get process: %w", err), RunningCommand)
 		return
 	}
 
 	payload, err := s.makePayload(makeRunningResponse(proc.Running(ctx)))
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not build response"), RunningCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not build response: %w", err), RunningCommand)
 		return
 	}
 
 	resp, err := shell.ResponseToMessage(mongowire.OP_REPLY, payload)
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not make response"), RunningCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not make response: %w", err), RunningCommand)
 		return
 	}
 	shell.WriteResponse(ctx, w, resp, RunningCommand)
@@ -97,13 +97,13 @@ func (s *mdbService) processRunning(ctx context.Context, w io.Writer, msg mongow
 func (s *mdbService) processComplete(ctx context.Context, w io.Writer, msg mongowire.Message) {
 	doc, err := shell.RequestMessageToDocument(msg)
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not read request"), CompleteCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not read request: %w", err), CompleteCommand)
 		return
 	}
 
 	req := &completeRequest{}
 	if err = s.readPayload(doc, req); err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse request"), CompleteCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not parse request: %w", err), CompleteCommand)
 		return
 	}
 
@@ -111,19 +111,19 @@ func (s *mdbService) processComplete(ctx context.Context, w io.Writer, msg mongo
 
 	proc, err := s.manager.Get(ctx, id)
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not get process"), CompleteCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not get process: %w", err), CompleteCommand)
 		return
 	}
 
 	payload, err := s.makePayload(makeCompleteResponse(proc.Complete(ctx)))
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not build response"), CompleteCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not build response: %w", err), CompleteCommand)
 		return
 	}
 
 	resp, err := shell.ResponseToMessage(mongowire.OP_REPLY, payload)
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not make response"), CompleteCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not make response: %w", err), CompleteCommand)
 		return
 	}
 	shell.WriteResponse(ctx, w, resp, CompleteCommand)
@@ -132,12 +132,12 @@ func (s *mdbService) processComplete(ctx context.Context, w io.Writer, msg mongo
 func (s *mdbService) processWait(ctx context.Context, w io.Writer, msg mongowire.Message) {
 	doc, err := shell.RequestMessageToDocument(msg)
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not read request"), WaitCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not read request: %w", err), WaitCommand)
 		return
 	}
 	req := waitRequest{}
 	if err = s.readPayload(doc, &req); err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse request"), WaitCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not parse request: %w", err), WaitCommand)
 		return
 	}
 
@@ -145,20 +145,20 @@ func (s *mdbService) processWait(ctx context.Context, w io.Writer, msg mongowire
 
 	proc, err := s.manager.Get(ctx, id)
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not get process"), WaitCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not get process: %w", err), WaitCommand)
 		return
 	}
 
 	exitCode, err := proc.Wait(ctx)
 	payload, err := s.makePayload(makeWaitResponse(exitCode, err))
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not build response"), WaitCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not build response: %w", err), WaitCommand)
 		return
 	}
 
 	resp, err := shell.ResponseToMessage(mongowire.OP_REPLY, payload)
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not make response"), WaitCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not make response: %w", err), WaitCommand)
 		return
 	}
 	shell.WriteResponse(ctx, w, resp, WaitCommand)
@@ -167,12 +167,12 @@ func (s *mdbService) processWait(ctx context.Context, w io.Writer, msg mongowire
 func (s *mdbService) processRespawn(ctx context.Context, w io.Writer, msg mongowire.Message) {
 	doc, err := shell.RequestMessageToDocument(msg)
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not read request"), RespawnCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not read request: %w", err), RespawnCommand)
 		return
 	}
 	req := respawnRequest{}
 	if err = s.readPayload(doc, &req); err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse request"), RespawnCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not parse request: %w", err), RespawnCommand)
 		return
 	}
 
@@ -180,19 +180,19 @@ func (s *mdbService) processRespawn(ctx context.Context, w io.Writer, msg mongow
 
 	proc, err := s.manager.Get(ctx, id)
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not get process"), RespawnCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not get process: %w", err), RespawnCommand)
 		return
 	}
 
 	pctx, cancel := context.WithCancel(context.Background())
 	newProc, err := proc.Respawn(pctx)
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "failed to respawned process"), RespawnCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("failed to respawned process: %w", err), RespawnCommand)
 		cancel()
 		return
 	}
 	if err = s.manager.Register(ctx, newProc); err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "failed to register respawned process"), RespawnCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("failed to register respawned process: %w", err), RespawnCommand)
 		cancel()
 		return
 	}
@@ -203,20 +203,20 @@ func (s *mdbService) processRespawn(ctx context.Context, w io.Writer, msg mongow
 		newProcInfo := getProcInfoNoHang(ctx, newProc)
 		cancel()
 		if !newProcInfo.Complete {
-			shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "failed to register trigger on respawned process"), RespawnCommand)
+			shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("failed to register trigger on respawned process: %w", err), RespawnCommand)
 			return
 		}
 	}
 
 	payload, err := s.makePayload(makeInfoResponse(newProc.Info(ctx)))
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not build response"), RespawnCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not build response: %w", err), RespawnCommand)
 		return
 	}
 
 	resp, err := shell.ResponseToMessage(mongowire.OP_REPLY, payload)
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not make response"), RespawnCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not make response: %w", err), RespawnCommand)
 		return
 	}
 	shell.WriteResponse(ctx, w, resp, RespawnCommand)
@@ -225,12 +225,12 @@ func (s *mdbService) processRespawn(ctx context.Context, w io.Writer, msg mongow
 func (s *mdbService) processSignal(ctx context.Context, w io.Writer, msg mongowire.Message) {
 	doc, err := shell.RequestMessageToDocument(msg)
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not read request"), SignalCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not read request: %w", err), SignalCommand)
 		return
 	}
 	req := signalRequest{}
 	if err = s.readPayload(doc, &req); err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse request"), SignalCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not parse request: %w", err), SignalCommand)
 		return
 	}
 
@@ -239,12 +239,12 @@ func (s *mdbService) processSignal(ctx context.Context, w io.Writer, msg mongowi
 
 	proc, err := s.manager.Get(ctx, id)
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not get process"), SignalCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not get process: %w", err), SignalCommand)
 		return
 	}
 
 	if err := proc.Signal(ctx, syscall.Signal(sig)); err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not signal process"), SignalCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not signal process: %w", err), SignalCommand)
 		return
 	}
 
@@ -254,13 +254,13 @@ func (s *mdbService) processSignal(ctx context.Context, w io.Writer, msg mongowi
 func (s *mdbService) processRegisterSignalTriggerID(ctx context.Context, w io.Writer, msg mongowire.Message) {
 	doc, err := shell.RequestMessageToDocument(msg)
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not read request"), RegisterSignalTriggerIDCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not read request: %w", err), RegisterSignalTriggerIDCommand)
 		return
 	}
 
 	req := registerSignalTriggerIDRequest{}
 	if err = s.readPayload(doc, &req); err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse request"), RegisterSignalTriggerIDCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not parse request: %w", err), RegisterSignalTriggerIDCommand)
 		return
 	}
 
@@ -269,18 +269,18 @@ func (s *mdbService) processRegisterSignalTriggerID(ctx context.Context, w io.Wr
 
 	makeTrigger, ok := jasper.GetSignalTriggerFactory(sigID)
 	if !ok {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Errorf("could not get signal trigger ID %s", sigID), RegisterSignalTriggerIDCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not get signal trigger ID %s", sigID), RegisterSignalTriggerIDCommand)
 		return
 	}
 
 	proc, err := s.manager.Get(ctx, procID)
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not get process"), RegisterSignalTriggerIDCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not get process: %w", err), RegisterSignalTriggerIDCommand)
 		return
 	}
 
 	if err := proc.RegisterSignalTrigger(ctx, makeTrigger()); err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not register signal trigger"), RegisterSignalTriggerIDCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not register signal trigger: %w", err), RegisterSignalTriggerIDCommand)
 		return
 	}
 
@@ -290,12 +290,12 @@ func (s *mdbService) processRegisterSignalTriggerID(ctx context.Context, w io.Wr
 func (s *mdbService) processTag(ctx context.Context, w io.Writer, msg mongowire.Message) {
 	doc, err := shell.RequestMessageToDocument(msg)
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not read request"), TagCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not read request: %w", err), TagCommand)
 		return
 	}
 	req := tagRequest{}
 	if err = s.readPayload(doc, &req); err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse request"), TagCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not parse request: %w", err), TagCommand)
 		return
 	}
 
@@ -304,7 +304,7 @@ func (s *mdbService) processTag(ctx context.Context, w io.Writer, msg mongowire.
 
 	proc, err := s.manager.Get(ctx, id)
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not get process"), TagCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not get process: %w", err), TagCommand)
 		return
 	}
 
@@ -316,13 +316,13 @@ func (s *mdbService) processTag(ctx context.Context, w io.Writer, msg mongowire.
 func (s *mdbService) processGetTags(ctx context.Context, w io.Writer, msg mongowire.Message) {
 	doc, err := shell.RequestMessageToDocument(msg)
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not read request"), GetTagsCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not read request: %w", err), GetTagsCommand)
 		return
 	}
 
 	req := &getTagsRequest{}
 	if err = s.readPayload(doc, req); err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse request"), GetTagsCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not parse request: %w", err), GetTagsCommand)
 		return
 	}
 
@@ -330,19 +330,19 @@ func (s *mdbService) processGetTags(ctx context.Context, w io.Writer, msg mongow
 
 	proc, err := s.manager.Get(ctx, id)
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not get process"), GetTagsCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not get process: %w", err), GetTagsCommand)
 		return
 	}
 
 	payload, err := s.makePayload(makeGetTagsResponse(proc.GetTags()))
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not build response"), GetTagsCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not build response: %w", err), GetTagsCommand)
 		return
 	}
 
 	resp, err := shell.ResponseToMessage(mongowire.OP_REPLY, payload)
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not make response"), GetTagsCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not make response: %w", err), GetTagsCommand)
 		return
 	}
 	shell.WriteResponse(ctx, w, resp, GetTagsCommand)
@@ -351,12 +351,12 @@ func (s *mdbService) processGetTags(ctx context.Context, w io.Writer, msg mongow
 func (s *mdbService) processResetTags(ctx context.Context, w io.Writer, msg mongowire.Message) {
 	doc, err := shell.RequestMessageToDocument(msg)
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not read request"), ResetTagsCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not read request: %w", err), ResetTagsCommand)
 		return
 	}
 	req := resetTagsRequest{}
 	if err = s.readPayload(doc, &req); err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse request"), ResetTagsCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not parse request: %w", err), ResetTagsCommand)
 		return
 	}
 
@@ -364,7 +364,7 @@ func (s *mdbService) processResetTags(ctx context.Context, w io.Writer, msg mong
 
 	proc, err := s.manager.Get(ctx, id)
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not get process"), ResetTagsCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not get process: %w", err), ResetTagsCommand)
 		return
 	}
 

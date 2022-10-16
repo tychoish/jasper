@@ -1,6 +1,7 @@
 package options
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/pkg/errors"
@@ -50,7 +51,7 @@ func (f LogFormat) MakeFormatter() (send.MessageFormatter, error) {
 	case LogFormatInvalid:
 		return nil, errors.New("cannot make log format for invalid format")
 	default:
-		return nil, errors.Errorf("unknown log format '%s'", f)
+		return nil, fmt.Errorf("unknown log format '%s'", f)
 	}
 }
 
@@ -71,7 +72,7 @@ func (f RawLoggerConfigFormat) Validate() error {
 	case RawLoggerConfigFormatInvalid:
 		return errors.New("invalid log format")
 	default:
-		return errors.Errorf("unknown raw logger config format '%s'", f)
+		return fmt.Errorf("unknown raw logger config format '%s'", f)
 	}
 }
 
@@ -80,7 +81,7 @@ func (f RawLoggerConfigFormat) Validate() error {
 func (f RawLoggerConfigFormat) Unmarshal(data []byte, out interface{}) error {
 	unmarshaler := GetGlobalLoggerRegistry().Unmarshaler(f)
 	if unmarshaler == nil {
-		return errors.Errorf("unsupported format '%s'", f)
+		return fmt.Errorf("unsupported format '%s'", f)
 	}
 
 	if err := unmarshaler(data, out); err != nil {
@@ -181,7 +182,7 @@ func (lc *LoggerConfig) Type() string { return lc.info.Type }
 func (lc *LoggerConfig) Resolve() (send.Sender, error) {
 	if lc.sender == nil {
 		if err := lc.resolveProducer(); err != nil {
-			return nil, errors.Wrap(err, "problem resolving logger producer")
+			return nil, fmt.Errorf("problem resolving logger producer: %w", err)
 		}
 
 		sender, err := lc.producer.Configure()
@@ -196,7 +197,7 @@ func (lc *LoggerConfig) Resolve() (send.Sender, error) {
 
 func (lc *LoggerConfig) MarshalBSON() ([]byte, error) {
 	if err := lc.resolveProducer(); err != nil {
-		return nil, errors.Wrap(err, "problem resolving logger producer")
+		return nil, fmt.Errorf("problem resolving logger producer: %w", err)
 	}
 
 	marshaler := lc.getRegistry().Marshaler(RawLoggerConfigFormatBSON)
@@ -206,7 +207,7 @@ func (lc *LoggerConfig) MarshalBSON() ([]byte, error) {
 
 	data, err := marshaler(lc.producer)
 	if err != nil {
-		return nil, errors.Wrap(err, "problem producing logger config")
+		return nil, fmt.Errorf("problem producing logger config: %w", err)
 	}
 
 	return marshaler(&loggerConfigInfo{
@@ -232,7 +233,7 @@ func (lc *LoggerConfig) UnmarshalBSON(b []byte) error {
 
 	info := loggerConfigInfo{}
 	if err := unmarshaler(b, &info); err != nil {
-		return errors.Wrap(err, "problem unmarshaling config logger info")
+		return fmt.Errorf("problem unmarshaling config logger info: %w", err)
 	}
 
 	lc.info = info
@@ -241,7 +242,7 @@ func (lc *LoggerConfig) UnmarshalBSON(b []byte) error {
 
 func (lc *LoggerConfig) MarshalJSON() ([]byte, error) {
 	if err := lc.resolveProducer(); err != nil {
-		return nil, errors.Wrap(err, "problem resolving logger producer")
+		return nil, fmt.Errorf("problem resolving logger producer: %w", err)
 	}
 
 	marshaler := lc.getRegistry().Marshaler(RawLoggerConfigFormatJSON)
@@ -251,7 +252,7 @@ func (lc *LoggerConfig) MarshalJSON() ([]byte, error) {
 
 	data, err := marshaler(lc.producer)
 	if err != nil {
-		return nil, errors.Wrap(err, "problem producing logger config")
+		return nil, fmt.Errorf("problem producing logger config: %w", err)
 	}
 
 	return marshaler(&loggerConfigInfo{
@@ -269,7 +270,7 @@ func (lc *LoggerConfig) UnmarshalJSON(b []byte) error {
 
 	info := loggerConfigInfo{}
 	if err := unmarshaler(b, &info); err != nil {
-		return errors.Wrap(err, "problem unmarshalling config logger info")
+		return fmt.Errorf("problem unmarshalling config logger info: %w", err)
 	}
 
 	lc.info = info
@@ -279,18 +280,18 @@ func (lc *LoggerConfig) UnmarshalJSON(b []byte) error {
 func (lc *LoggerConfig) resolveProducer() error {
 	if lc.producer == nil {
 		if err := lc.validate(); err != nil {
-			return errors.Wrap(err, "invalid logger config")
+			return fmt.Errorf("invalid logger config: %w", err)
 		}
 
 		factory, ok := lc.getRegistry().Resolve(lc.info.Type)
 		if !ok {
-			return errors.Errorf("unregistered logger type '%s'", lc.info.Type)
+			return fmt.Errorf("unregistered logger type '%s'", lc.info.Type)
 		}
 		lc.producer = factory()
 
 		if len(lc.info.Config) > 0 {
 			if err := lc.info.Format.Unmarshal(lc.info.Config, lc.producer); err != nil {
-				return errors.Wrap(err, "problem unmarshalling data")
+				return fmt.Errorf("problem unmarshalling data: %w", err)
 			}
 		}
 	}
@@ -349,7 +350,7 @@ type SafeSender struct {
 // sender and buffered sender are closed correctly.
 func NewSafeSender(baseSender send.Sender, opts BaseOptions) (send.Sender, error) {
 	if err := opts.Validate(); err != nil {
-		return nil, errors.Wrap(err, "invalid options")
+		return nil, fmt.Errorf("invalid options: %w", err)
 	}
 
 	sender := &SafeSender{}

@@ -2,6 +2,7 @@ package jasper
 
 import (
 	"context"
+	"fmt"
 	"io"
 
 	"github.com/pkg/errors"
@@ -21,7 +22,7 @@ func NewInMemoryLogger(maxSize int) (*options.LoggerConfig, error) {
 	}
 	config := &options.LoggerConfig{}
 	if err := config.Set(loggerProducer); err != nil {
-		return nil, errors.Wrap(err, "problem setting logger producer for logger config")
+		return nil, fmt.Errorf("problem setting logger producer for logger config: %w", err)
 	}
 	return config, nil
 }
@@ -67,7 +68,7 @@ func GetInMemoryLogStream(ctx context.Context, proc Process, count int) ([]strin
 		msgs, _, err := inMemorySender.GetCount(count)
 		if err != nil {
 			if err != io.EOF {
-				err = errors.Wrap(err, "failed to get logs from in-memory stream")
+				err = fmt.Errorf("failed to get logs from in-memory stream: %w", err)
 			}
 			return nil, err
 		}

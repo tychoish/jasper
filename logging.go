@@ -2,6 +2,7 @@ package jasper
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"time"
 
@@ -46,7 +47,7 @@ func (c *loggingCacheImpl) Create(id string, opts *options.Output) (*options.Cac
 	defer c.mu.Unlock()
 
 	if _, ok := c.cache[id]; ok {
-		return nil, errors.Errorf("logger named %s exists", id)
+		return nil, fmt.Errorf("logger named %s exists", id)
 	}
 	logger := opts.CachedLogger(id)
 
@@ -96,7 +97,7 @@ func (c *loggingCacheImpl) Put(id string, logger *options.CachedLogger) error {
 	defer c.mu.Unlock()
 
 	if _, ok := c.cache[id]; ok {
-		return errors.Errorf("cannot cache with existing logger '%s'", id)
+		return fmt.Errorf("cannot cache with existing logger '%s'", id)
 	}
 
 	logger.Accessed = time.Now()

@@ -2,6 +2,7 @@ package options
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"path/filepath"
 
@@ -40,7 +41,7 @@ func (opts Download) Validate() error {
 func (opts Download) Download(ctx context.Context) error {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, opts.URL, nil)
 	if err != nil {
-		return errors.Wrap(err, "problem building request")
+		return fmt.Errorf("problem building request: %w", err)
 	}
 
 	if opts.HTTPClient == nil {
@@ -53,7 +54,7 @@ func (opts Download) Download(ctx context.Context) error {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return errors.Errorf("%s: could not download %s to path %s", resp.Status, opts.URL, opts.Path)
+		return fmt.Errorf("%s: could not download %s to path %s", resp.Status, opts.URL, opts.Path)
 	}
 
 	if err = writeFile(resp.Body, opts.Path); err != nil {
@@ -77,19 +78,19 @@ func (opts Download) Extract() error {
 	case ArchiveAuto:
 		unzipper, _ := archiver.ByExtension(opts.Path)
 		if unzipper == nil {
-			return errors.Errorf("could not detect archive format for %s", opts.Path)
+			return fmt.Errorf("could not detect archive format for %s", opts.Path)
 		}
 		var ok bool
 		archiveHandler, ok = unzipper.(archiver.Unarchiver)
 		if !ok {
-			return errors.Errorf("%s was not a supported archive format [%T]", opts.Path, unzipper)
+			return fmt.Errorf("%s was not a supported archive format [%T]", opts.Path, unzipper)
 		}
 	case ArchiveTarGz:
 		archiveHandler = archiver.NewTarGz()
 	case ArchiveZip:
 		archiveHandler = archiver.NewZip()
 	default:
-		return errors.Errorf("unrecognized archive format %s", opts.ArchiveOpts.Format)
+		return fmt.Errorf("unrecognized archive format %s", opts.ArchiveOpts.Format)
 	}
 
 	if err := archiveHandler.Unarchive(opts.Path, opts.ArchiveOpts.TargetPath); err != nil {

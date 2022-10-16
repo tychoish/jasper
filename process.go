@@ -2,6 +2,7 @@ package jasper
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/pkg/errors"
 	"github.com/tychoish/jasper/options"
@@ -31,7 +32,7 @@ func NewProcess(ctx context.Context, opts *options.Create) (Process, error) {
 			return nil, errors.WithStack(err)
 		}
 	default:
-		return nil, errors.Errorf("cannot create '%s' type of process", opts.Implementation)
+		return nil, fmt.Errorf("cannot create '%s' type of process", opts.Implementation)
 	}
 
 	if !opts.Synchronized {

@@ -12,8 +12,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	splunk "github.com/tychoish/grip/x/splunk"
-	"go.mongodb.org/mongo-driver/bson"
+	"github.com/tychoish/birch"
+	"github.com/tychoish/grip/x/splunk"
 )
 
 func TestCreateConstructor(t *testing.T) {
@@ -259,7 +259,25 @@ func TestCreate(t *testing.T) {
 			assert.Equal(t, 1, opts.TimeoutSecs)
 		},
 		"ResolveFailsWithInvalidLoggerConfiguration": func(t *testing.T, opts *Create) {
-			config, err := bson.Marshal(&SplunkLoggerOptions{})
+			config, err := birch.DC.Make(2).Append(
+				birch.EC.SubDocumentFromElements("splunk",
+					birch.EC.String("url", ""),
+					birch.EC.String("token", ""),
+					birch.EC.String("channel", ""),
+				),
+				birch.EC.SubDocumentFromElements("base",
+					birch.EC.SubDocumentFromElements("buffer",
+						birch.EC.Boolean("buffered", false),
+						birch.EC.Duration("duration", 0),
+						birch.EC.Int("max_size", 0),
+					),
+					birch.EC.String("format", ""),
+					birch.EC.SubDocumentFromElements("level",
+						birch.EC.Int("default", 0),
+						birch.EC.Int("threshold", 0),
+					),
+				),
+			).MarshalBSON()
 			require.NoError(t, err)
 			opts.Output.Loggers = []*LoggerConfig{
 				{

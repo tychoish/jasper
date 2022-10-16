@@ -2,6 +2,7 @@ package remote
 
 import (
 	"context"
+	"fmt"
 	"net"
 
 	"github.com/pkg/errors"
@@ -41,7 +42,7 @@ func StartRPCService(ctx context.Context, manager jasper.Manager, addr net.Addr,
 	if creds != nil {
 		tlsConf, err := creds.Resolve()
 		if err != nil {
-			return nil, errors.Wrap(err, "error generating TLS config from server credentials")
+			return nil, fmt.Errorf("error generating TLS config from server credentials: %w", err)
 		}
 		opts = append(opts, grpc.Creds(credentials.NewTLS(tlsConf)))
 	}
@@ -51,7 +52,7 @@ func StartRPCService(ctx context.Context, manager jasper.Manager, addr net.Addr,
 	ctx, cancel := context.WithCancel(ctx)
 	if err := AttachService(ctx, manager, service); err != nil {
 		cancel()
-		return nil, errors.Wrap(err, "could not attach manager to service")
+		return nil, fmt.Errorf("could not attach manager to service: %w", err)
 	}
 	go func() {
 		defer recovery.LogStackTraceAndContinue("RPC service")
@@ -71,7 +72,7 @@ func StartRPCServiceWithFile(ctx context.Context, manager jasper.Manager, addr n
 		var err error
 		creds, err = options.NewCredentialsFromFile(filePath)
 		if err != nil {
-			return nil, errors.Wrap(err, "error getting credentials from file")
+			return nil, fmt.Errorf("error getting credentials from file: %w", err)
 		}
 	}
 

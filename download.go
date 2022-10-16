@@ -2,6 +2,7 @@ package jasper
 
 import (
 	"context"
+	"fmt"
 	"path/filepath"
 	"time"
 
@@ -42,7 +43,7 @@ func processDownloadJobs(ctx context.Context, processFile func(string) error) fu
 		grip.Info("all download tasks complete, processing errors now")
 
 		if err := amboy.ResolveErrors(ctx, q); err != nil {
-			return errors.Wrap(err, "problem completing download jobs")
+			return fmt.Errorf("problem completing download jobs: %w", err)
 		}
 
 		catcher := emt.NewBasicCatcher()

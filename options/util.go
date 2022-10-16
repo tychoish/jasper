@@ -1,6 +1,7 @@
 package options
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -16,24 +17,24 @@ func makeEnclosingDirectories(path string) error {
 			return err
 		}
 	} else if !info.IsDir() {
-		return errors.Errorf("'%s' already exists and is not a directory", path)
+		return fmt.Errorf("'%s' already exists and is not a directory", path)
 	}
 	return nil
 }
 
 func writeFile(reader io.Reader, path string) error {
 	if err := makeEnclosingDirectories(filepath.Dir(path)); err != nil {
-		return errors.Wrap(err, "problem making enclosing directories")
+		return fmt.Errorf("problem making enclosing directories: %w", err)
 	}
 
 	file, err := os.Create(path)
 	if err != nil {
-		return errors.Wrap(err, "problem creating file")
+		return fmt.Errorf("problem creating file: %w", err)
 	}
 
 	catcher := emt.NewBasicCatcher()
 	if _, err := io.Copy(file, reader); err != nil {
-		catcher.Add(errors.Wrap(err, "problem writing file"))
+		catcher.Add(fmt.Errorf("problem writing file: %w", err))
 	}
 
 	catcher.Add(errors.Wrap(file.Close(), "problem closing file"))

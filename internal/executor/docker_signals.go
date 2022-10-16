@@ -1,9 +1,8 @@
 package executor
 
 import (
+	"fmt"
 	"syscall"
-
-	"github.com/pkg/errors"
 )
 
 // This file contains platform-dependent Docker signals taken from
@@ -26,9 +25,9 @@ func syscallToDockerSignal(sig syscall.Signal, platform string) (string, error) 
 			return dsig, nil
 		}
 	default:
-		return "", errors.Errorf("unrecognized platform '%s'", platform)
+		return "", fmt.Errorf("unrecognized platform '%s'", platform)
 	}
-	return "", errors.Errorf("unrecognized Docker signal '%d' for platform '%s'", sig, platform)
+	return "", fmt.Errorf("unrecognized Docker signal '%d' for platform '%s'", sig, platform)
 }
 
 // dockerToSyscallSignal converts the Docker signal to the equivalent
@@ -48,9 +47,9 @@ func dockerToSyscallSignal(dsig string, platform string) (syscall.Signal, error)
 			return sig, nil
 		}
 	default:
-		return syscall.Signal(-1), errors.Errorf("unrecognized platform '%s'", platform)
+		return syscall.Signal(-1), fmt.Errorf("unrecognized platform '%s'", platform)
 	}
-	return syscall.Signal(-1), errors.Errorf("unrecognized signal '%s' for platform '%s'", dsig, platform)
+	return syscall.Signal(-1), fmt.Errorf("unrecognized signal '%s' for platform '%s'", dsig, platform)
 }
 
 // These are constants taken from the signals in the syscall package for

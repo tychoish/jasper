@@ -2,6 +2,7 @@ package remote
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"net"
 	"syscall"
@@ -38,7 +39,7 @@ func NewRPCClient(ctx context.Context, addr net.Addr, creds *options.Certificate
 	if creds != nil {
 		tlsConf, err := creds.Resolve()
 		if err != nil {
-			return nil, errors.Wrap(err, "could not resolve credentials into TLS config")
+			return nil, fmt.Errorf("could not resolve credentials into TLS config: %w", err)
 		}
 		opts = append(opts, grpc.WithTransportCredentials(credentials.NewTLS(tlsConf)))
 	} else {
@@ -63,7 +64,7 @@ func NewRPCClientWithFile(ctx context.Context, addr net.Addr, filePath string) (
 		var err error
 		creds, err = options.NewCredentialsFromFile(filePath)
 		if err != nil {
-			return nil, errors.Wrap(err, "error getting credentials from file")
+			return nil, fmt.Errorf("error getting credentials from file: %w", err)
 		}
 	}
 
@@ -89,7 +90,7 @@ func (c *rpcClient) ID() string {
 func (c *rpcClient) CreateProcess(ctx context.Context, opts *options.Create) (jasper.Process, error) {
 	convertedOpts, err := internal.ConvertCreateOptions(opts)
 	if err != nil {
-		return nil, errors.Wrap(err, "problem converting create options")
+		return nil, fmt.Errorf("problem converting create options: %w", err)
 	}
 	proc, err := c.client.Create(ctx, convertedOpts)
 	if err != nil {
@@ -106,7 +107,7 @@ func (c *rpcClient) CreateCommand(ctx context.Context) *jasper.Command {
 func (c *rpcClient) CreateScripting(ctx context.Context, opts options.ScriptingHarness) (scripting.Harness, error) {
 	seOpts, err := internal.ConvertScriptingOptions(opts)
 	if err != nil {
-		return nil, errors.Wrap(err, "invalid scripting options")
+		return nil, fmt.Errorf("invalid scripting options: %w", err)
 	}
 	seid, err := c.client.ScriptingHarnessCreate(ctx, seOpts)
 	if err != nil {
@@ -135,7 +136,7 @@ func (c *rpcClient) Register(ctx context.Context, proc jasper.Process) error {
 func (c *rpcClient) List(ctx context.Context, f options.Filter) ([]jasper.Process, error) {
 	procs, err := c.client.List(ctx, internal.ConvertFilter(f))
 	if err != nil {
-		return nil, errors.Wrap(err, "problem getting streaming client")
+		return nil, fmt.Errorf("problem getting streaming client: %w", err)
 	}
 
 	out := []jasper.Process{}
@@ -144,7 +145,7 @@ func (c *rpcClient) List(ctx context.Context, f options.Filter) ([]jasper.Proces
 		if err == io.EOF {
 			break
 		} else if err != nil {
-			return nil, errors.Wrap(err, "problem getting list")
+			return nil, fmt.Errorf("problem getting list: %w", err)
 		}
 
 		out = append(out, &rpcProcess{
@@ -159,7 +160,7 @@ func (c *rpcClient) List(ctx context.Context, f options.Filter) ([]jasper.Proces
 func (c *rpcClient) Group(ctx context.Context, name string) ([]jasper.Process, error) {
 	procs, err := c.client.Group(ctx, &internal.TagName{Value: name})
 	if err != nil {
-		return nil, errors.Wrap(err, "problem getting streaming client")
+		return nil, fmt.Errorf("problem getting streaming client: %w", err)
 	}
 
 	out := []jasper.Process{}
@@ -168,7 +169,7 @@ func (c *rpcClient) Group(ctx context.Context, name string) ([]jasper.Process, e
 		if err == io.EOF {
 			break
 		} else if err != nil {
-			return nil, errors.Wrap(err, "problem getting group")
+			return nil, fmt.Errorf("problem getting group: %w", err)
 		}
 
 		out = append(out, &rpcProcess{
@@ -183,7 +184,7 @@ func (c *rpcClient) Group(ctx context.Context, name string) ([]jasper.Process, e
 func (c *rpcClient) Get(ctx context.Context, name string) (jasper.Process, error) {
 	info, err := c.client.Get(ctx, &internal.JasperProcessID{Value: name})
 	if err != nil {
-		return nil, errors.Wrap(err, "problem finding process")
+		return nil, fmt.Errorf("problem finding process: %w", err)
 	}
 
 	return &rpcProcess{client: c.client, info: info}, nil
@@ -256,7 +257,7 @@ func (c *rpcClient) SignalEvent(ctx context.Context, name string) error {
 func (c *rpcClient) WriteFile(ctx context.Context, jopts options.WriteFile) error {
 	stream, err := c.client.WriteFile(ctx)
 	if err != nil {
-		return errors.Wrap(err, "error getting client stream to write file")
+		return fmt.Errorf("error getting client stream to write file: %w", err)
 	}
 
 	sendOpts := func(jopts options.WriteFile) error {

@@ -2,6 +2,7 @@ package remote
 
 import (
 	"context"
+	"fmt"
 	"io"
 
 	"github.com/pkg/errors"
@@ -39,7 +40,7 @@ func (s *mdbService) loggingCreate(ctx context.Context, w io.Writer, msg mongowi
 
 	cachedLogger, err := lc.Create(req.Params.ID, req.Params.Options)
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not create logger"), LoggingCacheCreateCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not create logger: %w", err), LoggingCacheCreateCommand)
 		return
 	}
 
@@ -123,7 +124,7 @@ func (s *mdbService) loggingSendMessages(ctx context.Context, w io.Writer, msg m
 	}
 
 	if err := req.Payload.Validate(); err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "invalid logging payload"), LoggingSendMessagesCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("invalid logging payload: %w", err), LoggingSendMessagesCommand)
 		return
 	}
 
@@ -133,7 +134,7 @@ func (s *mdbService) loggingSendMessages(ctx context.Context, w io.Writer, msg m
 		return
 	}
 	if err := cachedLogger.Send(&req.Payload); err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "problem sending message"), LoggingSendMessagesCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("problem sending message: %w", err), LoggingSendMessagesCommand)
 		return
 	}
 
@@ -149,7 +150,7 @@ func (s *mdbService) serviceLoggingCacheRequest(ctx context.Context, w io.Writer
 
 	if req != nil {
 		if err := s.readRequest(msg, req); err != nil {
-			shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse request"), command)
+			shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not parse request: %w", err), command)
 			return nil
 		}
 	}
@@ -161,13 +162,13 @@ func (s *mdbService) serviceLoggingCacheResponse(ctx context.Context, w io.Write
 	if resp != nil {
 		doc, err := s.makePayload(resp)
 		if err != nil {
-			shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse payload"), command)
+			shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not parse payload: %w", err), command)
 			return
 		}
 
 		shellResp, err := shell.ResponseToMessage(mongowire.OP_REPLY, doc)
 		if err != nil {
-			shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not make response"), command)
+			shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not make response: %w", err), command)
 			return
 		}
 

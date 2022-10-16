@@ -78,11 +78,11 @@ type Create struct {
 func MakeCreation(cmdStr string) (*Create, error) {
 	args, err := shlex.Split(cmdStr)
 	if err != nil {
-		return nil, errors.Wrap(err, "problem parsing shell command")
+		return nil, fmt.Errorf("problem parsing shell command: %w", err)
 	}
 
 	if len(args) == 0 {
-		return nil, errors.Errorf("'%s' did not parse to valid args array", cmdStr)
+		return nil, fmt.Errorf("'%s' did not parse to valid args array", cmdStr)
 	}
 
 	return &Create{
@@ -109,7 +109,9 @@ func (opts *Create) Validate() error {
 			opts.Timeout, opts.TimeoutSecs)
 	}
 
-	catcher.Add(opts.Output.Validate())
+	if err := opts.Output.Validate(); err != nil {
+		catcher.Errorf("invalid output options: %w", err)
+	}
 
 	if opts.WorkingDirectory != "" && opts.isLocal() {
 		info, err := os.Stat(opts.WorkingDirectory)
@@ -123,10 +125,14 @@ func (opts *Create) Validate() error {
 
 	catcher.NewWhen(opts.Docker != nil && opts.Remote != nil, "cannot specify both Docker and SSH options")
 	if opts.Remote != nil {
-		catcher.Add(opts.Remote.Validate())
+		if err := opts.Remote.Validate(); err != nil {
+			catcher.Errorf("invalid SSH options: %w", err)
+		}
 	}
 	if opts.Docker != nil {
-		catcher.Add(opts.Docker.Validate())
+		if err := opts.Docker.Validate(); err != nil {
+			catcher.Errorf("invalid Docker options: %w", err)
+		}
 	}
 
 	if catcher.HasErrors() {
@@ -214,7 +220,7 @@ func (opts *Create) Resolve(ctx context.Context) (exe executor.Executor, t time.
 
 	cmd, err := opts.resolveExecutor(ctx)
 	if err != nil {
-		return nil, time.Time{}, errors.Wrap(err, "could not resolve process executor")
+		return nil, time.Time{}, fmt.Errorf("could not resolve process executor: %w", err)
 	}
 	defer func() {
 		if resolveErr != nil {
@@ -266,7 +272,7 @@ func (opts *Create) resolveExecutor(ctx context.Context) (executor.Executor, err
 		if opts.Remote.UseSSHLibrary {
 			client, session, err := opts.Remote.Resolve()
 			if err != nil {
-				return nil, errors.Wrap(err, "could not resolve SSH client and session")
+				return nil, fmt.Errorf("could not resolve SSH client and session: %w", err)
 			}
 			return executor.NewSSH(ctx, client, session, opts.Args), nil
 		}
@@ -277,7 +283,7 @@ func (opts *Create) resolveExecutor(ctx context.Context) (executor.Executor, err
 	if opts.Docker != nil {
 		client, err := opts.Docker.Resolve()
 		if err != nil {
-			return nil, errors.Wrap(err, "could not resolve Docker options")
+			return nil, fmt.Errorf("could not resolve Docker options: %w", err)
 		}
 		return executor.NewDocker(ctx, client, opts.Docker.Platform, opts.Docker.Image, opts.Args), nil
 	}

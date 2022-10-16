@@ -1,14 +1,16 @@
 package jasper
 
 import (
+	"errors"
+	"fmt"
 	"syscall"
 
 	"github.com/containerd/cgroups"
 	specs "github.com/opencontainers/runtime-spec/specs-go"
-	"github.com/pkg/errors"
 	"github.com/tychoish/emt"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
+	"github.com/tychoish/jasper/util"
 )
 
 const (
@@ -59,7 +61,7 @@ func (t *linuxProcessTracker) setDefaultCgroupIfInvalid() error {
 
 	cgroup, err := cgroups.New(cgroups.V1, cgroups.StaticPath("/"+t.Name), &specs.LinuxResources{})
 	if err != nil {
-		return errors.Wrap(err, "could not create default cgroup")
+		return fmt.Errorf("could not create default cgroup: %w", err)
 	}
 	t.cgroup = cgroup
 
@@ -77,7 +79,7 @@ func (t *linuxProcessTracker) Add(info ProcessInfo) error {
 
 	proc := cgroups.Process{Subsystem: defaultSubsystem, Pid: info.PID}
 	if err := t.cgroup.Add(proc); err != nil {
-		return errors.Wrap(err, "failed to add process with pid '%d' to cgroup")
+		return fmt.Errorf("failed to add process with pid '%d' to cgroup: %w", err)
 	}
 	return nil
 }
@@ -91,7 +93,7 @@ func (t *linuxProcessTracker) listCgroupPIDs() ([]int, error) {
 
 	procs, err := t.cgroup.Processes(defaultSubsystem, false)
 	if err != nil {
-		return nil, errors.Wrap(err, "could not list tracked PIDs")
+		return nil, fmt.Errorf("could not list tracked PIDs: %w", err)
 	}
 
 	pids := make([]int, 0, len(procs))
@@ -110,12 +112,14 @@ func (t *linuxProcessTracker) doCleanupByCgroup() error {
 
 	pids, err := t.listCgroupPIDs()
 	if err != nil {
-		return errors.Wrap(err, "could not find tracked processes")
+		return fmt.Errorf("could not find tracked processes: %w", err)
 	}
 
 	catcher := emt.NewBasicCatcher()
 	for _, pid := range pids {
-		catcher.Add(errors.Wrapf(cleanupProcess(pid), "error while cleaning up process with pid '%d'", pid))
+		if err := cleanupProcess(pid); err != nil {
+			catcher.Errorf("error while cleaning up process with pid '%d': %w", pid, err)
+		}
 	}
 
 	// Delete the cgroup. If the process tracker is still used, the cgroup must
@@ -144,8 +148,10 @@ func cleanupProcess(pid int) error {
 	// A process returns syscall.ESRCH if it already terminated.
 	if err := syscall.Kill(pid, syscall.SIGTERM); err != nil && err != syscall.ESRCH {
 		catcher := emt.NewBasicCatcher()
-		catcher.Add(errors.Wrapf(err, "sending sigterm to process with PID '%d'", pid))
-		catcher.Add(errors.Wrapf(syscall.Kill(pid, syscall.SIGKILL), "sending sigkill to process with PID '%d'", pid))
+		catcher.Errorf("sending sigterm to process with PID '%d': %w", pid, err)
+		util.CheckCall(catcher, func() error { return syscall.Kill(pid, syscall.SIGKILL) },
+			fmt.Sprintf("sending sigkill to process with PID '%d'", pid),
+		)
 		return catcher.Resolve()
 	}
 	return nil
@@ -159,9 +165,11 @@ func cleanupProcess(pid int) error {
 func (t *linuxProcessTracker) Cleanup() error {
 	catcher := emt.NewBasicCatcher()
 	if t.validCgroup() {
-		catcher.Add(errors.Wrap(t.doCleanupByCgroup(), "error occurred while cleaning up processes tracked by cgroup"))
+		util.CheckCall(catcher, t.doCleanupByCgroup,
+			"error occurred while cleaning up processes tracked by cgroup")
 	}
-	catcher.Add(errors.Wrap(t.doCleanupByEnvironmentVariable(), "error occurred while cleaning up processes tracked by environment variable"))
+	util.CheckCall(catcher, t.doCleanupByEnvironmentVariable,
+		"error occurred while cleaning up processes tracked by environment variable")
 
 	return catcher.Resolve()
 }

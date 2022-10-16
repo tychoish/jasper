@@ -2,6 +2,7 @@ package cli
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"strings"
 	"time"
@@ -102,7 +103,7 @@ func RunCMD() cli.Command { //nolint: gocognit
 			inMemoryCap := 1000
 			logger, err := jasper.NewInMemoryLogger(inMemoryCap)
 			if err != nil {
-				return errors.Wrap(err, "problem creating new in memory logger")
+				return fmt.Errorf("problem creating new in memory logger: %w", err)
 			}
 
 			return withConnection(ctx, c, func(client remote.Manager) error {
@@ -136,9 +137,9 @@ func RunCMD() cli.Command { //nolint: gocognit
 						// Don't return on error, because if any of the
 						// sub-commands fail, it will fail to print the log
 						// lines.
-						grip.Error(errors.Wrap(err, "problem encountered while running commands"))
+						grip.Error(fmt.Errorf("problem encountered while running commands: %w", err))
 					} else {
-						return errors.Wrap(err, "problem running command")
+						return fmt.Errorf("problem running command: %w", err)
 					}
 				}
 
@@ -271,7 +272,7 @@ func ListCMD() cli.Command {
 				}
 
 				if err != nil {
-					return errors.Wrap(err, "problem getting list")
+					return fmt.Errorf("problem getting list: %w", err)
 				}
 
 				t := tabby.New()
@@ -382,7 +383,7 @@ func KillAllCMD() cli.Command {
 			clientBefore(),
 			func(c *cli.Context) error {
 				if c.String(groupFlagName) == "" {
-					return errors.Errorf("flag '--%s' was not specified", groupFlagName)
+					return fmt.Errorf("flag '--%s' was not specified", groupFlagName)
 				}
 				return nil
 			}),

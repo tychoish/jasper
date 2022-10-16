@@ -1,6 +1,7 @@
 package jasper
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/pkg/errors"
@@ -54,11 +55,11 @@ func (r *signalTriggerRegistry) registerSignalTriggerFactory(id SignalTriggerID,
 	}
 
 	if _, ok := r.signalTriggers[id]; ok {
-		return errors.Errorf("signal trigger '%s' is already registered", string(id))
+		return fmt.Errorf("signal trigger '%s' is already registered", string(id))
 	}
 
 	if factory == nil {
-		return errors.Errorf("cannot register a nil factory for signal trigger id '%s'", string(id))
+		return fmt.Errorf("cannot register a nil factory for signal trigger id '%s'", string(id))
 	}
 
 	r.signalTriggers[id] = factory

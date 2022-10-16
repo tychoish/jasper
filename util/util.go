@@ -5,6 +5,7 @@ import (
 	"io"
 	"sync"
 
+	"github.com/tychoish/emt"
 	"github.com/tychoish/grip/send"
 )
 
@@ -48,4 +49,11 @@ func ConvertWriter(wr io.Writer, err error) send.Sender {
 	}
 
 	return send.WrapWriter(wr)
+}
+
+func CheckCall(catcher emt.Catcher, fn emt.CheckFunction, msg string) {
+	if err := fn(); err != nil {
+		catcher.Errorf("%s: %w", msg, err)
+	}
+
 }

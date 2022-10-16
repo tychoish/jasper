@@ -5,6 +5,7 @@ package jasper
 import (
 	"bufio"
 	"context"
+	"fmt"
 	"os/exec"
 	"strings"
 
@@ -15,7 +16,7 @@ import (
 func (o *oomTrackerImpl) Clear(ctx context.Context) error {
 	sudo, err := isSudo(ctx)
 	if err != nil {
-		return errors.Wrap(err, "error checking sudo")
+		return fmt.Errorf("error checking sudo: %w", err)
 	}
 
 	if sudo {
@@ -28,7 +29,7 @@ func (o *oomTrackerImpl) Clear(ctx context.Context) error {
 func (o *oomTrackerImpl) Check(ctx context.Context) error {
 	wasOOMKilled, pids, err := analyzeLogs(ctx)
 	if err != nil {
-		return errors.Wrap(err, "error searching log")
+		return fmt.Errorf("error searching log: %w", err)
 	}
 	o.WasOOMKilled = wasOOMKilled
 	o.Pids = pids
@@ -41,7 +42,7 @@ func analyzeLogs(ctx context.Context) (bool, []int, error) {
 	errs := make(chan error)
 	sudo, err := isSudo(ctx)
 	if err != nil {
-		return false, nil, errors.Wrap(err, "error checking sudo")
+		return false, nil, fmt.Errorf("error checking sudo: %w", err)
 	}
 
 	if sudo {
@@ -51,12 +52,12 @@ func analyzeLogs(ctx context.Context) (bool, []int, error) {
 	}
 	cmdReader, err := cmd.StdoutPipe()
 	if err != nil {
-		return false, nil, errors.Wrap(err, "error creating StdoutPipe for log command")
+		return false, nil, fmt.Errorf("error creating StdoutPipe for log command: %w", err)
 	}
 
 	scanner := bufio.NewScanner(cmdReader)
 	if err = cmd.Start(); err != nil {
-		return false, nil, errors.Wrap(err, "Error starting log command")
+		return false, nil, fmt.Errorf("Error starting log command: %w", err)
 	}
 
 	go func() {
@@ -84,7 +85,7 @@ func analyzeLogs(ctx context.Context) (bool, []int, error) {
 	case <-ctx.Done():
 		return false, nil, errors.New("request cancelled")
 	case err = <-errs:
-		return wasOOMKilled, pids, errors.Wrap(err, "Error waiting for dmesg command")
+		return wasOOMKilled, pids, fmt.Errorf("Error waiting for dmesg command: %w", err)
 
 	}
 }

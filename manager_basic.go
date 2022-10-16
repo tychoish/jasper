@@ -2,6 +2,7 @@ package jasper
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -36,7 +37,7 @@ func newBasicProcessManager(procs map[string]Process, trackProcs bool, useSSHLib
 	if trackProcs {
 		tracker, err := NewProcessTracker(m.id)
 		if err != nil {
-			return nil, errors.Wrap(err, "failed to make process tracker")
+			return nil, fmt.Errorf("failed to make process tracker: %w", err)
 		}
 		m.tracker = tracker
 	}
@@ -56,7 +57,7 @@ func (m *basicProcessManager) CreateProcess(ctx context.Context, opts *options.C
 
 	proc, err := NewProcess(ctx, opts)
 	if err != nil {
-		return nil, errors.Wrap(err, "problem constructing process")
+		return nil, fmt.Errorf("problem constructing process: %w", err)
 	}
 
 	grip.Warning(message.WrapError(m.loggers.Put(proc.ID(), &options.CachedLogger{
@@ -127,7 +128,7 @@ func (m *basicProcessManager) List(ctx context.Context, f options.Filter) ([]Pro
 	out := []Process{}
 
 	if err := f.Validate(); err != nil {
-		return out, errors.Wrap(err, "invalid filter")
+		return out, fmt.Errorf("invalid filter: %w", err)
 	}
 
 	for _, proc := range m.procs {
@@ -166,7 +167,7 @@ func (m *basicProcessManager) List(ctx context.Context, f options.Filter) ([]Pro
 func (m *basicProcessManager) Get(ctx context.Context, id string) (Process, error) {
 	proc, ok := m.procs[id]
 	if !ok {
-		return nil, errors.Errorf("process '%s' does not exist", id)
+		return nil, fmt.Errorf("process '%s' does not exist", id)
 	}
 
 	return proc, nil
@@ -231,7 +232,7 @@ func (m *basicProcessManager) Group(ctx context.Context, name string) ([]Process
 
 func (m *basicProcessManager) WriteFile(ctx context.Context, opts options.WriteFile) error {
 	if err := opts.Validate(); err != nil {
-		return errors.Wrap(err, "invalid write options")
+		return fmt.Errorf("invalid write options: %w", err)
 	}
 
 	return errors.Wrapf(opts.DoWrite(), "error writing file '%s'", opts.Path)

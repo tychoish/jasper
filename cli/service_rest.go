@@ -47,7 +47,7 @@ func serviceCommandREST(cmd string, operation serviceOperation) cli.Command {
 		Action: func(c *cli.Context) error {
 			manager, err := jasper.NewSynchronizedManager(false)
 			if err != nil {
-				return errors.Wrap(err, "error creating REST manager")
+				return fmt.Errorf("error creating REST manager: %w", err)
 			}
 
 			daemon := newRESTDaemon(c.String(hostFlagName), c.Int(portFlagName), manager, makeLogger(c))
@@ -83,7 +83,7 @@ func newRESTDaemon(host string, port int, manager jasper.Manager, logger *option
 func (d *restDaemon) Start(s service.Service) error {
 	if d.Logger != nil {
 		if err := setupLogger(d.Logger); err != nil {
-			return errors.Wrap(err, "failed to set up logging")
+			return fmt.Errorf("failed to set up logging: %w", err)
 		}
 	}
 
@@ -91,7 +91,7 @@ func (d *restDaemon) Start(s service.Service) error {
 	if d.Manager == nil {
 		var err error
 		if d.Manager, err = jasper.NewSynchronizedManager(false); err != nil {
-			return errors.Wrap(err, "failed to construct REST manager")
+			return fmt.Errorf("failed to construct REST manager: %w", err)
 		}
 	}
 
@@ -130,10 +130,10 @@ func newRESTService(ctx context.Context, host string, port int, manager jasper.M
 	app := service.App(ctx)
 	app.SetPrefix("jasper")
 	if err := app.SetHost(host); err != nil {
-		return nil, errors.Wrap(err, "error setting REST host")
+		return nil, fmt.Errorf("error setting REST host: %w", err)
 	}
 	if err := app.SetPort(port); err != nil {
-		return nil, errors.Wrap(err, "error setting REST port")
+		return nil, fmt.Errorf("error setting REST port: %w", err)
 	}
 
 	go func() {

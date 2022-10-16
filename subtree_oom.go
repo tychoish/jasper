@@ -2,11 +2,10 @@ package jasper
 
 import (
 	"context"
+	"fmt"
 	"os/exec"
 	"strconv"
 	"strings"
-
-	"github.com/pkg/errors"
 )
 
 type oomTrackerImpl struct {
@@ -35,7 +34,7 @@ func isSudo(ctx context.Context) (bool, error) {
 		case *exec.ExitError:
 			return false, nil
 		default:
-			return false, errors.Wrap(err, "error executing sudo date")
+			return false, fmt.Errorf("error executing sudo date: %w", err)
 		}
 	}
 

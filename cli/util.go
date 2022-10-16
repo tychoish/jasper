@@ -53,7 +53,7 @@ func unparseFlagSet(c *cli.Context, serviceType string) []string {
 func requireStringFlag(name string) cli.BeforeFunc {
 	return func(c *cli.Context) error {
 		if c.String(name) == "" {
-			return errors.Errorf("must specify string for flag '--%s'", name)
+			return fmt.Errorf("must specify string for flag '--%s'", name)
 		}
 		return nil
 	}
@@ -62,7 +62,7 @@ func requireStringFlag(name string) cli.BeforeFunc {
 func requireStringSliceFlag(name string) cli.BeforeFunc {
 	return func(c *cli.Context) error {
 		if len(c.StringSlice(name)) == 0 {
-			return errors.Errorf("must specify at least one string for flag '--%s'", name)
+			return fmt.Errorf("must specify at least one string for flag '--%s'", name)
 		}
 		return nil
 	}
@@ -78,7 +78,7 @@ func validatePort(flagName string) func(*cli.Context) error {
 	return func(c *cli.Context) error {
 		port := c.Int(flagName)
 		if port < minPort || port > maxPort {
-			return errors.Errorf("port must be between %d-%d exclusive", minPort, maxPort)
+			return fmt.Errorf("port must be between %d-%d exclusive", minPort, maxPort)
 		}
 		return nil
 	}
@@ -88,7 +88,7 @@ func validatePort(flagName string) func(*cli.Context) error {
 func readInput(input io.Reader, output interface{}) error {
 	bytes, err := ioutil.ReadAll(input)
 	if err != nil {
-		return errors.Wrap(err, "error reading from input")
+		return fmt.Errorf("error reading from input: %w", err)
 	}
 	return errors.Wrap(json.Unmarshal(bytes, output), "error decoding to output")
 }
@@ -97,10 +97,10 @@ func readInput(input io.Reader, output interface{}) error {
 func writeOutput(output io.Writer, input interface{}) error {
 	bytes, err := json.MarshalIndent(input, "", "    ")
 	if err != nil {
-		return errors.Wrap(err, "error encoding input")
+		return fmt.Errorf("error encoding input: %w", err)
 	}
 	if _, err := output.Write(bytes); err != nil {
-		return errors.Wrap(err, "error writing to output")
+		return fmt.Errorf("error writing to output: %w", err)
 	}
 
 	return nil
@@ -112,7 +112,7 @@ func writeOutput(output io.Writer, input interface{}) error {
 func newRemoteClient(ctx context.Context, service, host string, port int, credsFilePath string) (remote.Manager, error) {
 	addr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", host, port))
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to resolve address")
+		return nil, fmt.Errorf("failed to resolve address: %w", err)
 	}
 
 	if service == RESTService {
@@ -120,7 +120,7 @@ func newRemoteClient(ctx context.Context, service, host string, port int, credsF
 	} else if service == RPCService {
 		return remote.NewRPCClientWithFile(ctx, addr, credsFilePath)
 	}
-	return nil, errors.Errorf("unrecognized service type '%s'", service)
+	return nil, fmt.Errorf("unrecognized service type '%s'", service)
 }
 
 // doPassthroughInputOutput passes input from standard input to the input validator,
@@ -131,10 +131,10 @@ func doPassthroughInputOutput(c *cli.Context, input Validator, request func(cont
 	defer cancel()
 
 	if err := readInput(os.Stdin, input); err != nil {
-		return errors.Wrap(err, "error reading from standard input")
+		return fmt.Errorf("error reading from standard input: %w", err)
 	}
 	if err := input.Validate(); err != nil {
-		return errors.Wrap(err, "input is invalid")
+		return fmt.Errorf("input is invalid: %w", err)
 	}
 
 	return withConnection(ctx, c, func(client remote.Manager) error {
@@ -163,7 +163,7 @@ func withConnection(ctx context.Context, c *cli.Context, operation func(remote.M
 
 	client, err := newRemoteClient(ctx, service, host, port, credsFilePath)
 	if err != nil {
-		return errors.Wrap(err, "error setting up remote client")
+		return fmt.Errorf("error setting up remote client: %w", err)
 	}
 
 	catcher := emt.NewBasicCatcher()
@@ -177,7 +177,7 @@ func withConnection(ctx context.Context, c *cli.Context, operation func(remote.M
 func withService(daemon service.Interface, config *service.Config, operation func(service.Service) error) error {
 	svc, err := service.New(daemon, config)
 	if err != nil {
-		return errors.Wrap(err, "error initializing new service")
+		return fmt.Errorf("error initializing new service: %w", err)
 	}
 	return operation(svc)
 }

@@ -2,6 +2,7 @@ package jasper
 
 import (
 	"context"
+	"fmt"
 	"math/rand"
 	"os"
 	"runtime"
@@ -35,7 +36,7 @@ func newBlockingProcess(ctx context.Context, opts *options.Create) (Process, err
 
 	exec, deadline, err := opts.Resolve(ctx)
 	if err != nil {
-		return nil, errors.Wrap(err, "problem building command from options")
+		return nil, fmt.Errorf("problem building command from options: %w", err)
 	}
 
 	p := &blockingProcess{
@@ -332,7 +333,7 @@ func (p *blockingProcess) RegisterSignalTrigger(_ context.Context, trigger Signa
 func (p *blockingProcess) RegisterSignalTriggerID(ctx context.Context, id SignalTriggerID) error {
 	makeTrigger, ok := GetSignalTriggerFactory(id)
 	if !ok {
-		return errors.Errorf("could not find signal trigger with id '%s'", id)
+		return fmt.Errorf("could not find signal trigger with id '%s'", id)
 	}
 	return errors.Wrap(p.RegisterSignalTrigger(ctx, makeTrigger()), "failed to register signal trigger")
 }

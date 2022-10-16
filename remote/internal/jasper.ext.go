@@ -3,6 +3,7 @@ package internal
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"os"
 	"syscall"
 	"time"
@@ -12,7 +13,7 @@ import (
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/grip/send"
-	splunk "github.com/tychoish/grip/x/splunk"
+	"github.com/tychoish/grip/x/splunk"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/scripting"
@@ -39,7 +40,7 @@ func (opts *CreateOptions) Export() (*options.Create, error) {
 	if opts.Output != nil {
 		exportedOutput, err := opts.Output.Export()
 		if err != nil {
-			return nil, errors.Wrap(err, "problem exporting output")
+			return nil, fmt.Errorf("problem exporting output: %w", err)
 		}
 		out.Output = exportedOutput
 	}
@@ -47,21 +48,21 @@ func (opts *CreateOptions) Export() (*options.Create, error) {
 	for _, opt := range opts.OnSuccess {
 		exportedOpt, err := opt.Export()
 		if err != nil {
-			return nil, errors.Wrap(err, "problem exporting create options")
+			return nil, fmt.Errorf("problem exporting create options: %w", err)
 		}
 		out.OnSuccess = append(out.OnSuccess, exportedOpt)
 	}
 	for _, opt := range opts.OnFailure {
 		exportedOpt, err := opt.Export()
 		if err != nil {
-			return nil, errors.Wrap(err, "problem exporting create options")
+			return nil, fmt.Errorf("problem exporting create options: %w", err)
 		}
 		out.OnFailure = append(out.OnFailure, exportedOpt)
 	}
 	for _, opt := range opts.OnTimeout {
 		exportedOpt, err := opt.Export()
 		if err != nil {
-			return nil, errors.Wrap(err, "problem exporting create options")
+			return nil, fmt.Errorf("problem exporting create options: %w", err)
 		}
 		out.OnTimeout = append(out.OnTimeout, exportedOpt)
 	}
@@ -81,7 +82,7 @@ func ConvertCreateOptions(opts *options.Create) (*CreateOptions, error) {
 
 	output, err := ConvertOutputOptions(opts.Output)
 	if err != nil {
-		return nil, errors.Wrap(err, "problem converting output options")
+		return nil, fmt.Errorf("problem converting output options: %w", err)
 	}
 
 	co := &CreateOptions{
@@ -98,21 +99,21 @@ func ConvertCreateOptions(opts *options.Create) (*CreateOptions, error) {
 	for _, opt := range opts.OnSuccess {
 		convertedOpts, err := ConvertCreateOptions(opt)
 		if err != nil {
-			return nil, errors.Wrap(err, "problem converting create options")
+			return nil, fmt.Errorf("problem converting create options: %w", err)
 		}
 		co.OnSuccess = append(co.OnSuccess, convertedOpts)
 	}
 	for _, opt := range opts.OnFailure {
 		convertedOpts, err := ConvertCreateOptions(opt)
 		if err != nil {
-			return nil, errors.Wrap(err, "problem converting create options")
+			return nil, fmt.Errorf("problem converting create options: %w", err)
 		}
 		co.OnFailure = append(co.OnFailure, convertedOpts)
 	}
 	for _, opt := range opts.OnTimeout {
 		convertedOpts, err := ConvertCreateOptions(opt)
 		if err != nil {
-			return nil, errors.Wrap(err, "problem converting create options")
+			return nil, fmt.Errorf("problem converting create options: %w", err)
 		}
 		co.OnTimeout = append(co.OnTimeout, convertedOpts)
 	}
@@ -128,19 +129,19 @@ func (info *ProcessInfo) Export() (jasper.ProcessInfo, error) {
 	if info.StartAt != nil {
 		startAt, err = ptypes.Timestamp(info.StartAt)
 		if err != nil {
-			return jasper.ProcessInfo{}, errors.Wrap(err, "could not convert start timestamp from equivalent protobuf RPC timestamp")
+			return jasper.ProcessInfo{}, fmt.Errorf("could not convert start timestamp from equivalent protobuf RPC timestamp: %w", err)
 		}
 	}
 	var endAt time.Time
 	if info.EndAt != nil {
 		endAt, err = ptypes.Timestamp(info.EndAt)
 		if err != nil {
-			return jasper.ProcessInfo{}, errors.Wrap(err, "could not convert end timestamp from equivalent protobuf RPC timestamp")
+			return jasper.ProcessInfo{}, fmt.Errorf("could not convert end timestamp from equivalent protobuf RPC timestamp: %w", err)
 		}
 	}
 	opts, err := info.Options.Export()
 	if err != nil {
-		return jasper.ProcessInfo{}, errors.Wrap(err, "problem exporting create options")
+		return jasper.ProcessInfo{}, fmt.Errorf("problem exporting create options: %w", err)
 	}
 	return jasper.ProcessInfo{
 		ID:         info.Id,
@@ -162,15 +163,15 @@ func (info *ProcessInfo) Export() (jasper.ProcessInfo, error) {
 func ConvertProcessInfo(info jasper.ProcessInfo) (*ProcessInfo, error) {
 	startAt, err := ptypes.TimestampProto(info.StartAt)
 	if err != nil {
-		return nil, errors.Wrap(err, "could not convert start timestamp to equivalent protobuf RPC timestamp")
+		return nil, fmt.Errorf("could not convert start timestamp to equivalent protobuf RPC timestamp: %w", err)
 	}
 	endAt, err := ptypes.TimestampProto(info.EndAt)
 	if err != nil {
-		return nil, errors.Wrap(err, "could not convert end timestamp to equivalent protobuf RPC timestamp")
+		return nil, fmt.Errorf("could not convert end timestamp to equivalent protobuf RPC timestamp: %w", err)
 	}
 	opts, err := ConvertCreateOptions(&info.Options)
 	if err != nil {
-		return nil, errors.Wrap(err, "problem converting create options")
+		return nil, fmt.Errorf("problem converting create options: %w", err)
 	}
 	return &ProcessInfo{
 		Id:         info.ID,
@@ -249,7 +250,7 @@ func (opts OutputOptions) Export() (options.Output, error) {
 	for _, logger := range opts.Loggers {
 		exportedLogger, err := logger.Export()
 		if err != nil {
-			return options.Output{}, errors.Wrap(err, "problem exporting logger config")
+			return options.Output{}, fmt.Errorf("problem exporting logger config: %w", err)
 		}
 		loggers = append(loggers, exportedLogger)
 	}
@@ -270,7 +271,7 @@ func ConvertOutputOptions(opts options.Output) (OutputOptions, error) {
 	for _, logger := range opts.Loggers {
 		convertedLoggerConfig, err := ConvertLoggerConfig(logger)
 		if err != nil {
-			return OutputOptions{}, errors.Wrap(err, "problem converting logger config")
+			return OutputOptions{}, fmt.Errorf("problem converting logger config: %w", err)
 		}
 		loggers = append(loggers, convertedLoggerConfig)
 	}
@@ -315,7 +316,7 @@ func (logger LoggerConfig) Export() (*options.LoggerConfig, error) {
 func ConvertLoggerConfig(config *options.LoggerConfig) (*LoggerConfig, error) {
 	data, err := json.Marshal(config)
 	if err != nil {
-		return nil, errors.Wrap(err, "problem marshalling logger config")
+		return nil, fmt.Errorf("problem marshalling logger config: %w", err)
 	}
 
 	return &LoggerConfig{
@@ -500,7 +501,7 @@ func ConvertRawLoggerConfigFormat(f options.RawLoggerConfigFormat) RawLoggerConf
 func (logger RawLoggerConfig) Export() (*options.LoggerConfig, error) {
 	config := &options.LoggerConfig{}
 	if err := logger.Format.Export().Unmarshal(logger.ConfigData, config); err != nil {
-		return nil, errors.Wrap(err, "problem unmarshalling raw config")
+		return nil, fmt.Errorf("problem unmarshalling raw config: %w", err)
 	}
 	return config, nil
 }
@@ -666,7 +667,7 @@ func (o *ScriptingOptions) Export() (options.ScriptingHarness, error) {
 	case *ScriptingOptions_Golang:
 		output, err := o.Output.Export()
 		if err != nil {
-			return nil, errors.Wrap(err, "problem exporting output options")
+			return nil, fmt.Errorf("problem exporting output options: %w", err)
 		}
 		return &options.ScriptingGolang{
 			Gopath:         val.Golang.Gopath,
@@ -681,7 +682,7 @@ func (o *ScriptingOptions) Export() (options.ScriptingHarness, error) {
 	case *ScriptingOptions_Python:
 		output, err := o.Output.Export()
 		if err != nil {
-			return nil, errors.Wrap(err, "problem exporting output options")
+			return nil, fmt.Errorf("problem exporting output options: %w", err)
 		}
 		return &options.ScriptingPython{
 			VirtualEnvPath:      val.Python.VirtualEnvPath,
@@ -697,7 +698,7 @@ func (o *ScriptingOptions) Export() (options.ScriptingHarness, error) {
 	case *ScriptingOptions_Roswell:
 		output, err := o.Output.Export()
 		if err != nil {
-			return nil, errors.Wrap(err, "problem exporting output options")
+			return nil, fmt.Errorf("problem exporting output options: %w", err)
 		}
 		return &options.ScriptingRoswell{
 			Path:           val.Roswell.Path,
@@ -708,7 +709,7 @@ func (o *ScriptingOptions) Export() (options.ScriptingHarness, error) {
 			Output:         output,
 		}, nil
 	default:
-		return nil, errors.Errorf("invalid scripting options type %T", val)
+		return nil, fmt.Errorf("invalid scripting options type %T", val)
 	}
 }
 
@@ -720,7 +721,7 @@ func ConvertScriptingOptions(opts options.ScriptingHarness) (*ScriptingOptions, 
 	case *options.ScriptingGolang:
 		out, err := ConvertOutputOptions(val.Output)
 		if err != nil {
-			return nil, errors.Wrap(err, "problem converting output options")
+			return nil, fmt.Errorf("problem converting output options: %w", err)
 		}
 		return &ScriptingOptions{
 			Duration:    int64(val.CachedDuration),
@@ -739,7 +740,7 @@ func ConvertScriptingOptions(opts options.ScriptingHarness) (*ScriptingOptions, 
 	case *options.ScriptingPython:
 		out, err := ConvertOutputOptions(val.Output)
 		if err != nil {
-			return nil, errors.Wrap(err, "problem converting output options")
+			return nil, fmt.Errorf("problem converting output options: %w", err)
 		}
 		return &ScriptingOptions{
 			Duration:    int64(val.CachedDuration),
@@ -759,7 +760,7 @@ func ConvertScriptingOptions(opts options.ScriptingHarness) (*ScriptingOptions, 
 	case *options.ScriptingRoswell:
 		out, err := ConvertOutputOptions(val.Output)
 		if err != nil {
-			return nil, errors.Wrap(err, "problem converting output options")
+			return nil, fmt.Errorf("problem converting output options: %w", err)
 		}
 		return &ScriptingOptions{
 			Duration:    int64(val.CachedDuration),
@@ -774,7 +775,7 @@ func ConvertScriptingOptions(opts options.ScriptingHarness) (*ScriptingOptions, 
 			},
 		}, nil
 	default:
-		return nil, errors.Errorf("scripting options for '%T' is not supported", opts)
+		return nil, fmt.Errorf("scripting options for '%T' is not supported", opts)
 	}
 }
 
@@ -785,7 +786,7 @@ func ConvertScriptingTestResults(res []scripting.TestResult) ([]*ScriptingHarnes
 	for idx, r := range res {
 		startAt, err := ptypes.TimestampProto(r.StartAt)
 		if err != nil {
-			return nil, errors.Wrap(err, "could not convert start timestamp to equivalent protobuf RPC timestamp")
+			return nil, fmt.Errorf("could not convert start timestamp to equivalent protobuf RPC timestamp: %w", err)
 		}
 		out[idx] = &ScriptingHarnessTestResult{
 			Name:     r.Name,
@@ -1015,7 +1016,7 @@ func (l *LoggingCacheInstance) Export() (*options.CachedLogger, error) {
 
 	accessed, err := ptypes.Timestamp(l.Accessed)
 	if err != nil {
-		return nil, errors.Wrap(err, "could not convert last accessed timestamp from equivalent protobuf RPC timestamp")
+		return nil, fmt.Errorf("could not convert last accessed timestamp from equivalent protobuf RPC timestamp: %w", err)
 	}
 
 	return &options.CachedLogger{
@@ -1031,7 +1032,7 @@ func (l *LoggingCacheInstance) Export() (*options.CachedLogger, error) {
 func ConvertCachedLogger(opts *options.CachedLogger) (*LoggingCacheInstance, error) {
 	accessed, err := ptypes.TimestampProto(opts.Accessed)
 	if err != nil {
-		return nil, errors.Wrap(err, "could not convert last accessed timestamp to equivalent protobuf RPC timestamp")
+		return nil, fmt.Errorf("could not convert last accessed timestamp to equivalent protobuf RPC timestamp: %w", err)
 	}
 	return &LoggingCacheInstance{
 		Outcome: &OperationOutcome{
@@ -1048,7 +1049,7 @@ func ConvertCachedLogger(opts *options.CachedLogger) (*LoggingCacheInstance, err
 func ConvertLoggingCreateArgs(id string, opts *options.Output) (*LoggingCacheCreateArgs, error) {
 	o, err := ConvertOutputOptions(*opts)
 	if err != nil {
-		return nil, errors.Wrap(err, "problem converting output options")
+		return nil, fmt.Errorf("problem converting output options: %w", err)
 	}
 	return &LoggingCacheCreateArgs{
 		Name:    id,

@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/emt"
 	"golang.org/x/crypto/ssh"
 )
@@ -92,7 +91,7 @@ func (opts *RemoteConfig) resolve() (*ssh.ClientConfig, error) {
 	if opts.Key != "" || opts.KeyFile != "" {
 		pubkey, err := opts.publicKeyAuth()
 		if err != nil {
-			return nil, errors.Wrap(err, "could not get public key")
+			return nil, fmt.Errorf("could not get public key: %w", err)
 		}
 		auth = append(auth, pubkey)
 	}
@@ -113,7 +112,7 @@ func (opts *RemoteConfig) publicKeyAuth() (ssh.AuthMethod, error) {
 		var err error
 		key, err = ioutil.ReadFile(opts.KeyFile)
 		if err != nil {
-			return nil, errors.Wrap(err, "could not read key file")
+			return nil, fmt.Errorf("could not read key file: %w", err)
 		}
 	} else {
 		key = []byte(opts.Key)
@@ -127,7 +126,7 @@ func (opts *RemoteConfig) publicKeyAuth() (ssh.AuthMethod, error) {
 		signer, err = ssh.ParsePrivateKey(key)
 	}
 	if err != nil {
-		return nil, errors.Wrap(err, "could not get signer")
+		return nil, fmt.Errorf("could not get signer: %w", err)
 	}
 	return ssh.PublicKeys(signer), nil
 }
@@ -142,6 +141,7 @@ func (opts *Remote) Validate() error {
 	}
 
 	catcher.Add(opts.validate())
+
 	return catcher.Resolve()
 }
 
@@ -156,18 +156,18 @@ func (opts *Remote) String() string {
 // Resolve returns the SSH client and session from the options.
 func (opts *Remote) Resolve() (*ssh.Client, *ssh.Session, error) {
 	if err := opts.Validate(); err != nil {
-		return nil, nil, errors.Wrap(err, "invalid remote options")
+		return nil, nil, fmt.Errorf("invalid remote options: %w", err)
 	}
 
 	var client *ssh.Client
 	if opts.Proxy != nil {
 		proxyConfig, err := opts.Proxy.resolve()
 		if err != nil {
-			return nil, nil, errors.Wrap(err, "could not create proxy config")
+			return nil, nil, fmt.Errorf("could not create proxy config: %w", err)
 		}
 		proxyClient, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", opts.Proxy.Host, opts.Proxy.Port), proxyConfig)
 		if err != nil {
-			return nil, nil, errors.Wrap(err, "could not dial proxy")
+			return nil, nil, fmt.Errorf("could not dial proxy: %w", err)
 		}
 
 		targetConn, err := proxyClient.Dial("tcp", fmt.Sprintf("%s:%d", opts.Host, opts.Port))
@@ -198,11 +198,11 @@ func (opts *Remote) Resolve() (*ssh.Client, *ssh.Session, error) {
 		var err error
 		config, err := opts.resolve()
 		if err != nil {
-			return nil, nil, errors.Wrap(err, "could not create config")
+			return nil, nil, fmt.Errorf("could not create config: %w", err)
 		}
 		client, err = ssh.Dial("tcp", fmt.Sprintf("%s:%d", opts.Host, opts.Port), config)
 		if err != nil {
-			return nil, nil, errors.Wrap(err, "could not dial host")
+			return nil, nil, fmt.Errorf("could not dial host: %w", err)
 		}
 	}
 
@@ -211,7 +211,7 @@ func (opts *Remote) Resolve() (*ssh.Client, *ssh.Session, error) {
 		catcher := emt.NewBasicCatcher()
 		catcher.Add(client.Close())
 		catcher.Add(err)
-		return nil, nil, errors.Wrap(catcher.Resolve(), "could not establish session")
+		return nil, nil, fmt.Errorf("could not establish session: %w", catcher.Resolve())
 	}
 	return client, session, nil
 }

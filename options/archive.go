@@ -1,6 +1,7 @@
 package options
 
 import (
+	"fmt"
 	"path/filepath"
 
 	"github.com/pkg/errors"
@@ -26,7 +27,7 @@ func (f ArchiveFormat) Validate() error {
 	case ArchiveTarGz, ArchiveZip, ArchiveAuto:
 		return nil
 	default:
-		return errors.Errorf("unknown archive format %s", f)
+		return fmt.Errorf("unknown archive format %s", f)
 	}
 }
 

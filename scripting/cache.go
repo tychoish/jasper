@@ -1,6 +1,7 @@
 package scripting
 
 import (
+	"fmt"
 	"sync"
 
 	"github.com/pkg/errors"
@@ -22,7 +23,7 @@ func (c *cacheImpl) Create(jpm jasper.Manager, opts options.ScriptingHarness) (H
 
 	h, err := NewHarness(jpm, opts)
 	if err != nil {
-		return nil, errors.Wrap(err, "problem constructing harness")
+		return nil, fmt.Errorf("problem constructing harness: %w", err)
 	}
 
 	c.cache[h.ID()] = h
@@ -39,7 +40,7 @@ func (c *cacheImpl) Add(id string, h Harness) error {
 	defer c.mutex.Unlock()
 
 	if _, ok := c.cache[id]; ok {
-		return errors.Errorf("harness '%s' exists, cannot cache", id)
+		return fmt.Errorf("harness '%s' exists, cannot cache", id)
 	}
 
 	c.cache[id] = h
@@ -55,7 +56,7 @@ func (c *cacheImpl) Get(id string) (Harness, error) {
 		return h, nil
 	}
 
-	return nil, errors.Errorf("could not find manager '%s'", id)
+	return nil, fmt.Errorf("could not find manager '%s'", id)
 }
 
 func (c *cacheImpl) Check(id string) bool {

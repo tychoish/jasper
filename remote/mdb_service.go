@@ -2,11 +2,11 @@ package remote
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"net"
 	"strconv"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/birch"
 	"github.com/tychoish/birch/mrpc"
 	"github.com/tychoish/birch/mrpc/mongowire"
@@ -33,16 +33,16 @@ type mdbService struct {
 func StartMDBService(ctx context.Context, m jasper.Manager, addr net.Addr) (util.CloseFunc, error) {
 	host, p, err := net.SplitHostPort(addr.String())
 	if err != nil {
-		return nil, errors.Wrap(err, "invalid address")
+		return nil, fmt.Errorf("invalid address: %w", err)
 	}
 	port, err := strconv.Atoi(p)
 	if err != nil {
-		return nil, errors.Wrap(err, "port is not a number")
+		return nil, fmt.Errorf("port is not a number: %w", err)
 	}
 
 	baseSvc, err := shell.NewShellService(host, port)
 	if err != nil {
-		return nil, errors.Wrap(err, "could not create base service")
+		return nil, fmt.Errorf("could not create base service: %w", err)
 	}
 	svc := &mdbService{
 		Service:      baseSvc,
@@ -52,7 +52,7 @@ func StartMDBService(ctx context.Context, m jasper.Manager, addr net.Addr) (util
 		marshaler:    options.GetGlobalLoggerRegistry().Marshaler(options.RawLoggerConfigFormatBSON),
 	}
 	if err := svc.registerHandlers(); err != nil {
-		return nil, errors.Wrap(err, "error registering handlers")
+		return nil, fmt.Errorf("error registering handlers: %w", err)
 	}
 
 	cctx, ccancel := context.WithCancel(context.Background())
@@ -117,7 +117,7 @@ func (s *mdbService) registerHandlers() error {
 			Type:    mongowire.OP_COMMAND,
 			Command: name,
 		}, handler); err != nil {
-			return errors.Wrapf(err, "could not register handler for %s", name)
+			return fmt.Errorf("could not register handler for %q: %w", name, err)
 		}
 	}
 
@@ -134,16 +134,16 @@ const (
 func (s *mdbService) readRequest(msg mongowire.Message, in interface{}) error {
 	doc, err := shell.RequestMessageToDocument(msg)
 	if err != nil {
-		return errors.Wrap(err, "could not read response")
+		return fmt.Errorf("could not read response: %w", err)
 	}
 
 	data, err := doc.MarshalBSON()
 	if err != nil {
-		return errors.Wrap(err, "could not read response data")
+		return fmt.Errorf("could not read response data: %w", err)
 	}
 
 	if err := s.unmarshaler(data, in); err != nil {
-		return errors.Wrap(err, "problem parsing response body")
+		return fmt.Errorf("problem parsing response body: %w", err)
 
 	}
 
@@ -154,19 +154,19 @@ func (s *mdbService) downloadFile(ctx context.Context, w io.Writer, msg mongowir
 	req := downloadFileRequest{}
 
 	if err := s.readRequest(msg, &req); err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse request"), DownloadFileCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not parse request: %w", err), DownloadFileCommand)
 		return
 	}
 
 	opts := req.Options
 
 	if err := opts.Validate(); err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "invalid download options"), DownloadFileCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("invalid download options: %w", err), DownloadFileCommand)
 		return
 	}
 
 	if err := opts.Download(ctx); err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not download file"), DownloadFileCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not download file: %w", err), DownloadFileCommand)
 		return
 	}
 
@@ -176,7 +176,7 @@ func (s *mdbService) downloadFile(ctx context.Context, w io.Writer, msg mongowir
 func (s *mdbService) getLogStream(ctx context.Context, w io.Writer, msg mongowire.Message) {
 	req := getLogStreamRequest{}
 	if err := s.readRequest(msg, &req); err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse request"), GetLogStreamCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not parse request: %w", err), GetLogStreamCommand)
 		return
 	}
 
@@ -185,7 +185,7 @@ func (s *mdbService) getLogStream(ctx context.Context, w io.Writer, msg mongowir
 
 	proc, err := s.manager.Get(ctx, id)
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not get process"), GetLogStreamCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not get process: %w", err), GetLogStreamCommand)
 		return
 	}
 
@@ -194,19 +194,19 @@ func (s *mdbService) getLogStream(ctx context.Context, w io.Writer, msg mongowir
 	if err == io.EOF {
 		done = true
 	} else if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not get logs"), GetLogStreamCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not get logs: %w", err), GetLogStreamCommand)
 		return
 	}
 
 	payload, err := s.makePayload(makeGetLogStreamResponse(logs, done))
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not make response"), GetLogStreamCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not make response: %w", err), GetLogStreamCommand)
 		return
 	}
 
 	resp, err := shell.ResponseToMessage(mongowire.OP_REPLY, payload)
 	if err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not make response"), GetLogStreamCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not make response: %w", err), GetLogStreamCommand)
 		return
 	}
 
@@ -216,7 +216,7 @@ func (s *mdbService) getLogStream(ctx context.Context, w io.Writer, msg mongowir
 func (s *mdbService) makePayload(in interface{}) (*birch.Document, error) {
 	data, err := s.marshaler(in)
 	if err != nil {
-		return nil, errors.Wrap(err, "problem producing data")
+		return nil, fmt.Errorf("problem producing data: %w", err)
 	}
 	return birch.ReadDocument(data)
 }
@@ -224,14 +224,14 @@ func (s *mdbService) makePayload(in interface{}) (*birch.Document, error) {
 func (s *mdbService) signalEvent(ctx context.Context, w io.Writer, msg mongowire.Message) {
 	req := signalEventRequest{}
 	if err := s.readRequest(msg, &req); err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrap(err, "could not parse request"), SignalEventCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not parse request: %w", err), SignalEventCommand)
 		return
 	}
 
 	name := req.Name
 
 	if err := jasper.SignalEvent(ctx, name); err != nil {
-		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrapf(err, "could not signal event '%s'", name), SignalEventCommand)
+		shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("could not signal event %q: %w", name, err), SignalEventCommand)
 		return
 	}
 

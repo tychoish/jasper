@@ -8,11 +8,11 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/birch"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/grip/send"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 func TestLoggingCache(t *testing.T) {
@@ -147,7 +147,7 @@ func TestLoggingCache(t *testing.T) {
 			})
 			t.Run("BSON", func(t *testing.T) {
 				lp := &LoggingPayload{Format: LoggingPayloadFormatBSON}
-				doc, err := bson.Marshal(map[string]string{"msg": "hello world!"})
+				doc, err := birch.DC.Interface(map[string]string{"msg": "hello world!"}).MarshalBSON()
 				require.NoError(t, err)
 
 				t.Run("Invalid", func(t *testing.T) {
@@ -269,11 +269,11 @@ func TestLoggingCache(t *testing.T) {
 					buf := &bytes.Buffer{}
 					for i := 0; i < 10; i++ {
 
-						doc, err := bson.Marshal(map[string]interface{}{
+						doc, err := birch.DC.MapInterface(map[string]interface{}{
 							"msg": "hello world!",
 							"idx": i,
 							"val": rand.Int63n(1 + int64(i*42)),
-						})
+						}).MarshalBSON()
 						require.NoError(t, err)
 						_, err = buf.Write(doc)
 						require.NoError(t, err)

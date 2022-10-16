@@ -2,6 +2,7 @@ package remote
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -115,7 +116,7 @@ func (lc *restLoggingCache) Len() int {
 func (lc *restLoggingCache) CloseAndRemove(ctx context.Context, id string) error {
 	resp, err := lc.client.doRequest(ctx, http.MethodDelete, lc.client.getURL("/logging/id/%s/close", id), nil)
 	if err != nil {
-		return errors.Wrap(err, "request returned error")
+		return fmt.Errorf("request returned error: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -125,7 +126,7 @@ func (lc *restLoggingCache) CloseAndRemove(ctx context.Context, id string) error
 func (lc *restLoggingCache) Clear(ctx context.Context) error {
 	resp, err := lc.client.doRequest(ctx, http.MethodDelete, lc.client.getURL("/logging/clear"), nil)
 	if err != nil {
-		return errors.Wrap(err, "request returned error")
+		return fmt.Errorf("request returned error: %w", err)
 	}
 	defer resp.Body.Close()
 

@@ -2,6 +2,7 @@ package jasper
 
 import (
 	"context"
+	"errors"
 	"os"
 	"os/exec"
 	"syscall"
@@ -9,7 +10,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tychoish/grip"

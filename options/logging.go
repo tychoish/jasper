@@ -3,6 +3,7 @@ package options
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"strings"
 	"time"
@@ -92,7 +93,7 @@ func (lp *LoggingPayload) Validate() error {
 // payload to a message format.
 func (cl *CachedLogger) Send(lp *LoggingPayload) error {
 	if err := lp.Validate(); err != nil {
-		return errors.Wrap(err, "invalid logging payload")
+		return fmt.Errorf("invalid logging payload: %w", err)
 	}
 
 	sender, err := cl.getSender(lp.PreferSendToError)
@@ -200,7 +201,7 @@ func (lp *LoggingPayload) produceMessage(data []byte) (message.Composer, error) 
 	case LoggingPayloadFormatJSON:
 		payload := message.Fields{}
 		if err := json.Unmarshal(data, &payload); err != nil {
-			return nil, errors.Wrap(err, "problem parsing json from message body")
+			return nil, fmt.Errorf("problem parsing json from message body: %w", err)
 		}
 
 		if lp.AddMetadata {
@@ -216,7 +217,7 @@ func (lp *LoggingPayload) produceMessage(data []byte) (message.Composer, error) 
 
 		payload := message.Fields{}
 		if err := unmarshler(data, &payload); err != nil {
-			return nil, errors.Wrap(err, "problem parsing bson from message body")
+			return nil, fmt.Errorf("problem parsing bson from message body: %w", err)
 		}
 		if lp.AddMetadata {
 			return message.NewFields(lp.Priority, payload), nil
@@ -246,12 +247,12 @@ func (lp *LoggingPayload) splitByteSlice(data []byte) (interface{}, error) {
 			break
 		}
 		if err != nil {
-			return nil, errors.Wrap(err, "problem reading bson from message data")
+			return nil, fmt.Errorf("problem reading bson from message data: %w", err)
 		}
 
 		payload, err := doc.MarshalBSON()
 		if err != nil {
-			return nil, errors.Wrap(err, "problem constructing bson form")
+			return nil, fmt.Errorf("problem constructing bson form: %w", err)
 		}
 		out = append(out, payload)
 	}

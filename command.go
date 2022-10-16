@@ -113,7 +113,7 @@ func (c *Command) String() string {
 func (c *Command) Export() ([]*options.Create, error) {
 	opts, err := c.getCreateOpts()
 	if err != nil {
-		return nil, errors.Wrap(err, "problem getting process creation options")
+		return nil, fmt.Errorf("problem getting process creation options: %w", err)
 	}
 	return opts, nil
 }
@@ -536,7 +536,7 @@ func (c *Command) Run(ctx context.Context) error {
 
 	for idx, opt := range opts {
 		if err := ctx.Err(); err != nil {
-			catcher.Add(errors.Wrap(err, "operation canceled"))
+			catcher.Add(fmt.Errorf("operation canceled: %w", err))
 			catcher.Add(c.Close())
 			return catcher.Resolve()
 		}
@@ -789,7 +789,7 @@ func (c *Command) getCreateOpt(args []string) (*options.Create, error) {
 		if c.opts.Process.Remote == nil && strings.ContainsAny(args[0], " \"'") {
 			spl, err := shlex.Split(args[0])
 			if err != nil {
-				return nil, errors.Wrap(err, "problem splitting argstring")
+				return nil, fmt.Errorf("problem splitting argstring: %w", err)
 			}
 			return c.getCreateOpt(spl)
 		}
@@ -838,7 +838,7 @@ func (c *Command) exec(ctx context.Context, opts *options.Create, idx int) error
 	writeOutput := getMsgOutput(opts.Output)
 	proc, err := c.makeProc(ctx, opts)
 	if err != nil {
-		return errors.Wrap(err, "problem starting command")
+		return fmt.Errorf("problem starting command: %w", err)
 	}
 	c.procs = append(c.procs, proc)
 
@@ -866,14 +866,14 @@ func getMsgOutput(opts options.Output) func(msg message.Fields) message.Fields {
 	logger, err := NewInMemoryLogger(1000)
 	if err != nil {
 		return func(msg message.Fields) message.Fields {
-			msg["log_err"] = errors.Wrap(err, "could not set up in-memory sender for capturing output")
+			msg["log_err"] = fmt.Errorf("could not set up in-memory sender for capturing output: %w", err)
 			return msg
 		}
 	}
 	sender, err := logger.Resolve()
 	if err != nil {
 		return func(msg message.Fields) message.Fields {
-			msg["log_err"] = errors.Wrap(err, "could not set up in-memory sender for capturing output")
+			msg["log_err"] = fmt.Errorf("could not set up in-memory sender for capturing output: %w", err)
 			return msg
 		}
 	}

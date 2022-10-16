@@ -47,7 +47,7 @@ func serviceCommandWire(cmd string, operation serviceOperation) cli.Command {
 		Action: func(c *cli.Context) error {
 			manager, err := jasper.NewSynchronizedManager(false)
 			if err != nil {
-				return errors.Wrap(err, "error creating wire manager")
+				return fmt.Errorf("error creating wire manager: %w", err)
 			}
 
 			daemon := newWireDaemon(c.String(hostFlagName), c.Int(portFlagName), manager, makeLogger(c))
@@ -83,7 +83,7 @@ func newWireDaemon(host string, port int, manager jasper.Manager, logger *option
 func (d *wireDaemon) Start(s service.Service) error {
 	if d.Logger != nil {
 		if err := setupLogger(d.Logger); err != nil {
-			return errors.Wrap(err, "failed to set up logging")
+			return fmt.Errorf("failed to set up logging: %w", err)
 		}
 	}
 
@@ -91,7 +91,7 @@ func (d *wireDaemon) Start(s service.Service) error {
 	if d.Manager == nil {
 		var err error
 		if d.Manager, err = jasper.NewSynchronizedManager(false); err != nil {
-			return errors.Wrap(err, "failed to construct wire manager")
+			return fmt.Errorf("failed to construct wire manager: %w", err)
 		}
 	}
 
@@ -117,12 +117,12 @@ func (d *wireDaemon) run(ctx context.Context) error {
 func (d *wireDaemon) newService(ctx context.Context) (util.CloseFunc, error) {
 	addr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", d.Host, d.Port))
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to resolve wire address")
+		return nil, fmt.Errorf("failed to resolve wire address: %w", err)
 	}
 
 	closeService, err := remote.StartMDBService(ctx, d.Manager, addr)
 	if err != nil {
-		return nil, errors.Wrap(err, "error starting wire service")
+		return nil, fmt.Errorf("error starting wire service: %w", err)
 	}
 	return closeService, nil
 }

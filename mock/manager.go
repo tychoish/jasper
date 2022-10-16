@@ -2,9 +2,9 @@ package mock
 
 import (
 	"context"
+	"fmt"
 	"runtime"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/scripting"
@@ -37,7 +37,7 @@ func mockFail() error {
 	n := runtime.Callers(2, progCounter)
 	frames := runtime.CallersFrames(progCounter[:n])
 	frame, _ := frames.Next()
-	return errors.Errorf("function failed: %s", frame.Function)
+	return fmt.Errorf("function failed: %s", frame.Function)
 }
 
 // ID returns the ManagerID field.
@@ -124,7 +124,7 @@ func (m *Manager) List(ctx context.Context, f options.Filter) ([]jasper.Process,
 				filteredProcs = append(filteredProcs, proc)
 			}
 		default:
-			return nil, errors.Errorf("invalid filter '%s'", f)
+			return nil, fmt.Errorf("invalid filter '%s'", f)
 		}
 	}
 
@@ -163,7 +163,7 @@ func (m *Manager) Get(ctx context.Context, id string) (jasper.Process, error) {
 		}
 	}
 
-	return nil, errors.Errorf("proc with id '%s' not found", id)
+	return nil, fmt.Errorf("proc with id '%s' not found", id)
 }
 
 // Clear removes all processes from Procs.

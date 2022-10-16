@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/urfave/cli"
 )
 
@@ -64,7 +63,7 @@ func clientBefore() func(*cli.Context) error {
 		func(c *cli.Context) error {
 			service := c.String(serviceFlagName)
 			if service != RESTService && service != RPCService {
-				return errors.Errorf("service must be '%s' or '%s'", RESTService, RPCService)
+				return fmt.Errorf("service must be '%s' or '%s'", RESTService, RPCService)
 			}
 			return nil
 		},

@@ -47,11 +47,11 @@ func newDownloadJob() *downloadFileJob {
 func NewDownloadJob(url, path string, force bool) (Job, error) {
 	j := newDownloadJob()
 	if err := j.setURL(url); err != nil {
-		return nil, errors.Wrap(err, "problem constructing Job object (url)")
+		return nil, fmt.Errorf("problem constructing Job object (url): %w", err)
 	}
 
 	if err := j.setDirectory(path); err != nil {
-		return nil, errors.Wrap(err, "problem constructing Job object (directory)")
+		return nil, fmt.Errorf("problem constructing Job object (directory): %w", err)
 	}
 
 	fn := j.getFileName()
@@ -159,7 +159,7 @@ func (j *downloadFileJob) setDirectory(path string) error {
 	if stat, err := os.Stat(path); !os.IsNotExist(err) && !stat.IsDir() {
 		// if the path exists and isn't a directory, then we
 		// won't be able to download into it:
-		return errors.Errorf("%s is not a directory, cannot download files into it",
+		return fmt.Errorf("%s is not a directory, cannot download files into it",
 			path)
 	}
 
@@ -169,11 +169,11 @@ func (j *downloadFileJob) setDirectory(path string) error {
 
 func (j *downloadFileJob) setURL(url string) error {
 	if !strings.HasPrefix(url, "http") {
-		return errors.Errorf("%s is not a valid url", url)
+		return fmt.Errorf("%s is not a valid url", url)
 	}
 
 	if strings.HasSuffix(url, "/") {
-		return errors.Errorf("%s does not contain a valid filename component", url)
+		return fmt.Errorf("%s does not contain a valid filename component", url)
 	}
 
 	j.URL = url

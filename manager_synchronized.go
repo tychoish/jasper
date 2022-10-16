@@ -2,6 +2,7 @@ package jasper
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
 	"github.com/pkg/errors"
@@ -28,7 +29,7 @@ func NewSynchronizedManager(trackProcs bool) (Manager, error) {
 func NewSSHLibrarySynchronizedManager(trackProcs bool) (Manager, error) {
 	basicManager, err := newBasicProcessManager(map[string]Process{}, trackProcs, true)
 	if err != nil {
-		return nil, errors.Wrap(err, "problem constructing underlying manager")
+		return nil, fmt.Errorf("problem constructing underlying manager: %w", err)
 	}
 	return &synchronizedProcessManager{manager: basicManager}, nil
 }

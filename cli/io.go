@@ -2,12 +2,14 @@ package cli
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/pkg/errors"
 	"github.com/tychoish/emt"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
+	"github.com/tychoish/jasper/util"
 )
 
 const (
@@ -282,13 +284,13 @@ func BuildScriptingOptions(in options.ScriptingHarness) (*ScriptingOptions, erro
 	case *options.ScriptingRoswell:
 		out.ImplementationType = options.RoswellScriptingType
 	default:
-		return nil, errors.Errorf("unsupported scripting type [%T]", in)
+		return nil, fmt.Errorf("unsupported scripting type [%T]", in)
 	}
 
 	var err error
 	out.Payload, err = json.Marshal(in)
 	if err != nil {
-		return nil, errors.Wrap(err, "problem building message payload")
+		return nil, fmt.Errorf("problem building message payload: %w", err)
 	}
 
 	return out, nil
@@ -352,7 +354,7 @@ func (in *SignalTriggerIDInput) Validate() error {
 	}
 	_, ok := jasper.GetSignalTriggerFactory(in.SignalTriggerID)
 	if !ok {
-		return errors.Errorf("could not find signal trigger with id '%s'", in.SignalTriggerID)
+		return fmt.Errorf("could not find signal trigger with id '%s'", in.SignalTriggerID)
 	}
 	return nil
 }
@@ -437,7 +439,7 @@ type LoggingCacheCreateInput struct {
 func (in *LoggingCacheCreateInput) Validate() error {
 	catcher := emt.NewBasicCatcher()
 	catcher.NewWhen(in.ID == "", "ID must not be empty")
-	catcher.Add(in.Output.Validate())
+	util.CheckCall(catcher, in.Output.Validate, "invalid output options")
 	return catcher.Resolve()
 }
 

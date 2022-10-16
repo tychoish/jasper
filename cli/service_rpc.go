@@ -52,7 +52,7 @@ func serviceCommandRPC(cmd string, operation serviceOperation) cli.Command {
 		Action: func(c *cli.Context) error {
 			manager, err := jasper.NewSynchronizedManager(false)
 			if err != nil {
-				return errors.Wrap(err, "error creating RPC manager")
+				return fmt.Errorf("error creating RPC manager: %w", err)
 			}
 
 			daemon := newRPCDaemon(c.String(hostFlagName), c.Int(portFlagName), manager, c.String(credsFilePathFlagName), makeLogger(c))
@@ -90,7 +90,7 @@ func newRPCDaemon(host string, port int, manager jasper.Manager, credsFilePath s
 func (d *rpcDaemon) Start(s service.Service) error {
 	if d.Logger != nil {
 		if err := setupLogger(d.Logger); err != nil {
-			return errors.Wrap(err, "")
+			return fmt.Errorf(": %w", err)
 		}
 	}
 
@@ -98,7 +98,7 @@ func (d *rpcDaemon) Start(s service.Service) error {
 	if d.Manager == nil {
 		var err error
 		if d.Manager, err = jasper.NewSynchronizedManager(false); err != nil {
-			return errors.Wrap(err, "failed to construct RPC manager")
+			return fmt.Errorf("failed to construct RPC manager: %w", err)
 		}
 	}
 
@@ -137,12 +137,12 @@ func (d *rpcDaemon) newService(ctx context.Context) (util.CloseFunc, error) {
 func newRPCService(ctx context.Context, host string, port int, manager jasper.Manager, credsFilePath string) (util.CloseFunc, error) {
 	addr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", host, port))
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to resolve RPC address")
+		return nil, fmt.Errorf("failed to resolve RPC address: %w", err)
 	}
 
 	closeService, err := remote.StartRPCServiceWithFile(ctx, manager, addr, credsFilePath)
 	if err != nil {
-		return nil, errors.Wrap(err, "error starting RPC service")
+		return nil, fmt.Errorf("error starting RPC service: %w", err)
 	}
 	return closeService, nil
 }

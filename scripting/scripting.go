@@ -2,6 +2,7 @@ package scripting
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/pkg/errors"
 	"github.com/tychoish/jasper"
@@ -60,7 +61,7 @@ func NewHarness(m jasper.Manager, env options.ScriptingHarness) (Harness, error)
 	case *options.ScriptingRoswell:
 		return &roswellEnvironment{opts: t, manager: m}, nil
 	default:
-		return nil, errors.Errorf("scripting environment %T (%s) is not supported", t, env.Type())
+		return nil, fmt.Errorf("scripting environment %T (%s) is not supported", t, env.Type())
 	}
 }
 

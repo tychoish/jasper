@@ -2,6 +2,7 @@ package remote
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/golang/protobuf/ptypes"
@@ -23,7 +24,7 @@ type rpcLoggingCache struct {
 func (lc *rpcLoggingCache) Create(id string, opts *options.Output) (*options.CachedLogger, error) {
 	args, err := internal.ConvertLoggingCreateArgs(id, opts)
 	if err != nil {
-		return nil, errors.Wrap(err, "problem converting create args")
+		return nil, fmt.Errorf("problem converting create args: %w", err)
 	}
 	resp, err := lc.client.LoggingCacheCreate(lc.ctx, args)
 	if err != nil {
@@ -70,7 +71,7 @@ func (lc *rpcLoggingCache) CloseAndRemove(ctx context.Context, id string) error 
 	}
 
 	if !resp.Success {
-		return errors.Errorf("failed to close and remove: %s", resp.Text)
+		return fmt.Errorf("failed to close and remove: %s", resp.Text)
 	}
 	return nil
 }
@@ -82,7 +83,7 @@ func (lc *rpcLoggingCache) Clear(ctx context.Context) error {
 	}
 
 	if !resp.Success {
-		return errors.Errorf("failed to clear the logging cache: %s", resp.Text)
+		return fmt.Errorf("failed to clear the logging cache: %s", resp.Text)
 	}
 	return nil
 }

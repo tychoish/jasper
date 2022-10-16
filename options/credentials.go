@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 
@@ -38,7 +39,7 @@ func NewCredentials(caCert, cert, key []byte) (*CertificateCredentials, error) {
 	}
 
 	if err := creds.Validate(); err != nil {
-		return nil, errors.Wrap(err, "invalid credentials")
+		return nil, fmt.Errorf("invalid credentials: %w", err)
 	}
 
 	return creds, nil
@@ -49,22 +50,22 @@ func NewCredentials(caCert, cert, key []byte) (*CertificateCredentials, error) {
 func NewCredentialsFromFile(path string) (*CertificateCredentials, error) {
 	file, err := os.Open(path)
 	if err != nil {
-		return nil, errors.Wrap(err, "error opening credentials file")
+		return nil, fmt.Errorf("error opening credentials file: %w", err)
 	}
 	defer file.Close()
 
 	contents, err := ioutil.ReadAll(file)
 	if err != nil {
-		return nil, errors.Wrap(err, "error reading credentials file")
+		return nil, fmt.Errorf("error reading credentials file: %w", err)
 	}
 
 	creds := CertificateCredentials{}
 	if err := json.Unmarshal(contents, &creds); err != nil {
-		return nil, errors.Wrap(err, "error unmarshalling contents of credentials file")
+		return nil, fmt.Errorf("error unmarshalling contents of credentials file: %w", err)
 	}
 
 	if err := creds.Validate(); err != nil {
-		return nil, errors.Wrap(err, "read invalid credentials from file")
+		return nil, fmt.Errorf("read invalid credentials from file: %w", err)
 	}
 
 	return &creds, nil
@@ -84,7 +85,7 @@ func (c *CertificateCredentials) Validate() error {
 // Resolve converts the Credentials struct into a tls.Config.
 func (c *CertificateCredentials) Resolve() (*tls.Config, error) {
 	if err := c.Validate(); err != nil {
-		return nil, errors.Wrap(err, "invalid credentials")
+		return nil, fmt.Errorf("invalid credentials: %w", err)
 	}
 
 	caCerts := x509.NewCertPool()
@@ -94,7 +95,7 @@ func (c *CertificateCredentials) Resolve() (*tls.Config, error) {
 
 	cert, err := tls.X509KeyPair(c.Cert, c.Key)
 	if err != nil {
-		return nil, errors.Wrap(err, "problem loading key pair")
+		return nil, fmt.Errorf("problem loading key pair: %w", err)
 	}
 
 	return &tls.Config{
@@ -113,12 +114,12 @@ func (c *CertificateCredentials) Resolve() (*tls.Config, error) {
 // Export exports the Credentials struct into JSON-encoded bytes.
 func (c *CertificateCredentials) Export() ([]byte, error) {
 	if err := c.Validate(); err != nil {
-		return nil, errors.Wrap(err, "invalid credentials")
+		return nil, fmt.Errorf("invalid credentials: %w", err)
 	}
 
 	b, err := json.Marshal(c)
 	if err != nil {
-		return nil, errors.Wrap(err, "error exporting credentials")
+		return nil, fmt.Errorf("error exporting credentials: %w", err)
 	}
 
 	return b, nil
