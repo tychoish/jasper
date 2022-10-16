@@ -225,8 +225,8 @@ github.com/tklauser/numcpus v0.4.0/go.mod h1:1+UI3pD8NW14VMwdgJNJ1ESk2UnwhAnz5hM
 github.com/tklauser/numcpus v0.5.0 h1:ooe7gN0fg6myJ0EKoTAf5hebTZrH52px3New/D9iJ+A=
 github.com/tklauser/numcpus v0.5.0/go.mod h1:OGzpTxpcIMNGYQdit2BYL1pvk/dSOaJWjKoflh+RQjo=
 github.com/trivago/tgo v1.0.7/go.mod h1:w4dpD+3tzNIIiIfkWWa85w5/B77tlvdZckQ+6PkFnhc=
-github.com/tychoish/amboy v0.0.0-20221016162606-d408d958ac3b h1:qAa9OE2+Wdt31+6GxpnLtqfArVPpRz7EuyrtGN6V0AQ=
-github.com/tychoish/amboy v0.0.0-20221016162606-d408d958ac3b/go.mod h1:Sta6RE6dOo4kyPZFNnNAiGRDfwCf/OJ41E54tlly/ec=
+github.com/tychoish/amboy v0.0.0-20221016175349-a562b519f3f8 h1:av7TRTig2ldWLrzx3baSIYMYpPcmEjJHf45r5dbSZ4Q=
+github.com/tychoish/amboy v0.0.0-20221016175349-a562b519f3f8/go.mod h1:ym3zC0BXOvPb2gBFpyEXodpy1G3YVzOMvAnWSWjAk9M=
 github.com/tychoish/birch v0.0.0-20221015172859-21f2fb994959 h1:sYHnzKXlFFYqjHt0G929oqg/5ZlMyl/UtCMMZjjPoIo=
 github.com/tychoish/birch v0.0.0-20221015172859-21f2fb994959/go.mod h1:jF/2WyEtoguuyLAzQSKSRbpvtk6zfH9X06XMhqoWC8E=
 github.com/tychoish/emt v0.0.0-20220306153139-74b97c67f209/go.mod h1:KMhVWIsL98Q8AoorphjsOQWabcNOoYqMSpODR/rtRb4=

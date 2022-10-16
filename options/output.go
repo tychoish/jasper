@@ -221,7 +221,10 @@ func (o *Output) Close() error {
 	// underlying send.Sender.
 	if o.outputSender != nil {
 		catcher.Add(o.outputSender.Close())
-		catcher.Add(o.outputSender.Sender.Close())
+		if o.outputSender.Sender != nil {
+			catcher.Add(o.outputSender.Sender.Close())
+		}
+
 	}
 	if o.errorSender != nil {
 		catcher.Add(o.errorSender.Close())

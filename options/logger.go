@@ -382,8 +382,12 @@ func (s *SafeSender) GetSender() send.Sender {
 func (s *SafeSender) Close() error {
 	catcher := emt.NewBasicCatcher()
 
-	catcher.Add(s.Sender.Close())
-	catcher.AddWhen(s.baseSender != nil, s.baseSender.Close())
+	if s.Sender != nil {
+		catcher.Add(s.Sender.Close())
+	}
+	if s.baseSender != nil {
+		catcher.Add(s.baseSender.Close())
+	}
 
 	return catcher.Resolve()
 }

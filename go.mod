@@ -14,7 +14,7 @@ require (
 	github.com/opencontainers/image-spec v1.1.0-rc2
 	github.com/opencontainers/runtime-spec v1.0.3-0.20210326190908-1c3f411f0417
 	github.com/stretchr/testify v1.7.5
-	github.com/tychoish/amboy v0.0.0-20221016162606-d408d958ac3b
+	github.com/tychoish/amboy v0.0.0-20221016175349-a562b519f3f8
 	github.com/tychoish/birch v0.0.0-20221015172859-21f2fb994959
 	github.com/tychoish/emt v0.1.0
 	github.com/tychoish/gimlet v0.0.0-20220430160104-9dbd313f23e7

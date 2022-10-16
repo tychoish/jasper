@@ -384,7 +384,7 @@ func (p *rpcProcess) Wait(ctx context.Context) (int, error) {
 	}
 
 	if !resp.Success {
-		return int(resp.ExitCode), fmt.Errorf("process exited with error: %s")
+		return int(resp.ExitCode), fmt.Errorf("process exited with error: %s", resp.Text)
 	}
 
 	return int(resp.ExitCode), nil

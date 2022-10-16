@@ -79,7 +79,7 @@ func (t *linuxProcessTracker) Add(info ProcessInfo) error {
 
 	proc := cgroups.Process{Subsystem: defaultSubsystem, Pid: info.PID}
 	if err := t.cgroup.Add(proc); err != nil {
-		return fmt.Errorf("failed to add process with pid '%d' to cgroup: %w", err)
+		return fmt.Errorf("failed to add process with pid '%d' to cgroup: %w", info.PID, err)
 	}
 	return nil
 }
