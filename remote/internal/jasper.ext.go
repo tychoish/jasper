@@ -3,13 +3,13 @@ package internal
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"syscall"
 	"time"
 
 	"github.com/golang/protobuf/ptypes"
-	"github.com/pkg/errors"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/grip/send"
@@ -808,14 +808,14 @@ func (r *ScriptingHarnessTestResponse) Export() ([]scripting.TestResult, error) 
 		if res.StartAt != nil {
 			startAt, err = ptypes.Timestamp(res.StartAt)
 			if err != nil {
-				return nil, errors.Wrapf(err, "could not convert start time from equivalent protobuf RPC time for script '%s'", res.Name)
+				return nil, fmt.Errorf("could not convert start time from equivalent protobuf RPC time for script '%s': %w", res.Name, err)
 			}
 		}
 		var duration time.Duration
 		if res.Duration != nil {
 			duration, err = ptypes.Duration(res.Duration)
 			if err != nil {
-				return nil, errors.Wrapf(err, "could not convert script duration from equivalent protobuf RPC duration for script '%s'", res.Name)
+				return nil, fmt.Errorf("could not convert script duration from equivalent protobuf RPC duration for script '%s': %w", res.Name, err)
 			}
 		}
 
@@ -836,7 +836,7 @@ func (a *ScriptingHarnessTestArgs) Export() ([]scripting.TestOptions, error) {
 	for idx, opts := range a.Options {
 		timeout, err := ptypes.Duration(opts.Timeout)
 		if err != nil {
-			return nil, errors.Wrapf(err, "could not convert timeout from equivalent RPC protobuf duration for script '%s'", opts.Name)
+			return nil, fmt.Errorf("could not convert timeout from equivalent RPC protobuf duration for script '%s': %w", opts.Name, err)
 		}
 		out[idx] = scripting.TestOptions{
 			Name:    opts.Name,

@@ -8,7 +8,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/pkg/errors"
+	"errors"
+
 	"github.com/tychoish/emt"
 )
 

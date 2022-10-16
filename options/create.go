@@ -13,6 +13,7 @@ import (
 
 	"github.com/google/shlex"
 	"github.com/pkg/errors"
+
 	"github.com/tychoish/emt"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"

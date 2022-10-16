@@ -2,11 +2,10 @@ package executor
 
 import (
 	"context"
+	"errors"
 	"io"
 	"os/exec"
 	"syscall"
-
-	"github.com/pkg/errors"
 )
 
 // local runs processes on a local machine via exec.

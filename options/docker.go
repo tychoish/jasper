@@ -6,7 +6,7 @@ import (
 	"runtime"
 
 	"github.com/docker/docker/client"
-	"github.com/pkg/errors"
+
 	"github.com/tychoish/emt"
 )
 
@@ -63,7 +63,7 @@ func (opts *Docker) Resolve() (*client.Client, error) {
 	if opts.Host != "" && opts.Port > 0 {
 		addr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", opts.Host, opts.Port))
 		if err != nil {
-			return nil, errors.Wrapf(err, "could not resolve Docker daemon address %s:%d", opts.Host, opts.Port)
+			return nil, fmt.Errorf("could not resolve Docker daemon address %s:%d: %w", opts.Host, opts.Port, err)
 		}
 		clientOpts = append(clientOpts, client.WithHost(addr.String()))
 	}

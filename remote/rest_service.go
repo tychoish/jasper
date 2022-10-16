@@ -11,7 +11,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/gimlet"
 	"github.com/tychoish/grip/x/metrics"
 	"github.com/tychoish/jasper"
@@ -218,7 +217,7 @@ func (s *Service) getProcess(rw http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusNotFound,
-			Message:    errors.Wrapf(err, "no process '%s' found", id).Error(),
+			Message:    fmt.Sprintf("no process '%s' found: %q", id, err.Error()),
 		})
 		return
 	}
@@ -234,7 +233,7 @@ func (s *Service) processMetrics(rw http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusNotFound,
-			Message:    errors.Wrapf(err, "no process '%s' found", id).Error(),
+			Message:    fmt.Sprintf("no process '%s' found: %q", id, err),
 		})
 		return
 	}
@@ -250,7 +249,7 @@ func (s *Service) getProcessTags(rw http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusNotFound,
-			Message:    errors.Wrapf(err, "no process '%s' found", id).Error(),
+			Message:    fmt.Sprintf("no process '%s' found: %q", id, err.Error()),
 		})
 		return
 	}
@@ -265,7 +264,7 @@ func (s *Service) deleteProcessTags(rw http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusNotFound,
-			Message:    errors.Wrapf(err, "no process '%s' found", id).Error(),
+			Message:    fmt.Sprintf("no process '%s' found: %q", id, err.Error()),
 		})
 		return
 	}
@@ -281,7 +280,7 @@ func (s *Service) addProcessTag(rw http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusNotFound,
-			Message:    errors.Wrapf(err, "no process '%s' found", id).Error(),
+			Message:    fmt.Sprintf("no process '%s' found: %q", id, err.Error()),
 		})
 		return
 	}
@@ -309,7 +308,7 @@ func (s *Service) waitForProcess(rw http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusNotFound,
-			Message:    errors.Wrapf(err, "no process '%s' found", id).Error(),
+			Message:    fmt.Sprintf("no process '%s' found: %q", id, err.Error()),
 		})
 		return
 	}
@@ -334,7 +333,7 @@ func (s *Service) respawnProcess(rw http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusNotFound,
-			Message:    errors.Wrapf(err, "no process '%s' found", id).Error(),
+			Message:    fmt.Sprintf("no process '%s' found: %q", id, err.Error()),
 		})
 		return
 	}
@@ -354,8 +353,7 @@ func (s *Service) respawnProcess(rw http.ResponseWriter, r *http.Request) {
 	if err := s.manager.Register(ctx, newProc); err != nil {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusInternalServerError,
-			Message: errors.Wrap(
-				err, "failed to register respawned process").Error(),
+			Message:    fmt.Sprintf("failed to register respawned process: %q", err.Error()),
 		})
 		cancel()
 		return
@@ -369,8 +367,7 @@ func (s *Service) respawnProcess(rw http.ResponseWriter, r *http.Request) {
 		if !newProcInfo.Complete {
 			writeError(rw, gimlet.ErrorResponse{
 				StatusCode: http.StatusInternalServerError,
-				Message: errors.Wrap(
-					err, "failed to register trigger on respawned process").Error(),
+				Message:    fmt.Sprintf("failed to register trigger on respawned process: %q", err.Error()),
 			})
 			return
 		}
@@ -387,7 +384,7 @@ func (s *Service) signalProcess(rw http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Message:    errors.Wrapf(err, "problem converting signal '%s'", vars["signal"]).Error(),
+			Message:    fmt.Sprintf("problem converting signal '%s': %q", vars["signal"], err.Error()),
 		})
 		return
 	}
@@ -397,7 +394,7 @@ func (s *Service) signalProcess(rw http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusNotFound,
-			Message:    errors.Wrapf(err, "no process '%s' found", id).Error(),
+			Message:    fmt.Sprintf("no process '%s' found: %q", id, err.Error()),
 		})
 		return
 	}
@@ -434,7 +431,7 @@ func (s *Service) downloadFile(rw http.ResponseWriter, r *http.Request) {
 	if err := opts.Download(r.Context()); err != nil {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusInternalServerError,
-			Message:    errors.Wrapf(err, "problem occurred during file download for URL %s", opts.URL).Error(),
+			Message:    fmt.Sprintf("problem occurred during file download for URL %s: %q", opts.URL, err.Error()),
 		})
 		return
 	}
@@ -449,7 +446,7 @@ func (s *Service) getLogStream(rw http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Message:    errors.Wrapf(err, "problem converting count '%s'", vars["count"]).Error(),
+			Message:    fmt.Sprintf("problem converting count '%s': %q", vars["count"], err.Error()),
 		})
 		return
 	}
@@ -460,7 +457,7 @@ func (s *Service) getLogStream(rw http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusNotFound,
-			Message:    errors.Wrapf(err, "no process '%s' found", id).Error(),
+			Message:    fmt.Sprintf("no process '%s' found: %q", id, err.Error()),
 		})
 		return
 	}
@@ -473,7 +470,7 @@ func (s *Service) getLogStream(rw http.ResponseWriter, r *http.Request) {
 	} else if err != nil {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusInternalServerError,
-			Message:    errors.Wrapf(err, "could not get logs for process '%s'", id).Error(),
+			Message:    fmt.Sprintf("could not get logs for process '%s': %q", id, err.Error()),
 		})
 		return
 	}
@@ -489,7 +486,7 @@ func (s *Service) signalEvent(rw http.ResponseWriter, r *http.Request) {
 	if err := jasper.SignalEvent(ctx, name); err != nil {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusInternalServerError,
-			Message:    errors.Wrapf(err, "problem signaling event named '%s'", name).Error(),
+			Message:    fmt.Sprintf("problem signaling event named '%s': %q", name, err.Error()),
 		})
 		return
 	}
@@ -518,7 +515,7 @@ func (s *Service) writeFile(rw http.ResponseWriter, r *http.Request) {
 	if err := opts.DoWrite(); err != nil {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusInternalServerError,
-			Message:    errors.Wrapf(err, "problem occurred during file write to %s", opts.Path).Error(),
+			Message:    fmt.Sprintf("problem occurred during file write to %s: %q", opts.Path, err.Error()),
 		})
 		return
 	}
@@ -526,7 +523,7 @@ func (s *Service) writeFile(rw http.ResponseWriter, r *http.Request) {
 	if err := opts.SetPerm(); err != nil {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusInternalServerError,
-			Message:    errors.Wrapf(err, "problem occurred while setting permissions on file %s", opts.Path).Error(),
+			Message:    fmt.Sprintf("problem occurred while setting permissions on file %s: %q", opts.Path, err.Error()),
 		})
 		return
 	}
@@ -561,7 +558,7 @@ func (s *Service) registerSignalTriggerID(rw http.ResponseWriter, r *http.Reques
 	if err != nil {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Message:    errors.Wrapf(err, "no process '%s' found", id).Error(),
+			Message:    fmt.Sprintf("no process '%s' found: %q", id, err.Error()),
 		})
 		return
 	}
@@ -579,7 +576,7 @@ func (s *Service) registerSignalTriggerID(rw http.ResponseWriter, r *http.Reques
 	if err := proc.RegisterSignalTrigger(ctx, makeTrigger()); err != nil {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusInternalServerError,
-			Message:    errors.Wrapf(err, "problem registering signal trigger with id '%s'", sigTriggerID).Error(),
+			Message:    fmt.Sprintf("problem registering signal trigger with id '%s': %q", sigTriggerID, err.Error()),
 		})
 		return
 	}
@@ -627,7 +624,7 @@ func (s *Service) loggingCachePrune(rw http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusBadRequest,
-			Message:    errors.Wrapf(err, "problem parsing timestamp").Error(),
+			Message:    fmt.Sprintf("problem parsing timestamp: %q", err.Error()),
 		})
 		return
 	}
@@ -655,7 +652,7 @@ func (s *Service) loggingSendMessages(rw http.ResponseWriter, r *http.Request) {
 	if err := gimlet.GetJSON(r.Body, payload); err != nil {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusNotFound,
-			Message:    errors.Wrapf(err, "problem parsing payload for %s", id).Error(),
+			Message:    fmt.Sprintf("problem parsing payload for %s: %q", id, err.Error()),
 		})
 		return
 	}

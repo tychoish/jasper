@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/emt"
 )
 
@@ -34,10 +33,12 @@ func writeFile(reader io.Reader, path string) error {
 
 	catcher := emt.NewBasicCatcher()
 	if _, err := io.Copy(file, reader); err != nil {
-		catcher.Add(fmt.Errorf("problem writing file: %w", err))
+		catcher.Errorf("problem writing file: %w", err)
 	}
 
-	catcher.Add(errors.Wrap(file.Close(), "problem closing file"))
+	if err := file.Close(); err != nil {
+		catcher.Errorf("problem closing %q: %w", path, err)
+	}
 
 	return catcher.Resolve()
 }

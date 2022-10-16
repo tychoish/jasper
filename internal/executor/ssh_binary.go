@@ -2,13 +2,12 @@ package executor
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os/exec"
 	"strings"
 	"syscall"
-
-	"github.com/pkg/errors"
 )
 
 // execSSHBinary runs remote processes using the SSH binary.

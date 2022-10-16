@@ -5,9 +5,7 @@ go 1.18
 require (
 	github.com/cheynewallace/tabby v1.1.0
 	github.com/containerd/cgroups v1.0.3
-	github.com/containerd/containerd v1.6.3 // indirect
 	github.com/docker/docker v17.12.0-ce-rc1.0.20200309214505-aa6a9891b09c+incompatible
-	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/evergreen-ci/service v1.0.1-0.20200225230430-d9382e39d768
 	github.com/golang/protobuf v1.5.2
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
@@ -33,12 +31,14 @@ require (
 	github.com/Azure/go-ansiterm v0.0.0-20170929234023-d6e3b3328b78 // indirect
 	github.com/Microsoft/go-winio v0.5.1 // indirect
 	github.com/VividCortex/ewma v1.1.1 // indirect
+	github.com/containerd/containerd v1.6.3 // indirect
 	github.com/coreos/go-systemd/v22 v22.3.2 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/docker/distribution v2.7.1+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
+	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/fuyufjh/splunk-hec-go v0.4.0 // indirect
 	github.com/go-chi/chi v4.1.2+incompatible // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect

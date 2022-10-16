@@ -4,9 +4,12 @@ import (
 	"context"
 	"fmt"
 
+	"errors"
+
 	"github.com/evergreen-ci/service"
-	"github.com/pkg/errors"
+
 	"github.com/tychoish/grip"
+	"github.com/tychoish/grip/message"
 	"github.com/tychoish/grip/recovery"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
@@ -100,7 +103,7 @@ func (d *restDaemon) Start(s service.Service) error {
 
 	go func(ctx context.Context, d *restDaemon) {
 		defer recovery.LogStackTraceAndContinue("rest service")
-		grip.Error(errors.Wrap(d.run(ctx), "error running REST service"))
+		grip.Error(message.WrapError(d.run(ctx), "error running REST service"))
 	}(ctx, d)
 
 	return nil
@@ -112,7 +115,10 @@ func (d *restDaemon) Stop(s service.Service) error {
 }
 
 func (d *restDaemon) run(ctx context.Context) error {
-	return errors.Wrap(runServices(ctx, d.newService), "error running REST service")
+	if err := runServices(ctx, d.newService); err != nil {
+		return fmt.Errorf("error running REST service: %w", err)
+	}
+	return nil
 }
 
 func (d *restDaemon) newService(ctx context.Context) (util.CloseFunc, error) {
@@ -138,7 +144,7 @@ func newRESTService(ctx context.Context, host string, port int, manager jasper.M
 
 	go func() {
 		defer recovery.LogStackTraceAndContinue("rest service")
-		grip.Warning(errors.Wrap(app.Run(ctx), "error running REST app"))
+		grip.Warning(message.WrapError(app.Run(ctx), "error running REST app"))
 	}()
 
 	return func() error { return nil }, nil

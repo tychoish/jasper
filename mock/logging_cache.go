@@ -2,9 +2,11 @@ package mock
 
 import (
 	"context"
+	"fmt"
 	"time"
 
-	"github.com/pkg/errors"
+	"errors"
+
 	"github.com/tychoish/emt"
 	"github.com/tychoish/jasper/options"
 )
@@ -74,7 +76,7 @@ func (c *LoggingCache) CloseAndRemove(_ context.Context, id string) error {
 		delete(c.Cache, id)
 	}
 
-	return errors.Wrapf(err, "problem closing logger with id %s", id)
+	return fmt.Errorf("problem closing logger with id %s: %w", id, err)
 }
 
 // Clear closes and removes all objects in the in-memory logging cache.

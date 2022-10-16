@@ -9,6 +9,7 @@ import (
 
 	empty "github.com/golang/protobuf/ptypes/empty"
 	"github.com/pkg/errors"
+
 	"github.com/tychoish/emt"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"

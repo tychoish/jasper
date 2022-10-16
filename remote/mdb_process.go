@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"syscall"
 
-	"github.com/pkg/errors"
+	"errors"
+
 	"github.com/tychoish/birch"
 	"github.com/tychoish/birch/mrpc/mongowire"
 	"github.com/tychoish/birch/mrpc/shell"
@@ -180,7 +181,10 @@ func (p *mdbProcess) Signal(ctx context.Context, sig syscall.Signal) error {
 		return fmt.Errorf("problem reading response: %w", err)
 	}
 
-	return errors.Wrap(resp.SuccessOrError(), "error in response")
+	if err := resp.SuccessOrError(); err != nil {
+		return fmt.Errorf("response: %w", err)
+	}
+	return nil
 }
 
 func (p *mdbProcess) Wait(ctx context.Context) (int, error) {
@@ -203,7 +207,11 @@ func (p *mdbProcess) Wait(ctx context.Context) (int, error) {
 		return -1, fmt.Errorf("problem reading response: %w", err)
 	}
 
-	return resp.ExitCode, errors.Wrap(resp.SuccessOrError(), "error in response")
+	if err := resp.SuccessOrError(); err != nil {
+		return resp.ExitCode, fmt.Errorf("response: %w", err)
+	}
+
+	return resp.ExitCode, nil
 }
 
 func (p *mdbProcess) Respawn(ctx context.Context) (jasper.Process, error) {
@@ -259,7 +267,11 @@ func (p *mdbProcess) RegisterSignalTriggerID(ctx context.Context, sigID jasper.S
 		return fmt.Errorf("problem reading response: %w", err)
 	}
 
-	return errors.Wrap(resp.SuccessOrError(), "error in response")
+	if err := resp.SuccessOrError(); err != nil {
+		return fmt.Errorf("response: %w", err)
+	}
+
+	return nil
 }
 
 func (p *mdbProcess) Tag(tag string) {

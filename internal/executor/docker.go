@@ -2,6 +2,7 @@ package executor
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -15,7 +16,7 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/google/uuid"
-	"github.com/pkg/errors"
+
 	"github.com/tychoish/emt"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
@@ -200,7 +201,9 @@ func (e *docker) runIOStream(stream types.HijackedResponse) {
 			defer wg.Done()
 			_, err := io.Copy(stream.Conn, e.stdin)
 			grip.Error(fmt.Errorf("problem streaming input to process: %w", err))
-			grip.Error(errors.Wrap(stream.CloseWrite(), "problem closing process input stream"))
+			if err := stream.CloseWrite(); err != nil {
+				grip.Error(message.WrapError(err, "problem closing process input stream"))
+			}
 		}()
 	}
 
@@ -299,7 +302,7 @@ func (e *docker) Signal(sig syscall.Signal) error {
 
 	dsig, err := syscallToDockerSignal(sig, e.platform)
 	if err != nil {
-		return errors.Wrapf(err, "could not get Docker equivalent of signal '%d'", sig)
+		return fmt.Errorf("could not get Docker equivalent of signal '%d': %w", sig, err)
 	}
 	if err := e.client.ContainerKill(e.ctx, e.getContainerID(), dsig); err != nil {
 		return fmt.Errorf("could not signal process within container: %w", err)

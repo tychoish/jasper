@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/pkg/errors"
+	"errors"
+
 	"github.com/tychoish/emt"
 )
 

@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/mholt/archiver"
-	"github.com/pkg/errors"
+
 	"github.com/tychoish/emt"
 )
 
@@ -50,7 +50,7 @@ func (opts Download) Download(ctx context.Context) error {
 
 	resp, err := opts.HTTPClient.Do(req)
 	if err != nil {
-		return errors.Wrapf(err, "problem downloading file for url %s", opts.URL)
+		return fmt.Errorf("problem downloading file for url %q: %w", opts.URL, err)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
@@ -63,7 +63,7 @@ func (opts Download) Download(ctx context.Context) error {
 
 	if opts.ArchiveOpts.ShouldExtract {
 		if err = opts.Extract(); err != nil {
-			return errors.Wrapf(err, "problem extracting file %s to path %s", opts.Path, opts.ArchiveOpts.TargetPath)
+			return fmt.Errorf("problem extracting file %q to path %q: %w", opts.Path, opts.ArchiveOpts.TargetPath, err)
 		}
 	}
 
@@ -94,7 +94,7 @@ func (opts Download) Extract() error {
 	}
 
 	if err := archiveHandler.Unarchive(opts.Path, opts.ArchiveOpts.TargetPath); err != nil {
-		return errors.Wrapf(err, "problem extracting archive %s to %s", opts.Path, opts.ArchiveOpts.TargetPath)
+		return fmt.Errorf("problem extracting archive %q to %q: %w", opts.Path, opts.ArchiveOpts.TargetPath, err)
 	}
 
 	return nil

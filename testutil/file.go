@@ -1,13 +1,14 @@
 package testutil
 
 import (
+	"errors"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
 
 	"github.com/mholt/archiver"
-	"github.com/pkg/errors"
+
 	"github.com/tychoish/emt"
 )
 

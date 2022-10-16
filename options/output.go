@@ -1,11 +1,11 @@
 package options
 
 import (
+	"errors"
 	"io"
 	"io/ioutil"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/emt"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/send"

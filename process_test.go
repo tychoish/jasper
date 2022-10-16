@@ -11,9 +11,11 @@ import (
 	"testing"
 	"time"
 
+	"errors"
+
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
-	"github.com/pkg/errors"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tychoish/grip"

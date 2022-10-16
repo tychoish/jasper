@@ -2,6 +2,7 @@ package options
 
 import (
 	"crypto/sha1"
+	"errors"
 	"fmt"
 	"io"
 	"path/filepath"
@@ -9,7 +10,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/pkg/errors"
 )
 
 // ScriptingGolang describes a Go environment for building and running

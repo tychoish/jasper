@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/pkg/errors"
+	"errors"
+
 	"github.com/tychoish/emt"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/send"
@@ -85,7 +86,7 @@ func (f RawLoggerConfigFormat) Unmarshal(data []byte, out interface{}) error {
 	}
 
 	if err := unmarshaler(data, out); err != nil {
-		return errors.Wrapf(err, "could not render '%s' [%s] input into '%s'", f, data, out)
+		return fmt.Errorf("could not render '%s' [%s] input into '%s': %w", f, data, out, err)
 	}
 
 	return nil

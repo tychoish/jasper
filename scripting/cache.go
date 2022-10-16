@@ -1,10 +1,10 @@
 package scripting
 
 import (
+	"errors"
 	"fmt"
 	"sync"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 )

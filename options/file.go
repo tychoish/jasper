@@ -8,7 +8,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/pkg/errors"
+	"errors"
+
 	"github.com/tychoish/emt"
 )
 
@@ -67,7 +68,7 @@ func (opts *WriteFile) DoWrite() error {
 
 	file, err := os.OpenFile(opts.Path, openFlags, 0666)
 	if err != nil {
-		return errors.Wrapf(err, "error opening file %s", opts.Path)
+		return fmt.Errorf("error opening file %q: %w", opts.Path, err)
 	}
 
 	catcher := emt.NewBasicCatcher()
@@ -86,7 +87,10 @@ func (opts *WriteFile) DoWrite() error {
 		return catcher.Resolve()
 	}
 
-	return errors.Wrap(file.Close(), "error closing file")
+	if err := file.Close(); err != nil {
+		return fmt.Errorf("closing %q: %w", opts.Path, err)
+	}
+	return nil
 }
 
 // WriteBufferedContent writes the content to a file by repeatedly calling
@@ -108,8 +112,8 @@ func (opts *WriteFile) WriteBufferedContent(doWrite func(bufopts WriteFile) erro
 			bufOpts.Append = true
 		}
 
-		if writeErr := doWrite(bufOpts); err != nil {
-			return errors.Wrap(writeErr, "could not perform buffered write")
+		if writeErr := doWrite(bufOpts); writeErr != nil {
+			return fmt.Errorf("could not perform buffered write: %w", writeErr)
 		}
 
 		didWrite = true
@@ -123,14 +127,19 @@ func (opts *WriteFile) WriteBufferedContent(doWrite func(bufopts WriteFile) erro
 		return nil
 	}
 
-	return errors.Wrap(doWrite(*opts), "could not perform buffered write")
-
+	if err := doWrite(*opts); err != nil {
+		return fmt.Errorf("could not perform buffered writes: %w", err)
+	}
+	return nil
 }
 
 // SetPerm sets the file permissions on the file. This should be called after
 // DoWrite. If no file exists at (WriteFile).Path, it will error.
 func (opts *WriteFile) SetPerm() error {
-	return errors.Wrap(os.Chmod(opts.Path, opts.Perm), "error setting permissions")
+	if err := os.Chmod(opts.Path, opts.Perm); err != nil {
+		return fmt.Errorf("error setting permissions: %w", err)
+	}
+	return nil
 }
 
 // contentBytes returns the contents to be written to the file as a byte slice.
