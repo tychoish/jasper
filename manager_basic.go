@@ -2,12 +2,11 @@ package jasper
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/pkg/errors"
-
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/jasper/options"
@@ -97,7 +96,7 @@ func (m *basicProcessManager) CreateCommand(ctx context.Context) *Command {
 
 func (m *basicProcessManager) Register(ctx context.Context, proc Process) error {
 	if ctx.Err() != nil {
-		return errors.WithStack(ctx.Err())
+		return ctx.Err()
 	}
 
 	if proc == nil {
@@ -134,7 +133,7 @@ func (m *basicProcessManager) List(ctx context.Context, f options.Filter) ([]Pro
 
 	for _, proc := range m.procs {
 		if ctx.Err() != nil {
-			return nil, errors.WithStack(ctx.Err())
+			return nil, ctx.Err()
 		}
 
 		cctx, cancel := context.WithTimeout(ctx, 100*time.Millisecond)
@@ -189,7 +188,7 @@ func (m *basicProcessManager) Close(ctx context.Context) error {
 	}
 	procs, err := m.List(ctx, options.Running)
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	termCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
@@ -206,7 +205,7 @@ func (m *basicProcessManager) Close(ctx context.Context) error {
 		killCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 		defer cancel()
 
-		return errors.WithStack(KillAll(killCtx, procs))
+		return KillAll(killCtx, procs)
 	}
 
 	return nil
@@ -216,7 +215,7 @@ func (m *basicProcessManager) Group(ctx context.Context, name string) ([]Process
 	out := []Process{}
 	for _, proc := range m.procs {
 		if ctx.Err() != nil {
-			return nil, errors.WithStack(ctx.Err())
+			return nil, ctx.Err()
 		}
 
 	addTag:
@@ -236,5 +235,8 @@ func (m *basicProcessManager) WriteFile(ctx context.Context, opts options.WriteF
 		return fmt.Errorf("invalid write options: %w", err)
 	}
 
-	return errors.Wrapf(opts.DoWrite(), "error writing file '%s'", opts.Path)
+	if err := opts.DoWrite(); err != nil {
+		return fmt.Errorf("error writing file '%s': %w", opts.Path, err)
+	}
+	return nil
 }

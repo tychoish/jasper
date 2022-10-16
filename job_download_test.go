@@ -2,6 +2,7 @@ package jasper
 
 import (
 	"context"
+	"errors"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -9,8 +10,6 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/pkg/errors"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"

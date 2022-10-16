@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/emt"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
@@ -82,7 +81,7 @@ func (e *golangEnvironment) Build(ctx context.Context, dir string, args []string
 		Add(append([]string{e.opts.Interpreter(), "build"}, args...)).Run(ctx)
 
 	if err != nil {
-		return "", errors.WithStack(err)
+		return "", err
 	}
 
 	for idx, val := range args {
@@ -119,8 +118,10 @@ func (e *golangEnvironment) RunScript(ctx context.Context, script string) error 
 }
 
 func (e *golangEnvironment) Cleanup(ctx context.Context) error {
-	return errors.Wrapf(e.manager.CreateCommand(ctx).SetOutputOptions(e.opts.Output).Sudo(true).AppendArgs("rm", "-rf", e.opts.Gopath).Run(ctx),
-		"problem removing golang environment '%s'", e.opts.Gopath)
+	if err := e.manager.CreateCommand(ctx).SetOutputOptions(e.opts.Output).Sudo(true).AppendArgs("rm", "-rf", e.opts.Gopath).Run(ctx); err != nil {
+		return fmt.Errorf("problem removing golang environment '%s': %w", e.opts.Gopath, err)
+	}
+	return nil
 }
 
 func (e *golangEnvironment) Test(ctx context.Context, dir string, tests ...TestOptions) ([]TestResult, error) {

@@ -2,8 +2,8 @@ package cli
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/remote"
@@ -69,7 +69,7 @@ func managerCreateProcess() cli.Command {
 			return doPassthroughInputOutput(c, opts, func(ctx context.Context, client remote.Manager) interface{} {
 				proc, err := client.CreateProcess(ctx, opts)
 				if err != nil {
-					return &InfoResponse{OutcomeResponse: *makeOutcomeResponse(errors.Wrapf(err, "error creating process"))}
+					return &InfoResponse{OutcomeResponse: *makeOutcomeResponse(fmt.Errorf("error creating process: %w", err))}
 				}
 				return &InfoResponse{Info: proc.Info(ctx), OutcomeResponse: *makeOutcomeResponse(nil)}
 			})
@@ -87,12 +87,12 @@ func managerCreateScripting() cli.Command {
 			return doPassthroughInputOutput(c, opts, func(ctx context.Context, client remote.Manager) interface{} {
 				harnessOpts, err := opts.Export()
 				if err != nil {
-					return &IDResponse{OutcomeResponse: *makeOutcomeResponse(errors.Wrapf(err, "error creating scripting harness"))}
+					return &IDResponse{OutcomeResponse: *makeOutcomeResponse(fmt.Errorf("error creating scripting harness: %w", err))}
 				}
 
 				env, err := client.CreateScripting(ctx, harnessOpts)
 				if err != nil {
-					return &IDResponse{ID: harnessOpts.ID(), OutcomeResponse: *makeOutcomeResponse(errors.Wrapf(err, "error creating scripting harness"))}
+					return &IDResponse{ID: harnessOpts.ID(), OutcomeResponse: *makeOutcomeResponse(fmt.Errorf("error creating scripting harness, %w", err))}
 				}
 				return &IDResponse{ID: env.ID(), OutcomeResponse: *makeOutcomeResponse(nil)}
 			})
@@ -136,7 +136,7 @@ func managerGet() cli.Command {
 			return doPassthroughInputOutput(c, input, func(ctx context.Context, client remote.Manager) interface{} {
 				proc, err := client.Get(ctx, input.ID)
 				if err != nil {
-					return &InfoResponse{OutcomeResponse: *makeOutcomeResponse(errors.Wrapf(err, "error getting process with ID '%s'", input.ID))}
+					return &InfoResponse{OutcomeResponse: *makeOutcomeResponse(fmt.Errorf("error getting process with ID '%s': %w", input.ID, err))}
 				}
 				return &InfoResponse{Info: proc.Info(ctx), OutcomeResponse: *makeOutcomeResponse(nil)}
 			})
@@ -154,7 +154,7 @@ func managerList() cli.Command {
 			return doPassthroughInputOutput(c, input, func(ctx context.Context, client remote.Manager) interface{} {
 				procs, err := client.List(ctx, input.Filter)
 				if err != nil {
-					return &InfosResponse{OutcomeResponse: *makeOutcomeResponse(errors.Wrapf(err, "error listing processes with filter '%s'", input.Filter))}
+					return &InfosResponse{OutcomeResponse: *makeOutcomeResponse(fmt.Errorf("error listing processes with filter '%s': %w", input.Filter, err))}
 				}
 				infos := make([]jasper.ProcessInfo, 0, len(procs))
 				for _, proc := range procs {
@@ -176,7 +176,7 @@ func managerGroup() cli.Command {
 			return doPassthroughInputOutput(c, input, func(ctx context.Context, client remote.Manager) interface{} {
 				procs, err := client.Group(ctx, input.Tag)
 				if err != nil {
-					return &InfosResponse{OutcomeResponse: *makeOutcomeResponse(errors.Wrapf(err, "error grouping processes with tag '%s'", input.Tag))}
+					return &InfosResponse{OutcomeResponse: *makeOutcomeResponse(fmt.Errorf("error grouping processes with tag '%s': %w", input.Tag, err))}
 				}
 				infos := make([]jasper.ProcessInfo, 0, len(procs))
 				for _, proc := range procs {

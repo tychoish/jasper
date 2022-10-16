@@ -3,12 +3,12 @@ package options
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/birch"
 	"github.com/tychoish/emt"
 	"github.com/tychoish/grip/level"
@@ -98,12 +98,12 @@ func (cl *CachedLogger) Send(lp *LoggingPayload) error {
 
 	sender, err := cl.getSender(lp.PreferSendToError)
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	msg, err := lp.convert()
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	sender.Send(msg)
@@ -125,7 +125,7 @@ func (lp *LoggingPayload) convertMultiMessage(value interface{}) (message.Compos
 	case []byte:
 		payload, err := lp.splitByteSlice(data)
 		if err != nil {
-			return nil, errors.WithStack(err)
+			return nil, err
 		}
 		return lp.convertMultiMessage(payload)
 	case []string:
@@ -133,7 +133,7 @@ func (lp *LoggingPayload) convertMultiMessage(value interface{}) (message.Compos
 		for _, str := range data {
 			elem, err := lp.produceMessage([]byte(str))
 			if err != nil {
-				return nil, errors.WithStack(err)
+				return nil, err
 			}
 			batch = append(batch, elem)
 		}
@@ -143,7 +143,7 @@ func (lp *LoggingPayload) convertMultiMessage(value interface{}) (message.Compos
 		for _, dt := range data {
 			elem, err := lp.produceMessage(dt)
 			if err != nil {
-				return nil, errors.WithStack(err)
+				return nil, err
 			}
 			batch = append(batch, elem)
 		}
@@ -153,7 +153,7 @@ func (lp *LoggingPayload) convertMultiMessage(value interface{}) (message.Compos
 		for _, dt := range data {
 			elem, err := lp.convertMessage(dt)
 			if err != nil {
-				return nil, errors.WithStack(err)
+				return nil, err
 			}
 			batch = append(batch, elem)
 		}

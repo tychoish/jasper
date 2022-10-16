@@ -3,10 +3,10 @@ package cli
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/jasper/options"
 )
@@ -32,12 +32,12 @@ func (lc *sshLoggingCache) Create(id string, opts *options.Output) (*options.Cac
 		Output: *opts,
 	})
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	resp, err := ExtractCachedLoggerResponse(output)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	return &resp.Logger, nil

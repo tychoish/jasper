@@ -2,6 +2,7 @@ package cli
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -9,8 +10,6 @@ import (
 
 	"github.com/cheynewallace/tabby"
 	"github.com/google/uuid"
-	"github.com/pkg/errors"
-
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/grip/recovery"
@@ -79,13 +78,13 @@ func RunCMD() cli.Command { //nolint: gocognit
 					if c.NArg() == 0 {
 						return errors.New("must specify at least one command")
 					}
-					return errors.Wrap(c.Set(commandFlagName, strings.Join(c.Args(), " ")), "problem setting command")
+					return c.Set(commandFlagName, strings.Join(c.Args(), " "))
 				}
 				return nil
 			},
 			func(c *cli.Context) error {
 				if c.String(idFlagName) == "" {
-					return errors.Wrap(c.Set(idFlagName, defaultID.String()), "problem setting ID")
+					return c.Set(idFlagName, defaultID.String())
 				}
 				return nil
 			}),
@@ -248,9 +247,9 @@ func ListCMD() cli.Command {
 				filter := options.Filter(c.String(filterFlagName))
 				if filter == "" {
 					filter = options.All
-					return errors.Wrap(c.Set(filterFlagName, string(filter)), "problem setting default filter")
+					return c.Set(filterFlagName, string(filter))
 				}
-				return errors.Wrapf(filter.Validate(), "invalid filter '%s'", filter)
+				return fmt.Errorf("invalid filter '%s': %w", filter, filter.Validate())
 			}),
 		Action: func(c *cli.Context) error {
 			filter := options.Filter(c.String(filterFlagName))
@@ -315,7 +314,7 @@ func KillCMD() cli.Command {
 					if c.NArg() != 1 {
 						return errors.New("must specify a process ID")
 					}
-					return errors.Wrap(c.Set(idFlagName, c.Args().First()), "problem setting id from positional flags")
+					return c.Set(idFlagName, c.Args().First())
 				}
 				return nil
 			}),
@@ -328,13 +327,13 @@ func KillCMD() cli.Command {
 			return withConnection(ctx, c, func(client remote.Manager) error {
 				proc, err := client.Get(ctx, procID)
 				if err != nil {
-					return errors.WithStack(err)
+					return err
 				}
 
 				if sendKill {
-					return errors.WithStack(jasper.Kill(ctx, proc))
+					return jasper.Kill(ctx, proc)
 				}
-				return errors.WithStack(jasper.Terminate(ctx, proc))
+				return jasper.Terminate(ctx, proc)
 			})
 		},
 	}
@@ -397,13 +396,13 @@ func KillAllCMD() cli.Command {
 			return withConnection(ctx, c, func(client remote.Manager) error {
 				procs, err := client.Group(ctx, group)
 				if err != nil {
-					return errors.WithStack(err)
+					return err
 				}
 
 				if sendKill {
-					return errors.WithStack(jasper.KillAll(ctx, procs))
+					return jasper.KillAll(ctx, procs)
 				}
-				return errors.WithStack(jasper.TerminateAll(ctx, procs))
+				return jasper.TerminateAll(ctx, procs)
 			})
 		},
 	}
@@ -441,7 +440,7 @@ func DownloadCMD() cli.Command {
 					if c.NArg() != 1 {
 						return errors.New("must specify a URL")
 					}
-					return errors.Wrap(c.Set(urlFlagName, c.Args().First()), "problem setting URL from positional flags")
+					return c.Set(urlFlagName, c.Args().First())
 				}
 				return nil
 			}),
@@ -463,7 +462,7 @@ func DownloadCMD() cli.Command {
 			defer cancel()
 
 			return withConnection(ctx, c, func(client remote.Manager) error {
-				return errors.WithStack(client.DownloadFile(ctx, opts))
+				return client.DownloadFile(ctx, opts)
 			})
 		},
 	}

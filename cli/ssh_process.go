@@ -2,9 +2,9 @@ package cli
 
 import (
 	"context"
+	"errors"
 	"syscall"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/jasper"
 )
 
@@ -96,11 +96,11 @@ func (p *sshProcess) Complete(ctx context.Context) bool {
 func (p *sshProcess) Signal(ctx context.Context, sig syscall.Signal) error {
 	output, err := p.runCommand(ctx, SignalCommand, &SignalInput{ID: p.info.ID, Signal: int(sig)})
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	if _, err = ExtractOutcomeResponse(output); err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	return nil
@@ -109,12 +109,12 @@ func (p *sshProcess) Signal(ctx context.Context, sig syscall.Signal) error {
 func (p *sshProcess) Wait(ctx context.Context) (int, error) {
 	output, err := p.runCommand(ctx, WaitCommand, &IDInput{ID: p.info.ID})
 	if err != nil {
-		return -1, errors.WithStack(err)
+		return -1, err
 	}
 
 	resp, err := ExtractWaitResponse(output)
 	if err != nil {
-		return resp.ExitCode, errors.WithStack(err)
+		return resp.ExitCode, err
 	}
 
 	if resp.Error != "" {
@@ -127,12 +127,12 @@ func (p *sshProcess) Wait(ctx context.Context) (int, error) {
 func (p *sshProcess) Respawn(ctx context.Context) (jasper.Process, error) {
 	output, err := p.runCommand(ctx, RespawnCommand, &IDInput{ID: p.info.ID})
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	resp, err := ExtractInfoResponse(output)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	return newSSHProcess(p.runClientCommand, resp.Info)
@@ -152,11 +152,11 @@ func (p *sshProcess) RegisterSignalTriggerID(ctx context.Context, sigID jasper.S
 		SignalTriggerID: sigID,
 	})
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	if _, err = ExtractOutcomeResponse(output); err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	return nil

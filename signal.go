@@ -4,7 +4,6 @@ import (
 	"context"
 	"syscall"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/emt"
 )
 
@@ -12,14 +11,14 @@ import (
 // context. This does not guarantee that the process will actually die. This
 // function does not Wait() on the given process upon sending the signal.
 func Terminate(ctx context.Context, p Process) error {
-	return errors.WithStack(p.Signal(ctx, syscall.SIGTERM))
+	return p.Signal(ctx, syscall.SIGTERM)
 }
 
 // Kill sends a SIGKILL signal to the given process under the given context.
 // This guarantees that the process will die. This function does not Wait() on
 // the given process upon sending the signal.
 func Kill(ctx context.Context, p Process) error {
-	return errors.WithStack(p.Signal(ctx, syscall.SIGKILL))
+	return p.Signal(ctx, syscall.SIGKILL)
 }
 
 // TerminateAll sends a SIGTERM signal to each of the given processes under the

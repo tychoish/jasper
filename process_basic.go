@@ -2,6 +2,7 @@ package jasper
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"runtime"
@@ -10,8 +11,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/pkg/errors"
-
 	"github.com/tychoish/emt"
 	"github.com/tychoish/jasper/internal/executor"
 	"github.com/tychoish/jasper/options"
@@ -51,18 +50,20 @@ func newBasicProcess(ctx context.Context, opts *options.Create) (Process, error)
 
 	if err = p.RegisterTrigger(ctx, makeOptionsCloseTrigger()); err != nil {
 		catcher := emt.NewBasicCatcher()
+		catcher.New("problem registering options close trigger")
 		catcher.Add(err)
 		catcher.Add(opts.Close())
 		catcher.Add(exec.Close())
-		return nil, errors.Wrap(catcher.Resolve(), "problem registering options close trigger")
+		return nil, catcher.Resolve()
 	}
 
 	if err = exec.Start(); err != nil {
 		catcher := emt.NewBasicCatcher()
+		catcher.New("problem starting process execution")
 		catcher.Add(err)
 		catcher.Add(opts.Close())
 		catcher.Add(exec.Close())
-		return nil, errors.Wrap(catcher.Resolve(), "problem starting process execution")
+		return nil, catcher.Resolve()
 	}
 
 	p.info.StartAt = time.Now()
@@ -148,7 +149,9 @@ func (p *basicProcess) Signal(_ context.Context, sig syscall.Signal) error {
 
 	if skipSignal := p.signalTriggers.Run(p.info, sig); !skipSignal {
 		sig = makeCompatible(sig)
-		return errors.Wrapf(p.exec.Signal(sig), "problem sending signal '%s' to '%s'", sig, p.id)
+		if err := p.exec.Signal(sig); err != nil {
+			return fmt.Errorf("problem sending signal '%s' to '%s': %w", sig, p.id, err)
+		}
 	}
 	return nil
 }
@@ -217,7 +220,7 @@ func (p *basicProcess) RegisterSignalTriggerID(ctx context.Context, id SignalTri
 	if !ok {
 		return fmt.Errorf("could not find signal trigger with id '%s'", id)
 	}
-	return errors.Wrap(p.RegisterSignalTrigger(ctx, makeTrigger()), "failed to register signal trigger")
+	return p.RegisterSignalTrigger(ctx, makeTrigger())
 }
 
 func (p *basicProcess) Tag(t string) {

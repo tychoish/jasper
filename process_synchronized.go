@@ -4,8 +4,6 @@ import (
 	"context"
 	"sync"
 	"syscall"
-
-	"github.com/pkg/errors"
 )
 
 type synchronizedProcess struct {
@@ -45,7 +43,7 @@ func (p *synchronizedProcess) Signal(ctx context.Context, sig syscall.Signal) er
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 
-	return errors.WithStack(p.proc.Signal(ctx, sig))
+	return p.proc.Signal(ctx, sig)
 }
 
 func (p *synchronizedProcess) Tag(t string) {
@@ -73,21 +71,21 @@ func (p *synchronizedProcess) RegisterTrigger(ctx context.Context, trigger Proce
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 
-	return errors.WithStack(p.proc.RegisterTrigger(ctx, trigger))
+	return p.proc.RegisterTrigger(ctx, trigger)
 }
 
 func (p *synchronizedProcess) RegisterSignalTrigger(ctx context.Context, trigger SignalTrigger) error {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 
-	return errors.WithStack(p.proc.RegisterSignalTrigger(ctx, trigger))
+	return p.proc.RegisterSignalTrigger(ctx, trigger)
 }
 
 func (p *synchronizedProcess) RegisterSignalTriggerID(ctx context.Context, trigger SignalTriggerID) error {
 	p.mutex.Lock()
 	defer p.mutex.Unlock()
 
-	return errors.WithStack(p.proc.RegisterSignalTriggerID(ctx, trigger))
+	return p.proc.RegisterSignalTriggerID(ctx, trigger)
 }
 
 func (p *synchronizedProcess) Wait(ctx context.Context) (int, error) {
@@ -95,7 +93,7 @@ func (p *synchronizedProcess) Wait(ctx context.Context) (int, error) {
 	defer p.mutex.Unlock()
 
 	exitCode, err := p.proc.Wait(ctx)
-	return exitCode, errors.WithStack(err)
+	return exitCode, err
 }
 
 func (p *synchronizedProcess) Respawn(ctx context.Context) (Process, error) {
@@ -103,5 +101,5 @@ func (p *synchronizedProcess) Respawn(ctx context.Context) (Process, error) {
 	defer p.mutex.Unlock()
 
 	newProc, err := p.proc.Respawn(ctx)
-	return newProc, errors.WithStack(err)
+	return newProc, err
 }

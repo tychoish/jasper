@@ -2,10 +2,10 @@ package cli
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/emt"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
@@ -51,7 +51,7 @@ func (resp OutcomeResponse) ErrorMessage() string {
 func ExtractOutcomeResponse(input []byte) (OutcomeResponse, error) {
 	resp := OutcomeResponse{}
 	if err := json.Unmarshal(input, &resp); err != nil {
-		return resp, errors.Wrap(err, unmarshalFailed)
+		return resp, fmt.Errorf("%s: %w", unmarshalFailed, err)
 	}
 	return resp, resp.successOrError()
 }
@@ -82,7 +82,8 @@ type InfoResponse struct {
 func ExtractInfoResponse(input []byte) (InfoResponse, error) {
 	resp := InfoResponse{}
 	if err := json.Unmarshal(input, &resp); err != nil {
-		return resp, errors.Wrap(err, unmarshalFailed)
+		return resp, fmt.Errorf("%s: %w", unmarshalFailed, err)
+
 	}
 	return resp, resp.successOrError()
 }
@@ -99,7 +100,8 @@ type InfosResponse struct {
 func ExtractInfosResponse(input []byte) (InfosResponse, error) {
 	resp := InfosResponse{}
 	if err := json.Unmarshal(input, &resp); err != nil {
-		return resp, errors.Wrap(err, unmarshalFailed)
+		return resp, fmt.Errorf("%s: %w", unmarshalFailed, err)
+
 	}
 	return resp, resp.successOrError()
 }
@@ -116,7 +118,8 @@ type TagsResponse struct {
 func ExtractTagsResponse(input []byte) (TagsResponse, error) {
 	resp := TagsResponse{}
 	if err := json.Unmarshal(input, &resp); err != nil {
-		return resp, errors.Wrap(err, unmarshalFailed)
+		return resp, fmt.Errorf("%s: %w", unmarshalFailed, err)
+
 	}
 	return resp, resp.successOrError()
 }
@@ -133,7 +136,8 @@ type RunningResponse struct {
 func ExtractRunningResponse(input []byte) (RunningResponse, error) {
 	resp := RunningResponse{}
 	if err := json.Unmarshal(input, &resp); err != nil {
-		return resp, errors.Wrap(err, unmarshalFailed)
+		return resp, fmt.Errorf("%s: %w", unmarshalFailed, err)
+
 	}
 	return resp, resp.successOrError()
 }
@@ -150,7 +154,8 @@ type CompleteResponse struct {
 func ExtractCompleteResponse(input []byte) (CompleteResponse, error) {
 	resp := CompleteResponse{}
 	if err := json.Unmarshal(input, &resp); err != nil {
-		return resp, errors.Wrap(err, unmarshalFailed)
+		return resp, fmt.Errorf("%s: %w", unmarshalFailed, err)
+
 	}
 	return resp, resp.successOrError()
 }
@@ -168,7 +173,8 @@ type WaitResponse struct {
 func ExtractWaitResponse(input []byte) (WaitResponse, error) {
 	resp := WaitResponse{}
 	if err := json.Unmarshal(input, &resp); err != nil {
-		return resp, errors.Wrap(err, unmarshalFailed)
+		return resp, fmt.Errorf("%s: %w", unmarshalFailed, err)
+
 	}
 	if err := resp.successOrError(); err != nil {
 		resp.ExitCode = -1
@@ -189,7 +195,8 @@ type ServiceStatusResponse struct {
 func ExtractServiceStatusResponse(input []byte) (ServiceStatusResponse, error) {
 	resp := ServiceStatusResponse{}
 	if err := json.Unmarshal(input, &resp); err != nil {
-		return resp, errors.Wrap(err, unmarshalFailed)
+		return resp, fmt.Errorf("%s: %w", unmarshalFailed, err)
+
 	}
 	return resp, resp.successOrError()
 }
@@ -206,7 +213,8 @@ type LogStreamResponse struct {
 func ExtractLogStreamResponse(input []byte) (LogStreamResponse, error) {
 	resp := LogStreamResponse{}
 	if err := json.Unmarshal(input, &resp); err != nil {
-		return resp, errors.Wrap(err, unmarshalFailed)
+		return resp, fmt.Errorf("%s: %w", unmarshalFailed, err)
+
 	}
 	return resp, resp.successOrError()
 }
@@ -223,7 +231,8 @@ type BuildloggerURLsResponse struct {
 func ExtractBuildloggerURLsResponse(input []byte) (BuildloggerURLsResponse, error) {
 	resp := BuildloggerURLsResponse{}
 	if err := json.Unmarshal(input, &resp); err != nil {
-		return resp, errors.Wrap(err, unmarshalFailed)
+		return resp, fmt.Errorf("%s: %w", unmarshalFailed, err)
+
 	}
 	return resp, resp.successOrError()
 }
@@ -240,7 +249,8 @@ type IDResponse struct {
 func ExtractIDResponse(input []byte) (IDResponse, error) {
 	resp := IDResponse{}
 	if err := json.Unmarshal(input, &resp); err != nil {
-		return resp, errors.Wrap(err, unmarshalFailed)
+		return resp, fmt.Errorf("%s: %w", unmarshalFailed, err)
+
 	}
 	return resp, resp.successOrError()
 }
@@ -300,12 +310,12 @@ func BuildScriptingOptions(in options.ScriptingHarness) (*ScriptingOptions, erro
 func (opts *ScriptingOptions) Export() (options.ScriptingHarness, error) {
 	harness, err := options.NewScriptingHarness(opts.ImplementationType)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	err = json.Unmarshal(opts.Payload, harness)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	return harness, nil
@@ -455,7 +465,7 @@ type CachedLoggerResponse struct {
 func ExtractCachedLoggerResponse(input json.RawMessage) (CachedLoggerResponse, error) {
 	var resp CachedLoggerResponse
 	if err := json.Unmarshal(input, &resp); err != nil {
-		return resp, errors.Wrap(err, unmarshalFailed)
+		return resp, fmt.Errorf("%s: %w", unmarshalFailed, err)
 	}
 	return resp, resp.successOrError()
 }
@@ -481,7 +491,7 @@ type LoggingCacheLenResponse struct {
 func ExtractLoggingCacheLenResponse(input json.RawMessage) (LoggingCacheLenResponse, error) {
 	var resp LoggingCacheLenResponse
 	if err := json.Unmarshal(input, &resp); err != nil {
-		return resp, errors.Wrap(err, unmarshalFailed)
+		return resp, fmt.Errorf("%s: %w", unmarshalFailed, err)
 	}
 	return resp, resp.successOrError()
 }

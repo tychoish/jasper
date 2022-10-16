@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"strings"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/remote"
@@ -79,12 +79,12 @@ func (c *sshClient) ID() string {
 func (c *sshClient) CreateProcess(ctx context.Context, opts *options.Create) (jasper.Process, error) {
 	output, err := c.runManagerCommand(ctx, CreateProcessCommand, opts)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	resp, err := ExtractInfoResponse(output)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	return newSSHProcess(c.runClientCommand, resp.Info)
@@ -100,7 +100,7 @@ func (c *sshClient) CreateCommand(ctx context.Context) *jasper.Command {
 		}
 
 		if _, err := ExtractOutcomeResponse(output); err != nil {
-			return errors.WithStack(err)
+			return err
 		}
 
 		return nil
@@ -124,12 +124,12 @@ func (c *sshClient) Register(ctx context.Context, proc jasper.Process) error {
 func (c *sshClient) List(ctx context.Context, f options.Filter) ([]jasper.Process, error) {
 	output, err := c.runManagerCommand(ctx, ListCommand, &FilterInput{Filter: f})
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	resp, err := ExtractInfosResponse(output)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	procs := make([]jasper.Process, len(resp.Infos))
@@ -145,12 +145,12 @@ func (c *sshClient) List(ctx context.Context, f options.Filter) ([]jasper.Proces
 func (c *sshClient) Group(ctx context.Context, tag string) ([]jasper.Process, error) {
 	output, err := c.runManagerCommand(ctx, GroupCommand, &TagInput{Tag: tag})
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	resp, err := ExtractInfosResponse(output)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	procs := make([]jasper.Process, len(resp.Infos))
@@ -166,12 +166,12 @@ func (c *sshClient) Group(ctx context.Context, tag string) ([]jasper.Process, er
 func (c *sshClient) Get(ctx context.Context, id string) (jasper.Process, error) {
 	output, err := c.runManagerCommand(ctx, GetCommand, &IDInput{ID: id})
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	resp, err := ExtractInfoResponse(output)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	return newSSHProcess(c.runClientCommand, resp.Info)
@@ -184,11 +184,11 @@ func (c *sshClient) Clear(ctx context.Context) {
 func (c *sshClient) Close(ctx context.Context) error {
 	output, err := c.runManagerCommand(ctx, CloseCommand, nil)
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	if _, err = ExtractOutcomeResponse(output); err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	return nil
@@ -201,11 +201,11 @@ func (c *sshClient) CloseConnection() error {
 func (c *sshClient) DownloadFile(ctx context.Context, opts options.Download) error {
 	output, err := c.runRemoteCommand(ctx, DownloadFileCommand, &opts)
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	if _, err := ExtractOutcomeResponse(output); err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	return nil
@@ -215,11 +215,11 @@ func (c *sshClient) WriteFile(ctx context.Context, opts options.WriteFile) error
 	return opts.WriteBufferedContent(func(opts options.WriteFile) error {
 		output, err := c.runRemoteCommand(ctx, WriteFileCommand, &opts)
 		if err != nil {
-			return errors.WithStack(err)
+			return err
 		}
 
 		if _, err := ExtractOutcomeResponse(output); err != nil {
-			return errors.WithStack(err)
+			return err
 		}
 
 		return nil
@@ -229,12 +229,12 @@ func (c *sshClient) WriteFile(ctx context.Context, opts options.WriteFile) error
 func (c *sshClient) GetLogStream(ctx context.Context, id string, count int) (jasper.LogStream, error) {
 	output, err := c.runRemoteCommand(ctx, GetLogStreamCommand, &LogStreamInput{ID: id, Count: count})
 	if err != nil {
-		return jasper.LogStream{}, errors.WithStack(err)
+		return jasper.LogStream{}, err
 	}
 
 	resp, err := ExtractLogStreamResponse(output)
 	if err != nil {
-		return resp.LogStream, errors.WithStack(err)
+		return resp.LogStream, err
 	}
 
 	return resp.LogStream, nil
@@ -243,11 +243,11 @@ func (c *sshClient) GetLogStream(ctx context.Context, id string, count int) (jas
 func (c *sshClient) SignalEvent(ctx context.Context, name string) error {
 	output, err := c.runRemoteCommand(ctx, SignalEventCommand, &EventInput{Name: name})
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	if _, err := ExtractOutcomeResponse(output); err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	return nil
@@ -261,11 +261,11 @@ func (c *sshClient) LoggingCache(ctx context.Context) jasper.LoggingCache {
 func (c *sshClient) SendMessages(ctx context.Context, opts options.LoggingPayload) error {
 	output, err := c.runRemoteCommand(ctx, SendMessagesCommand, opts)
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	if _, err := ExtractOutcomeResponse(output); err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	return nil
@@ -291,7 +291,7 @@ func (c *sshClient) runClientCommand(ctx context.Context, subcommand []string, s
 
 	cmd := c.newCommand(ctx, subcommand, input, output)
 	if err := cmd.Run(ctx); err != nil {
-		return nil, errors.Wrapf(err, "problem running command '%s' over SSH", c.opts.buildCommand(subcommand...))
+		return nil, fmt.Errorf("problem running command '%s' over SSH: %w", c.opts.buildCommand(subcommand...), err)
 	}
 
 	return output.Bytes(), nil

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -15,8 +16,6 @@ import (
 	"time"
 
 	"github.com/evergreen-ci/service"
-	"github.com/pkg/errors"
-
 	"github.com/tychoish/emt"
 	"github.com/tychoish/jasper/remote"
 	"github.com/tychoish/jasper/util"
@@ -91,7 +90,7 @@ func readInput(input io.Reader, output interface{}) error {
 	if err != nil {
 		return fmt.Errorf("error reading from input: %w", err)
 	}
-	return errors.Wrap(json.Unmarshal(bytes, output), "error decoding to output")
+	return json.Unmarshal(bytes, output)
 }
 
 // writeOutput encodes the output as JSON and writes it to w.
@@ -139,7 +138,7 @@ func doPassthroughInputOutput(c *cli.Context, input Validator, request func(cont
 	}
 
 	return withConnection(ctx, c, func(client remote.Manager) error {
-		return errors.Wrap(writeOutput(os.Stdout, request(ctx, client)), "error writing to standard output")
+		return writeOutput(os.Stdout, request(ctx, client))
 	})
 }
 
@@ -150,7 +149,7 @@ func doPassthroughOutput(c *cli.Context, request func(context.Context, remote.Ma
 	defer cancel()
 
 	return withConnection(ctx, c, func(client remote.Manager) error {
-		return errors.Wrap(writeOutput(os.Stdout, request(ctx, client)), "error writing to standard output")
+		return writeOutput(os.Stdout, request(ctx, client))
 	})
 }
 
@@ -190,7 +189,7 @@ func runServices(ctx context.Context, makeServices ...func(context.Context) (uti
 	closeAllServices := func(closeServices []util.CloseFunc) error {
 		catcher := emt.NewBasicCatcher()
 		for _, closeService := range closeServices {
-			catcher.Add(errors.Wrap(closeService(), "error closing service"))
+			catcher.Add(closeService())
 		}
 		return catcher.Resolve()
 	}

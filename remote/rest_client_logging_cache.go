@@ -2,11 +2,11 @@ package remote
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/gimlet"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
@@ -23,22 +23,22 @@ type restLoggingCache struct {
 func (lc *restLoggingCache) Create(id string, opts *options.Output) (*options.CachedLogger, error) {
 	body, err := makeBody(opts)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	resp, err := lc.client.doRequest(lc.ctx, http.MethodPost, lc.client.getURL("/logging/id/%s", id), body)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if err = handleError(resp); err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	out := &options.CachedLogger{}
 	if err = gimlet.GetJSON(resp.Body, out); err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	return out, nil
@@ -120,7 +120,7 @@ func (lc *restLoggingCache) CloseAndRemove(ctx context.Context, id string) error
 	}
 	defer resp.Body.Close()
 
-	return errors.WithStack(handleError(resp))
+	return handleError(resp)
 }
 
 func (lc *restLoggingCache) Clear(ctx context.Context) error {
@@ -130,5 +130,5 @@ func (lc *restLoggingCache) Clear(ctx context.Context) error {
 	}
 	defer resp.Body.Close()
 
-	return errors.WithStack(handleError(resp))
+	return handleError(resp)
 }

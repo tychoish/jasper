@@ -2,13 +2,13 @@ package cli
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 
 	"github.com/evergreen-ci/service"
-	"github.com/pkg/errors"
-
 	"github.com/tychoish/grip"
+	"github.com/tychoish/grip/message"
 	"github.com/tychoish/grip/recovery"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
@@ -108,7 +108,7 @@ func (d *rpcDaemon) Start(s service.Service) error {
 
 	go func(ctx context.Context, d *rpcDaemon) {
 		defer recovery.LogStackTraceAndContinue("rpc service")
-		grip.Error(errors.Wrap(d.run(ctx), "error running RPC service"))
+		grip.Error(message.WrapError(d.run(ctx), "error running RPC service"))
 	}(ctx, d)
 
 	return nil
@@ -120,7 +120,10 @@ func (d *rpcDaemon) Stop(s service.Service) error {
 }
 
 func (d *rpcDaemon) run(ctx context.Context) error {
-	return errors.Wrap(runServices(ctx, d.newService), "error running RPC service")
+	if err := runServices(ctx, d.newService); err != nil {
+		return fmt.Errorf("error running RPC service: %w", err)
+	}
+	return nil
 }
 
 func (d *rpcDaemon) newService(ctx context.Context) (util.CloseFunc, error) {

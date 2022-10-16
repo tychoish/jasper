@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/jasper/options"
 )
 
@@ -49,7 +48,7 @@ func (m *synchronizedProcessManager) CreateProcess(ctx context.Context, opts *op
 
 	proc, err := m.manager.CreateProcess(ctx, opts)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	return &synchronizedProcess{proc: proc}, nil
@@ -66,7 +65,7 @@ func (m *synchronizedProcessManager) Register(ctx context.Context, proc Process)
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	return errors.WithStack(m.manager.Register(ctx, proc))
+	return m.manager.Register(ctx, proc)
 }
 
 func (m *synchronizedProcessManager) List(ctx context.Context, f options.Filter) ([]Process, error) {
@@ -78,7 +77,7 @@ func (m *synchronizedProcessManager) List(ctx context.Context, f options.Filter)
 	for _, proc := range procs {
 		syncedProcs = append(syncedProcs, &synchronizedProcess{proc: proc})
 	}
-	return syncedProcs, errors.WithStack(err)
+	return syncedProcs, err
 }
 
 func (m *synchronizedProcessManager) Get(ctx context.Context, id string) (Process, error) {
@@ -87,9 +86,9 @@ func (m *synchronizedProcessManager) Get(ctx context.Context, id string) (Proces
 
 	proc, err := m.manager.Get(ctx, id)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
-	return &synchronizedProcess{proc: proc}, errors.WithStack(err)
+	return &synchronizedProcess{proc: proc}, err
 }
 
 func (m *synchronizedProcessManager) Clear(ctx context.Context) {
@@ -103,7 +102,7 @@ func (m *synchronizedProcessManager) Close(ctx context.Context) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	return errors.WithStack(m.manager.Close(ctx))
+	return m.manager.Close(ctx)
 }
 
 func (m *synchronizedProcessManager) Group(ctx context.Context, name string) ([]Process, error) {
@@ -115,7 +114,7 @@ func (m *synchronizedProcessManager) Group(ctx context.Context, name string) ([]
 	for _, proc := range procs {
 		syncedProcs = append(syncedProcs, &synchronizedProcess{proc: proc})
 	}
-	return syncedProcs, errors.WithStack(err)
+	return syncedProcs, err
 }
 
 func (m *synchronizedProcessManager) LoggingCache(ctx context.Context) LoggingCache {

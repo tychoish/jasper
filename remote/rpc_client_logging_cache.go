@@ -2,12 +2,12 @@ package remote
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/golang/protobuf/ptypes"
 	empty "github.com/golang/protobuf/ptypes/empty"
-	"github.com/pkg/errors"
 
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
@@ -29,12 +29,12 @@ func (lc *rpcLoggingCache) Create(id string, opts *options.Output) (*options.Cac
 	}
 	resp, err := lc.client.LoggingCacheCreate(lc.ctx, args)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	out, err := resp.Export()
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	return out, nil

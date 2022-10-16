@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/recovery"
 	"github.com/tychoish/jasper"
@@ -20,7 +19,7 @@ import (
 // this function successfully returns, calls to Manager functions will be sent
 // over GRPC to the Jasper GRPC server.
 func AttachService(ctx context.Context, manager jasper.Manager, s *grpc.Server) error {
-	return errors.WithStack(internal.AttachService(ctx, manager, s))
+	return internal.AttachService(ctx, manager, s)
 }
 
 // StartRPCService starts an RPC server with the specified address addr around the
@@ -36,7 +35,7 @@ func AttachService(ctx context.Context, manager jasper.Manager, s *grpc.Server) 
 func StartRPCService(ctx context.Context, manager jasper.Manager, addr net.Addr, creds *options.CertificateCredentials, opts ...grpc.ServerOption) (util.CloseFunc, error) {
 	lis, err := net.Listen(addr.Network(), addr.String())
 	if err != nil {
-		return nil, errors.Wrapf(err, "error listening on %s", addr.String())
+		return nil, fmt.Errorf("error listening on %s: %w", addr.String(), err)
 	}
 
 	if creds != nil {

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/jasper/options"
 )
 
@@ -17,19 +16,19 @@ func NewProcess(ctx context.Context, opts *options.Create) (Process, error) {
 	)
 
 	if err = opts.Validate(); err != nil {
-		return nil, errors.WithStack((err))
+		return nil, (err)
 	}
 
 	switch opts.Implementation {
 	case options.ProcessImplementationBlocking:
 		proc, err = newBlockingProcess(ctx, opts)
 		if err != nil {
-			return nil, errors.WithStack(err)
+			return nil, err
 		}
 	case options.ProcessImplementationBasic:
 		proc, err = newBasicProcess(ctx, opts)
 		if err != nil {
-			return nil, errors.WithStack(err)
+			return nil, err
 		}
 	default:
 		return nil, fmt.Errorf("cannot create '%s' type of process", opts.Implementation)

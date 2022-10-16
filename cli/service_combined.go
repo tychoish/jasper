@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/evergreen-ci/service"
-	"github.com/pkg/errors"
 
 	"github.com/tychoish/emt"
 	"github.com/tychoish/jasper"
@@ -95,14 +94,14 @@ func newCombinedDaemon(rest *restDaemon, rpc *rpcDaemon) *combinedDaemon {
 
 func (d *combinedDaemon) Start(s service.Service) error {
 	catcher := emt.NewBasicCatcher()
-	catcher.Add(errors.Wrap(d.RPCDaemon.Start(s), "error starting RPC service"))
-	catcher.Add(errors.Wrap(d.RESTDaemon.Start(s), "error starting REST service"))
+	catcher.Add(d.RPCDaemon.Start(s))
+	catcher.Add(d.RESTDaemon.Start(s))
 	return catcher.Resolve()
 }
 
 func (d *combinedDaemon) Stop(s service.Service) error {
 	catcher := emt.NewBasicCatcher()
-	catcher.Add(errors.Wrap(d.RPCDaemon.Stop(s), "error stopping RPC service"))
-	catcher.Add(errors.Wrap(d.RESTDaemon.Stop(s), "error stopping REST service"))
+	catcher.Add(d.RPCDaemon.Stop(s))
+	catcher.Add(d.RESTDaemon.Stop(s))
 	return catcher.Resolve()
 }

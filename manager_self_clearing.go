@@ -2,8 +2,8 @@ package jasper
 
 import (
 	"context"
+	"errors"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/jasper/options"
 )
 
@@ -24,7 +24,7 @@ type selfClearingProcessManager struct {
 func NewSelfClearingProcessManager(maxProcs int, trackProcs bool) (Manager, error) {
 	pm, err := newBasicProcessManager(map[string]Process{}, trackProcs, false)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 	bpm, ok := pm.(*basicProcessManager)
 	if !ok {
@@ -43,7 +43,7 @@ func NewSelfClearingProcessManager(maxProcs int, trackProcs bool) (Manager, erro
 func NewSSHLibrarySelfClearingProcessManager(maxProcs int, trackProcs bool) (Manager, error) {
 	pm, err := newBasicProcessManager(map[string]Process{}, trackProcs, true)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 	bpm, ok := pm.(*basicProcessManager)
 	if !ok {
@@ -75,7 +75,7 @@ func (m *selfClearingProcessManager) CreateProcess(ctx context.Context, opts *op
 
 	proc, err := m.basicProcessManager.CreateProcess(ctx, opts)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	return proc, nil
@@ -86,5 +86,5 @@ func (m *selfClearingProcessManager) Register(ctx context.Context, proc Process)
 		return err
 	}
 
-	return errors.WithStack(m.basicProcessManager.Register(ctx, proc))
+	return m.basicProcessManager.Register(ctx, proc)
 }

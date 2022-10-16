@@ -2,13 +2,12 @@ package jasper
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"strings"
 
 	"github.com/google/shlex"
-	"github.com/pkg/errors"
-
 	"github.com/tychoish/amboy"
 	"github.com/tychoish/emt"
 	"github.com/tychoish/grip"
@@ -614,7 +613,7 @@ func (c *Command) RunParallel(ctx context.Context) error {
 			catcher.Add(c.Close())
 			catcherErr := catcher.Resolve()
 			if catcherErr != nil {
-				return errors.Wrapf(ctx.Err(), catcherErr.Error())
+				return fmt.Errorf("catcher errors %q: %w", catcherErr.Error(), ctx.Err())
 			}
 			return ctx.Err()
 		}
@@ -702,7 +701,7 @@ func (c *Command) SetCombinedWriter(writer io.WriteCloser) *Command {
 func (c *Command) EnqueueForeground(ctx context.Context, q amboy.Queue) error {
 	jobs, err := c.JobsForeground(ctx)
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	catcher := emt.NewBasicCatcher()
@@ -720,7 +719,7 @@ func (c *Command) EnqueueForeground(ctx context.Context, q amboy.Queue) error {
 func (c *Command) Enqueue(ctx context.Context, q amboy.Queue) error {
 	jobs, err := c.Jobs(ctx)
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	catcher := emt.NewBasicCatcher()
@@ -737,7 +736,7 @@ func (c *Command) Enqueue(ctx context.Context, q amboy.Queue) error {
 func (c *Command) JobsForeground(ctx context.Context) ([]amboy.Job, error) {
 	opts, err := c.getCreateOpts()
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	out := make([]amboy.Job, len(opts))
@@ -753,7 +752,7 @@ func (c *Command) JobsForeground(ctx context.Context) ([]amboy.Job, error) {
 func (c *Command) Jobs(ctx context.Context) ([]amboy.Job, error) {
 	opts, err := c.getCreateOpts()
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	out := make([]amboy.Job, len(opts))
@@ -847,14 +846,15 @@ func (c *Command) exec(ctx context.Context, opts *options.Create, idx int) error
 		waitCatcher := emt.NewBasicCatcher()
 		for _, proc := range c.procs {
 			_, err = proc.Wait(ctx)
-			waitCatcher.Add(errors.Wrapf(err, "error waiting on process '%s'", proc.ID()))
+			waitCatcher.ErrorfWhen(err != nil,
+				"error waiting on process '%s': %w", proc.ID(), err)
 		}
 		err = waitCatcher.Resolve()
 		msg["err"] = err
 		grip.Log(c.opts.Priority, writeOutput(msg))
 	}
 
-	return errors.WithStack(err)
+	return err
 }
 
 func getMsgOutput(opts options.Output) func(msg message.Fields) message.Fields {
@@ -917,7 +917,7 @@ func (c *Command) Wait(ctx context.Context) (int, error) {
 	for _, proc := range c.procs {
 		exitCode, err := proc.Wait(ctx)
 		if err != nil || exitCode != 0 {
-			return exitCode, errors.Wrapf(err, "error waiting on process '%s'", proc.ID())
+			return exitCode, fmt.Errorf("error waiting on process '%s': %w", proc.ID(), err)
 		}
 	}
 

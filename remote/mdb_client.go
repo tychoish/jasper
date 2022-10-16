@@ -2,11 +2,11 @@ package remote
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/birch"
 	"github.com/tychoish/birch/mrpc/mongowire"
 	"github.com/tychoish/birch/mrpc/shell"
@@ -60,7 +60,7 @@ func NewMDBClient(ctx context.Context, addr net.Addr, reqTimeout time.Duration) 
 	dialer := net.Dialer{}
 	var err error
 	if client.conn, err = dialer.DialContext(ctx, "tcp", addr.String()); err != nil {
-		return nil, errors.Wrapf(err, "could not establish connection to %s service at address %s", addr.Network(), addr.String())
+		return nil, fmt.Errorf("could not establish connection to %s service at address %s: %w", addr.Network(), addr.String(), err)
 	}
 
 	return client, nil
@@ -256,7 +256,7 @@ func (s *mdbScriptingClient) Setup(ctx context.Context) error {
 		return fmt.Errorf("problem reading response: %w", err)
 	}
 
-	return errors.Wrap(resp.SuccessOrError(), "error in response")
+	return resp.SuccessOrError()
 }
 
 func (s *mdbScriptingClient) Cleanup(ctx context.Context) error {
@@ -279,7 +279,7 @@ func (s *mdbScriptingClient) Cleanup(ctx context.Context) error {
 		return fmt.Errorf("problem reading response: %w", err)
 	}
 
-	return errors.Wrap(resp.SuccessOrError(), "error in response")
+	return resp.SuccessOrError()
 }
 
 func (s *mdbScriptingClient) Run(ctx context.Context, args []string) error {
@@ -306,7 +306,7 @@ func (s *mdbScriptingClient) Run(ctx context.Context, args []string) error {
 		return fmt.Errorf("could not parse response document: %w", err)
 	}
 
-	return errors.Wrap(resp.SuccessOrError(), "error in response")
+	return resp.SuccessOrError()
 }
 
 func (s *mdbScriptingClient) RunScript(ctx context.Context, in string) error {
@@ -333,7 +333,7 @@ func (s *mdbScriptingClient) RunScript(ctx context.Context, in string) error {
 		return fmt.Errorf("could not parse response document: %w", err)
 	}
 
-	return errors.Wrap(resp.SuccessOrError(), "error in response")
+	return resp.SuccessOrError()
 }
 
 func (s *mdbScriptingClient) Build(ctx context.Context, dir string, args []string) (string, error) {
@@ -362,7 +362,7 @@ func (s *mdbScriptingClient) Build(ctx context.Context, dir string, args []strin
 		return "", fmt.Errorf("could not parse response document: %w", err)
 	}
 
-	return resp.Path, errors.Wrap(resp.SuccessOrError(), "error in response")
+	return resp.Path, resp.SuccessOrError()
 }
 
 func (s *mdbScriptingClient) Test(ctx context.Context, dir string, opts ...scripting.TestOptions) ([]scripting.TestResult, error) {
@@ -390,7 +390,7 @@ func (s *mdbScriptingClient) Test(ctx context.Context, dir string, opts ...scrip
 		return nil, fmt.Errorf("could not parse response document: %w", err)
 	}
 
-	return resp.Results, errors.Wrap(resp.SuccessOrError(), "error in response")
+	return resp.Results, resp.SuccessOrError()
 }
 
 func (c *mdbClient) LoggingCache(ctx context.Context) jasper.LoggingCache {
@@ -403,7 +403,7 @@ func (c *mdbClient) LoggingCache(ctx context.Context) jasper.LoggingCache {
 func (c *mdbClient) SendMessages(ctx context.Context, lp options.LoggingPayload) error {
 	payload, err := c.makeRequest(&loggingSendMessagesRequest{Payload: lp})
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	req, err := shell.RequestToMessage(mongowire.OP_QUERY, payload)
@@ -421,7 +421,7 @@ func (c *mdbClient) SendMessages(ctx context.Context, lp options.LoggingPayload)
 		return fmt.Errorf("could not parse response document: %w", err)
 	}
 
-	return errors.Wrap(resp.SuccessOrError(), "error in response")
+	return resp.SuccessOrError()
 }
 
 func (c *mdbClient) Register(ctx context.Context, proc jasper.Process) error {
@@ -570,7 +570,7 @@ func (c *mdbClient) Close(ctx context.Context) error {
 		return fmt.Errorf("could not parse response document: %w", err)
 	}
 
-	return errors.Wrap(resp.SuccessOrError(), "error in response")
+	return resp.SuccessOrError()
 }
 
 func (c *mdbClient) WriteFile(ctx context.Context, opts options.WriteFile) error {
@@ -594,7 +594,7 @@ func (c *mdbClient) WriteFile(ctx context.Context, opts options.WriteFile) error
 			return fmt.Errorf("could not parse response document: %w", err)
 		}
 
-		return errors.Wrap(resp.SuccessOrError(), "error in response")
+		return resp.SuccessOrError()
 	}
 	return opts.WriteBufferedContent(sendOpts)
 }
@@ -625,7 +625,7 @@ func (c *mdbClient) DownloadFile(ctx context.Context, opts options.Download) err
 		return fmt.Errorf("could not parse response document: %w", err)
 	}
 
-	return errors.Wrap(resp.SuccessOrError(), "error in response")
+	return resp.SuccessOrError()
 }
 
 func (c *mdbClient) GetLogStream(ctx context.Context, id string, count int) (jasper.LogStream, error) {
@@ -682,7 +682,7 @@ func (c *mdbClient) SignalEvent(ctx context.Context, name string) error {
 		return fmt.Errorf("could not parse response document: %w", err)
 	}
 
-	return errors.Wrap(resp.SuccessOrError(), "error in response")
+	return resp.SuccessOrError()
 }
 
 // doRequest sends the given request and reads the response.

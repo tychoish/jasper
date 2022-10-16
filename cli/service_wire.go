@@ -6,9 +6,9 @@ import (
 	"net"
 
 	"github.com/evergreen-ci/service"
-	"github.com/pkg/errors"
 
 	"github.com/tychoish/grip"
+	"github.com/tychoish/grip/message"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/remote"
@@ -100,7 +100,7 @@ func (d *wireDaemon) Start(s service.Service) error {
 	go handleDaemonSignals(ctx, cancel, d.exit)
 
 	go func(ctx context.Context, d *wireDaemon) {
-		grip.Error(errors.Wrap(d.run(ctx), "error running wire service"))
+		grip.Error(message.WrapError(d.run(ctx), "error running wire service"))
 	}(ctx, d)
 
 	return nil
@@ -112,7 +112,10 @@ func (d *wireDaemon) Stop(s service.Service) error {
 }
 
 func (d *wireDaemon) run(ctx context.Context) error {
-	return errors.Wrap(runServices(ctx, d.newService), "error running wire service")
+	if err := runServices(ctx, d.newService); err != nil {
+		return fmt.Errorf("error running wire service: %w", err)
+	}
+	return nil
 }
 
 func (d *wireDaemon) newService(ctx context.Context) (util.CloseFunc, error) {

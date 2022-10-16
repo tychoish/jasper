@@ -2,6 +2,7 @@ package jasper
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math/rand"
 	"os"
@@ -11,8 +12,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/pkg/errors"
-
 	"github.com/tychoish/emt"
 	"github.com/tychoish/jasper/internal/executor"
 	"github.com/tychoish/jasper/options"
@@ -53,16 +52,18 @@ func newBlockingProcess(ctx context.Context, opts *options.Create) (Process, err
 
 	if err = p.RegisterTrigger(ctx, makeOptionsCloseTrigger()); err != nil {
 		catcher := emt.NewBasicCatcher()
-		catcher.Add(opts.Close())
+		catcher.New("problem registering options close trigger")
 		catcher.Add(err)
-		return nil, errors.Wrap(catcher.Resolve(), "problem registering options close trigger")
+		catcher.Add(opts.Close())
+		return nil, catcher.Resolve()
 	}
 
 	if err = exec.Start(); err != nil {
 		catcher := emt.NewBasicCatcher()
-		catcher.Add(opts.Close())
+		catcher.New("problem starting command")
 		catcher.Add(err)
-		return nil, errors.Wrap(catcher.Resolve(), "problem starting command")
+		catcher.Add(opts.Close())
+		return nil, catcher.Resolve()
 	}
 
 	p.info = ProcessInfo{
@@ -273,8 +274,10 @@ func (p *blockingProcess) Signal(ctx context.Context, sig syscall.Signal) error 
 
 		if skipSignal := p.signalTriggers.Run(p.getInfo(), sig); !skipSignal {
 			sig = makeCompatible(sig)
-			out <- errors.Wrapf(exec.Signal(sig), "problem sending signal '%s' to '%s'",
-				sig, p.id)
+			if err := exec.Signal(sig); err != nil {
+				out <- fmt.Errorf("problem sending signal '%s' to '%s': %w",
+					sig, p.id, err)
+			}
 		} else {
 			out <- nil
 		}
@@ -336,7 +339,7 @@ func (p *blockingProcess) RegisterSignalTriggerID(ctx context.Context, id Signal
 	if !ok {
 		return fmt.Errorf("could not find signal trigger with id '%s'", id)
 	}
-	return errors.Wrap(p.RegisterSignalTrigger(ctx, makeTrigger()), "failed to register signal trigger")
+	return p.RegisterSignalTrigger(ctx, makeTrigger())
 }
 
 func (p *blockingProcess) Wait(ctx context.Context) (int, error) {
@@ -364,7 +367,7 @@ func (p *blockingProcess) Wait(ctx context.Context) (int, error) {
 		case <-ctx.Done():
 			return -1, errors.New("wait operation canceled")
 		case err := <-out:
-			return p.getInfo().ExitCode, errors.WithStack(err)
+			return p.getInfo().ExitCode, err
 		case <-p.complete:
 			return p.getInfo().ExitCode, p.getErr()
 		}

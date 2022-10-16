@@ -2,11 +2,11 @@ package jasper
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sync"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/emt"
 	"github.com/tychoish/jasper/options"
 )
@@ -125,7 +125,10 @@ func (c *loggingCacheImpl) CloseAndRemove(_ context.Context, id string) error {
 		delete(c.cache, id)
 	}
 
-	return errors.Wrapf(err, "problem closing logger with id %s", id)
+	if err != nil {
+		return fmt.Errorf("problem closing logger with id %s: %w", id, err)
+	}
+	return nil
 }
 
 func (c *loggingCacheImpl) Clear(_ context.Context) error {
@@ -138,5 +141,8 @@ func (c *loggingCacheImpl) Clear(_ context.Context) error {
 	}
 	c.cache = map[string]*options.CachedLogger{}
 
-	return errors.Wrap(catcher.Resolve(), "problem clearing logger cache")
+	if catcher.HasErrors() {
+		fmt.Errorf("problem clearing logger cache: %w", catcher.Resolve())
+	}
+	return nil
 }

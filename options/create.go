@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha1"
+	"errors"
 	"fmt"
 	"hash"
 	"io"
@@ -12,11 +13,10 @@ import (
 	"time"
 
 	"github.com/google/shlex"
-	"github.com/pkg/errors"
-
 	"github.com/tychoish/emt"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
+	"github.com/tychoish/grip/message"
 	"github.com/tychoish/grip/send"
 	"github.com/tychoish/jasper/internal/executor"
 )
@@ -199,7 +199,7 @@ func (opts *Create) Resolve(ctx context.Context) (exe executor.Executor, t time.
 	}
 
 	if err := opts.Validate(); err != nil {
-		return nil, time.Time{}, errors.WithStack(err)
+		return nil, time.Time{}, err
 	}
 
 	var deadline time.Time
@@ -225,7 +225,7 @@ func (opts *Create) Resolve(ctx context.Context) (exe executor.Executor, t time.
 	}
 	defer func() {
 		if resolveErr != nil {
-			grip.Error(errors.Wrap(cmd.Close(), "problem closing process executor"))
+			grip.Error(message.WrapError(cmd.Close(), "problem closing process executor"))
 		}
 	}()
 
@@ -246,13 +246,13 @@ func (opts *Create) Resolve(ctx context.Context) (exe executor.Executor, t time.
 
 	stdout, err := opts.Output.GetOutput()
 	if err != nil {
-		return nil, time.Time{}, errors.WithStack(err)
+		return nil, time.Time{}, err
 	}
 	cmd.SetStdout(stdout)
 
 	stderr, err := opts.Output.GetError()
 	if err != nil {
-		return nil, time.Time{}, errors.WithStack(err)
+		return nil, time.Time{}, err
 	}
 	cmd.SetStderr(stderr)
 
@@ -262,7 +262,7 @@ func (opts *Create) Resolve(ctx context.Context) (exe executor.Executor, t time.
 
 	// Senders require Close() or else command output is not guaranteed to log.
 	opts.closers = append(opts.closers, func() error {
-		return errors.Wrap(opts.Output.Close(), "problem closing output")
+		return opts.Output.Close()
 	})
 
 	return cmd, deadline, nil

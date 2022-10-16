@@ -1,10 +1,10 @@
 package jasper
 
 import (
+	"errors"
 	"fmt"
 	"sync"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/grip"
 )
 
@@ -37,7 +37,10 @@ func newSignalTriggerRegistry() *signalTriggerRegistry {
 // RegisterSignalTriggerFactory registers a factory to create the signal trigger
 // represented by the id.
 func RegisterSignalTriggerFactory(id SignalTriggerID, factory SignalTriggerFactory) error {
-	return errors.Wrap(jasperSignalTriggerRegistry.registerSignalTriggerFactory(id, factory), "problem registering signal trigger factory")
+	if err := jasperSignalTriggerRegistry.registerSignalTriggerFactory(id, factory); err != nil {
+		return fmt.Errorf("problem registering signal trigger factory: %w", err)
+	}
+	return nil
 }
 
 // GetSignalTriggerFactory retrieves a factory to create the signal trigger

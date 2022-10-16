@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/amboy"
 	"github.com/tychoish/amboy/dependency"
 	"github.com/tychoish/amboy/job"
@@ -103,7 +102,7 @@ func (j *downloadFileJob) Run(ctx context.Context) {
 	}
 
 	if err := opts.Download(ctx); err != nil {
-		j.handleError(errors.Wrapf(err, "problem downloading file %s", fn))
+		j.handleError(fmt.Errorf("problem downloading file %s: %w", fn, err))
 		return
 	}
 

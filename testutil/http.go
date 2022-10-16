@@ -7,7 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/grip"
 )
 
@@ -43,7 +42,7 @@ func WaitForRESTService(ctx context.Context, url string) error {
 	for {
 		select {
 		case <-ctx.Done():
-			return errors.WithStack(ctx.Err())
+			return ctx.Err()
 		case <-timer.C:
 			req, err := http.NewRequest(http.MethodGet, url, nil)
 			if err != nil {
@@ -74,7 +73,7 @@ func WaitForWireService(ctx context.Context, addr net.Addr) error {
 	for {
 		select {
 		case <-ctx.Done():
-			return errors.Wrap(ctx.Err(), "context errored before connection could be established to service")
+			return ctx.Err()
 		case <-timer.C:
 			conn, err := net.Dial("tcp", addr.String())
 			if err != nil {

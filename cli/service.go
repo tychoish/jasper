@@ -11,7 +11,6 @@ import (
 	"syscall"
 
 	"github.com/evergreen-ci/service"
-	"github.com/pkg/errors"
 
 	"github.com/tychoish/emt"
 	"github.com/tychoish/grip"
@@ -210,7 +209,7 @@ func makeLogger(c *cli.Context) *options.LoggerConfig {
 		if tokenFilePath := c.String(splunkTokenFilePathFlagName); tokenFilePath != "" {
 			token, err := ioutil.ReadFile(tokenFilePath)
 			if err != nil {
-				grip.Error(errors.Wrapf(err, "could not read splunk token file from path '%s'", tokenFilePath))
+				grip.Error(fmt.Errorf("could not read splunk token file from path '%s': %w", tokenFilePath, err))
 				return nil
 			}
 			info.Token = string(token)
@@ -402,7 +401,7 @@ func serviceCommand(cmd string, operation serviceOperation) cli.Command {
 // returns an error if there is an error while installing or starting the new
 // service.
 func forceReinstall(daemon service.Interface, config *service.Config) error {
-	return errors.Wrap(withService(daemon, config, func(svc service.Service) error {
+	return withService(daemon, config, func(svc service.Service) error {
 		stopErr := message.WrapError(svc.Stop(), message.Fields{
 			"msg":    "error stopping service",
 			"cmd":    "force-reinstall",
@@ -420,63 +419,66 @@ func forceReinstall(daemon service.Interface, config *service.Config) error {
 		if catcher.HasErrors() {
 			grip.Debug(stopErr)
 			grip.Debug(uninstallErr)
+			return fmt.Errorf("force reinstall: %w", catcher.Resolve())
 		}
-		return catcher.Resolve()
-	}), "error force reinstalling service")
+		return nil
+	})
 }
 
 // install registers the service with the given configuration in the service
 // manager.
 func install(daemon service.Interface, config *service.Config) error {
-	return errors.Wrap(withService(daemon, config, func(svc service.Service) error {
+	return withService(daemon, config, func(svc service.Service) error {
 		return svc.Install()
-	}), "error installing service")
+	})
 }
 
 // uninstall removes the service from the service manager.
 func uninstall(daemon service.Interface, config *service.Config) error {
-	return errors.Wrap(withService(daemon, config, func(svc service.Service) error {
+	return withService(daemon, config, func(svc service.Service) error {
 		return svc.Uninstall()
-	}), "error uninstalling service")
+	})
 }
 
 // start begins the service if it has not already started.
 func start(daemon service.Interface, config *service.Config) error {
-	return errors.Wrap(withService(daemon, config, func(svc service.Service) error {
+	return withService(daemon, config, func(svc service.Service) error {
 		return svc.Start()
-	}), "error starting service")
+	})
 }
 
 // stop ends the running service.
 func stop(daemon service.Interface, config *service.Config) error {
-	return errors.Wrap(withService(daemon, config, func(svc service.Service) error {
+	return withService(daemon, config, func(svc service.Service) error {
 		return svc.Stop()
-	}), "error stopping service")
+	})
 }
 
 // restart stops the existing service and starts it again.
 func restart(daemon service.Interface, config *service.Config) error {
-	return errors.Wrap(withService(daemon, config, func(svc service.Service) error {
+	return withService(daemon, config, func(svc service.Service) error {
 		return svc.Restart()
-	}), "error restarting service")
+	})
 }
 
 // run runs the service in the foreground.
 func run(daemon service.Interface, config *service.Config) error {
-	return errors.Wrap(withService(daemon, config, func(svc service.Service) error {
+	return withService(daemon, config, func(svc service.Service) error {
 		return svc.Run()
-	}), "error running service")
+	})
 }
 
 // status gets the current status of the running service.
 func status(daemon service.Interface, config *service.Config) error {
-	return errors.Wrap(withService(daemon, config, func(svc service.Service) error {
+	return withService(daemon, config, func(svc service.Service) error {
 		status, err := svc.Status()
 		if err != nil {
-			return errors.Wrapf(writeOutput(os.Stdout, &ServiceStatusResponse{OutcomeResponse: *makeOutcomeResponse(errors.Wrapf(err, "error getting status from service"))}), "error writing to standard output")
+			return writeOutput(os.Stdout, &ServiceStatusResponse{
+				OutcomeResponse: *makeOutcomeResponse(fmt.Errorf("error getting status from service: %w", err)),
+			})
 		}
-		return errors.Wrapf(writeOutput(os.Stdout, &ServiceStatusResponse{Status: statusToString(status), OutcomeResponse: *makeOutcomeResponse(nil)}), "error writing status to standard output")
-	}), "error getting service status")
+		return writeOutput(os.Stdout, &ServiceStatusResponse{Status: statusToString(status), OutcomeResponse: *makeOutcomeResponse(nil)})
+	})
 }
 
 // ServiceStatus represents the state of the service.

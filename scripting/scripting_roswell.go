@@ -9,7 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/emt"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
@@ -77,7 +76,7 @@ func (e *roswellEnvironment) Build(ctx context.Context, dir string, args []strin
 	err := e.manager.CreateCommand(ctx).Directory(dir).Environment(e.opts.Environment).AddEnv("ROSWELL_HOME", e.opts.Path).
 		SetOutputOptions(e.opts.Output).Add(append([]string{e.opts.Interpreter(), "dump", "executable"}, args...)).Run(ctx)
 	if err != nil {
-		return "", errors.WithStack(err)
+		return "", err
 	}
 
 	if len(args) >= 1 {
@@ -90,12 +89,16 @@ func (e *roswellEnvironment) Build(ctx context.Context, dir string, args []strin
 func (e *roswellEnvironment) Cleanup(ctx context.Context) error {
 	switch mgr := e.manager.(type) {
 	case remote:
-		return errors.Wrapf(mgr.CreateCommand(ctx).SetOutputOptions(e.opts.Output).AppendArgs("rm", "-rf", e.opts.Path).Run(ctx),
-			"problem removing remote roswell environment '%s'", e.opts.Path)
+		if err := mgr.CreateCommand(ctx).SetOutputOptions(e.opts.Output).AppendArgs("rm", "-rf", e.opts.Path).Run(ctx); err != nil {
+			return fmt.Errorf("problem removing remote roswell environment '%s': %w", e.opts.Path, err)
+		}
 	default:
-		return errors.Wrapf(os.RemoveAll(e.opts.Path),
-			"problem removing local roswell environment '%s'", e.opts.Path)
+		if err := os.RemoveAll(e.opts.Path); err != nil {
+			return fmt.Errorf("problem removing local roswell environment '%s'", e.opts.Path)
+		}
 	}
+
+	return nil
 }
 
 func (e *roswellEnvironment) Test(ctx context.Context, dir string, tests ...TestOptions) ([]TestResult, error) {

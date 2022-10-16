@@ -1,10 +1,9 @@
 package options
 
 import (
+	"errors"
 	"fmt"
 	"time"
-
-	"errors"
 
 	"github.com/tychoish/emt"
 	"github.com/tychoish/grip/level"

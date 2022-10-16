@@ -2,9 +2,9 @@ package cli
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/jasper/remote"
 	"github.com/urfave/cli"
 )

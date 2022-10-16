@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/emt"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
@@ -96,7 +95,7 @@ func (e *pythonEnvironment) Build(ctx context.Context, dir string, args []string
 		Add(append([]string{e.opts.Interpreter(), "setup.py", "bdist_wheel"}, args...)).
 		SetOutputWriter(output).SetOutputOptions(e.opts.Output).Run(ctx)
 	if err != nil {
-		return "", errors.WithStack(err)
+		return "", err
 	}
 
 	scanner := bufio.NewScanner(output)
@@ -116,12 +115,15 @@ func (e *pythonEnvironment) Build(ctx context.Context, dir string, args []string
 func (e *pythonEnvironment) Cleanup(ctx context.Context) error {
 	switch mgr := e.manager.(type) {
 	case remote:
-		return errors.Wrapf(mgr.CreateCommand(ctx).SetOutputOptions(e.opts.Output).AppendArgs("rm", "-rf", e.opts.VirtualEnvPath).Run(ctx),
-			"problem removing remote python environment '%s'", e.opts.VirtualEnvPath)
+		if err := mgr.CreateCommand(ctx).SetOutputOptions(e.opts.Output).AppendArgs("rm", "-rf", e.opts.VirtualEnvPath).Run(ctx); err != nil {
+			return fmt.Errorf("problem removing remote python environment '%s': %w", e.opts.VirtualEnvPath, err)
+		}
 	default:
-		return errors.Wrapf(os.RemoveAll(e.opts.VirtualEnvPath),
-			"problem removing local python environment '%s'", e.opts.VirtualEnvPath)
+		if err := os.RemoveAll(e.opts.VirtualEnvPath); err != nil {
+			return fmt.Errorf("problem removing local python environment '%s': %w", e.opts.VirtualEnvPath, err)
+		}
 	}
+	return nil
 }
 
 func (e *pythonEnvironment) Test(ctx context.Context, dir string, tests ...TestOptions) ([]TestResult, error) {

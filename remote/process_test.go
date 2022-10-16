@@ -9,7 +9,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tychoish/jasper"
@@ -402,7 +401,7 @@ func TestProcessImplementations(t *testing.T) {
 		"REST": func(ctx context.Context, opts *options.Create) (jasper.Process, error) {
 			_, port, err := startRESTService(ctx, httpClient)
 			if err != nil {
-				return nil, errors.WithStack(err)
+				return nil, err
 			}
 
 			client := &restClient{
@@ -415,12 +414,12 @@ func TestProcessImplementations(t *testing.T) {
 		"MDB": func(ctx context.Context, opts *options.Create) (jasper.Process, error) {
 			mngr, err := jasper.NewSynchronizedManager(false)
 			if err != nil {
-				return nil, errors.WithStack(err)
+				return nil, err
 			}
 
 			client, err := makeTestMDBServiceAndClient(ctx, mngr)
 			if err != nil {
-				return nil, errors.WithStack(err)
+				return nil, err
 			}
 
 			return client.CreateProcess(ctx, opts)
@@ -428,12 +427,12 @@ func TestProcessImplementations(t *testing.T) {
 		"RPC/TLS": func(ctx context.Context, opts *options.Create) (jasper.Process, error) {
 			mngr, err := jasper.NewSynchronizedManager(false)
 			if err != nil {
-				return nil, errors.WithStack(err)
+				return nil, err
 			}
 
 			client, err := makeTLSRPCServiceAndClient(ctx, mngr)
 			if err != nil {
-				return nil, errors.WithStack(err)
+				return nil, err
 			}
 
 			return client.CreateProcess(ctx, opts)
@@ -441,12 +440,12 @@ func TestProcessImplementations(t *testing.T) {
 		"RPC/Insecure": func(ctx context.Context, opts *options.Create) (jasper.Process, error) {
 			mngr, err := jasper.NewSynchronizedManager(false)
 			if err != nil {
-				return nil, errors.WithStack(err)
+				return nil, err
 			}
 
 			client, err := makeInsecureRPCServiceAndClient(ctx, mngr)
 			if err != nil {
-				return nil, errors.WithStack(err)
+				return nil, err
 			}
 
 			return client.CreateProcess(ctx, opts)

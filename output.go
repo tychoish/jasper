@@ -2,10 +2,10 @@ package jasper
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/grip/send"
 	"github.com/tychoish/jasper/options"
 )

@@ -2,11 +2,11 @@ package jasper
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"path/filepath"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/amboy"
 	"github.com/tychoish/emt"
 	"github.com/tychoish/grip"
@@ -22,7 +22,7 @@ func createDownloadJobs(path string, urls <-chan string, catcher emt.Catcher) <-
 		for url := range urls {
 			j, err := NewDownloadJob(url, path, true)
 			if err != nil {
-				catcher.Add(errors.Wrapf(err, "problem creating download job for %s", url))
+				catcher.Add(fmt.Errorf("problem creating download job for %s: %w", url, err))
 				continue
 			}
 

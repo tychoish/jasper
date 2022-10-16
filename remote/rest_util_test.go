@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/testutil"
@@ -18,11 +17,11 @@ tryStartService:
 		select {
 		case <-ctx.Done():
 			grip.Warning("timed out starting test service")
-			return nil, -1, errors.WithStack(ctx.Err())
+			return nil, -1, ctx.Err()
 		default:
 			synchronizedManager, err := jasper.NewSynchronizedManager(false)
 			if err != nil {
-				return nil, -1, errors.WithStack(err)
+				return nil, -1, err
 			}
 			srv := NewRestService(synchronizedManager)
 			app := srv.App(ctx)
@@ -48,7 +47,7 @@ tryStartService:
 				timer.Reset(5 * time.Millisecond)
 				select {
 				case <-ctx.Done():
-					return nil, -1, errors.WithStack(ctx.Err())
+					return nil, -1, ctx.Err()
 				case <-timer.C:
 					req, err := http.NewRequest(http.MethodGet, url, nil)
 					if err != nil {

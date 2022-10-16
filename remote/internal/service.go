@@ -2,6 +2,7 @@ package internal
 
 import (
 	"context"
+	"errors"
 	fmt "fmt"
 	"io"
 	"os"
@@ -11,8 +12,6 @@ import (
 	"github.com/golang/protobuf/ptypes"
 	empty "github.com/golang/protobuf/ptypes/empty"
 	timestamp "github.com/golang/protobuf/ptypes/timestamp"
-	"github.com/pkg/errors"
-
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/scripting"
@@ -34,7 +33,7 @@ func newGRPCError(code codes.Code, err error) error {
 func AttachService(ctx context.Context, manager jasper.Manager, s *grpc.Server) error {
 	hn, err := os.Hostname()
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	srv := &jasperService{
@@ -84,7 +83,7 @@ func (s *jasperService) Create(ctx context.Context, opts *CreateOptions) (*Proce
 
 	proc, err := s.manager.CreateProcess(pctx, jopts)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	if err := proc.RegisterTrigger(ctx, func(_ jasper.ProcessInfo) {
@@ -95,13 +94,13 @@ func (s *jasperService) Create(ctx context.Context, opts *CreateOptions) (*Proce
 		// that the reason for it isn't just because the process has exited
 		// already, since that should not be considered an error.
 		if !getProcInfoNoHang(ctx, proc).Complete {
-			return nil, errors.WithStack(err)
+			return nil, err
 		}
 	}
 
 	info, err := ConvertProcessInfo(getProcInfoNoHang(ctx, proc))
 	if err != nil {
-		return nil, errors.Wrapf(err, "could not convert info for process '%s'", proc.ID())
+		return nil, fmt.Errorf("could not convert info for process '%s': %w", proc.ID(), err)
 	}
 	return info, nil
 }
@@ -110,7 +109,7 @@ func (s *jasperService) List(f *Filter, stream JasperProcessManager_ListServer) 
 	ctx := stream.Context()
 	procs, err := s.manager.List(ctx, options.Filter(strings.ToLower(f.GetName().String())))
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	for _, p := range procs {
@@ -120,7 +119,7 @@ func (s *jasperService) List(f *Filter, stream JasperProcessManager_ListServer) 
 
 		info, err := ConvertProcessInfo(getProcInfoNoHang(ctx, p))
 		if err != nil {
-			return errors.Wrapf(err, "could not convert info for process '%s'", p.ID())
+			return fmt.Errorf("could not convert info for process '%s': %w", p.ID(), err)
 		}
 		if err := stream.Send(info); err != nil {
 			return fmt.Errorf("problem sending process info: %w", err)
@@ -134,7 +133,7 @@ func (s *jasperService) Group(t *TagName, stream JasperProcessManager_GroupServe
 	ctx := stream.Context()
 	procs, err := s.manager.Group(ctx, t.Value)
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	for _, p := range procs {
@@ -144,7 +143,7 @@ func (s *jasperService) Group(t *TagName, stream JasperProcessManager_GroupServe
 
 		info, err := ConvertProcessInfo(getProcInfoNoHang(ctx, p))
 		if err != nil {
-			return errors.Wrapf(err, "could not get info for process '%s'", p.ID())
+			return fmt.Errorf("could not get info for process '%s': %w", p.ID(), err)
 		}
 		if err := stream.Send(info); err != nil {
 			return fmt.Errorf("problem sending process info: %w", err)
@@ -157,12 +156,12 @@ func (s *jasperService) Group(t *TagName, stream JasperProcessManager_GroupServe
 func (s *jasperService) Get(ctx context.Context, id *JasperProcessID) (*ProcessInfo, error) {
 	proc, err := s.manager.Get(ctx, id.Value)
 	if err != nil {
-		return nil, errors.Wrapf(err, "problem fetching process '%s'", id.Value)
+		return nil, fmt.Errorf("problem fetching process '%s': %w", id.Value, err)
 	}
 
 	info, err := ConvertProcessInfo(getProcInfoNoHang(ctx, proc))
 	if err != nil {
-		return nil, errors.Wrapf(err, "could not get info for process '%s'", id.Value)
+		return nil, fmt.Errorf("could not get info for process '%s': %w", id.Value, err)
 	}
 	return info, nil
 }
@@ -170,7 +169,7 @@ func (s *jasperService) Get(ctx context.Context, id *JasperProcessID) (*ProcessI
 func (s *jasperService) Signal(ctx context.Context, sig *SignalProcess) (*OperationOutcome, error) {
 	proc, err := s.manager.Get(ctx, sig.ProcessID.Value)
 	if err != nil {
-		err = errors.Wrapf(err, "couldn't find process with id '%s'", sig.ProcessID)
+		err = fmt.Errorf("couldn't find process with id '%s': %w", sig.ProcessID, err)
 		return &OperationOutcome{
 			Success:  false,
 			Text:     err.Error(),
@@ -179,7 +178,7 @@ func (s *jasperService) Signal(ctx context.Context, sig *SignalProcess) (*Operat
 	}
 
 	if err = proc.Signal(ctx, sig.Signal.Export()); err != nil {
-		err = errors.Wrapf(err, "problem sending '%s' to '%s'", sig.Signal, sig.ProcessID)
+		err = fmt.Errorf("problem sending '%s' to '%s': %w", sig.Signal, sig.ProcessID, err)
 		return &OperationOutcome{
 			Success:  false,
 			ExitCode: -3,
@@ -197,7 +196,7 @@ func (s *jasperService) Signal(ctx context.Context, sig *SignalProcess) (*Operat
 func (s *jasperService) Wait(ctx context.Context, id *JasperProcessID) (*OperationOutcome, error) {
 	proc, err := s.manager.Get(ctx, id.Value)
 	if err != nil {
-		err = errors.Wrapf(err, "problem finding process '%s'", id.Value)
+		err = fmt.Errorf("problem finding process '%s': %w", id.Value, err)
 		return &OperationOutcome{
 			Success:  false,
 			Text:     err.Error(),
@@ -225,8 +224,8 @@ func (s *jasperService) Wait(ctx context.Context, id *JasperProcessID) (*Operati
 func (s *jasperService) Respawn(ctx context.Context, id *JasperProcessID) (*ProcessInfo, error) {
 	proc, err := s.manager.Get(ctx, id.Value)
 	if err != nil {
-		err = errors.Wrapf(err, "problem finding process '%s'", id.Value)
-		return nil, errors.WithStack(err)
+		err = fmt.Errorf("problem finding process '%s': %w", id.Value, err)
+		return nil, err
 	}
 
 	// Spawn a new context so that the process' context is not potentially
@@ -237,11 +236,11 @@ func (s *jasperService) Respawn(ctx context.Context, id *JasperProcessID) (*Proc
 	if err != nil {
 		err = fmt.Errorf("problem encountered while respawning: %w", err)
 		cancel()
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 	if err := s.manager.Register(ctx, newProc); err != nil {
 		cancel()
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	if err := newProc.RegisterTrigger(ctx, func(_ jasper.ProcessInfo) {
@@ -249,13 +248,13 @@ func (s *jasperService) Respawn(ctx context.Context, id *JasperProcessID) (*Proc
 	}); err != nil {
 		cancel()
 		if !getProcInfoNoHang(ctx, newProc).Complete {
-			return nil, errors.WithStack(err)
+			return nil, err
 		}
 	}
 
 	newProcInfo, err := ConvertProcessInfo(getProcInfoNoHang(ctx, newProc))
 	if err != nil {
-		return nil, errors.Wrapf(err, "could not get info for process '%s'", newProc.ID())
+		return nil, fmt.Errorf("could not get info for process '%s': %w", newProc.ID(), err)
 	}
 	return newProcInfo, nil
 }
@@ -282,7 +281,7 @@ func (s *jasperService) Close(ctx context.Context, _ *empty.Empty) (*OperationOu
 func (s *jasperService) GetTags(ctx context.Context, id *JasperProcessID) (*ProcessTags, error) {
 	proc, err := s.manager.Get(ctx, id.Value)
 	if err != nil {
-		return nil, errors.Wrapf(err, "problem finding process '%s'", id.Value)
+		return nil, fmt.Errorf("problem finding process '%s': %w", id.Value, err)
 	}
 
 	return &ProcessTags{ProcessID: id.Value, Tags: proc.GetTags()}, nil
@@ -291,7 +290,7 @@ func (s *jasperService) GetTags(ctx context.Context, id *JasperProcessID) (*Proc
 func (s *jasperService) TagProcess(ctx context.Context, tags *ProcessTags) (*OperationOutcome, error) {
 	proc, err := s.manager.Get(ctx, tags.ProcessID)
 	if err != nil {
-		err = errors.Wrapf(err, "problem finding process '%s'", tags.ProcessID)
+		err = fmt.Errorf("problem finding process '%s': %w", tags.ProcessID, err)
 		return &OperationOutcome{
 			ExitCode: 1,
 			Success:  false,
@@ -313,7 +312,7 @@ func (s *jasperService) TagProcess(ctx context.Context, tags *ProcessTags) (*Ope
 func (s *jasperService) ResetTags(ctx context.Context, id *JasperProcessID) (*OperationOutcome, error) {
 	proc, err := s.manager.Get(ctx, id.Value)
 	if err != nil {
-		err = errors.Wrapf(err, "problem finding process '%s'", id.Value)
+		err = fmt.Errorf("problem finding process '%s': %w", id.Value, err)
 		return &OperationOutcome{
 			ExitCode: -1,
 			Success:  false,
@@ -333,7 +332,7 @@ func (s *jasperService) DownloadFile(ctx context.Context, opts *DownloadInfo) (*
 	}
 
 	if err := jopts.Download(ctx); err != nil {
-		err = errors.Wrapf(err, "problem occurred during file download for URL %s to path %s", jopts.URL, jopts.Path)
+		err = fmt.Errorf("problem occurred during file download for URL %s to path %s: %w", jopts.URL, jopts.Path, err)
 		return &OperationOutcome{Success: false, Text: err.Error(), ExitCode: -3}, nil
 	}
 
@@ -347,7 +346,7 @@ func (s *jasperService) GetLogStream(ctx context.Context, request *LogRequest) (
 	id := request.Id
 	proc, err := s.manager.Get(ctx, id.Value)
 	if err != nil {
-		return nil, errors.Wrapf(err, "problem finding process '%s'", id.Value)
+		return nil, fmt.Errorf("problem finding process '%s': %w", id.Value, err)
 	}
 
 	stream := &LogStream{}
@@ -355,7 +354,7 @@ func (s *jasperService) GetLogStream(ctx context.Context, request *LogRequest) (
 	if err == io.EOF {
 		stream.Done = true
 	} else if err != nil {
-		return nil, errors.Wrapf(err, "could not get logs for process '%s'", request.Id.Value)
+		return nil, fmt.Errorf("could not get logs for process '%s': %w", request.Id.Value, err)
 	}
 	return stream, nil
 }
@@ -365,7 +364,7 @@ func (s *jasperService) RegisterSignalTriggerID(ctx context.Context, params *Sig
 
 	proc, err := s.manager.Get(ctx, jasperProcessID)
 	if err != nil {
-		err = errors.Wrapf(err, "problem finding process '%s'", jasperProcessID)
+		err = fmt.Errorf("problem finding process '%s': %w", jasperProcessID, err)
 		return &OperationOutcome{
 			Success:  false,
 			Text:     err.Error(),
@@ -383,7 +382,7 @@ func (s *jasperService) RegisterSignalTriggerID(ctx context.Context, params *Sig
 	}
 
 	if err := proc.RegisterSignalTrigger(ctx, makeTrigger()); err != nil {
-		err = errors.Wrapf(err, "problem registering signal trigger '%s'", signalTriggerID)
+		err = fmt.Errorf("problem registering signal trigger '%s': %w", signalTriggerID, err)
 		return &OperationOutcome{
 			Success:  false,
 			Text:     err.Error(),
@@ -404,7 +403,7 @@ func (s *jasperService) SignalEvent(ctx context.Context, name *EventName) (*Oper
 	if err := jasper.SignalEvent(ctx, eventName); err != nil {
 		return &OperationOutcome{
 			Success:  false,
-			Text:     errors.Wrapf(err, "problem signaling event '%s'", eventName).Error(),
+			Text:     fmt.Sprintf("problem signaling event '%s': %s", eventName, err.Error()),
 			ExitCode: -2,
 		}, nil
 	}
@@ -429,7 +428,7 @@ func (s *jasperService) WriteFile(stream JasperProcessManager_WriteFileServer) e
 				Text:     fmt.Errorf("error receiving from client stream: %w", err).Error(),
 				ExitCode: -2,
 			}); sendErr != nil {
-				return errors.Wrapf(sendErr, "could not send error response to client: %s", err.Error())
+				return fmt.Errorf("could not send error response to client: %s: %w", err.Error(), sendErr)
 			}
 			return nil
 		}
@@ -442,7 +441,7 @@ func (s *jasperService) WriteFile(stream JasperProcessManager_WriteFileServer) e
 				Text:     fmt.Errorf("problem validating file write options: %w", err).Error(),
 				ExitCode: -3,
 			}); sendErr != nil {
-				return errors.Wrapf(sendErr, "could not send error response to client: %s", err.Error())
+				return fmt.Errorf("could not send error response to client: %s: %w", err.Error(), sendErr)
 			}
 			return nil
 		}
@@ -453,7 +452,7 @@ func (s *jasperService) WriteFile(stream JasperProcessManager_WriteFileServer) e
 				Text:     fmt.Errorf("problem validating file write opts: %w", err).Error(),
 				ExitCode: -4,
 			}); sendErr != nil {
-				return errors.Wrapf(sendErr, "could not send error response to client: %s", err.Error())
+				return fmt.Errorf("could not send error response to client: %s: %w", err.Error(), sendErr)
 			}
 			return nil
 		}
@@ -462,18 +461,20 @@ func (s *jasperService) WriteFile(stream JasperProcessManager_WriteFileServer) e
 	if err := jopts.SetPerm(); err != nil {
 		if sendErr := stream.SendAndClose(&OperationOutcome{
 			Success:  false,
-			Text:     errors.Wrapf(err, "problem setting permissions for file %s", jopts.Path).Error(),
+			Text:     fmt.Sprintf("problem setting permissions for file %s: %s", jopts.Path, err.Error()),
 			ExitCode: -5,
 		}); sendErr != nil {
-			return errors.Wrapf(sendErr, "could not send error response to client: %s", err.Error())
+			return fmt.Errorf("could not send error response to client: %s: %w", err.Error(), sendErr)
 		}
 		return nil
 	}
-
-	return errors.Wrap(stream.SendAndClose(&OperationOutcome{
+	if err := stream.SendAndClose(&OperationOutcome{
 		Success: true,
 		Text:    fmt.Sprintf("file %s successfully written", jopts.Path),
-	}), "could not send success response to client")
+	}); err != nil {
+		return fmt.Errorf("could not send success response to client: %w", err)
+	}
+	return nil
 }
 
 func (s *jasperService) ScriptingHarnessCreate(ctx context.Context, opts *ScriptingOptions) (*ScriptingHarnessID, error) {

@@ -2,10 +2,10 @@ package remote
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/birch/mrpc/mongowire"
 	"github.com/tychoish/birch/mrpc/shell"
 	"github.com/tychoish/jasper/options"
@@ -96,7 +96,7 @@ func (lc *mdbLoggingCache) Remove(id string) {
 func (lc *mdbLoggingCache) CloseAndRemove(ctx context.Context, id string) error {
 	payload, err := lc.client.makeRequest(&loggingCacheCloseAndRemoveRequest{ID: id})
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	req, err := shell.RequestToMessage(mongowire.OP_QUERY, payload)
@@ -120,7 +120,7 @@ func (lc *mdbLoggingCache) CloseAndRemove(ctx context.Context, id string) error 
 func (lc *mdbLoggingCache) Clear(ctx context.Context) error {
 	payload, err := lc.client.makeRequest(&loggingCacheClearRequest{Clear: 1})
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	req, err := shell.RequestToMessage(mongowire.OP_QUERY, payload)

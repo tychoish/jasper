@@ -2,14 +2,13 @@ package remote
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"net"
 	"syscall"
 
 	empty "github.com/golang/protobuf/ptypes/empty"
-	"github.com/pkg/errors"
-
 	"github.com/tychoish/emt"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
@@ -49,7 +48,7 @@ func NewRPCClient(ctx context.Context, addr net.Addr, creds *options.Certificate
 
 	conn, err := grpc.DialContext(ctx, addr.String(), opts...)
 	if err != nil {
-		return nil, errors.Wrapf(err, "could not establish connection to %s service at address %s", addr.Network(), addr.String())
+		return nil, fmt.Errorf("could not establish connection to %s service at address %s: %w", addr.Network(), addr.String(), err)
 	}
 
 	return newRPCClient(conn), nil
@@ -95,7 +94,7 @@ func (c *rpcClient) CreateProcess(ctx context.Context, opts *options.Create) (ja
 	}
 	proc, err := c.client.Create(ctx, convertedOpts)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	return &rpcProcess{client: c.client, info: proc}, nil
@@ -112,7 +111,7 @@ func (c *rpcClient) CreateScripting(ctx context.Context, opts options.ScriptingH
 	}
 	seid, err := c.client.ScriptingHarnessCreate(ctx, seOpts)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	return &rpcScripting{client: c.client, id: seid.Id}, nil
@@ -121,7 +120,7 @@ func (c *rpcClient) CreateScripting(ctx context.Context, opts options.ScriptingH
 func (c *rpcClient) GetScripting(ctx context.Context, id string) (scripting.Harness, error) {
 	resp, err := c.client.ScriptingHarnessCheck(ctx, &internal.ScriptingHarnessID{Id: id})
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 	if !resp.Success {
 		return nil, errors.New(resp.Text)
@@ -198,7 +197,7 @@ func (c *rpcClient) Clear(ctx context.Context) {
 func (c *rpcClient) Close(ctx context.Context) error {
 	resp, err := c.client.Close(ctx, &empty.Empty{})
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 	if !resp.Success {
 		return errors.New(resp.Text)
@@ -210,7 +209,7 @@ func (c *rpcClient) Close(ctx context.Context) error {
 func (c *rpcClient) Status(ctx context.Context) (string, bool, error) {
 	resp, err := c.client.Status(ctx, &empty.Empty{})
 	if err != nil {
-		return "", false, errors.WithStack(err)
+		return "", false, err
 	}
 	return resp.HostId, resp.Active, nil
 }
@@ -222,7 +221,7 @@ func (c *rpcClient) CloseConnection() error {
 func (c *rpcClient) DownloadFile(ctx context.Context, opts options.Download) error {
 	resp, err := c.client.DownloadFile(ctx, internal.ConvertDownloadOptions(opts))
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	if !resp.Success {
@@ -238,7 +237,7 @@ func (c *rpcClient) GetLogStream(ctx context.Context, id string, count int) (jas
 		Count: int64(count),
 	})
 	if err != nil {
-		return jasper.LogStream{}, errors.WithStack(err)
+		return jasper.LogStream{}, err
 	}
 	return stream.Export(), nil
 }
@@ -246,7 +245,7 @@ func (c *rpcClient) GetLogStream(ctx context.Context, id string, count int) (jas
 func (c *rpcClient) SignalEvent(ctx context.Context, name string) error {
 	resp, err := c.client.SignalEvent(ctx, &internal.EventName{Value: name})
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 	if !resp.Success {
 		return errors.New(resp.Text)
@@ -275,7 +274,7 @@ func (c *rpcClient) WriteFile(ctx context.Context, jopts options.WriteFile) erro
 
 	resp, err := stream.CloseAndRecv()
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	if !resp.Success {
@@ -288,7 +287,7 @@ func (c *rpcClient) WriteFile(ctx context.Context, jopts options.WriteFile) erro
 func (c *rpcClient) SendMessages(ctx context.Context, lp options.LoggingPayload) error {
 	resp, err := c.client.SendMessages(ctx, internal.ConvertLoggingPayload(lp))
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	if !resp.Success {
@@ -368,7 +367,7 @@ func (p *rpcProcess) Signal(ctx context.Context, sig syscall.Signal) error {
 	})
 
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	if !resp.Success {
@@ -381,11 +380,11 @@ func (p *rpcProcess) Signal(ctx context.Context, sig syscall.Signal) error {
 func (p *rpcProcess) Wait(ctx context.Context) (int, error) {
 	resp, err := p.client.Wait(ctx, &internal.JasperProcessID{Value: p.info.Id})
 	if err != nil {
-		return -1, errors.WithStack(err)
+		return -1, err
 	}
 
 	if !resp.Success {
-		return int(resp.ExitCode), errors.Wrapf(errors.New(resp.Text), "process exited with error")
+		return int(resp.ExitCode), fmt.Errorf("process exited with error: %s")
 	}
 
 	return int(resp.ExitCode), nil
@@ -394,7 +393,7 @@ func (p *rpcProcess) Wait(ctx context.Context) (int, error) {
 func (p *rpcProcess) Respawn(ctx context.Context) (jasper.Process, error) {
 	newProc, err := p.client.Respawn(ctx, &internal.JasperProcessID{Value: p.info.Id})
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	return &rpcProcess{client: p.client, info: newProc}, nil
@@ -414,7 +413,7 @@ func (p *rpcProcess) RegisterSignalTriggerID(ctx context.Context, sigID jasper.S
 		SignalTriggerID: internal.ConvertSignalTriggerID(sigID),
 	})
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	if !resp.Success {
@@ -454,7 +453,7 @@ func (s *rpcScripting) ID() string { return s.id }
 func (s *rpcScripting) Run(ctx context.Context, args []string) error {
 	resp, err := s.client.ScriptingHarnessRun(ctx, &internal.ScriptingHarnessRunArgs{Id: s.id, Args: args})
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	if !resp.Success {
@@ -467,7 +466,7 @@ func (s *rpcScripting) Run(ctx context.Context, args []string) error {
 func (s *rpcScripting) Setup(ctx context.Context) error {
 	resp, err := s.client.ScriptingHarnessSetup(ctx, &internal.ScriptingHarnessID{Id: s.id})
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	if !resp.Success {
@@ -480,7 +479,7 @@ func (s *rpcScripting) Setup(ctx context.Context) error {
 func (s *rpcScripting) RunScript(ctx context.Context, script string) error {
 	resp, err := s.client.ScriptingHarnessRunScript(ctx, &internal.ScriptingHarnessRunScriptArgs{Id: s.id, Script: script})
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	if !resp.Success {
@@ -493,7 +492,7 @@ func (s *rpcScripting) RunScript(ctx context.Context, script string) error {
 func (s *rpcScripting) Build(ctx context.Context, dir string, args []string) (string, error) {
 	resp, err := s.client.ScriptingHarnessBuild(ctx, &internal.ScriptingHarnessBuildArgs{Id: s.id, Directory: dir, Args: args})
 	if err != nil {
-		return "", errors.WithStack(err)
+		return "", err
 	}
 
 	if !resp.Outcome.Success {
@@ -506,7 +505,7 @@ func (s *rpcScripting) Build(ctx context.Context, dir string, args []string) (st
 func (s *rpcScripting) Test(ctx context.Context, dir string, args ...scripting.TestOptions) ([]scripting.TestResult, error) {
 	resp, err := s.client.ScriptingHarnessTest(ctx, &internal.ScriptingHarnessTestArgs{Id: s.id, Directory: dir, Options: internal.ConvertScriptingTestOptions(args)})
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	if !resp.Outcome.Success {
@@ -519,7 +518,7 @@ func (s *rpcScripting) Test(ctx context.Context, dir string, args ...scripting.T
 func (s *rpcScripting) Cleanup(ctx context.Context) error {
 	resp, err := s.client.ScriptingHarnessCleanup(ctx, &internal.ScriptingHarnessID{Id: s.id})
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	if !resp.Success {

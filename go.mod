@@ -12,7 +12,6 @@ require (
 	github.com/google/uuid v1.2.0
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/opencontainers/runtime-spec v1.0.3-0.20210326190908-1c3f411f0417
-	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.5
 	github.com/tychoish/amboy v0.0.0-20220430162145-d25a56e0afa4
 	github.com/tychoish/birch v0.0.0-20221015141307-94c305a07b87
@@ -53,6 +52,7 @@ require (
 	github.com/opencontainers/image-spec v1.0.3-0.20211202183452-c5a74bcca799 // indirect
 	github.com/phyber/negroni-gzip v1.0.0 // indirect
 	github.com/pierrec/lz4 v2.5.2+incompatible // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rs/cors v1.8.2 // indirect
 	github.com/russross/blackfriday/v2 v2.0.1 // indirect

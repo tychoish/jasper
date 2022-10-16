@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -11,7 +12,6 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/gimlet"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
@@ -73,10 +73,10 @@ func handleError(resp *http.Response) error {
 
 	gimerr := gimlet.ErrorResponse{}
 	if err := gimlet.GetJSON(resp.Body, &gimerr); err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
-	return errors.WithStack(gimerr)
+	return gimerr
 }
 
 func (c *restClient) doRequest(ctx context.Context, method string, url string, body io.Reader) (*http.Response, error) {
@@ -92,7 +92,7 @@ func (c *restClient) doRequest(ctx context.Context, method string, url string, b
 	}
 
 	if err = handleError(resp); err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	return resp, nil
@@ -158,7 +158,7 @@ func (c *restClient) CreateScripting(ctx context.Context, opts options.Scripting
 	defer resp.Body.Close()
 
 	if err = handleError(resp); err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	out := struct {
@@ -183,7 +183,7 @@ func (c *restClient) GetScripting(ctx context.Context, id string) (scripting.Har
 	defer resp.Body.Close()
 
 	if err = handleError(resp); err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	return &restScripting{
@@ -215,7 +215,7 @@ func (c *restClient) getListOfProcesses(resp *http.Response) ([]jasper.Process, 
 
 func (c *restClient) List(ctx context.Context, f options.Filter) ([]jasper.Process, error) {
 	if err := f.Validate(); err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	resp, err := c.doRequest(ctx, http.MethodGet, c.getURL("/list/%s", string(f)), nil)
@@ -225,12 +225,12 @@ func (c *restClient) List(ctx context.Context, f options.Filter) ([]jasper.Proce
 	defer resp.Body.Close()
 
 	if err = handleError(resp); err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	out, err := c.getListOfProcesses(resp)
 
-	return out, errors.WithStack(err)
+	return out, err
 }
 
 func (c *restClient) Group(ctx context.Context, name string) ([]jasper.Process, error) {
@@ -241,12 +241,12 @@ func (c *restClient) Group(ctx context.Context, name string) ([]jasper.Process, 
 	defer resp.Body.Close()
 
 	if err = handleError(resp); err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	out, err := c.getListOfProcesses(resp)
 
-	return out, errors.WithStack(err)
+	return out, err
 }
 
 func (c *restClient) getProcess(ctx context.Context, id string) (*http.Response, error) {
@@ -261,13 +261,13 @@ func (c *restClient) getProcess(ctx context.Context, id string) (*http.Response,
 func (c *restClient) getProcessInfo(ctx context.Context, id string) (jasper.ProcessInfo, error) {
 	resp, err := c.getProcess(ctx, id)
 	if err != nil {
-		return jasper.ProcessInfo{}, errors.WithStack(err)
+		return jasper.ProcessInfo{}, err
 	}
 	defer resp.Body.Close()
 
 	out := jasper.ProcessInfo{}
 	if err = gimlet.GetJSON(resp.Body, &out); err != nil {
-		return jasper.ProcessInfo{}, errors.WithStack(err)
+		return jasper.ProcessInfo{}, err
 	}
 
 	return out, nil
@@ -276,7 +276,7 @@ func (c *restClient) getProcessInfo(ctx context.Context, id string) (jasper.Proc
 func (c *restClient) Get(ctx context.Context, id string) (jasper.Process, error) {
 	resp, err := c.getProcess(ctx, id)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 	defer resp.Body.Close()
 
@@ -358,7 +358,10 @@ func (c *restClient) WriteFile(ctx context.Context, opts options.WriteFile) erro
 		if err != nil {
 			return fmt.Errorf("problem writing file: %w", err)
 		}
-		return errors.Wrap(resp.Body.Close(), "problem closing response body")
+		if err := resp.Body.Close(); err != nil {
+			return fmt.Errorf("problem closing response body: %w", err)
+		}
+		return nil
 	}
 
 	return opts.WriteBufferedContent(sendOpts)
@@ -367,17 +370,17 @@ func (c *restClient) WriteFile(ctx context.Context, opts options.WriteFile) erro
 func (c *restClient) SendMessages(ctx context.Context, lp options.LoggingPayload) error {
 	body, err := makeBody(lp)
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	resp, err := c.doRequest(ctx, http.MethodPost, c.getURL("/logging/id/%s/send", lp.LoggerID), body)
 	if err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 	defer resp.Body.Close()
 
 	if err = handleError(resp); err != nil {
-		return errors.WithStack(err)
+		return err
 	}
 
 	return nil
@@ -451,7 +454,7 @@ func (p *restProcess) Respawn(ctx context.Context) (jasper.Process, error) {
 
 	info := jasper.ProcessInfo{}
 	if err = gimlet.GetJSON(resp.Body, &info); err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	return &restProcess{

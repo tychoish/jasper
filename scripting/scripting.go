@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 )
@@ -50,7 +49,7 @@ type Harness interface {
 // using Manager.CreateScripting), but are otherwise totally functional.
 func NewHarness(m jasper.Manager, env options.ScriptingHarness) (Harness, error) {
 	if err := env.Validate(); err != nil {
-		return nil, errors.WithStack(err)
+		return nil, err
 	}
 
 	switch t := env.(type) {

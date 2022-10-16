@@ -2,10 +2,10 @@ package remote
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/birch/mrpc/mongowire"
 	"github.com/tychoish/birch/mrpc/shell"
 	"github.com/tychoish/jasper/options"
@@ -200,7 +200,7 @@ func (s *mdbService) getHarness(ctx context.Context, w io.Writer, id, command st
 		return harness
 	}
 
-	shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, errors.Wrapf(err, "problem fetching scripting harness with id %s", id), command)
+	shell.WriteErrorResponse(ctx, w, mongowire.OP_REPLY, fmt.Errorf("problem fetching scripting harness with id %s: %w", id, err), command)
 	return nil
 }
 

@@ -5,11 +5,11 @@ package jasper
 import (
 	"bufio"
 	"context"
+	"errors"
 	"fmt"
 	"os/exec"
 	"strings"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/grip/recovery"
 )
 
@@ -20,10 +20,10 @@ func (o *oomTrackerImpl) Clear(ctx context.Context) error {
 	}
 
 	if sudo {
-		return errors.Wrap(exec.CommandContext(ctx, "sudo", "log", "erase", "--all").Run(), "error clearing log")
+		return exec.CommandContext(ctx, "sudo", "log", "erase", "--all").Run()
 	}
 
-	return errors.Wrap(exec.CommandContext(ctx, "log", "erase", "--all").Run(), "error clearing log")
+	return exec.CommandContext(ctx, "log", "erase", "--all").Run()
 }
 
 func (o *oomTrackerImpl) Check(ctx context.Context) error {

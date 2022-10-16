@@ -11,14 +11,13 @@ import (
 	"testing"
 	"time"
 
-	"errors"
-
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tychoish/grip"
+	"github.com/tychoish/grip/message"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/testutil"
 )
@@ -57,7 +56,7 @@ func TestProcessImplementations(t *testing.T) {
 						containers, err := client.ContainerList(ctx, types.ContainerListOptions{All: true})
 						require.NoError(t, err)
 						for _, container := range containers {
-							grip.Error(errors.Wrap(client.ContainerRemove(ctx, container.ID, types.ContainerRemoveOptions{Force: true}), "problem cleaning up container"))
+							grip.Error(message.WrapError(client.ContainerRemove(ctx, container.ID, types.ContainerRemoveOptions{Force: true}), "problem cleaning up container"))
 						}
 					}()
 				}

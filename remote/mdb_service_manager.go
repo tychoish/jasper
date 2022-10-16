@@ -2,10 +2,10 @@ package remote
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 
-	"github.com/pkg/errors"
 	"github.com/tychoish/birch"
 	"github.com/tychoish/birch/mrpc/mongowire"
 	"github.com/tychoish/birch/mrpc/shell"
@@ -102,7 +102,10 @@ func (s *mdbService) readPayload(doc birch.Marshaler, in interface{}) error {
 		return fmt.Errorf("problem reading payload: %w", err)
 	}
 
-	return errors.Wrap(s.unmarshaler(data, in), "problem parsing document")
+	if err := s.unmarshaler(data, in); err != nil {
+		return fmt.Errorf("problem parsing document: %w", err)
+	}
+	return nil
 }
 
 func (s *mdbService) managerList(ctx context.Context, w io.Writer, msg mongowire.Message) {
