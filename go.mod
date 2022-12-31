@@ -15,14 +15,13 @@ require (
 	github.com/opencontainers/runtime-spec v1.0.3-0.20210326190908-1c3f411f0417
 	github.com/stretchr/testify v1.7.5
 	github.com/tychoish/amboy v0.0.0-20221016175349-a562b519f3f8
-	github.com/tychoish/birch v0.0.0-20221015172859-21f2fb994959
+	github.com/tychoish/birch v0.0.0-20221231184222-0437ea03eb26
 	github.com/tychoish/emt v0.1.0
 	github.com/tychoish/gimlet v0.0.0-20220430160104-9dbd313f23e7
 	github.com/tychoish/grip v0.1.0
 	github.com/tychoish/grip/x/metrics v0.0.0-20221015161242-1426883e127d
 	github.com/tychoish/grip/x/splunk v0.0.0-20221015161242-1426883e127d
 	github.com/urfave/cli v1.22.4
-	go.mongodb.org/mongo-driver v1.10.3
 	golang.org/x/crypto v0.0.0-20221012134737-56aed061732a
 	google.golang.org/grpc v1.50.1
 )

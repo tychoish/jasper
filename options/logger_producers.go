@@ -3,6 +3,7 @@ package options
 import (
 	"fmt"
 
+	"github.com/tychoish/birch"
 	"github.com/tychoish/emt"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/send"
@@ -51,6 +52,21 @@ func (opts *DefaultLoggerOptions) Configure() (send.Sender, error) {
 		return nil, fmt.Errorf("problem creating safe default logger: %w", err)
 	}
 	return sender, nil
+}
+func (opts *DefaultLoggerOptions) MarshalDocument() (*birch.Document, error) {
+	base, err := opts.Base.MarshalDocument()
+	if err != nil {
+		return nil, err
+	}
+
+	return birch.DC.Elements(
+		birch.EC.String("prefix", opts.Prefix),
+		birch.EC.SubDocument("base", base),
+	), nil
+}
+
+func (opts *DefaultLoggerOptions) MarshalBSON() ([]byte, error) {
+	return birch.MarshalDocumentBSON(opts)
 }
 
 ///////////////////////////////////////////////////////////////////////////////

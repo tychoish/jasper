@@ -17,6 +17,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/birch"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/send"
@@ -24,7 +25,6 @@ import (
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/scripting"
 	"github.com/tychoish/jasper/testutil"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 func init() {
@@ -33,8 +33,16 @@ func init() {
 	grip.SetGlobalLogger(grip.NewLogger(sender))
 
 	reg := options.GetGlobalLoggerRegistry()
-	reg.RegisterMarshaler(options.RawLoggerConfigFormatBSON, bson.Marshal)
-	reg.RegisterUnmarshaler(options.RawLoggerConfigFormatBSON, bson.Unmarshal)
+
+	reg.RegisterMarshaler(options.RawLoggerConfigFormatBSON,
+		func(val interface{}) ([]byte, error) {
+			return birch.DC.Interface(val).MarshalBSON()
+		})
+	reg.RegisterUnmarshaler(options.RawLoggerConfigFormatBSON,
+		func(data []byte, val interface{}) error {
+			doc := birch.DC.Reader(data)
+			return doc.Unmarshal(val)
+		})
 }
 
 type clientTestCase struct {

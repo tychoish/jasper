@@ -414,6 +414,7 @@ func TestProcessImplementations(t *testing.T) {
 		"MDB": func(ctx context.Context, opts *options.Create) (jasper.Process, error) {
 			mngr, err := jasper.NewSynchronizedManager(false)
 			if err != nil {
+
 				return nil, err
 			}
 

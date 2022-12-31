@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/tychoish/birch"
 	"github.com/tychoish/emt"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/send"
@@ -96,18 +97,10 @@ func (f RawLoggerConfigFormat) Unmarshal(data []byte, out interface{}) error {
 type RawLoggerConfig []byte
 
 func (lc *RawLoggerConfig) MarshalJSON() ([]byte, error) { return *lc, nil }
+func (lc *RawLoggerConfig) UnmarshalJSON(b []byte) error { *lc = b; return nil }
 
-func (lc *RawLoggerConfig) UnmarshalJSON(b []byte) error {
-	*lc = b
-	return nil
-}
-
-func (lc RawLoggerConfig) MarshalBSON() ([]byte, error) { return lc, nil }
-
-func (lc *RawLoggerConfig) UnmarshalBSON(b []byte) error {
-	*lc = b
-	return nil
-}
+func (lc RawLoggerConfig) MarshalBSON() ([]byte, error)  { return lc, nil }
+func (lc *RawLoggerConfig) UnmarshalBSON(b []byte) error { *lc = b; return nil }
 
 // LoggerConfig represents the necessary information to construct a new grip
 // send.Sender. LoggerConfig implements the json and bson Marshaler and
@@ -320,6 +313,26 @@ func (opts *BaseOptions) Validate() error {
 	return catcher.Resolve()
 }
 
+func (opts *BaseOptions) MarshalDocument() (*birch.Document, error) {
+	buf, err := opts.Buffer.MarshalDocument()
+	if err != nil {
+		return nil, err
+	}
+
+	return birch.DC.Elements(
+		birch.EC.String("format", string(opts.Format)),
+		birch.EC.SubDocumentFromElements("level",
+			birch.EC.Int("default", int(opts.Level.Default)),
+			birch.EC.Int("threshhold", int(opts.Level.Threshold)),
+		),
+		birch.EC.SubDocument("buffer", buf),
+	), nil
+}
+
+func (opts *BaseOptions) MarshalBSON() ([]byte, error) {
+	return birch.MarshalDocumentBSON(opts)
+}
+
 // BufferOptions packages options for whether or not a Logger should be
 // buffered and the duration and size of the respective buffer in the case that
 // it should be.
@@ -336,6 +349,18 @@ func (opts *BufferOptions) Validate() error {
 	}
 
 	return nil
+}
+
+func (opts *BufferOptions) MarshalDocument() (*birch.Document, error) {
+	return birch.DC.Elements(
+		birch.EC.Boolean("buffered", opts.Buffered),
+		birch.EC.Duration("duration", opts.Duration),
+		birch.EC.Int("max_size", opts.MaxSize),
+	), nil
+}
+
+func (opts *BufferOptions) MarshalBSON() ([]byte, error) {
+	return birch.MarshalDocumentBSON(opts)
 }
 
 // SafeSender wraps a grip send.Sender and its base sender, ensuring that the

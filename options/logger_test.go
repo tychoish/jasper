@@ -8,13 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/send"
-	"go.mongodb.org/mongo-driver/bson"
 )
-
-func init() {
-	GetGlobalLoggerRegistry().RegisterMarshaler(RawLoggerConfigFormatBSON, bson.Marshal)
-	GetGlobalLoggerRegistry().RegisterUnmarshaler(RawLoggerConfigFormatBSON, bson.Unmarshal)
-}
 
 func TestLoggerConfigValidate(t *testing.T) {
 	t.Run("NoType", func(t *testing.T) {
@@ -181,7 +175,7 @@ func TestLoggerConfigResolve(t *testing.T) {
 		assert.NoError(t, err)
 	})
 	t.Run("ProducerAndSenderUnsetBSON", func(t *testing.T) {
-		rawConfig, err := bson.Marshal(&DefaultLoggerOptions{Base: BaseOptions{Format: LogFormatPlain}})
+		rawConfig, err := (&DefaultLoggerOptions{Base: BaseOptions{Format: LogFormatPlain}}).MarshalBSON()
 		require.NoError(t, err)
 		config := LoggerConfig{
 			Registry: globalLoggerRegistry,
@@ -199,17 +193,18 @@ func TestLoggerConfigResolve(t *testing.T) {
 
 func TestLoggerConfigMarshalBSON(t *testing.T) {
 	t.Run("InvalidConfig", func(t *testing.T) {
-		config := LoggerConfig{
+		config := &LoggerConfig{
 			info: loggerConfigInfo{
 				Type:   LogDefault,
 				Config: []byte("some bytes"),
 			},
 		}
-		_, err := bson.Marshal(&config)
+
+		_, err := config.MarshalBSON()
 		assert.Error(t, err)
 	})
 	t.Run("UnregisteredLogger", func(t *testing.T) {
-		config := LoggerConfig{
+		config := &LoggerConfig{
 			Registry: NewBasicLoggerRegistry(),
 			info: loggerConfigInfo{
 				Type:   LogDefault,
@@ -217,7 +212,7 @@ func TestLoggerConfigMarshalBSON(t *testing.T) {
 				Config: []byte("some bytes"),
 			},
 		}
-		_, err := bson.Marshal(&config)
+		_, err := config.MarshalBSON()
 		assert.Error(t, err)
 	})
 	t.Run("JSON2BSON", func(t *testing.T) {
@@ -233,18 +228,19 @@ func TestLoggerConfigMarshalBSON(t *testing.T) {
 		}
 		rawConfig, err := json.Marshal(producer)
 		require.NoError(t, err)
-		config := LoggerConfig{
+		config := &LoggerConfig{
 			info: loggerConfigInfo{
 				Type:   LogDefault,
 				Format: RawLoggerConfigFormatJSON,
 				Config: rawConfig,
 			},
 		}
-		data, err := bson.Marshal(&config)
+		data, err := config.MarshalBSON()
 		require.NoError(t, err)
 		assert.NotNil(t, data)
 		unmarshalledConfig := &LoggerConfig{}
-		require.NoError(t, bson.Unmarshal(data, unmarshalledConfig))
+		err = unmarshalledConfig.UnmarshalBSON(data)
+		require.NoError(t, err)
 		assert.Equal(t, config.info.Type, unmarshalledConfig.info.Type)
 		assert.Equal(t, RawLoggerConfigFormatBSON, unmarshalledConfig.info.Format)
 		_, err = config.Resolve()
@@ -252,7 +248,7 @@ func TestLoggerConfigMarshalBSON(t *testing.T) {
 		assert.Equal(t, producer, config.producer)
 	})
 	t.Run("ExistingProducer", func(t *testing.T) {
-		config := LoggerConfig{
+		config := &LoggerConfig{
 			info: loggerConfigInfo{
 				Type:   LogDefault,
 				Format: RawLoggerConfigFormatBSON,
@@ -269,11 +265,12 @@ func TestLoggerConfigMarshalBSON(t *testing.T) {
 				},
 			},
 		}
-		data, err := bson.Marshal(&config)
+		data, err := config.MarshalBSON()
 		require.NoError(t, err)
 		assert.NotNil(t, data)
 		unmarshalledConfig := &LoggerConfig{}
-		require.NoError(t, bson.Unmarshal(data, unmarshalledConfig))
+		err = unmarshalledConfig.UnmarshalBSON(data)
+		require.NoError(t, err)
 		assert.Equal(t, config.info.Type, unmarshalledConfig.info.Type)
 		assert.Equal(t, RawLoggerConfigFormatBSON, unmarshalledConfig.info.Format)
 		_, err = unmarshalledConfig.Resolve()
@@ -281,7 +278,7 @@ func TestLoggerConfigMarshalBSON(t *testing.T) {
 		assert.Equal(t, config.producer, unmarshalledConfig.producer)
 	})
 	t.Run("RoundTrip", func(t *testing.T) {
-		rawConfig, err := bson.Marshal(&DefaultLoggerOptions{
+		rawConfig, err := (&DefaultLoggerOptions{
 			Prefix: "jasper",
 			Base: BaseOptions{
 				Level: send.LevelInfo{
@@ -290,9 +287,9 @@ func TestLoggerConfigMarshalBSON(t *testing.T) {
 				},
 				Format: LogFormatPlain,
 			},
-		})
+		}).MarshalBSON()
 		require.NoError(t, err)
-		config := LoggerConfig{
+		config := &LoggerConfig{
 			Registry: globalLoggerRegistry,
 			info: loggerConfigInfo{
 				Type:   LogDefault,
@@ -300,10 +297,11 @@ func TestLoggerConfigMarshalBSON(t *testing.T) {
 				Config: rawConfig,
 			},
 		}
-		data, err := bson.Marshal(&config)
+		data, err := config.MarshalBSON()
 		require.NoError(t, err)
 		roundTripped := &LoggerConfig{}
-		require.NoError(t, bson.Unmarshal(data, roundTripped))
+		err = roundTripped.UnmarshalBSON(data)
+		require.NoError(t, err)
 		sender, err := roundTripped.Resolve()
 		assert.NotNil(t, sender)
 		assert.NoError(t, err)
@@ -345,7 +343,7 @@ func TestLoggerConfigMarshalJSON(t *testing.T) {
 				Format: LogFormatPlain,
 			},
 		}
-		rawConfig, err := bson.Marshal(producer)
+		rawConfig, err := producer.MarshalBSON()
 		require.NoError(t, err)
 		config := LoggerConfig{
 			info: loggerConfigInfo{

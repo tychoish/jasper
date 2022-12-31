@@ -4,23 +4,39 @@ import (
 	"encoding/json"
 	"sync"
 
+	"github.com/tychoish/birch"
 	"github.com/tychoish/grip/send"
 )
 
-var globalLoggerRegistry LoggerRegistry = &basicLoggerRegistry{
-	factories: map[string]LoggerProducerFactory{
-		LogDefault:   NewDefaultLoggerProducer,
-		LogFile:      NewFileLoggerProducer,
-		LogInherited: NewInheritedLoggerProducer,
-		LogInMemory:  NewInMemoryLoggerProducer,
-		LogSplunk:    NewSplunkLoggerProducer,
-	},
-	marshalers: map[RawLoggerConfigFormat]Marshaler{
-		RawLoggerConfigFormatJSON: json.Marshal,
-	},
-	unmarshalers: map[RawLoggerConfigFormat]Unmarshaler{
-		RawLoggerConfigFormatJSON: json.Unmarshal,
-	},
+var globalLoggerRegistry LoggerRegistry
+
+func init() {
+	globalLoggerRegistry = &basicLoggerRegistry{
+		factories: map[string]LoggerProducerFactory{
+			LogDefault:   NewDefaultLoggerProducer,
+			LogFile:      NewFileLoggerProducer,
+			LogInherited: NewInheritedLoggerProducer,
+			LogInMemory:  NewInMemoryLoggerProducer,
+			LogSplunk:    NewSplunkLoggerProducer,
+		},
+		marshalers: map[RawLoggerConfigFormat]Marshaler{
+			RawLoggerConfigFormatJSON: json.Marshal,
+			RawLoggerConfigFormatBSON: func(val interface{}) ([]byte, error) {
+				return birch.DC.Interface(val).MarshalBSON()
+			},
+		},
+		unmarshalers: map[RawLoggerConfigFormat]Unmarshaler{
+			RawLoggerConfigFormatJSON: json.Unmarshal,
+			RawLoggerConfigFormatBSON: func(data []byte, val interface{}) error {
+				doc, err := birch.DC.ReaderErr(data)
+				if err != nil {
+					return err
+				}
+
+				return doc.Unmarshal(val)
+			},
+		},
+	}
 }
 
 // GetGlobalLoggerRegistry returns the global logger registry.
@@ -53,7 +69,9 @@ type basicLoggerRegistry struct {
 // basicLoggerRegistry implementation.
 func NewBasicLoggerRegistry() LoggerRegistry {
 	return &basicLoggerRegistry{
-		factories: map[string]LoggerProducerFactory{},
+		factories:    map[string]LoggerProducerFactory{},
+		marshalers:   map[RawLoggerConfigFormat]Marshaler{},
+		unmarshalers: map[RawLoggerConfigFormat]Unmarshaler{},
 	}
 }
 
