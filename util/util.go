@@ -48,7 +48,10 @@ func ConvertWriter(wr io.Writer, err error) send.Sender {
 		return nil
 	}
 
-	return send.WrapWriter(wr)
+	sender := send.WrapWriter(wr)
+	sender.SetName(sender.Name())
+	return sender
+
 }
 
 func CheckCall(catcher emt.Catcher, fn emt.CheckFunction, msg string) {
