@@ -6,11 +6,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/golang/protobuf/ptypes"
 	empty "github.com/golang/protobuf/ptypes/empty"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"github.com/tychoish/grip"
-	"github.com/tychoish/grip/message"
 	"github.com/tychoish/jasper/options"
 	internal "github.com/tychoish/jasper/remote/internal"
 )
@@ -90,14 +88,7 @@ func (lc *rpcLoggingCache) Clear(ctx context.Context) error {
 }
 
 func (lc *rpcLoggingCache) Prune(ts time.Time) {
-	pbts, err := ptypes.TimestampProto(ts)
-	if err != nil {
-		grip.Warning(message.WrapError(err, message.Fields{
-			"message": "could not convert prune timestamp to equivalent protobuf RPC timestamp",
-		}))
-		return
-	}
-	_, _ = lc.client.LoggingCachePrune(lc.ctx, pbts)
+	_, _ = lc.client.LoggingCachePrune(lc.ctx, timestamppb.New(ts))
 }
 
 func (lc *rpcLoggingCache) Len() int {

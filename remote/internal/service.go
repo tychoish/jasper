@@ -9,7 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/golang/protobuf/ptypes"
 	empty "github.com/golang/protobuf/ptypes/empty"
 	timestamp "github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/tychoish/jasper"
@@ -83,6 +82,7 @@ func (s *jasperService) Create(ctx context.Context, opts *CreateOptions) (*Proce
 
 	proc, err := s.manager.CreateProcess(pctx, jopts)
 	if err != nil {
+		cancel()
 		return nil, err
 	}
 
@@ -679,23 +679,13 @@ func (s *jasperService) ScriptingHarnessTest(ctx context.Context, args *Scriptin
 			},
 		}, nil
 	}
-	convertedRes, err := ConvertScriptingTestResults(res)
-	if err != nil {
-		return &ScriptingHarnessTestResponse{
-			Outcome: &OperationOutcome{
-				Success:  false,
-				Text:     err.Error(),
-				ExitCode: -4,
-			},
-		}, nil
-	}
 
 	return &ScriptingHarnessTestResponse{
 		Outcome: &OperationOutcome{
 			Success:  true,
 			ExitCode: 0,
 		},
-		Results: convertedRes,
+		Results: ConvertScriptingTestResults(res),
 	}, nil
 }
 
@@ -720,17 +710,7 @@ func (s *jasperService) LoggingCacheCreate(ctx context.Context, args *LoggingCac
 		}, nil
 	}
 
-	logger, err := ConvertCachedLogger(out)
-	if err != nil {
-		return &LoggingCacheInstance{
-			Outcome: &OperationOutcome{
-				Success:  false,
-				Text:     err.Error(),
-				ExitCode: -2,
-			},
-		}, nil
-	}
-	return logger, nil
+	return ConvertCachedLogger(out), nil
 }
 
 func (s *jasperService) LoggingCacheGet(ctx context.Context, args *LoggingCacheArgs) (*LoggingCacheInstance, error) {
@@ -750,17 +730,7 @@ func (s *jasperService) LoggingCacheGet(ctx context.Context, args *LoggingCacheA
 		}, nil
 	}
 
-	logger, err := ConvertCachedLogger(out)
-	if err != nil {
-		return &LoggingCacheInstance{
-			Outcome: &OperationOutcome{
-				Success:  false,
-				Text:     err.Error(),
-				ExitCode: -2,
-			},
-		}, nil
-	}
-	return logger, nil
+	return ConvertCachedLogger(out), nil
 }
 
 func (s *jasperService) LoggingCacheRemove(ctx context.Context, args *LoggingCacheArgs) (*OperationOutcome, error) {
@@ -812,11 +782,7 @@ func (s *jasperService) LoggingCachePrune(ctx context.Context, arg *timestamp.Ti
 		return nil, errors.New("logging cache not supported")
 	}
 
-	ts, err := ptypes.Timestamp(arg)
-	if err != nil {
-		return nil, fmt.Errorf("could not convert prune timestamp to equivalent protobuf RPC timestamp: %w", err)
-	}
-	lc.Prune(ts)
+	lc.Prune(arg.AsTime())
 
 	return &OperationOutcome{
 		Success: true,

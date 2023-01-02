@@ -2,13 +2,11 @@ package testutil
 
 import (
 	"errors"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
 
 	"github.com/mholt/archiver"
-
 	"github.com/tychoish/emt"
 )
 
@@ -20,7 +18,8 @@ func AddFileToDirectory(dir string, fileName string, fileContents string) error 
 		if !ok {
 			return errors.New("unsupported archive format")
 		}
-		tmpFile, err := ioutil.TempFile(dir, "tmp.txt")
+
+		tmpFile, err := os.CreateTemp(dir, "tmp.txt")
 		if err != nil {
 			return err
 		}

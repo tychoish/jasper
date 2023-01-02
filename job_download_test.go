@@ -3,7 +3,6 @@ package jasper
 import (
 	"context"
 	"errors"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -40,7 +39,7 @@ func (s *DownloadJobSuite) TearDownTest() {
 
 func (s *DownloadJobSuite) SetupTest() {
 	var err error
-	s.tempDir, err = ioutil.TempDir("", uuid.New().String())
+	s.tempDir, err = os.MkdirTemp("", uuid.New().String())
 	s.require.NoError(err)
 
 	s.job = newDownloadJob()

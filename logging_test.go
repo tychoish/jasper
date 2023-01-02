@@ -134,7 +134,7 @@ func TestLogging(t *testing.T) {
 				}))
 				require.NotNil(t, cache.Get("id0"))
 				require.NotNil(t, cache.Get("id1"))
-				cache.Clear(ctx)
+				_ = cache.Clear(ctx)
 				assert.Nil(t, cache.Get("id0"))
 				assert.Nil(t, cache.Get("id1"))
 			},

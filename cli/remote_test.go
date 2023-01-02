@@ -3,7 +3,6 @@ package cli
 import (
 	"context"
 	"encoding/json"
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -24,7 +23,7 @@ func TestCLIRemote(t *testing.T) {
 		t.Run(remoteType, func(t *testing.T) {
 			for testName, testCase := range map[string]func(ctx context.Context, t *testing.T, c *cli.Context){
 				"DownloadFileSucceeds": func(ctx context.Context, t *testing.T, c *cli.Context) {
-					tmpFile, err := ioutil.TempFile(testutil.BuildDirectory(), "out.txt")
+					tmpFile, err := os.CreateTemp(testutil.BuildDirectory(), "out.txt")
 					require.NoError(t, err)
 					defer func() {
 						assert.NoError(t, tmpFile.Close())
@@ -62,7 +61,7 @@ func TestCLIRemote(t *testing.T) {
 					assert.True(t, resp.Successful())
 				},
 				"WriteFileSucceeds": func(ctx context.Context, t *testing.T, c *cli.Context) {
-					tmpFile, err := ioutil.TempFile(testutil.BuildDirectory(), "write_file")
+					tmpFile, err := os.CreateTemp(testutil.BuildDirectory(), "write_file")
 					require.NoError(t, err)
 					defer func() {
 						assert.NoError(t, tmpFile.Close())
@@ -78,7 +77,7 @@ func TestCLIRemote(t *testing.T) {
 
 					assert.True(t, resp.Successful())
 
-					data, err := ioutil.ReadFile(opts.Path)
+					data, err := os.ReadFile(opts.Path)
 					require.NoError(t, err)
 					assert.Equal(t, opts.Content, data)
 				},

@@ -3,8 +3,8 @@ package remote
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"net"
+	"os"
 	"path/filepath"
 
 	"github.com/tychoish/emt"
@@ -59,17 +59,17 @@ func makeTLSRPCServiceAndClient(ctx context.Context, mngr jasper.Manager) (Manag
 	clientKeyFile := filepath.Join("testdata", "client.key")
 
 	// Make CA credentials
-	caCert, err := ioutil.ReadFile(caCertFile)
+	caCert, err := os.ReadFile(caCertFile)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read cert file: %w", err)
 	}
 
 	// Make server credentials
-	serverCert, err := ioutil.ReadFile(serverCertFile)
+	serverCert, err := os.ReadFile(serverCertFile)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read cert file: %w", err)
 	}
-	serverKey, err := ioutil.ReadFile(serverKeyFile)
+	serverKey, err := os.ReadFile(serverKeyFile)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read key file: %w", err)
 	}
@@ -85,11 +85,11 @@ func makeTLSRPCServiceAndClient(ctx context.Context, mngr jasper.Manager) (Manag
 		return nil, fmt.Errorf("failed to start RPC service: %w", err)
 	}
 
-	clientCert, err := ioutil.ReadFile(clientCertFile)
+	clientCert, err := os.ReadFile(clientCertFile)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read cert file: %w", err)
 	}
-	clientKey, err := ioutil.ReadFile(clientKeyFile)
+	clientKey, err := os.ReadFile(clientKeyFile)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read key file: %w", err)
 	}

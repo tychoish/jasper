@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
@@ -571,7 +570,7 @@ func TestManager(t *testing.T) {
 						clientTestCase{
 							Name: "WriteFileSucceeds",
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
-								tmpFile, err := ioutil.TempFile(testutil.BuildDirectory(), filepath.Base(t.Name()))
+								tmpFile, err := os.CreateTemp(testutil.BuildDirectory(), filepath.Base(t.Name()))
 								require.NoError(t, err)
 								defer func() {
 									assert.NoError(t, os.RemoveAll(tmpFile.Name()))
@@ -581,7 +580,7 @@ func TestManager(t *testing.T) {
 								opts := options.WriteFile{Path: tmpFile.Name(), Content: []byte("foo")}
 								require.NoError(t, client.WriteFile(ctx, opts))
 
-								content, err := ioutil.ReadFile(tmpFile.Name())
+								content, err := os.ReadFile(tmpFile.Name())
 								require.NoError(t, err)
 
 								assert.Equal(t, opts.Content, content)
@@ -590,7 +589,7 @@ func TestManager(t *testing.T) {
 						clientTestCase{
 							Name: "WriteFileAcceptsContentFromReader",
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
-								tmpFile, err := ioutil.TempFile(testutil.BuildDirectory(), filepath.Base(t.Name()))
+								tmpFile, err := os.CreateTemp(testutil.BuildDirectory(), filepath.Base(t.Name()))
 								require.NoError(t, err)
 								defer func() {
 									assert.NoError(t, os.RemoveAll(tmpFile.Name()))
@@ -601,7 +600,7 @@ func TestManager(t *testing.T) {
 								opts := options.WriteFile{Path: tmpFile.Name(), Reader: bytes.NewBuffer(buf)}
 								require.NoError(t, client.WriteFile(ctx, opts))
 
-								content, err := ioutil.ReadFile(tmpFile.Name())
+								content, err := os.ReadFile(tmpFile.Name())
 								require.NoError(t, err)
 
 								assert.Equal(t, buf, content)
@@ -610,7 +609,7 @@ func TestManager(t *testing.T) {
 						clientTestCase{
 							Name: "WriteFileSucceedsWithLargeContent",
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
-								tmpFile, err := ioutil.TempFile(testutil.BuildDirectory(), filepath.Base(t.Name()))
+								tmpFile, err := os.CreateTemp(testutil.BuildDirectory(), filepath.Base(t.Name()))
 								require.NoError(t, err)
 								defer func() {
 									assert.NoError(t, os.RemoveAll(tmpFile.Name()))
@@ -621,7 +620,7 @@ func TestManager(t *testing.T) {
 								opts := options.WriteFile{Path: tmpFile.Name(), Content: bytes.Repeat([]byte("foo"), mb)}
 								require.NoError(t, client.WriteFile(ctx, opts))
 
-								content, err := ioutil.ReadFile(tmpFile.Name())
+								content, err := os.ReadFile(tmpFile.Name())
 								require.NoError(t, err)
 
 								assert.Equal(t, opts.Content, content)
@@ -630,7 +629,7 @@ func TestManager(t *testing.T) {
 						clientTestCase{
 							Name: "WriteFileSucceedsWithLargeContentFromReader",
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
-								tmpFile, err := ioutil.TempFile(testutil.BuildDirectory(), filepath.Base(t.Name()))
+								tmpFile, err := os.CreateTemp(testutil.BuildDirectory(), filepath.Base(t.Name()))
 								require.NoError(t, err)
 								defer func() {
 									assert.NoError(t, tmpFile.Close())
@@ -642,7 +641,7 @@ func TestManager(t *testing.T) {
 								opts := options.WriteFile{Path: tmpFile.Name(), Reader: bytes.NewBuffer(buf)}
 								require.NoError(t, client.WriteFile(ctx, opts))
 
-								content, err := ioutil.ReadFile(tmpFile.Name())
+								content, err := os.ReadFile(tmpFile.Name())
 								require.NoError(t, err)
 
 								assert.Equal(t, buf, content)
@@ -752,7 +751,7 @@ func TestManager(t *testing.T) {
 										assert.NotZero(t, fileInfo.Size())
 									},
 									"WritesFileIfExists": func(ctx context.Context, t *testing.T, client Manager, tempDir string) {
-										file, err := ioutil.TempFile(tempDir, "out.txt")
+										file, err := os.CreateTemp(tempDir, "out.txt")
 										require.NoError(t, err)
 										defer func() {
 											assert.NoError(t, os.RemoveAll(file.Name()))
@@ -773,13 +772,13 @@ func TestManager(t *testing.T) {
 										assert.NotZero(t, fileInfo.Size())
 									},
 									"CreatesFileAndExtracts": func(ctx context.Context, t *testing.T, client Manager, tempDir string) {
-										downloadDir, err := ioutil.TempDir(tempDir, "out")
+										downloadDir, err := os.MkdirTemp(tempDir, "out")
 										require.NoError(t, err)
 										defer func() {
 											assert.NoError(t, os.RemoveAll(downloadDir))
 										}()
 
-										fileServerDir, err := ioutil.TempDir(tempDir, "file_server")
+										fileServerDir, err := os.MkdirTemp(tempDir, "file_server")
 										require.NoError(t, err)
 										defer func() {
 											assert.NoError(t, os.RemoveAll(fileServerDir))
@@ -824,19 +823,19 @@ func TestManager(t *testing.T) {
 										require.NoError(t, err)
 										assert.NotZero(t, fileInfo.Size())
 
-										dirContents, err := ioutil.ReadDir(destExtractDir)
+										dirContents, err := os.ReadDir(destExtractDir)
 										require.NoError(t, err)
 
 										assert.NotZero(t, len(dirContents))
 									},
 									"FailsForInvalidArchiveFormat": func(ctx context.Context, t *testing.T, client Manager, tempDir string) {
-										file, err := ioutil.TempFile(tempDir, filepath.Base(t.Name()))
+										file, err := os.CreateTemp(tempDir, filepath.Base(t.Name()))
 										require.NoError(t, err)
 										defer func() {
 											assert.NoError(t, os.RemoveAll(file.Name()))
 										}()
 										require.NoError(t, file.Close())
-										extractDir, err := ioutil.TempDir(tempDir, filepath.Base(t.Name())+"_extract")
+										extractDir, err := os.MkdirTemp(tempDir, filepath.Base(t.Name())+"_extract")
 										require.NoError(t, err)
 										defer func() {
 											assert.NoError(t, os.RemoveAll(file.Name()))
@@ -854,7 +853,7 @@ func TestManager(t *testing.T) {
 										assert.Error(t, client.DownloadFile(ctx, opts))
 									},
 									"FailsForUnarchivedFile": func(ctx context.Context, t *testing.T, client Manager, tempDir string) {
-										extractDir, err := ioutil.TempDir(tempDir, filepath.Base(t.Name())+"_extract")
+										extractDir, err := os.MkdirTemp(tempDir, filepath.Base(t.Name())+"_extract")
 										require.NoError(t, err)
 										defer func() {
 											assert.NoError(t, os.RemoveAll(extractDir))
@@ -870,12 +869,12 @@ func TestManager(t *testing.T) {
 										}
 										assert.Error(t, client.DownloadFile(ctx, opts))
 
-										dirContents, err := ioutil.ReadDir(extractDir)
+										dirContents, err := os.ReadDir(extractDir)
 										require.NoError(t, err)
 										assert.Zero(t, len(dirContents))
 									},
 									"FailsForInvalidURL": func(ctx context.Context, t *testing.T, client Manager, tempDir string) {
-										file, err := ioutil.TempFile(tempDir, filepath.Base(t.Name()))
+										file, err := os.CreateTemp(tempDir, filepath.Base(t.Name()))
 										require.NoError(t, err)
 										defer func() {
 											assert.NoError(t, os.RemoveAll(file.Name()))
@@ -884,7 +883,7 @@ func TestManager(t *testing.T) {
 										assert.Error(t, client.DownloadFile(ctx, options.Download{URL: "", Path: file.Name()}))
 									},
 									"FailsForNonexistentURL": func(ctx context.Context, t *testing.T, client Manager, tempDir string) {
-										file, err := ioutil.TempFile(tempDir, "out.txt")
+										file, err := os.CreateTemp(tempDir, "out.txt")
 										require.NoError(t, err)
 										defer func() {
 											assert.NoError(t, os.RemoveAll(file.Name()))
@@ -902,7 +901,7 @@ func TestManager(t *testing.T) {
 									},
 								} {
 									t.Run(testName, func(t *testing.T) {
-										tempDir, err := ioutil.TempDir(testutil.BuildDirectory(), filepath.Base(t.Name()))
+										tempDir, err := os.MkdirTemp(testutil.BuildDirectory(), filepath.Base(t.Name()))
 										require.NoError(t, err)
 										defer func() {
 											assert.NoError(t, os.RemoveAll(tempDir))
@@ -915,7 +914,7 @@ func TestManager(t *testing.T) {
 						clientTestCase{
 							Name: "CreateWithLogFile",
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
-								file, err := ioutil.TempFile(testutil.BuildDirectory(), filepath.Base(t.Name()))
+								file, err := os.CreateTemp(testutil.BuildDirectory(), filepath.Base(t.Name()))
 								require.NoError(t, err)
 								defer func() {
 									assert.NoError(t, os.RemoveAll(file.Name()))
@@ -946,7 +945,7 @@ func TestManager(t *testing.T) {
 								require.NoError(t, err)
 								assert.NotZero(t, info.Size())
 
-								fileContents, err := ioutil.ReadFile(file.Name())
+								fileContents, err := os.ReadFile(file.Name())
 								require.NoError(t, err)
 								assert.Contains(t, string(fileContents), output)
 							},
@@ -1164,7 +1163,7 @@ func TestManager(t *testing.T) {
 						clientTestCase{
 							Name: "ScriptingRunNoError",
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
-								tmpdir, err := ioutil.TempDir(testutil.BuildDirectory(), "scripting_tests")
+								tmpdir, err := os.MkdirTemp(testutil.BuildDirectory(), "scripting_tests")
 								require.NoError(t, err)
 								defer func() {
 									assert.NoError(t, os.RemoveAll(tmpdir))
@@ -1173,14 +1172,14 @@ func TestManager(t *testing.T) {
 
 								require.NoError(t, err)
 								tmpFile := filepath.Join(tmpdir, "fake_script.go")
-								require.NoError(t, ioutil.WriteFile(tmpFile, []byte(`package main; import "os"; func main() { os.Exit(0) }`), 0755))
+								require.NoError(t, os.WriteFile(tmpFile, []byte(`package main; import "os"; func main() { os.Exit(0) }`), 0755))
 								assert.NoError(t, harness.Run(ctx, []string{tmpFile}))
 							},
 						},
 						clientTestCase{
 							Name: "ScriptingRunError",
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
-								tmpdir, err := ioutil.TempDir(testutil.BuildDirectory(), "scripting_tests")
+								tmpdir, err := os.MkdirTemp(testutil.BuildDirectory(), "scripting_tests")
 								require.NoError(t, err)
 								defer func() {
 									assert.NoError(t, os.RemoveAll(tmpdir))
@@ -1188,14 +1187,14 @@ func TestManager(t *testing.T) {
 								harness := createTestScriptingHarness(ctx, t, client, tmpdir)
 
 								tmpFile := filepath.Join(tmpdir, "fake_script.go")
-								require.NoError(t, ioutil.WriteFile(tmpFile, []byte(`package main; import "os"; func main() { os.Exit(42) }`), 0755))
+								require.NoError(t, os.WriteFile(tmpFile, []byte(`package main; import "os"; func main() { os.Exit(42) }`), 0755))
 								assert.Error(t, harness.Run(ctx, []string{tmpFile}))
 							},
 						},
 						clientTestCase{
 							Name: "ScriptingRunScriptNoError",
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
-								tmpdir, err := ioutil.TempDir(testutil.BuildDirectory(), "scripting_tests")
+								tmpdir, err := os.MkdirTemp(testutil.BuildDirectory(), "scripting_tests")
 								require.NoError(t, err)
 								defer func() {
 									assert.NoError(t, os.RemoveAll(tmpdir))
@@ -1208,7 +1207,7 @@ func TestManager(t *testing.T) {
 						clientTestCase{
 							Name: "ScriptingRunScriptError",
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
-								tmpdir, err := ioutil.TempDir(testutil.BuildDirectory(), "scripting_tests")
+								tmpdir, err := os.MkdirTemp(testutil.BuildDirectory(), "scripting_tests")
 								require.NoError(t, err)
 								defer func() {
 									assert.NoError(t, os.RemoveAll(tmpdir))
@@ -1221,7 +1220,7 @@ func TestManager(t *testing.T) {
 						clientTestCase{
 							Name: "ScriptingBuild",
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
-								tmpdir, err := ioutil.TempDir(testutil.BuildDirectory(), "scripting_tests")
+								tmpdir, err := os.MkdirTemp(testutil.BuildDirectory(), "scripting_tests")
 								require.NoError(t, err)
 								defer func() {
 									assert.NoError(t, os.RemoveAll(tmpdir))
@@ -1229,7 +1228,7 @@ func TestManager(t *testing.T) {
 								harness := createTestScriptingHarness(ctx, t, client, tmpdir)
 
 								tmpFile := filepath.Join(tmpdir, "fake_script.go")
-								require.NoError(t, ioutil.WriteFile(tmpFile, []byte(`package main; import "os"; func main() { os.Exit(0) }`), 0755))
+								require.NoError(t, os.WriteFile(tmpFile, []byte(`package main; import "os"; func main() { os.Exit(0) }`), 0755))
 								_, err = harness.Build(ctx, tmpdir, []string{
 									"-o",
 									filepath.Join(tmpdir, "fake_script"),
@@ -1243,7 +1242,7 @@ func TestManager(t *testing.T) {
 						clientTestCase{
 							Name: "ScriptingTest",
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
-								tmpdir, err := ioutil.TempDir(testutil.BuildDirectory(), "scripting_tests")
+								tmpdir, err := os.MkdirTemp(testutil.BuildDirectory(), "scripting_tests")
 								require.NoError(t, err)
 								defer func() {
 									assert.NoError(t, os.RemoveAll(tmpdir))
@@ -1251,7 +1250,7 @@ func TestManager(t *testing.T) {
 								harness := createTestScriptingHarness(ctx, t, client, tmpdir)
 
 								tmpFile := filepath.Join(tmpdir, "fake_script_test.go")
-								require.NoError(t, ioutil.WriteFile(tmpFile, []byte(`package main; import "testing"; func TestMain(t *testing.T) { return }`), 0755))
+								require.NoError(t, os.WriteFile(tmpFile, []byte(`package main; import "testing"; func TestMain(t *testing.T) { return }`), 0755))
 								results, err := harness.Test(ctx, tmpdir, scripting.TestOptions{Name: "dummy"})
 								require.NoError(t, err)
 								require.Len(t, results, 1)

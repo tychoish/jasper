@@ -5,7 +5,6 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"errors"
@@ -49,13 +48,7 @@ func NewCredentials(caCert, cert, key []byte) (*CertificateCredentials, error) {
 // NewCredentialsFromFile parses the PEM-encoded credentials in JSON format in
 // the file at path into a Credentials struct.
 func NewCredentialsFromFile(path string) (*CertificateCredentials, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, fmt.Errorf("error opening credentials file: %w", err)
-	}
-	defer file.Close()
-
-	contents, err := ioutil.ReadAll(file)
+	contents, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("error reading credentials file: %w", err)
 	}

@@ -4,7 +4,6 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
@@ -107,7 +106,7 @@ func (opts *ScriptingPython) ID() string {
 	if opts.requrementsHash == "" {
 		stat, err := os.Stat(opts.RequirementsPath)
 		if !os.IsNotExist(err) && (stat.ModTime() != opts.requirementsModTime) {
-			reqData, err := ioutil.ReadFile(opts.RequirementsPath)
+			reqData, err := os.ReadFile(opts.RequirementsPath)
 			if err == nil {
 				reqHash := sha1.New()
 				_, _ = reqHash.Write(reqData)

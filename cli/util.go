@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"math"
 	"math/rand"
 	"net"
@@ -86,7 +85,7 @@ func validatePort(flagName string) func(*cli.Context) error {
 
 // readInput reads JSON from the input and decodes it to the output.
 func readInput(input io.Reader, output interface{}) error {
-	bytes, err := ioutil.ReadAll(input)
+	bytes, err := io.ReadAll(input)
 	if err != nil {
 		return fmt.Errorf("error reading from input: %w", err)
 	}

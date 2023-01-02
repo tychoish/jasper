@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"sync"
 	"syscall"
 	"time"
@@ -220,10 +219,10 @@ func (e *docker) runIOStream(stream types.HijackedResponse) {
 			stdout := e.stdout
 			stderr := e.stderr
 			if stdout == nil {
-				stdout = ioutil.Discard
+				stdout = io.Discard
 			}
 			if stderr == nil {
-				stderr = ioutil.Discard
+				stderr = io.Discard
 			}
 			if _, err := stdcopy.StdCopy(stdout, stderr, stream.Reader); err != nil {
 				grip.Error(fmt.Errorf("problem streaming output from process: %w", err))

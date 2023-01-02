@@ -3,7 +3,6 @@ package jasper
 import (
 	"bytes"
 	"context"
-	"io/ioutil"
 	"os"
 	"runtime"
 	"strings"
@@ -287,7 +286,7 @@ func TestProcessImplementations(t *testing.T) {
 							assert.True(t, proc.Complete(ctx))
 						},
 						"ProcessLogDefault": func(ctx context.Context, t *testing.T, opts *options.Create, makep ProcessConstructor) {
-							file, err := ioutil.TempFile(testutil.BuildDirectory(), "out.txt")
+							file, err := os.CreateTemp(testutil.BuildDirectory(), "out.txt")
 							require.NoError(t, err)
 							defer func() {
 								assert.NoError(t, file.Close())
@@ -311,7 +310,7 @@ func TestProcessImplementations(t *testing.T) {
 							assert.NoError(t, err)
 						},
 						"ProcessWritesToLog": func(ctx context.Context, t *testing.T, opts *options.Create, makep ProcessConstructor) {
-							file, err := ioutil.TempFile(testutil.BuildDirectory(), "out.txt")
+							file, err := os.CreateTemp(testutil.BuildDirectory(), "out.txt")
 							require.NoError(t, err)
 							defer func() {
 								assert.NoError(t, file.Close())
@@ -360,7 +359,7 @@ func TestProcessImplementations(t *testing.T) {
 							}
 						},
 						"ProcessWritesToBufferedLog": func(ctx context.Context, t *testing.T, opts *options.Create, makep ProcessConstructor) {
-							file, err := ioutil.TempFile(testutil.BuildDirectory(), "out.txt")
+							file, err := os.CreateTemp(testutil.BuildDirectory(), "out.txt")
 							require.NoError(t, err)
 							defer func() {
 								assert.NoError(t, file.Close())

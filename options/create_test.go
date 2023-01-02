@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"os"
 	"os/exec"
 	"testing"
@@ -98,7 +98,7 @@ func TestCreate(t *testing.T) {
 
 			require.NoError(t, opts.Validate())
 
-			out, err := ioutil.ReadAll(opts.StandardInput)
+			out, err := io.ReadAll(opts.StandardInput)
 			require.NoError(t, err)
 			assert.EqualValues(t, stdinBytesStr, out)
 		},
@@ -111,7 +111,7 @@ func TestCreate(t *testing.T) {
 
 			require.NoError(t, opts.Validate())
 
-			out, err := ioutil.ReadAll(opts.StandardInput)
+			out, err := io.ReadAll(opts.StandardInput)
 			require.NoError(t, err)
 			assert.EqualValues(t, stdinBytesStr, out)
 		},
@@ -356,7 +356,7 @@ func TestFileLogging(t *testing.T) {
 	errorSize := int64(len(catErrorMessage) + 1)
 
 	// Ensure good file exists and has data
-	goodFile, err := ioutil.TempFile("", "this_file_exists")
+	goodFile, err := os.CreateTemp("", "this_file_exists")
 	require.NoError(t, err)
 	defer func() {
 		assert.NoError(t, goodFile.Close())
@@ -449,7 +449,7 @@ func TestFileLogging(t *testing.T) {
 
 			files := []*os.File{}
 			for i := 0; i < testParams.numLogs; i++ {
-				file, err := ioutil.TempFile("", "out.txt")
+				file, err := os.CreateTemp("", "out.txt")
 				require.NoError(t, err)
 				defer func() {
 					assert.NoError(t, file.Close())

@@ -323,7 +323,7 @@ func (opts *BaseOptions) MarshalDocument() (*birch.Document, error) {
 		birch.EC.String("format", string(opts.Format)),
 		birch.EC.SubDocumentFromElements("level",
 			birch.EC.Int("default", int(opts.Level.Default)),
-			birch.EC.Int("threshhold", int(opts.Level.Threshold)),
+			birch.EC.Int("threshold", int(opts.Level.Threshold)),
 		),
 		birch.EC.SubDocument("buffer", buf),
 	), nil

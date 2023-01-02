@@ -142,7 +142,7 @@ func (c *loggingCacheImpl) Clear(_ context.Context) error {
 	c.cache = map[string]*options.CachedLogger{}
 
 	if catcher.HasErrors() {
-		fmt.Errorf("problem clearing logger cache: %w", catcher.Resolve())
+		return fmt.Errorf("problem clearing logger cache: %w", catcher.Resolve())
 	}
 	return nil
 }

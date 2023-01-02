@@ -3,7 +3,6 @@ package cli
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/signal"
 	"strconv"
@@ -207,7 +206,7 @@ func makeLogger(c *cli.Context) *options.LoggerConfig {
 	}
 	if info.Token == "" {
 		if tokenFilePath := c.String(splunkTokenFilePathFlagName); tokenFilePath != "" {
-			token, err := ioutil.ReadFile(tokenFilePath)
+			token, err := os.ReadFile(tokenFilePath)
 			if err != nil {
 				grip.Error(fmt.Errorf("could not read splunk token file from path '%s': %w", tokenFilePath, err))
 				return nil
@@ -347,7 +346,7 @@ func makeUserEnvironment(user string, vars []string) map[string]string { //nolin
 	// Content and format of /etc/passwd is documented here:
 	// https://linux.die.net/man/5/passwd
 	file := "/etc/passwd"
-	content, err := ioutil.ReadFile(file)
+	content, err := os.ReadFile(file)
 	if err != nil {
 		grip.Debug(message.WrapErrorf(err, "could not read file '%s'", file))
 		return env

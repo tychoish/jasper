@@ -5,7 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -33,7 +33,7 @@ func TestRestService(t *testing.T) {
 	httpClient := testutil.GetHTTPClient()
 	defer testutil.PutHTTPClient(httpClient)
 
-	tempDir, err := ioutil.TempDir(testutil.BuildDirectory(), filepath.Base(t.Name()))
+	tempDir, err := os.MkdirTemp(testutil.BuildDirectory(), filepath.Base(t.Name()))
 	require.NoError(t, err)
 	defer func() { assert.NoError(t, os.RemoveAll(tempDir)) }()
 
@@ -204,7 +204,7 @@ func TestRestService(t *testing.T) {
 			body, err := makeBody(map[string]int{"tags": 42})
 			require.NoError(t, err)
 
-			req, err := http.NewRequest(http.MethodPost, "", ioutil.NopCloser(body))
+			req, err := http.NewRequest(http.MethodPost, "", io.NopCloser(body))
 			require.NoError(t, err)
 			rw := httptest.NewRecorder()
 			srv.createProcess(rw, req)
@@ -349,7 +349,7 @@ func TestRestService(t *testing.T) {
 			assert.Zero(t, stream)
 		},
 		"CreateWithMultipleLoggers": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
-			file, err := ioutil.TempFile(tempDir, "out.txt")
+			file, err := os.CreateTemp(tempDir, "out.txt")
 			require.NoError(t, err)
 			defer func() {
 				assert.NoError(t, file.Close())
@@ -386,7 +386,7 @@ func TestRestService(t *testing.T) {
 
 		},
 		"WriteFileSucceeds": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
-			tmpFile, err := ioutil.TempFile(tempDir, filepath.Base(t.Name()))
+			tmpFile, err := os.CreateTemp(tempDir, filepath.Base(t.Name()))
 			require.NoError(t, err)
 			defer func() {
 				assert.NoError(t, tmpFile.Close())
@@ -396,13 +396,13 @@ func TestRestService(t *testing.T) {
 			opts := options.WriteFile{Path: tmpFile.Name(), Content: []byte("foo")}
 			require.NoError(t, client.WriteFile(ctx, opts))
 
-			content, err := ioutil.ReadFile(tmpFile.Name())
+			content, err := os.ReadFile(tmpFile.Name())
 			require.NoError(t, err)
 
 			assert.Equal(t, opts.Content, content)
 		},
 		"WriteFileAcceptsContentFromReader": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
-			tmpFile, err := ioutil.TempFile(tempDir, filepath.Base(t.Name()))
+			tmpFile, err := os.CreateTemp(tempDir, filepath.Base(t.Name()))
 			require.NoError(t, err)
 			defer func() {
 				assert.NoError(t, tmpFile.Close())
@@ -413,13 +413,13 @@ func TestRestService(t *testing.T) {
 			opts := options.WriteFile{Path: tmpFile.Name(), Reader: bytes.NewBuffer(buf)}
 			require.NoError(t, client.WriteFile(ctx, opts))
 
-			content, err := ioutil.ReadFile(tmpFile.Name())
+			content, err := os.ReadFile(tmpFile.Name())
 			require.NoError(t, err)
 
 			assert.Equal(t, buf, content)
 		},
 		"WriteFileSucceedsWithLargeContentReader": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
-			tmpFile, err := ioutil.TempFile(tempDir, filepath.Base(t.Name()))
+			tmpFile, err := os.CreateTemp(tempDir, filepath.Base(t.Name()))
 			require.NoError(t, err)
 			defer func() {
 				assert.NoError(t, tmpFile.Close())
@@ -431,7 +431,7 @@ func TestRestService(t *testing.T) {
 			opts := options.WriteFile{Path: tmpFile.Name(), Reader: bytes.NewBuffer(buf)}
 			require.NoError(t, client.WriteFile(ctx, opts))
 
-			content, err := ioutil.ReadFile(tmpFile.Name())
+			content, err := os.ReadFile(tmpFile.Name())
 			require.NoError(t, err)
 
 			assert.Equal(t, buf, content)

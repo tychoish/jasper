@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -65,7 +64,7 @@ EKTcWGekdmdDPsHloRNtsiCa697B2O9IFA==
 	require.NoError(t, err)
 
 	makeFile := func(t *testing.T) *os.File {
-		file, err := ioutil.TempFile("", "creds")
+		file, err := os.CreateTemp("", "creds")
 		require.NoError(t, err)
 		return file
 	}
