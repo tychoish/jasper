@@ -340,10 +340,10 @@ type SignalInput struct {
 func (in *SignalInput) Validate() error {
 	catcher := emt.NewBasicCatcher()
 	if len(in.ID) == 0 {
-		catcher.Add(errors.New("Jasper process ID must not be empty"))
+		catcher.New("Jasper process ID must not be empty")
 	}
 	if in.Signal <= 0 {
-		catcher.Add(errors.New("signal must be greater than 0"))
+		catcher.New("signal must be greater than 0")
 	}
 	return catcher.Resolve()
 }
@@ -360,7 +360,7 @@ type SignalTriggerIDInput struct {
 func (in *SignalTriggerIDInput) Validate() error {
 	catcher := emt.NewBasicCatcher()
 	if len(in.ID) == 0 {
-		catcher.Add(errors.New("Jasper process ID must not be empty"))
+		catcher.New("Jasper process ID must not be empty")
 	}
 	_, ok := jasper.GetSignalTriggerFactory(in.SignalTriggerID)
 	if !ok {

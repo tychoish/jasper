@@ -536,7 +536,7 @@ func (c *Command) Run(ctx context.Context) error {
 
 	for idx, opt := range opts {
 		if err := ctx.Err(); err != nil {
-			catcher.Add(fmt.Errorf("operation canceled: %w", err))
+			catcher.Errorf("operation canceled: %w", err)
 			catcher.Add(c.Close())
 			return catcher.Resolve()
 		}

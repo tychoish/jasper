@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"errors"
-
 	"github.com/tychoish/emt"
 )
 
@@ -48,7 +46,7 @@ func (opts Archive) Validate() error {
 	catcher := emt.NewBasicCatcher()
 
 	if !filepath.IsAbs(opts.TargetPath) {
-		catcher.Add(errors.New("download path must be an absolute path"))
+		catcher.New("download path must be an absolute path")
 	}
 
 	catcher.Add(opts.Format.Validate())
