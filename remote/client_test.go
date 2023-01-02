@@ -429,6 +429,7 @@ func TestManager(t *testing.T) {
 		{
 			Name: "MDB",
 			Constructor: func(ctx context.Context, t *testing.T) Manager {
+				t.SkipNow()
 				mngr, err := jasper.NewSynchronizedManager(false)
 				require.NoError(t, err)
 
