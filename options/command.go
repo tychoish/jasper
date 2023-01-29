@@ -1,7 +1,7 @@
 package options
 
 import (
-	"github.com/tychoish/emt"
+	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
@@ -28,15 +28,15 @@ type Command struct {
 
 // Validate ensures that the options passed to the command are valid.
 func (opts *Command) Validate() error {
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 	// The semantics of a valid options.Create expects Args to be non-empty, but
 	// Command ignores these args, so we insert a dummy argument.
 	if len(opts.Process.Args) == 0 {
 		opts.Process.Args = []string{""}
 	}
 	catcher.Add(opts.Process.Validate())
-	catcher.NewWhen(opts.Priority != 0 && !opts.Priority.IsValid(), "priority is not in the valid range of values")
-	catcher.NewWhen(len(opts.Commands) == 0, "must specify at least one command")
+	erc.When(catcher, opts.Priority != 0 && !opts.Priority.IsValid(), "priority is not in the valid range of values")
+	erc.When(catcher, len(opts.Commands) == 0, "must specify at least one command")
 	return catcher.Resolve()
 }
 
@@ -89,7 +89,7 @@ type CommandPostHook func(error) error
 // the errors and merging them.
 func MergePostHooks(fns ...CommandPostHook) CommandPostHook {
 	return func(err error) error {
-		catcher := emt.NewBasicCatcher()
+		catcher := &erc.Collector{}
 		for _, fn := range fns {
 			catcher.Add(fn(err))
 		}

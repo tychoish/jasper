@@ -7,7 +7,7 @@ import (
 
 	"github.com/containerd/cgroups"
 	specs "github.com/opencontainers/runtime-spec/specs-go"
-	"github.com/tychoish/emt"
+	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/jasper/util"
@@ -115,10 +115,10 @@ func (t *linuxProcessTracker) doCleanupByCgroup() error {
 		return fmt.Errorf("could not find tracked processes: %w", err)
 	}
 
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 	for _, pid := range pids {
 		if err := cleanupProcess(pid); err != nil {
-			catcher.Errorf("error while cleaning up process with pid '%d': %w", pid, err)
+			catcher.Add(fmt.Errorf("error while cleaning up process with pid '%d': %w", pid, err))
 		}
 	}
 
@@ -132,7 +132,7 @@ func (t *linuxProcessTracker) doCleanupByCgroup() error {
 // value for environment variable ManagerEnvironID equals this process
 // tracker's name.
 func (t *linuxProcessTracker) doCleanupByEnvironmentVariable() error {
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 	for _, info := range t.infos {
 		if value, ok := info.Options.Environment[ManagerEnvironID]; ok && value == t.Name {
 			catcher.Add(cleanupProcess(info.PID))
@@ -147,8 +147,8 @@ func (t *linuxProcessTracker) doCleanupByEnvironmentVariable() error {
 func cleanupProcess(pid int) error {
 	// A process returns syscall.ESRCH if it already terminated.
 	if err := syscall.Kill(pid, syscall.SIGTERM); err != nil && err != syscall.ESRCH {
-		catcher := emt.NewBasicCatcher()
-		catcher.Errorf("sending sigterm to process with PID '%d': %w", pid, err)
+		catcher := &erc.Collector{}
+		catcher.Add(fmt.Errorf("sending sigterm to process with PID '%d': %w", pid, err))
 		util.CheckCall(catcher, func() error { return syscall.Kill(pid, syscall.SIGKILL) },
 			fmt.Sprintf("sending sigkill to process with PID '%d'", pid),
 		)
@@ -163,7 +163,7 @@ func cleanupProcess(pid int) error {
 // that there should be an environment variable ManagerEnvironID that has a
 // value equal to this process tracker's name.
 func (t *linuxProcessTracker) Cleanup() error {
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 	if t.validCgroup() {
 		util.CheckCall(catcher, t.doCleanupByCgroup,
 			"error occurred while cleaning up processes tracked by cgroup")

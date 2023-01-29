@@ -17,7 +17,7 @@ import (
 	"github.com/google/uuid"
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 
-	"github.com/tychoish/emt"
+	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
 )
@@ -236,7 +236,7 @@ func (e *docker) runIOStream(stream types.HijackedResponse) {
 // withRemoveContainer returns the error as well as any error from cleaning up
 // the container.
 func (e *docker) withRemoveContainer(err error) error {
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 	catcher.Add(err)
 	catcher.Add(e.removeContainer())
 	return catcher.Resolve()
@@ -379,7 +379,7 @@ func (e *docker) SignalInfo() (sig syscall.Signal, signaled bool) {
 // Close cleans up the container associated with this process executor and
 // closes the connection to the Docker daemon.
 func (e *docker) Close() error {
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 	catcher.Add(e.removeContainer())
 	catcher.Add(e.client.Close())
 	e.setStatus(Closed)

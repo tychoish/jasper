@@ -11,7 +11,7 @@ import (
 
 	"github.com/evergreen-ci/service"
 
-	"github.com/tychoish/emt"
+	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
@@ -174,11 +174,11 @@ func serviceFlags() []cli.Flag {
 
 func validateLimits(flagNames ...string) func(*cli.Context) error {
 	return func(c *cli.Context) error {
-		catcher := emt.NewBasicCatcher()
+		catcher := &erc.Collector{}
 		for _, flagName := range flagNames {
 			l := c.Int(flagName)
 			if l < -1 {
-				catcher.Errorf("%s is not a valid limit value for %s", l, flagName)
+				catcher.Add(fmt.Errorf("%d is not a valid limit value for %s", l, flagName))
 			}
 		}
 		return catcher.Resolve()
@@ -412,7 +412,7 @@ func forceReinstall(daemon service.Interface, config *service.Config) error {
 			"config": *config,
 		})
 
-		catcher := emt.NewBasicCatcher()
+		catcher := &erc.Collector{}
 		catcher.Add(svc.Install())
 		catcher.Add(svc.Start())
 		if catcher.HasErrors() {

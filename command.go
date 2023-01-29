@@ -9,7 +9,7 @@ import (
 
 	"github.com/google/shlex"
 	"github.com/tychoish/amboy"
-	"github.com/tychoish/emt"
+	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
@@ -53,7 +53,9 @@ func splitCmdToArgs(cmd string) []string {
 // New blank Commands will use basicProcess as their default Process for
 // executing sub-commands unless it is changed via ProcConstructor().
 func NewCommand() *Command {
-	return &Command{makeProc: newBasicProcess}
+	return &Command{makeProc: newBasicProcess,
+		opts: options.Command{Priority: level.Debug},
+	}
 }
 
 // ProcConstructor returns a blank Command that will use the process created
@@ -525,7 +527,7 @@ func (c *Command) Run(ctx context.Context) error {
 		return c.runFunc(c.opts)
 	}
 
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 
 	opts, err := c.getCreateOpts()
 	if err != nil {
@@ -536,7 +538,7 @@ func (c *Command) Run(ctx context.Context) error {
 
 	for idx, opt := range opts {
 		if err := ctx.Err(); err != nil {
-			catcher.Errorf("operation canceled: %w", err)
+			catcher.Add(fmt.Errorf("operation canceled: %w", err))
 			catcher.Add(c.Close())
 			return catcher.Resolve()
 		}
@@ -547,10 +549,12 @@ func (c *Command) Run(ctx context.Context) error {
 
 		err := c.exec(ctx, opt, idx)
 
-		if c.opts.PostHook != nil {
-			catcher.AddWhen(!c.opts.IgnoreError, c.opts.PostHook(err))
-		} else {
-			catcher.AddWhen(!c.opts.IgnoreError, err)
+		if !c.opts.IgnoreError {
+			if c.opts.PostHook != nil {
+				catcher.Add(c.opts.PostHook(err))
+			} else {
+				catcher.Add(err)
+			}
 		}
 
 		if err != nil && !c.opts.ContinueOnError {
@@ -600,7 +604,7 @@ func (c *Command) RunParallel(ctx context.Context) error {
 		}(parallelCmd)
 	}
 
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 	for i := 0; i < len(c.opts.Commands); i++ {
 		select {
 		case cmdRes := <-cmdResults:
@@ -704,7 +708,7 @@ func (c *Command) EnqueueForeground(ctx context.Context, q amboy.Queue) error {
 		return err
 	}
 
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 	for _, j := range jobs {
 		catcher.Add(q.Put(ctx, j))
 	}
@@ -722,7 +726,7 @@ func (c *Command) Enqueue(ctx context.Context, q amboy.Queue) error {
 		return err
 	}
 
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 	for _, j := range jobs {
 		catcher.Add(q.Put(ctx, j))
 	}
@@ -807,7 +811,7 @@ func (c *Command) getCreateOpt(args []string) (*options.Create, error) {
 
 func (c *Command) getCreateOpts() ([]*options.Create, error) {
 	out := []*options.Create{}
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 	for _, args := range c.opts.Commands {
 		cmd, err := c.getCreateOpt(args)
 		if err != nil {
@@ -843,11 +847,12 @@ func (c *Command) exec(ctx context.Context, opts *options.Create, idx int) error
 	c.procs = append(c.procs, proc)
 
 	if !c.opts.RunBackground {
-		waitCatcher := emt.NewBasicCatcher()
+		waitCatcher := &erc.Collector{}
 		for _, proc := range c.procs {
 			_, err = proc.Wait(ctx)
-			waitCatcher.ErrorfWhen(err != nil,
-				"error waiting on process '%s': %w", proc.ID(), err)
+			if err != nil {
+				waitCatcher.Add(fmt.Errorf("error waiting on process '%s': %w", proc.ID(), err))
+			}
 		}
 		err = waitCatcher.Resolve()
 		msg["err"] = err

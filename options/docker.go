@@ -7,7 +7,7 @@ import (
 
 	"github.com/docker/docker/client"
 
-	"github.com/tychoish/emt"
+	"github.com/tychoish/fun/erc"
 )
 
 // Docker encapsulates options related to connecting to a Docker daemon.
@@ -24,17 +24,17 @@ type Docker struct {
 // Validate checks whether all the required fields are set and sets defaults if
 // none are specified.
 func (opts *Docker) Validate() error {
-	catcher := emt.NewBasicCatcher()
-	catcher.NewWhen(opts.Port < 0, "port must be positive value")
-	catcher.NewWhen(opts.Image == "", "Docker image must be specified")
+	catcher := &erc.Collector{}
+	erc.When(catcher, opts.Port < 0, "port must be positive value")
+	erc.When(catcher, opts.Image == "", "Docker image must be specified")
 	if opts.Platform == "" {
 		if PlatformSupportsDocker(runtime.GOOS) {
 			opts.Platform = runtime.GOOS
 		} else {
-			catcher.Errorf("failed to set default platform to current runtime platform '%s' because it is unsupported", opts.Platform)
+			catcher.Add(fmt.Errorf("failed to set default platform to current runtime platform '%s' because it is unsupported", opts.Platform))
 		}
 	} else if !PlatformSupportsDocker(opts.Platform) {
-		catcher.Errorf("unrecognized platform '%s'", opts.Platform)
+		catcher.Add(fmt.Errorf("unrecognized platform '%s'", opts.Platform))
 	}
 	return catcher.Resolve()
 }

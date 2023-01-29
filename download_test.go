@@ -15,7 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tychoish/amboy/queue"
-	"github.com/tychoish/emt"
+	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/testutil"
@@ -32,7 +32,7 @@ func TestCreateValidDownloadJobs(t *testing.T) {
 		close(urls)
 	}()
 
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 	jobs := createDownloadJobs(dir, urls, catcher)
 
 	count := 0
@@ -51,7 +51,7 @@ func TestCreateDownloadJobsWithInvalidPath(t *testing.T) {
 	urls := make(chan string)
 	testURL := "https://example.com"
 
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 	go func() {
 		urls <- testURL
 		close(urls)

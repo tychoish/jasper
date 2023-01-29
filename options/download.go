@@ -2,13 +2,13 @@ package options
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"path/filepath"
 
 	"github.com/mholt/archiver"
-
-	"github.com/tychoish/emt"
+	"github.com/tychoish/fun/erc"
 )
 
 // Download represents the options to download a file to a given path and
@@ -22,14 +22,14 @@ type Download struct {
 
 // Validate checks the download options.
 func (opts Download) Validate() error {
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 
 	if opts.URL == "" {
-		catcher.New("download url cannot be empty")
+		catcher.Add(errors.New("download url cannot be empty"))
 	}
 
 	if !filepath.IsAbs(opts.Path) {
-		catcher.New("download path must be an absolute path")
+		catcher.Add(errors.New("download path must be an absolute path"))
 	}
 
 	catcher.Add(opts.ArchiveOpts.Validate())

@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/tychoish/emt"
+	"github.com/tychoish/fun/erc"
 )
 
 func makeEnclosingDirectories(path string) error {
@@ -31,13 +31,13 @@ func writeFile(reader io.Reader, path string) error {
 		return fmt.Errorf("problem creating file: %w", err)
 	}
 
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 	if _, err := io.Copy(file, reader); err != nil {
-		catcher.Errorf("problem writing file: %w", err)
+		catcher.Add(fmt.Errorf("problem writing file: %w", err))
 	}
 
 	if err := file.Close(); err != nil {
-		catcher.Errorf("problem closing %q: %w", path, err)
+		catcher.Add(fmt.Errorf("problem closing %q: %w", path, err))
 	}
 
 	return catcher.Resolve()

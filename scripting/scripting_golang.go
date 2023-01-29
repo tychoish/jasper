@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tychoish/emt"
+	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 )
@@ -131,7 +131,7 @@ func (e *golangEnvironment) Test(ctx context.Context, dir string, tests ...TestO
 
 	out := make([]TestResult, len(tests))
 
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 	for idx, t := range tests {
 		startAt := time.Now()
 		args := []string{e.opts.Interpreter(), "test", "-v"}
@@ -156,7 +156,7 @@ func (e *golangEnvironment) Test(ctx context.Context, dir string, tests ...TestO
 			Add(args).Run(ctx)
 
 		if err != nil {
-			catcher.Errorf("golang test %q: %w", t, err)
+			catcher.Add(fmt.Errorf("golang test %q: %w", t, err))
 		}
 
 		out[idx] = t.getResult(ctx, err, startAt)

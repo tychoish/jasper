@@ -28,7 +28,7 @@ func init() {
 		unmarshalers: map[RawLoggerConfigFormat]Unmarshaler{
 			RawLoggerConfigFormatJSON: json.Unmarshal,
 			RawLoggerConfigFormatBSON: func(data []byte, val interface{}) error {
-				doc, err := birch.DC.ReaderErr(data)
+				doc, err := birch.DCE.Reader(data)
 				if err != nil {
 					return err
 				}

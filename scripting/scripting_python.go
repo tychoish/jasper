@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tychoish/emt"
+	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/util"
@@ -129,7 +129,7 @@ func (e *pythonEnvironment) Cleanup(ctx context.Context) error {
 func (e *pythonEnvironment) Test(ctx context.Context, dir string, tests ...TestOptions) ([]TestResult, error) {
 	out := make([]TestResult, len(tests))
 
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 	for idx, t := range tests {
 		startAt := time.Now()
 		args := []string{e.opts.Interpreter(), "-m", "pytest"}
@@ -148,7 +148,7 @@ func (e *pythonEnvironment) Test(ctx context.Context, dir string, tests ...TestO
 		err := e.manager.CreateCommand(ctx).Directory(dir).Environment(e.opts.Environment).SetOutputOptions(e.opts.Output).Add(args).Run(ctx)
 
 		if err != nil {
-			catcher.Errorf("python test %q: %w", t, err)
+			catcher.Add(fmt.Errorf("python test %q: %w", t, err))
 		}
 
 		out[idx] = t.getResult(ctx, err, startAt)

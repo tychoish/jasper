@@ -7,8 +7,8 @@ import (
 	"io"
 
 	"github.com/tychoish/birch"
-	"github.com/tychoish/birch/mrpc/mongowire"
-	"github.com/tychoish/birch/mrpc/shell"
+	"github.com/tychoish/birch/x/mrpc/mongowire"
+	"github.com/tychoish/birch/x/mrpc/shell"
 	"github.com/tychoish/jasper"
 )
 

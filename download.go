@@ -8,12 +8,12 @@ import (
 	"time"
 
 	"github.com/tychoish/amboy"
-	"github.com/tychoish/emt"
+	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/recovery"
 )
 
-func createDownloadJobs(path string, urls <-chan string, catcher emt.Catcher) <-chan amboy.Job {
+func createDownloadJobs(path string, urls <-chan string, catcher *erc.Collector) <-chan amboy.Job {
 	output := make(chan amboy.Job)
 
 	go func() {
@@ -22,7 +22,7 @@ func createDownloadJobs(path string, urls <-chan string, catcher emt.Catcher) <-
 		for url := range urls {
 			j, err := NewDownloadJob(url, path, true)
 			if err != nil {
-				catcher.Errorf("problem creating download job for %s: %w", url, err)
+				catcher.Add(fmt.Errorf("problem creating download job for %s: %w", url, err))
 				continue
 			}
 
@@ -46,7 +46,7 @@ func processDownloadJobs(ctx context.Context, processFile func(string) error) fu
 			return fmt.Errorf("problem completing download jobs: %w", err)
 		}
 
-		catcher := emt.NewBasicCatcher()
+		catcher := &erc.Collector{}
 		for job := range q.Jobs(ctx) {
 			if !job.Status().Completed {
 				continue
@@ -54,7 +54,7 @@ func processDownloadJobs(ctx context.Context, processFile func(string) error) fu
 			catcher.Add(job.Error())
 			downloadJob, ok := job.(*downloadFileJob)
 			if !ok {
-				catcher.New("problem retrieving download job from queue")
+				catcher.Add(errors.New("problem retrieving download job from queue"))
 				continue
 			}
 			if err := processFile(filepath.Join(downloadJob.Directory, downloadJob.FileName)); err != nil {

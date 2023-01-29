@@ -15,7 +15,7 @@ import (
 	"time"
 
 	"github.com/evergreen-ci/service"
-	"github.com/tychoish/emt"
+	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/jasper/remote"
 	"github.com/tychoish/jasper/util"
 	"github.com/urfave/cli"
@@ -25,7 +25,7 @@ import (
 // the errors.
 func mergeBeforeFuncs(funcs ...cli.BeforeFunc) cli.BeforeFunc {
 	return func(c *cli.Context) error {
-		catcher := emt.NewBasicCatcher()
+		catcher := &erc.Collector{}
 		for _, f := range funcs {
 			catcher.Add(f(c))
 		}
@@ -53,15 +53,6 @@ func requireStringFlag(name string) cli.BeforeFunc {
 	return func(c *cli.Context) error {
 		if c.String(name) == "" {
 			return fmt.Errorf("must specify string for flag '--%s'", name)
-		}
-		return nil
-	}
-}
-
-func requireStringSliceFlag(name string) cli.BeforeFunc {
-	return func(c *cli.Context) error {
-		if len(c.StringSlice(name)) == 0 {
-			return fmt.Errorf("must specify at least one string for flag '--%s'", name)
 		}
 		return nil
 	}
@@ -165,7 +156,7 @@ func withConnection(ctx context.Context, c *cli.Context, operation func(remote.M
 		return fmt.Errorf("error setting up remote client: %w", err)
 	}
 
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 	catcher.Add(operation(client))
 	catcher.Add(client.CloseConnection())
 
@@ -186,7 +177,7 @@ func withService(daemon service.Interface, config *service.Config, operation fun
 func runServices(ctx context.Context, makeServices ...func(context.Context) (util.CloseFunc, error)) error {
 	closeServices := []util.CloseFunc{}
 	closeAllServices := func(closeServices []util.CloseFunc) error {
-		catcher := emt.NewBasicCatcher()
+		catcher := &erc.Collector{}
 		for _, closeService := range closeServices {
 			catcher.Add(closeService())
 		}
@@ -196,8 +187,8 @@ func runServices(ctx context.Context, makeServices ...func(context.Context) (uti
 	for _, makeService := range makeServices {
 		closeService, err := makeService(ctx)
 		if err != nil {
-			catcher := emt.NewBasicCatcher()
-			catcher.Errorf("failed to create service: %w", err)
+			catcher := &erc.Collector{}
+			catcher.Add(fmt.Errorf("failed to create service: %w", err))
 			catcher.Add(closeAllServices(closeServices))
 			return catcher.Resolve()
 		}

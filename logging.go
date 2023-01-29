@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/tychoish/emt"
+	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/jasper/options"
 )
 
@@ -135,7 +135,7 @@ func (c *loggingCacheImpl) Clear(_ context.Context) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 	for _, logger := range c.cache {
 		catcher.Add(logger.Close())
 	}

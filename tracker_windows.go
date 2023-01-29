@@ -3,7 +3,7 @@ package jasper
 import (
 	"fmt"
 
-	"github.com/tychoish/emt"
+	"github.com/tychoish/fun/erc"
 )
 
 type windowsProcessTracker struct {
@@ -43,7 +43,7 @@ func (t *windowsProcessTracker) Cleanup() error {
 	if t.job == nil {
 		return nil
 	}
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 	catcher.Add(t.job.Terminate(0))
 	catcher.Add(t.job.Close())
 	t.job = nil

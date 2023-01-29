@@ -1,11 +1,12 @@
 package options
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"time"
 
-	"github.com/tychoish/emt"
+	"github.com/tychoish/fun/erc"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -59,9 +60,9 @@ func (opts *Proxy) Copy() *Proxy {
 const defaultSSHPort = 22
 
 func (opts *RemoteConfig) validate() error {
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 	if opts.Host == "" {
-		catcher.New("host cannot be empty")
+		catcher.Add(errors.New("host cannot be empty"))
 	}
 	if opts.Port == 0 {
 		opts.Port = defaultSSHPort
@@ -78,10 +79,10 @@ func (opts *RemoteConfig) validate() error {
 		}
 	}
 	if numAuthMethods != 1 {
-		catcher.Errorf("must specify exactly one authentication method, found %d", numAuthMethods)
+		catcher.Add(fmt.Errorf("must specify exactly one authentication method, found %d", numAuthMethods))
 	}
 	if opts.Key == "" && opts.KeyFile == "" && opts.KeyPassphrase != "" {
-		catcher.New("cannot set passphrase without specifying key or key file")
+		catcher.Add(errors.New("cannot set passphrase without specifying key or key file"))
 	}
 	return catcher.Resolve()
 }
@@ -134,7 +135,7 @@ func (opts *RemoteConfig) publicKeyAuth() (ssh.AuthMethod, error) {
 // Validate ensures that enough information is provided to connect to a remote
 // host.
 func (opts *Remote) Validate() error {
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 
 	if opts.Proxy != nil {
 		catcher.Add(opts.Proxy.validate())
@@ -172,25 +173,25 @@ func (opts *Remote) Resolve() (*ssh.Client, *ssh.Session, error) {
 
 		targetConn, err := proxyClient.Dial("tcp", fmt.Sprintf("%s:%d", opts.Host, opts.Port))
 		if err != nil {
-			catcher := emt.NewBasicCatcher()
+			catcher := &erc.Collector{}
 			catcher.Add(proxyClient.Close())
-			catcher.Errorf("could not dial target host: %w", err)
+			catcher.Add(fmt.Errorf("could not dial target host: %w", err))
 			return nil, nil, catcher.Resolve()
 		}
 
 		targetConfig, err := opts.resolve()
 		if err != nil {
-			catcher := emt.NewBasicCatcher()
+			catcher := &erc.Collector{}
 			catcher.Add(proxyClient.Close())
-			catcher.Errorf("could not create target config: %w", err)
+			catcher.Add(fmt.Errorf("could not create target config: %w", err))
 			return nil, nil, catcher.Resolve()
 		}
 		gatewayConn, chans, reqs, err := ssh.NewClientConn(targetConn, fmt.Sprintf("%s:%d", opts.Host, opts.Port), targetConfig)
 		if err != nil {
-			catcher := emt.NewBasicCatcher()
+			catcher := &erc.Collector{}
 			catcher.Add(targetConn.Close())
 			catcher.Add(proxyClient.Close())
-			catcher.Errorf("could not establish connection to target via proxy: %w", err)
+			catcher.Add(fmt.Errorf("could not establish connection to target via proxy: %w", err))
 			return nil, nil, catcher.Resolve()
 		}
 		client = ssh.NewClient(gatewayConn, chans, reqs)
@@ -208,7 +209,7 @@ func (opts *Remote) Resolve() (*ssh.Client, *ssh.Session, error) {
 
 	session, err := client.NewSession()
 	if err != nil {
-		catcher := emt.NewBasicCatcher()
+		catcher := &erc.Collector{}
 		catcher.Add(client.Close())
 		catcher.Add(err)
 		return nil, nil, fmt.Errorf("could not establish session: %w", catcher.Resolve())

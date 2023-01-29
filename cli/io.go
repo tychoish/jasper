@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/tychoish/emt"
+	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/util"
@@ -271,9 +271,9 @@ type ScriptingOptions struct {
 // Validate ensures that the ScriptingOptions instance is
 // validated.
 func (opts *ScriptingOptions) Validate() error {
-	catcher := emt.NewBasicCatcher()
-	catcher.NewWhen(opts.ImplementationType == "", "implementation type must be defined")
-	catcher.NewWhen(opts.Payload == nil, "implementation type must be defined")
+	catcher := &erc.Collector{}
+	erc.When(catcher, opts.ImplementationType == "", "implementation type must be defined")
+	erc.When(catcher, opts.Payload == nil, "implementation type must be defined")
 
 	return catcher.Resolve()
 }
@@ -338,12 +338,12 @@ type SignalInput struct {
 // Validate checks that the SignalInput has a non-empty Jasper process ID and
 // positive Signal.
 func (in *SignalInput) Validate() error {
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 	if len(in.ID) == 0 {
-		catcher.New("Jasper process ID must not be empty")
+		catcher.Add(errors.New("Jasper process ID must not be empty"))
 	}
 	if in.Signal <= 0 {
-		catcher.New("signal must be greater than 0")
+		catcher.Add(errors.New("signal must be greater than 0"))
 	}
 	return catcher.Resolve()
 }
@@ -358,9 +358,9 @@ type SignalTriggerIDInput struct {
 // Validate checks that the SignalTriggerIDInput has a non-empty Jasper process
 // ID and a recognized signal trigger ID.
 func (in *SignalTriggerIDInput) Validate() error {
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 	if len(in.ID) == 0 {
-		catcher.New("Jasper process ID must not be empty")
+		catcher.Add(errors.New("Jasper process ID must not be empty"))
 	}
 	_, ok := jasper.GetSignalTriggerFactory(in.SignalTriggerID)
 	if !ok {
@@ -447,8 +447,8 @@ type LoggingCacheCreateInput struct {
 // Validate checks that a cached logger ID has been given and the logger options
 // are valid.
 func (in *LoggingCacheCreateInput) Validate() error {
-	catcher := emt.NewBasicCatcher()
-	catcher.NewWhen(in.ID == "", "ID must not be empty")
+	catcher := &erc.Collector{}
+	erc.When(catcher, in.ID == "", "ID must not be empty")
 	util.CheckCall(catcher, in.Output.Validate, "invalid output options")
 	return catcher.Resolve()
 }

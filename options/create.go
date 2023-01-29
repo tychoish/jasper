@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/google/shlex"
-	"github.com/tychoish/emt"
+	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
@@ -97,42 +97,41 @@ func MakeCreation(cmdStr string) (*Create, error) {
 
 // Validate ensures that Create is valid for non-remote interfaces.
 func (opts *Create) Validate() error {
-	catcher := emt.NewBasicCatcher()
-	catcher.NewWhen(len(opts.Args) == 0, "invalid process, must specify at least one argument")
+	catcher := &erc.Collector{}
+	erc.When(catcher, len(opts.Args) == 0, "invalid process, must specify at least one argument")
 
-	catcher.NewWhen(opts.Timeout < 0, "when specifying a timeout, it must be non-negative")
-	catcher.NewWhen(opts.Timeout > 0 && opts.Timeout < time.Second, "when specifying a timeout, it must be greater than one second")
-	catcher.NewWhen(opts.TimeoutSecs < 0, "when specifying timeout in seconds, it must be non-negative")
+	erc.When(catcher, opts.Timeout < 0, "when specifying a timeout, it must be non-negative")
+	erc.When(catcher, opts.Timeout > 0 && opts.Timeout < time.Second, "when specifying a timeout, it must be greater than one second")
+	erc.When(catcher, opts.TimeoutSecs < 0, "when specifying timeout in seconds, it must be non-negative")
 
-	if opts.Timeout > 0 && opts.TimeoutSecs > 0 {
-		catcher.ErrorfWhen(time.Duration(opts.TimeoutSecs)*time.Second != opts.Timeout,
-			"cannot specify different timeout (in nanos) (%s) and timeout seconds (%d)",
-			opts.Timeout, opts.TimeoutSecs)
+	if opts.Timeout > 0 && opts.TimeoutSecs > 0 && time.Duration(opts.TimeoutSecs)*time.Second != opts.Timeout {
+		catcher.Add(fmt.Errorf("cannot specify different timeout (in nanos) (%s) and timeout seconds (%d)",
+			opts.Timeout, opts.TimeoutSecs))
 	}
 
 	if err := opts.Output.Validate(); err != nil {
-		catcher.Errorf("invalid output options: %w", err)
+		catcher.Add(fmt.Errorf("invalid output options: %w", err))
 	}
 
 	if opts.WorkingDirectory != "" && opts.isLocal() {
 		info, err := os.Stat(opts.WorkingDirectory)
 
 		if os.IsNotExist(err) {
-			catcher.Errorf("cannot not use %s as working directory because it does not exist", opts.WorkingDirectory)
+			catcher.Add(fmt.Errorf("cannot not use %s as working directory because it does not exist", opts.WorkingDirectory))
 		} else if !info.IsDir() {
-			catcher.Errorf("cannot not use %s as working directory because it is not a directory", opts.WorkingDirectory)
+			catcher.Add(fmt.Errorf("cannot not use %s as working directory because it is not a directory", opts.WorkingDirectory))
 		}
 	}
 
-	catcher.NewWhen(opts.Docker != nil && opts.Remote != nil, "cannot specify both Docker and SSH options")
+	erc.When(catcher, opts.Docker != nil && opts.Remote != nil, "cannot specify both Docker and SSH options")
 	if opts.Remote != nil {
 		if err := opts.Remote.Validate(); err != nil {
-			catcher.Errorf("invalid SSH options: %w", err)
+			catcher.Add(fmt.Errorf("invalid SSH options: %w", err))
 		}
 	}
 	if opts.Docker != nil {
 		if err := opts.Docker.Validate(); err != nil {
-			catcher.Errorf("invalid Docker options: %w", err)
+			catcher.Add(fmt.Errorf("invalid Docker options: %w", err))
 		}
 	}
 
@@ -317,7 +316,7 @@ func (opts *Create) AddEnvVar(k, v string) {
 // function is often called as a trigger at the end of a process' lifetime in
 // Jasper.
 func (opts *Create) Close() error {
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 	for _, c := range opts.closers {
 		catcher.Add(c())
 	}

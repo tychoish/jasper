@@ -10,7 +10,7 @@ import (
 
 	"errors"
 
-	"github.com/tychoish/emt"
+	"github.com/tychoish/fun/erc"
 )
 
 // WriteFile represents the options necessary to write to a file.
@@ -46,8 +46,8 @@ func (opts *WriteFile) Validate() error {
 		opts.Perm = 0666
 	}
 
-	catcher := emt.NewBasicCatcher()
-	catcher.NewWhen(opts.Path == "", "path to file must be specified")
+	catcher := &erc.Collector{}
+	erc.When(catcher, opts.Path == "", "path to file must be specified")
 	catcher.Add(opts.validateContent())
 	return catcher.Resolve()
 }
@@ -71,18 +71,18 @@ func (opts *WriteFile) DoWrite() error {
 		return fmt.Errorf("error opening file %q: %w", opts.Path, err)
 	}
 
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 
 	reader, err := opts.ContentReader()
 	if err != nil {
-		catcher.Errorf("error getting file content as bytes: %w", err)
+		catcher.Add(fmt.Errorf("error getting file content as bytes: %w", err))
 		catcher.Add(file.Close())
 		return catcher.Resolve()
 	}
 
 	bufReader := bufio.NewReader(reader)
 	if _, err = io.Copy(file, bufReader); err != nil {
-		catcher.Errorf("error writing content to file: %w", err)
+		catcher.Add(fmt.Errorf("error writing content to file: %w", err))
 		catcher.Add(file.Close())
 		return catcher.Resolve()
 	}

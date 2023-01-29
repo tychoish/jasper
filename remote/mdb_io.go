@@ -3,7 +3,7 @@ package remote
 import (
 	"time"
 
-	"github.com/tychoish/birch/mrpc/shell"
+	"github.com/tychoish/birch/x/mrpc/shell"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/scripting"

@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/tychoish/emt"
+	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/jasper/internal/executor"
 	"github.com/tychoish/jasper/options"
 )
@@ -51,16 +51,16 @@ func newBlockingProcess(ctx context.Context, opts *options.Create) (Process, err
 	}
 
 	if err = p.RegisterTrigger(ctx, makeOptionsCloseTrigger()); err != nil {
-		catcher := emt.NewBasicCatcher()
-		catcher.New("problem registering options close trigger")
+		catcher := &erc.Collector{}
+		catcher.Add(errors.New("problem registering options close trigger"))
 		catcher.Add(err)
 		catcher.Add(opts.Close())
 		return nil, catcher.Resolve()
 	}
 
 	if err = exec.Start(); err != nil {
-		catcher := emt.NewBasicCatcher()
-		catcher.New("problem starting command")
+		catcher := &erc.Collector{}
+		catcher.Add(errors.New("problem starting command"))
 		catcher.Add(err)
 		catcher.Add(opts.Close())
 		return nil, catcher.Resolve()

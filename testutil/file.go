@@ -7,7 +7,7 @@ import (
 	"runtime"
 
 	"github.com/mholt/archiver"
-	"github.com/tychoish/emt"
+	"github.com/tychoish/fun/erc"
 )
 
 // AddFileToDirectory adds an archive file given by fileName with the given
@@ -25,7 +25,7 @@ func AddFileToDirectory(dir string, fileName string, fileContents string) error 
 		}
 		defer os.RemoveAll(tmpFile.Name())
 		if _, err := tmpFile.Write([]byte(fileContents)); err != nil {
-			catcher := emt.NewBasicCatcher()
+			catcher := &erc.Collector{}
 			catcher.Add(err)
 			catcher.Add(tmpFile.Close())
 			return catcher.Resolve()
@@ -45,7 +45,7 @@ func AddFileToDirectory(dir string, fileName string, fileContents string) error 
 		return err
 	}
 	if _, err := file.Write([]byte(fileContents)); err != nil {
-		catcher := emt.NewBasicCatcher()
+		catcher := &erc.Collector{}
 		catcher.Add(err)
 		catcher.Add(file.Close())
 		return catcher.Resolve()

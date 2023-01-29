@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/tychoish/birch"
-	"github.com/tychoish/emt"
+	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/send"
 	"github.com/tychoish/grip/x/splunk"
@@ -87,9 +87,9 @@ func NewFileLoggerProducer() LoggerProducer { return &FileLoggerOptions{} }
 
 // Validate ensures FileLoggerOptions is valid.
 func (opts *FileLoggerOptions) Validate() error {
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 
-	catcher.NewWhen(opts.Filename == "", "must specify a filename")
+	erc.When(catcher, opts.Filename == "", "must specify a filename")
 	catcher.Add(opts.Base.Validate())
 	return catcher.Resolve()
 }
@@ -140,6 +140,7 @@ func (opts *InheritedLoggerOptions) Configure() (send.Sender, error) {
 	}
 
 	sender = grip.Sender()
+	fmt.Println("-->", opts.Base.Level)
 	if err = sender.SetLevel(opts.Base.Level); err != nil {
 		return nil, fmt.Errorf("problem creating base inherited logger: %w", err)
 	}
@@ -169,9 +170,9 @@ type InMemoryLoggerOptions struct {
 func NewInMemoryLoggerProducer() LoggerProducer { return &InMemoryLoggerOptions{} }
 
 func (opts *InMemoryLoggerOptions) Validate() error {
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 
-	catcher.NewWhen(opts.InMemoryCap <= 0, "invalid in-memory capacity")
+	erc.When(catcher, opts.InMemoryCap <= 0, "invalid in-memory capacity")
 	catcher.Add(opts.Base.Validate())
 	return catcher.Resolve()
 }
@@ -211,9 +212,9 @@ type SplunkLoggerOptions struct {
 func NewSplunkLoggerProducer() LoggerProducer { return &SplunkLoggerOptions{} }
 
 func (opts *SplunkLoggerOptions) Validate() error {
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 
-	catcher.NewWhen(opts.Splunk.Populated(), "missing connection info for output type splunk")
+	erc.When(catcher, opts.Splunk.Populated(), "missing connection info for output type splunk")
 	catcher.Add(opts.Base.Validate())
 	return catcher.Resolve()
 }

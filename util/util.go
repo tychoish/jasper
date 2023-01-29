@@ -2,10 +2,12 @@ package util
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"sync"
 
 	"github.com/tychoish/emt"
+	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/grip/send"
 )
 
@@ -54,9 +56,9 @@ func ConvertWriter(wr io.Writer, err error) send.Sender {
 
 }
 
-func CheckCall(catcher emt.Catcher, fn emt.CheckFunction, msg string) {
+func CheckCall(catcher *erc.Collector, fn emt.CheckFunction, msg string) {
 	if err := fn(); err != nil {
-		catcher.Errorf("%s: %w", msg, err)
+		catcher.Add(fmt.Errorf("%s: %w", msg, err))
 	}
 
 }

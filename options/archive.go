@@ -1,10 +1,11 @@
 package options
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 
-	"github.com/tychoish/emt"
+	"github.com/tychoish/fun/erc"
 )
 
 // ArchiveFormat represents an archive file type.
@@ -43,10 +44,10 @@ func (opts Archive) Validate() error {
 		return nil
 	}
 
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 
 	if !filepath.IsAbs(opts.TargetPath) {
-		catcher.New("download path must be an absolute path")
+		catcher.Add(errors.New("download path must be an absolute path"))
 	}
 
 	catcher.Add(opts.Format.Validate())

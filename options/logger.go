@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/tychoish/birch"
-	"github.com/tychoish/emt"
+	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/send"
 )
@@ -133,9 +133,9 @@ func NewLoggerConfig(producerType string, format RawLoggerConfigFormat, config [
 }
 
 func (lc *LoggerConfig) validate() error {
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 
-	catcher.NewWhen(lc.info.Type == "", "cannot have empty logger type")
+	erc.When(catcher, lc.info.Type == "", "cannot have empty logger type")
 	if len(lc.info.Config) > 0 {
 		catcher.Add(lc.info.Format.Validate())
 	}
@@ -301,13 +301,13 @@ type BaseOptions struct {
 
 // Validate ensures that BaseOptions is valid.
 func (opts *BaseOptions) Validate() error {
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 
 	if opts.Level.Threshold == 0 && opts.Level.Default == 0 {
 		opts.Level = send.LevelInfo{Default: level.Trace, Threshold: level.Trace}
 	}
 
-	catcher.NewWhen(!opts.Level.Valid(), "invalid log level")
+	erc.When(catcher, !opts.Level.Valid(), "invalid log level")
 	catcher.Add(opts.Buffer.Validate())
 	catcher.Add(opts.Format.Validate())
 	return catcher.Resolve()
@@ -405,7 +405,7 @@ func (s *SafeSender) GetSender() send.Sender {
 }
 
 func (s *SafeSender) Close() error {
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 
 	if s.Sender != nil {
 		catcher.Add(s.Sender.Close())

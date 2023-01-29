@@ -1,10 +1,11 @@
 package options
 
 import (
+	"errors"
 	"io"
 	"time"
 
-	"github.com/tychoish/emt"
+	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/send"
 	"github.com/tychoish/jasper/util"
@@ -65,34 +66,34 @@ func (o Output) errorIsNull() bool {
 // Validate ensures that the Output it is called on has reasonable
 // values.
 func (o *Output) Validate() error {
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 
 	if o.SuppressOutput && (!o.outputIsNull() || o.outputLogging()) {
-		catcher.New("cannot suppress output if output is defined")
+		catcher.Add(errors.New("cannot suppress output if output is defined"))
 	}
 
 	if o.SuppressError && (!o.errorIsNull() || o.errorLogging()) {
-		catcher.New("cannot suppress error if error is defined")
+		catcher.Add(errors.New("cannot suppress error if error is defined"))
 	}
 
 	if o.SuppressOutput && o.SendOutputToError {
-		catcher.New("cannot suppress output and redirect it to error")
+		catcher.Add(errors.New("cannot suppress output and redirect it to error"))
 	}
 
 	if o.SuppressError && o.SendErrorToOutput {
-		catcher.New("cannot suppress error and redirect it to output")
+		catcher.Add(errors.New("cannot suppress error and redirect it to output"))
 	}
 
 	if o.SendOutputToError && o.errorIsNull() && !o.errorLogging() {
-		catcher.New("cannot redirect output to error without a defined error writer")
+		catcher.Add(errors.New("cannot redirect output to error without a defined error writer"))
 	}
 
 	if o.SendErrorToOutput && o.outputIsNull() && !o.outputLogging() {
-		catcher.New("cannot redirect error to output without a defined output writer")
+		catcher.Add(errors.New("cannot redirect error to output without a defined output writer"))
 	}
 
 	if o.SendOutputToError && o.SendErrorToOutput {
-		catcher.New("cannot create redirect cycle between output and error")
+		catcher.Add(errors.New("cannot create redirect cycle between output and error"))
 	}
 
 	return catcher.Resolve()
@@ -214,7 +215,7 @@ func (o *Output) Copy() *Output {
 
 // Close calls all of the processes' output senders' Close method.
 func (o *Output) Close() error {
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 	// Close the outputSender and errorSender, which does not close the
 	// underlying send.Sender.
 	if o.outputSender != nil {
@@ -230,8 +231,9 @@ func (o *Output) Close() error {
 		// Close the sender wrapped by the send.WriterSender.
 		// Since senders are shared, only close error's senders if output hasn't
 		// already closed them.
-		catcher.AddWhen((o.SuppressOutput || o.SendOutputToError),
-			o.errorSender.Sender.Close())
+		if o.SuppressOutput || o.SendOutputToError {
+			catcher.Add(o.errorSender.Sender.Close())
+		}
 	}
 
 	return catcher.Resolve()

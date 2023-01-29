@@ -7,7 +7,7 @@ import (
 
 	"errors"
 
-	"github.com/tychoish/emt"
+	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/jasper/options"
 )
 
@@ -81,7 +81,7 @@ func (c *LoggingCache) CloseAndRemove(_ context.Context, id string) error {
 
 // Clear closes and removes all objects in the in-memory logging cache.
 func (c *LoggingCache) Clear(_ context.Context) error {
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 	for _, logger := range c.Cache {
 		catcher.Add(logger.Close())
 	}

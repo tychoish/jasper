@@ -1,9 +1,10 @@
 package cli
 
 import (
+	"errors"
 	"fmt"
 
-	"github.com/tychoish/emt"
+	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/jasper/options"
 )
 
@@ -20,12 +21,12 @@ type ClientOptions struct {
 // Validate checks that the binary path is set and it is a recognized Jasper
 // client type.
 func (opts *ClientOptions) Validate() error {
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 	if opts.BinaryPath == "" {
-		catcher.New("client binary path cannot be empty")
+		catcher.Add(errors.New("client binary path cannot be empty"))
 	}
 	if opts.Type != RPCService && opts.Type != RESTService {
-		catcher.New("client type must be RPC or REST")
+		catcher.Add(errors.New("client type must be RPC or REST"))
 	}
 	return catcher.Resolve()
 }

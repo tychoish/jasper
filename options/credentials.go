@@ -9,7 +9,7 @@ import (
 
 	"errors"
 
-	"github.com/tychoish/emt"
+	"github.com/tychoish/fun/erc"
 )
 
 // CertificateCredentials represent a bundle of assets for doing TLS
@@ -67,11 +67,11 @@ func NewCredentialsFromFile(path string) (*CertificateCredentials, error) {
 
 // Validate checks that the Credentials are all set to non-empty values.
 func (c *CertificateCredentials) Validate() error {
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 
-	catcher.NewWhen(len(c.CACert) == 0, "CA certificate should not be empty")
-	catcher.NewWhen(len(c.Cert) == 0, "certificate should not be empty")
-	catcher.NewWhen(len(c.Key) == 0, "key should not be empty")
+	erc.When(catcher, len(c.CACert) == 0, "CA certificate should not be empty")
+	erc.When(catcher, len(c.Cert) == 0, "certificate should not be empty")
+	erc.When(catcher, len(c.Key) == 0, "key should not be empty")
 
 	return catcher.Resolve()
 }

@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/tychoish/birch"
-	"github.com/tychoish/emt"
+	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/grip/send"
@@ -42,7 +42,7 @@ func (cl *CachedLogger) getSender(preferError bool) (send.Sender, error) {
 
 // Close closes the underlying output for the cached logger.
 func (cl *CachedLogger) Close() error {
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 	if cl.Output != nil {
 		catcher.Check(cl.Output.Close)
 	}
@@ -77,12 +77,12 @@ const (
 // Validate checks that the required fields are populated for the payload and
 // the format is valid.
 func (lp *LoggingPayload) Validate() error {
-	catcher := emt.NewBasicCatcher()
-	catcher.NewWhen(lp.Data == nil, "data cannot be empty")
+	catcher := &erc.Collector{}
+	erc.When(catcher, lp.Data == nil, "data cannot be empty")
 	switch lp.Format {
 	case "", LoggingPayloadFormatBSON, LoggingPayloadFormatJSON, LoggingPayloadFormatSTRING:
 	default:
-		catcher.Errorf("invalid payload format '%s'", lp.Format)
+		catcher.Add(fmt.Errorf("invalid payload format '%s'", lp.Format))
 	}
 	return catcher.Resolve()
 }

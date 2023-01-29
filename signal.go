@@ -4,7 +4,7 @@ import (
 	"context"
 	"syscall"
 
-	"github.com/tychoish/emt"
+	"github.com/tychoish/fun/erc"
 )
 
 // Terminate sends a SIGTERM signal to the given process under the given
@@ -27,7 +27,7 @@ func Kill(ctx context.Context, p Process) error {
 // signals. On Windows, this function sends a SIGKILL instead of SIGTERM. Use
 // Terminate() in a loop if you do not wish to potentially hang on Wait().
 func TerminateAll(ctx context.Context, procs []Process) error {
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 
 	for _, proc := range procs {
 		if proc.Running(ctx) {
@@ -47,7 +47,7 @@ func TerminateAll(ctx context.Context, procs []Process) error {
 // function calls Wait() on each process after sending them SIGKILL signals.
 // Use Kill() in a loop if you do not wish to potentially hang on Wait().
 func KillAll(ctx context.Context, procs []Process) error {
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 
 	for _, proc := range procs {
 		if proc.Running(ctx) {

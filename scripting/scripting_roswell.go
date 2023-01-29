@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tychoish/emt"
+	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 )
@@ -104,7 +104,7 @@ func (e *roswellEnvironment) Cleanup(ctx context.Context) error {
 func (e *roswellEnvironment) Test(ctx context.Context, dir string, tests ...TestOptions) ([]TestResult, error) {
 	out := make([]TestResult, len(tests))
 
-	catcher := emt.NewBasicCatcher()
+	catcher := &erc.Collector{}
 	for idx, t := range tests {
 		if t.Count == 0 {
 			t.Count++
@@ -130,7 +130,7 @@ func (e *roswellEnvironment) Test(ctx context.Context, dir string, tests ...Test
 
 		err := cmd.Run(tctx)
 		if err != nil {
-			catcher.Errorf("roswell test %q: %w", t, err)
+			catcher.Add(fmt.Errorf("roswell test %q: %w", t, err))
 		}
 
 		out[idx] = t.getResult(ctx, err, startAt)

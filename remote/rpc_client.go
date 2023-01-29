@@ -9,7 +9,7 @@ import (
 	"syscall"
 
 	empty "github.com/golang/protobuf/ptypes/empty"
-	"github.com/tychoish/emt"
+	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/jasper"
@@ -266,7 +266,7 @@ func (c *rpcClient) WriteFile(ctx context.Context, jopts options.WriteFile) erro
 	}
 
 	if err = jopts.WriteBufferedContent(sendOpts); err != nil {
-		catcher := emt.NewBasicCatcher()
+		catcher := &erc.Collector{}
 		catcher.Add(err)
 		catcher.Add(stream.CloseSend())
 		return catcher.Resolve()
