@@ -184,7 +184,7 @@ func TestScriptingHarness(t *testing.T) {
 				Gopath: filepath.Join(tmpdir, "gopath"),
 				Goroot: runtime.GOROOT(),
 				Packages: []string{
-					"github.com/tychoish/emt",
+					"github.com/tychoish/fun",
 				},
 				Output: options.Output{},
 			},

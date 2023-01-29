@@ -17,7 +17,6 @@ require (
 	github.com/tychoish/amboy v0.0.0-20230101002553-13863324d55a
 	github.com/tychoish/birch v0.1.1
 	github.com/tychoish/birch/x/mrpc v0.0.0-20230129183934-8a4ffa59c337
-	github.com/tychoish/emt v0.1.0
 	github.com/tychoish/fun v0.3.3
 	github.com/tychoish/gimlet v0.0.0-20220430160104-9dbd313f23e7
 	github.com/tychoish/grip v0.1.1
@@ -63,6 +62,7 @@ require (
 	github.com/tklauser/go-sysconf v0.3.11 // indirect
 	github.com/tklauser/numcpus v0.6.0 // indirect
 	github.com/tychoish/birch/x/ftdc v0.0.0-20230129175603-45d936d8ebc3 // indirect
+	github.com/tychoish/emt v0.1.0 // indirect
 	github.com/ulikunitz/xz v0.5.11 // indirect
 	github.com/urfave/negroni v1.0.0 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
