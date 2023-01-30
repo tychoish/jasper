@@ -14,11 +14,11 @@ require (
 	github.com/opencontainers/image-spec v1.1.0-rc2
 	github.com/opencontainers/runtime-spec v1.0.3-0.20210326190908-1c3f411f0417
 	github.com/stretchr/testify v1.8.0
-	github.com/tychoish/amboy v0.0.0-20230101002553-13863324d55a
+	github.com/tychoish/amboy v0.0.0-20230129201934-9886a92b26f3
 	github.com/tychoish/birch v0.1.1
 	github.com/tychoish/birch/x/mrpc v0.0.0-20230129183934-8a4ffa59c337
 	github.com/tychoish/fun v0.3.3
-	github.com/tychoish/gimlet v0.0.0-20220430160104-9dbd313f23e7
+	github.com/tychoish/gimlet v0.0.0-20230130001449-8987c96bb886
 	github.com/tychoish/grip v0.1.1
 	github.com/tychoish/grip/x/metrics v0.0.0-20230129183331-ca147f0e6354
 	github.com/tychoish/grip/x/splunk v0.0.0-20230129184027-659798450323
@@ -54,7 +54,7 @@ require (
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/rs/cors v1.8.2 // indirect
+	github.com/rs/cors v1.8.3 // indirect
 	github.com/russross/blackfriday/v2 v2.0.1 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
@@ -62,7 +62,6 @@ require (
 	github.com/tklauser/go-sysconf v0.3.11 // indirect
 	github.com/tklauser/numcpus v0.6.0 // indirect
 	github.com/tychoish/birch/x/ftdc v0.0.0-20230129175603-45d936d8ebc3 // indirect
-	github.com/tychoish/emt v0.1.0 // indirect
 	github.com/ulikunitz/xz v0.5.11 // indirect
 	github.com/urfave/negroni v1.0.0 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
