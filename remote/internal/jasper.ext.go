@@ -11,7 +11,6 @@ import (
 
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
-	"github.com/tychoish/grip/send"
 	"github.com/tychoish/grip/x/splunk"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
@@ -318,15 +317,16 @@ func ConvertLoggerConfig(config *options.LoggerConfig) (*LoggerConfig, error) {
 
 // Export takes a protobuf RPC LogLevel struct and returns the analogous send
 // LevelInfo struct.
-func (l *LogLevel) Export() send.LevelInfo {
-	return send.LevelInfo{Threshold: level.Priority(l.Threshold), Default: level.Priority(l.Default)}
+func (l *LogLevel) Export() level.Priority {
+	return level.Priority(l.Threshold)
 }
 
 // ConvertLogLevel takes a send LevelInfo struct and returns an equivalent
 // protobuf RPC LogLevel struct. ConvertLogLevel is the inverse of
 // (*LogLevel) Export().
-func ConvertLogLevel(l send.LevelInfo) *LogLevel {
-	return &LogLevel{Threshold: int32(l.Threshold), Default: int32(l.Default)}
+func ConvertLogLevel(l level.Priority) *LogLevel {
+	return &LogLevel{Threshold: int32(l)}
+
 }
 
 // Export takes a protobuf RPC BufferOptions struct and returns the analogous

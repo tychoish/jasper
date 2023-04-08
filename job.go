@@ -12,7 +12,6 @@ import (
 	"github.com/tychoish/amboy/job"
 	"github.com/tychoish/amboy/registry"
 	"github.com/tychoish/grip"
-	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/send"
 	"github.com/tychoish/jasper/options"
 )
@@ -286,8 +285,9 @@ func (j *amboyForegroundOutputJob) Run(ctx context.Context) {
 		return
 	}
 
-	j.Options.Output.Error = send.NewWriter(grip.Sender(), level.Error)
-	j.Options.Output.Output = send.NewWriter(grip.Sender(), level.Info)
+	// TODO make these loggers log at different levels (sender.Clone())
+	j.Options.Output.Error = send.MakeWriter(grip.Sender())
+	j.Options.Output.Output = send.MakeWriter(grip.Sender())
 
 	p, err := j.makep(ctx, j.Options)
 	if err != nil {

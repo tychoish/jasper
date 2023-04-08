@@ -648,7 +648,8 @@ func (c *Command) SetInputBytes(b []byte) *Command {
 // SetErrorSender sets a Sender to be used by this Command for its output to
 // stderr.
 func (c *Command) SetErrorSender(l level.Priority, s send.Sender) *Command {
-	writer := send.NewWriter(s, l)
+	s.SetPriority(l)
+	writer := send.MakeWriter(s)
 	c.opts.Process.RegisterCloser(writer.Close)
 	c.opts.Process.Output.Error = writer
 	return c
@@ -657,7 +658,8 @@ func (c *Command) SetErrorSender(l level.Priority, s send.Sender) *Command {
 // SetOutputSender sets a Sender to be used by this Command for its output to
 // stdout.
 func (c *Command) SetOutputSender(l level.Priority, s send.Sender) *Command {
-	writer := send.NewWriter(s, l)
+	s.SetPriority(l)
+	writer := send.MakeWriter(s)
 	c.opts.Process.RegisterCloser(writer.Close)
 	c.opts.Process.Output.Output = writer
 	return c
@@ -666,7 +668,8 @@ func (c *Command) SetOutputSender(l level.Priority, s send.Sender) *Command {
 // SetCombinedSender is the combination of SetErrorSender() and
 // SetOutputSender().
 func (c *Command) SetCombinedSender(l level.Priority, s send.Sender) *Command {
-	writer := send.NewWriter(s, l)
+	s.SetPriority(l)
+	writer := send.MakeWriter(s)
 	c.opts.Process.RegisterCloser(writer.Close)
 	c.opts.Process.Output.Error = writer
 	c.opts.Process.Output.Output = writer

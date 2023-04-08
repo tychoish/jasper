@@ -294,7 +294,7 @@ func (lc *LoggerConfig) resolveProducer() error {
 
 // BaseOptions are the base options necessary for setting up most loggers.
 type BaseOptions struct {
-	Level  send.LevelInfo `json:"level" bson:"level"`
+	Level  level.Priority `json:"level" bson:"level"`
 	Buffer BufferOptions  `json:"buffer" bson:"buffer"`
 	Format LogFormat      `json:"format" bson:"format"`
 }
@@ -303,11 +303,10 @@ type BaseOptions struct {
 func (opts *BaseOptions) Validate() error {
 	catcher := &erc.Collector{}
 
-	if opts.Level.Threshold == 0 && opts.Level.Default == 0 {
-		opts.Level = send.LevelInfo{Default: level.Trace, Threshold: level.Trace}
+	if opts.Level == level.Invalid {
+		opts.Level = level.Trace
 	}
 
-	erc.When(catcher, !opts.Level.Valid(), "invalid log level")
 	catcher.Add(opts.Buffer.Validate())
 	catcher.Add(opts.Format.Validate())
 	return catcher.Resolve()
@@ -321,10 +320,7 @@ func (opts *BaseOptions) MarshalDocument() (*birch.Document, error) {
 
 	return birch.DC.Elements(
 		birch.EC.String("format", string(opts.Format)),
-		birch.EC.SubDocumentFromElements("level",
-			birch.EC.Int("default", int(opts.Level.Default)),
-			birch.EC.Int("threshold", int(opts.Level.Threshold)),
-		),
+		birch.EC.Int("level", int(opts.Level)),
 		birch.EC.SubDocument("buffer", buf),
 	), nil
 }
@@ -380,7 +376,7 @@ func NewSafeSender(baseSender send.Sender, opts BaseOptions) (send.Sender, error
 
 	sender := &SafeSender{}
 	if opts.Buffer.Buffered {
-		sender.Sender = send.NewBuffered(baseSender, opts.Buffer.Duration, opts.Buffer.MaxSize)
+		sender.Sender = send.MakeBuffered(baseSender, opts.Buffer.Duration, opts.Buffer.MaxSize)
 		sender.baseSender = baseSender
 	} else {
 		sender.Sender = baseSender

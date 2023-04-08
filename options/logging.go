@@ -44,11 +44,11 @@ func (cl *CachedLogger) getSender(preferError bool) (send.Sender, error) {
 func (cl *CachedLogger) Close() error {
 	catcher := &erc.Collector{}
 	if cl.Output != nil {
-		catcher.Check(cl.Output.Close)
+		erc.Check(catcher, cl.Output.Close)
 	}
 
 	if cl.Error != nil && cl.Output != cl.Error {
-		catcher.Check(cl.Error.Close)
+		erc.Check(catcher, cl.Error.Close)
 	}
 	return catcher.Resolve()
 }
@@ -105,7 +105,7 @@ func (cl *CachedLogger) Send(lp *LoggingPayload) error {
 	if err != nil {
 		return err
 	}
-
+	msg.SetPriority(lp.Priority)
 	sender.Send(msg)
 
 	return nil
@@ -159,41 +159,12 @@ func (lp *LoggingPayload) convertMultiMessage(value interface{}) (message.Compos
 		}
 		return message.MakeGroupComposer(batch), nil
 	default:
-		return message.ConvertWithPriority(lp.Priority, value), nil
+		return message.Convert(value), nil
 	}
 }
 
 func (lp *LoggingPayload) convertMessage(value interface{}) (message.Composer, error) {
-	switch data := value.(type) {
-	case string:
-		return lp.produceMessage([]byte(data))
-	case []byte:
-		return lp.produceMessage(data)
-	case []string:
-		return message.ConvertWithPriority(lp.Priority, data), nil
-	case [][]byte:
-		return message.NewLines(lp.Priority, byteSlicesToStringSlice(data)), nil
-	case message.Fields:
-		if lp.AddMetadata {
-			return message.NewFields(lp.Priority, data), nil
-		}
-		return message.NewSimpleFields(lp.Priority, data), nil
-	case []message.Fields:
-		msgs := make([]message.Composer, len(data))
-		for idx := range data {
-			if lp.AddMetadata {
-				msgs[idx] = message.NewFields(lp.Priority, data[idx])
-			} else {
-				msgs[idx] = message.NewSimpleFields(lp.Priority, data[idx])
-			}
-		}
-
-		return message.MakeGroupComposer(msgs), nil
-	case []interface{}:
-		return message.NewLines(lp.Priority, data...), nil
-	default:
-		return message.ConvertWithPriority(lp.Priority, value), nil
-	}
+	return message.Convert(value), nil
 }
 
 func (lp *LoggingPayload) produceMessage(data []byte) (message.Composer, error) {
@@ -205,10 +176,10 @@ func (lp *LoggingPayload) produceMessage(data []byte) (message.Composer, error) 
 		}
 
 		if lp.AddMetadata {
-			return message.NewFields(lp.Priority, payload), nil
+			return message.MakeFields(payload), nil
 		}
 
-		return message.NewSimpleFields(lp.Priority, payload), nil
+		return message.MakeSimpleFields(payload), nil
 	case LoggingPayloadFormatBSON:
 		unmarshler := GetGlobalLoggerRegistry().Unmarshaler(RawLoggerConfigFormatBSON)
 		if unmarshler == nil {
@@ -220,16 +191,16 @@ func (lp *LoggingPayload) produceMessage(data []byte) (message.Composer, error) 
 			return nil, fmt.Errorf("problem parsing bson from message body: %w", err)
 		}
 		if lp.AddMetadata {
-			return message.NewFields(lp.Priority, payload), nil
+			return message.MakeFields(payload), nil
 		}
 
-		return message.NewSimpleFields(lp.Priority, payload), nil
+		return message.MakeSimpleFields(payload), nil
 	default: // includes string case.
 		if lp.AddMetadata {
-			return message.NewBytes(lp.Priority, data), nil
+			return message.MakeBytes(data), nil
 		}
 
-		return message.NewSimpleBytes(lp.Priority, data), nil
+		return message.MakeSimpleBytes(data), nil
 	}
 }
 

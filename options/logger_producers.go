@@ -42,11 +42,13 @@ func (opts *DefaultLoggerOptions) Configure() (send.Sender, error) {
 		return nil, fmt.Errorf("invalid options: %w", err)
 	}
 
-	sender, err := send.NewPlainStdOutput(opts.Prefix, opts.Base.Level)
-	if err != nil {
-		return nil, fmt.Errorf("problem creating base default logger: %w", err)
-	}
+	sender := send.MakePlain()
 
+	// TODO fix logger so that you can prefix the logger with the
+	// name somehow
+	sender.SetName(opts.Prefix)
+
+	var err error
 	sender, err = NewSafeSender(sender, opts.Base)
 	if err != nil {
 		return nil, fmt.Errorf("problem creating safe default logger: %w", err)
@@ -100,10 +102,12 @@ func (opts *FileLoggerOptions) Configure() (send.Sender, error) {
 		return nil, fmt.Errorf("invalid options: %w", err)
 	}
 
-	sender, err := send.NewPlainFile(DefaultLogName, opts.Filename, opts.Base.Level)
+	sender, err := send.MakePlainFile(opts.Filename)
 	if err != nil {
 		return nil, fmt.Errorf("problem creating base file logger: %w", err)
 	}
+
+	sender.SetName(DefaultLogName)
 
 	sender, err = NewSafeSender(sender, opts.Base)
 	if err != nil {
@@ -140,10 +144,7 @@ func (opts *InheritedLoggerOptions) Configure() (send.Sender, error) {
 	}
 
 	sender = grip.Sender()
-	fmt.Println("-->", opts.Base.Level)
-	if err = sender.SetLevel(opts.Base.Level); err != nil {
-		return nil, fmt.Errorf("problem creating base inherited logger: %w", err)
-	}
+	sender.SetPriority(opts.Base.Level)
 
 	sender, err = NewSafeSender(sender, opts.Base)
 	if err != nil {
@@ -225,11 +226,12 @@ func (opts *SplunkLoggerOptions) Configure() (send.Sender, error) {
 		return nil, fmt.Errorf("invalid config: %w", err)
 	}
 
-	sender, err := splunk.NewSender(DefaultLogName, opts.Splunk, opts.Base.Level)
+	sender, err := splunk.MakeSender(opts.Splunk)
 	if err != nil {
 		return nil, fmt.Errorf("problem creating base splunk logger: %w", err)
 	}
-
+	sender.SetName(DefaultLogName)
+	sender.SetPriority(opts.Base.Level)
 	sender, err = NewSafeSender(sender, opts.Base)
 	if err != nil {
 		return nil, fmt.Errorf("problem creating safe splunk logger: %w", err)

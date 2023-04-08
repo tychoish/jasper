@@ -16,7 +16,6 @@ import (
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/grip/recovery"
-	"github.com/tychoish/grip/send"
 	"github.com/tychoish/grip/x/splunk"
 	"github.com/tychoish/jasper/options"
 	"github.com/urfave/cli"
@@ -189,9 +188,10 @@ func validateLogLevel(flagName string) func(*cli.Context) error {
 	return func(c *cli.Context) error {
 		l := c.String(logLevelFlagName)
 		priority := level.FromString(l)
-		if !priority.IsValid() {
+		if priority == level.Invalid {
 			return fmt.Errorf("%s is not a valid log level", l)
 		}
+
 		return nil
 	}
 }
@@ -220,16 +220,13 @@ func makeLogger(c *cli.Context) *options.LoggerConfig {
 
 	l := c.String(logLevelFlagName)
 	priority := level.FromString(l)
-	if !priority.IsValid() {
-		return nil
-	}
 
 	logger := &options.LoggerConfig{}
 	producer := &options.SplunkLoggerOptions{
 		Splunk: info,
 		Base: options.BaseOptions{
 			Format: options.LogFormatDefault,
-			Level:  send.LevelInfo{Default: priority, Threshold: priority},
+			Level:  priority,
 		},
 	}
 	if err := logger.Set(producer); err != nil {

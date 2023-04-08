@@ -13,15 +13,15 @@ require (
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/opencontainers/image-spec v1.1.0-rc2
 	github.com/opencontainers/runtime-spec v1.0.3-0.20210326190908-1c3f411f0417
-	github.com/stretchr/testify v1.8.0
-	github.com/tychoish/amboy v0.0.0-20230129201934-9886a92b26f3
-	github.com/tychoish/birch v0.1.1
-	github.com/tychoish/birch/x/mrpc v0.0.0-20230129183934-8a4ffa59c337
-	github.com/tychoish/fun v0.3.3
+	github.com/stretchr/testify v1.8.1
+	github.com/tychoish/amboy v0.0.0-20230408193931-6ba4e429a638
+	github.com/tychoish/birch v0.2.1
+	github.com/tychoish/birch/x/mrpc v0.0.0-20230408192718-ea2b06ab9878
+	github.com/tychoish/fun v0.8.4
 	github.com/tychoish/gimlet v0.0.0-20230130001449-8987c96bb886
-	github.com/tychoish/grip v0.1.1
-	github.com/tychoish/grip/x/metrics v0.0.0-20230129183331-ca147f0e6354
-	github.com/tychoish/grip/x/splunk v0.0.0-20230129184027-659798450323
+	github.com/tychoish/grip v0.2.2
+	github.com/tychoish/grip/x/metrics v0.0.0-20230408192639-ef555fcdf0fd
+	github.com/tychoish/grip/x/splunk v0.0.0-20230408192639-ef555fcdf0fd
 	github.com/urfave/cli v1.22.4
 	golang.org/x/crypto v0.5.0
 	google.golang.org/grpc v1.50.1
@@ -61,7 +61,7 @@ require (
 	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.11 // indirect
 	github.com/tklauser/numcpus v0.6.0 // indirect
-	github.com/tychoish/birch/x/ftdc v0.0.0-20230129175603-45d936d8ebc3 // indirect
+	github.com/tychoish/birch/x/ftdc v0.0.0-20230218012303-165f4d35e29f // indirect
 	github.com/ulikunitz/xz v0.5.11 // indirect
 	github.com/urfave/negroni v1.0.0 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect

@@ -15,7 +15,6 @@ import (
 	"github.com/google/shlex"
 	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/grip"
-	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/grip/send"
 	"github.com/tychoish/jasper/internal/executor"
@@ -89,8 +88,10 @@ func MakeCreation(cmdStr string) (*Create, error) {
 	return &Create{
 		Args: args,
 		Output: Output{
-			Output: send.NewWriter(grip.Sender(), level.Info),
-			Error:  send.NewWriter(grip.Sender(), level.Error),
+			// TODO: make so senders send at different
+			// levels for error and output
+			Output: send.MakeWriter(grip.Sender()),
+			Error:  send.MakeWriter(grip.Sender()),
 		},
 	}, nil
 }
