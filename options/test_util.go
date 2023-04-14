@@ -12,15 +12,15 @@ import (
 // interface.
 // TODO: Remove this mock sender with EVG-13443.
 type MockSender struct {
-	*send.Base
+	send.Base
 	Closed bool
 }
 
 // NewMockSender returns a MockSender with the given name.
 func NewMockSender(name string) *MockSender {
-	return &MockSender{
-		Base: send.NewBase(name),
-	}
+	b := &MockSender{}
+	b.SetName(name)
+	return b
 }
 
 // Send noops.

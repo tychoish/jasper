@@ -19,7 +19,7 @@ require (
 	github.com/tychoish/birch/x/mrpc v0.0.0-20230408192718-ea2b06ab9878
 	github.com/tychoish/fun v0.8.5
 	github.com/tychoish/gimlet v0.0.0-20230130001449-8987c96bb886
-	github.com/tychoish/grip v0.2.3
+	github.com/tychoish/grip v0.2.4
 	github.com/tychoish/grip/x/metrics v0.0.0-20230408192639-ef555fcdf0fd
 	github.com/tychoish/grip/x/splunk v0.0.0-20230408192639-ef555fcdf0fd
 	github.com/urfave/cli v1.22.4
