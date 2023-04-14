@@ -367,7 +367,7 @@ func (c *Command) AddEnv(k, v string) *Command {
 
 // Add adds on a sub-command.
 func (c *Command) Add(args []string) *Command {
-	c.opts.Commands = append(c.opts.Commands, args)
+	c.opts.Commands = append(c.opts.Commands, args...)
 	return c
 }
 
