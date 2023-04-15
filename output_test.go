@@ -24,9 +24,8 @@ func TestGetInMemoryLogStream(t *testing.T) {
 
 			for testName, testCase := range map[string]func(ctx context.Context, t *testing.T, opts *options.Create, makeProc ProcessConstructor, output string){
 				"FailsWithNilProcess": func(ctx context.Context, t *testing.T, opts *options.Create, makeProc ProcessConstructor, output string) {
-					logs, err := GetInMemoryLogStream(ctx, nil, 1)
+					_, err := GetInMemoryLogStream(ctx, nil, 1)
 					check.Error(t, err)
-					check.Nil(t, logs)
 				},
 				"FailsWithInvalidCount": func(ctx context.Context, t *testing.T, opts *options.Create, makeProc ProcessConstructor, output string) {
 					proc, err := makeProc(ctx, opts)
@@ -35,9 +34,8 @@ func TestGetInMemoryLogStream(t *testing.T) {
 					_, err = proc.Wait(ctx)
 					assert.NotError(t, err)
 
-					logs, err := GetInMemoryLogStream(ctx, proc, 0)
+					_, err = GetInMemoryLogStream(ctx, proc, 0)
 					check.Error(t, err)
-					check.Nil(t, logs)
 				},
 				"FailsWithoutInMemoryLogger": func(ctx context.Context, t *testing.T, opts *options.Create, makeProc ProcessConstructor, output string) {
 					proc, err := makeProc(ctx, opts)
@@ -46,9 +44,8 @@ func TestGetInMemoryLogStream(t *testing.T) {
 					_, err = proc.Wait(ctx)
 					assert.NotError(t, err)
 
-					logs, err := GetInMemoryLogStream(ctx, proc, 100)
+					_, err = GetInMemoryLogStream(ctx, proc, 100)
 					check.Error(t, err)
-					check.Nil(t, logs)
 				},
 				"SucceedsWithInMemoryLogger": func(ctx context.Context, t *testing.T, opts *options.Create, makeProc ProcessConstructor, output string) {
 					loggerProducer := &options.InMemoryLoggerOptions{

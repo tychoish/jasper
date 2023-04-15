@@ -43,7 +43,7 @@ func verifyCommandAndGetOutput(ctx context.Context, t *testing.T, cmd *Command, 
 
 func checkOutput(t *testing.T, exists bool, output string, expectedOutputs ...string) {
 	for _, expected := range expectedOutputs {
-		check.True(t, exists == strings.Contains(output, expected), "out='%s' and expected='%s'", output, expected)
+		check.True(t, exists == strings.Contains(output, expected))
 	}
 }
 
@@ -192,7 +192,7 @@ func TestCommandImplementation(t *testing.T) {
 						},
 						"InvalidArgsCommandErrors": func(ctx context.Context, t *testing.T, cmd Command) {
 							cmd.Add([]string{})
-							check.EqualError(t, runFunc(&cmd, ctx), "cannot have empty args")
+							check.Equal(t, runFunc(&cmd, ctx).Error(), "cannot have empty args")
 						},
 						"ZeroSubCommandsIsVacuouslySuccessful": func(ctx context.Context, t *testing.T, cmd Command) {
 							check.NotError(t, runFunc(&cmd, ctx))
@@ -407,7 +407,7 @@ func TestCommandImplementation(t *testing.T) {
 							require.NoError(t, err)
 							require.Equal(t, len(genOpts), 1)
 							check.Equal(t, opts.WorkingDirectory, genOpts[0].WorkingDirectory)
-							check.Equal(t, opts.Environment, genOpts[0].Environment)
+							require.Equal(t, opts.Environment, genOpts[0].Environment)
 						},
 						"TagFunctions": func(ctx context.Context, t *testing.T, cmd Command) {
 							tags := []string{"tag0", "tag1"}
@@ -467,9 +467,9 @@ func TestCommandImplementation(t *testing.T) {
 							require.NoError(t, err)
 
 							require.Equal(t, len(optslist), 3)
-							check.Equal(t, []string{"echo", "hello", "world"}, optslist[0].Args)
-							check.Equal(t, []string{"echo", "hello world"}, optslist[1].Args)
-							check.Equal(t, []string{"echo", "hello\"world\""}, optslist[2].Args)
+							require.Equal(t, []string{"echo", "hello", "world"}, optslist[0].Args)
+							require.Equal(t, []string{"echo", "hello world"}, optslist[1].Args)
+							require.Equal(t, []string{"echo", "hello\"world\""}, optslist[2].Args)
 						},
 						"RunFuncReceivesPopulatedOptions": func(ctx context.Context, t *testing.T, cmd Command) {
 							prio := level.Warning

@@ -202,7 +202,7 @@ func TestBlockingProcess(t *testing.T) {
 					go proc.reactor(ctx, deadline, cmd)
 					_, err = proc.Wait(cctx)
 					require.Error(t, err)
-					check.Contains(t, err.Error(), "operation canceled")
+					check.Substring(t, err.Error(), "operation canceled")
 				},
 				"WaitShouldReturnNilForSuccessfulCommandsWithoutIDs": func(ctx context.Context, t *testing.T, proc *blockingProcess) {
 					proc.info.Options.Args = []string{"sleep", "10"}
@@ -336,7 +336,7 @@ func TestBlockingProcess(t *testing.T) {
 					select {
 					case <-opCompleted:
 					case <-longCtx.Done():
-						check.Fail(t, "context timed out waiting for op to return")
+						t.Fatal("context timed out waiting for op to return")
 					}
 				},
 				"RunningDoesNotWaitForContextTimeoutAfterProcessCompletes": func(ctx context.Context, t *testing.T, proc *blockingProcess) {
@@ -363,7 +363,7 @@ func TestBlockingProcess(t *testing.T) {
 					select {
 					case <-opCompleted:
 					case <-longCtx.Done():
-						check.Fail(t, "context timed out waiting for op to return")
+						t.Fatal("context timed out waiting for op to return")
 					}
 				},
 				"SignalDoesNotWaitForContextTimeoutAfterProcessCompletes": func(ctx context.Context, t *testing.T, proc *blockingProcess) {
