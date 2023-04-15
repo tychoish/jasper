@@ -16,6 +16,7 @@ import (
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/x/remote"
+	roptions "github.com/tychoish/jasper/x/remote/options"
 	"github.com/urfave/cli"
 )
 
@@ -445,15 +446,15 @@ func DownloadCMD() cli.Command {
 				return nil
 			}),
 		Action: func(c *cli.Context) error {
-			opts := remote.Download{
+			opts := roptions.Download{
 				URL:  c.String(urlFlagName),
 				Path: c.String(pathFlagName),
 			}
 
 			if path := c.String(extractPathFlagName); path != "" {
-				opts.ArchiveOpts = remote.Archive{
+				opts.ArchiveOpts = roptions.Archive{
 					ShouldExtract: true,
-					Format:        remote.ArchiveAuto,
+					Format:        roptions.ArchiveAuto,
 					TargetPath:    path,
 				}
 			}

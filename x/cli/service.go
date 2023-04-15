@@ -18,6 +18,7 @@ import (
 	"github.com/tychoish/grip/recovery"
 	"github.com/tychoish/grip/x/splunk"
 	"github.com/tychoish/jasper/options"
+	jsplunk "github.com/tychoish/jasper/x/splunk"
 	"github.com/urfave/cli"
 )
 
@@ -222,7 +223,7 @@ func makeLogger(c *cli.Context) *options.LoggerConfig {
 	priority := level.FromString(l)
 
 	logger := &options.LoggerConfig{}
-	producer := &options.SplunkLoggerOptions{
+	producer := &jsplunk.SplunkLoggerOptions{
 		Splunk: info,
 		Base: options.BaseOptions{
 			Format: options.LogFormatDefault,

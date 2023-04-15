@@ -5,6 +5,7 @@ import (
 
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/x/remote"
+	roptions "github.com/tychoish/jasper/x/remote/options"
 	"github.com/urfave/cli"
 )
 
@@ -54,7 +55,7 @@ func remoteDownloadFile() cli.Command {
 		Flags:  clientFlags(),
 		Before: clientBefore(),
 		Action: func(c *cli.Context) error {
-			input := remote.Download{}
+			input := roptions.Download{}
 			return doPassthroughInputOutput(c, &input, func(ctx context.Context, client remote.Manager) interface{} {
 				return makeOutcomeResponse(client.DownloadFile(ctx, input))
 			})
