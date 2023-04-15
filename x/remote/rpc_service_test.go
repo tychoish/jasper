@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tychoish/jasper"
-	"github.com/tychoish/jasper/remote/internal"
+	"github.com/tychoish/jasper/x/remote/internal"
 	"github.com/tychoish/jasper/testutil"
 	"google.golang.org/grpc"
 )

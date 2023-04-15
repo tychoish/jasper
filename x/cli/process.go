@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"syscall"
 
-	"github.com/tychoish/jasper/remote"
+	"github.com/tychoish/jasper/x/remote"
 	"github.com/urfave/cli"
 )
 

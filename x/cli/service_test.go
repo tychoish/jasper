@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
-	"github.com/tychoish/jasper/remote"
+	"github.com/tychoish/jasper/x/remote"
 	"github.com/tychoish/jasper/testutil"
 	"github.com/tychoish/jasper/util"
 )

@@ -11,7 +11,7 @@ import (
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
-	"github.com/tychoish/jasper/remote"
+	"github.com/tychoish/jasper/x/remote"
 	"github.com/tychoish/jasper/util"
 	"github.com/urfave/cli"
 )

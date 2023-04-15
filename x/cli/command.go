@@ -15,7 +15,7 @@ import (
 	"github.com/tychoish/grip/recovery"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
-	"github.com/tychoish/jasper/remote"
+	"github.com/tychoish/jasper/x/remote"
 	"github.com/urfave/cli"
 )
 

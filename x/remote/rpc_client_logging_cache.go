@@ -10,7 +10,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/tychoish/jasper/options"
-	internal "github.com/tychoish/jasper/remote/internal"
+	internal "github.com/tychoish/jasper/x/remote/internal"
 )
 
 // rpcLoggingCache is the client-side representation of a jasper.LoggingCache

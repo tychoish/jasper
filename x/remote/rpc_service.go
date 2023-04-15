@@ -9,8 +9,8 @@ import (
 	"github.com/tychoish/grip/recovery"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
-	"github.com/tychoish/jasper/remote/internal"
 	"github.com/tychoish/jasper/util"
+	"github.com/tychoish/jasper/x/remote/internal"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )

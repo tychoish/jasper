@@ -14,7 +14,7 @@ import (
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
-	internal "github.com/tychoish/jasper/remote/internal"
+	internal "github.com/tychoish/jasper/x/remote/internal"
 	"github.com/tychoish/jasper/scripting"
 	"github.com/tychoish/jasper/util"
 	grpc "google.golang.org/grpc"
