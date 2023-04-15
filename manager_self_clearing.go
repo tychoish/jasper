@@ -22,7 +22,7 @@ type selfClearingProcessManager struct {
 // The self clearing process manager is not thread safe. Wrap with the
 // synchronized process manager for multithreaded use.
 func NewSelfClearingProcessManager(maxProcs int, trackProcs bool) (Manager, error) {
-	pm, err := newBasicProcessManager(map[string]Process{}, trackProcs, false)
+	pm, err := NewBasicProcessManager(trackProcs, false)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func NewSelfClearingProcessManager(maxProcs int, trackProcs bool) (Manager, erro
 // NewSelfClearingProcessManager but uses the SSH library instead of the SSH
 // binary for remote processes.
 func NewSSHLibrarySelfClearingProcessManager(maxProcs int, trackProcs bool) (Manager, error) {
-	pm, err := newBasicProcessManager(map[string]Process{}, trackProcs, true)
+	pm, err := NewBasicProcessManager(trackProcs, true)
 	if err != nil {
 		return nil, err
 	}

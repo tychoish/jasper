@@ -1,26 +1,27 @@
-package jasper
+package testcases
 
 import (
 	"context"
 
 	"github.com/tychoish/fun/erc"
+	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 )
 
-func makeLockingProcess(pmake ProcessConstructor) ProcessConstructor {
-	return func(ctx context.Context, opts *options.Create) (Process, error) {
+func makeLockingProcess(pmake jasper.ProcessConstructor) jasper.ProcessConstructor {
+	return func(ctx context.Context, opts *options.Create) (jasper.Process, error) {
 		proc, err := pmake(ctx, opts)
 		if err != nil {
 			return nil, err
 		}
 
-		return SyncrhonizeProcess(proc), nil
+		return jasper.SyncrhonizeProcess(proc), nil
 	}
 }
 
-func createProcs(ctx context.Context, opts *options.Create, manager Manager, num int) ([]Process, error) {
+func createProcs(ctx context.Context, opts *options.Create, manager jasper.Manager, num int) ([]jasper.Process, error) {
 	catcher := &erc.Collector{}
-	out := []Process{}
+	out := []jasper.Process{}
 	for i := 0; i < num; i++ {
 		optsCopy := *opts
 

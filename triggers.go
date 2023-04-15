@@ -65,7 +65,7 @@ func makeOptionsCloseTrigger() ProcessTrigger {
 	}
 }
 
-func makeDefaultTrigger(ctx context.Context, m Manager, opts *options.Create, parentID string) ProcessTrigger {
+func MakeDefaultTrigger(ctx context.Context, m Manager, opts *options.Create, parentID string) ProcessTrigger {
 	deadline, hasDeadline := ctx.Deadline()
 	timeout := time.Until(deadline)
 

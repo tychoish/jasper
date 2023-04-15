@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
+	"github.com/tychoish/jasper/executor"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/util"
 )
@@ -21,13 +22,12 @@ type basicProcessManager struct {
 	loggers       LoggingCache
 }
 
-// newBasicProcessManager returns a manager which is not thread safe for
+// NewBasicProcessManager returns a manager which is not thread safe for
 // creating arbitrary processes. By default, processes are basic processes
 // unless otherwise specified when creating the process.
-func newBasicProcessManager(procs map[string]Process, trackProcs bool, useSSHLibrary bool) (Manager, error) {
-	if procs == nil {
-		procs = map[string]Process{}
-	}
+func NewBasicProcessManager(trackProcs bool, useSSHLibrary bool) (Manager, error) {
+	procs := map[string]Process{}
+
 	m := basicProcessManager{
 		procs:         procs,
 		id:            uuid.New().String(),
@@ -51,8 +51,21 @@ func (m *basicProcessManager) ID() string {
 func (m *basicProcessManager) CreateProcess(ctx context.Context, opts *options.Create) (Process, error) {
 	opts.AddEnvVar(ManagerEnvironID, m.id)
 
-	if opts.Remote != nil && m.useSSHLibrary {
-		opts.Remote.UseSSHLibrary = true
+	if opts.Remote != nil {
+		if m.useSSHLibrary {
+			client, session, err := opts.Remote.Resolve()
+			if err != nil {
+				return nil, fmt.Errorf("could not resolve SSH client and session: %w", err)
+			}
+			opts.ResolveExecutor = func(ctx context.Context, args []string) executor.Executor {
+				return executor.NewSSH(ctx, client, session, args)
+			}
+			opts.Remote.UseSSHLibrary = true
+		} else {
+			opts.ResolveExecutor = func(ctx context.Context, args []string) executor.Executor {
+				return executor.NewSSHBinary(ctx, opts.Remote.String(), opts.Remote.Args, args)
+			}
+		}
 	}
 
 	proc, err := NewProcess(ctx, opts)
@@ -74,7 +87,7 @@ func (m *basicProcessManager) CreateProcess(ctx context.Context, opts *options.C
 	// This trigger is not guaranteed to be registered since the process may
 	// have already completed. One way to guarantee it runs could be to add this
 	// as a closer to CreateOptions.
-	_ = proc.RegisterTrigger(ctx, makeDefaultTrigger(ctx, m, opts, proc.ID()))
+	_ = proc.RegisterTrigger(ctx, MakeDefaultTrigger(ctx, m, opts, proc.ID()))
 
 	if m.tracker != nil {
 		// The process may have terminated already, so don't return on error.

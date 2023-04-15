@@ -53,7 +53,7 @@ func splitCmdToArgs(cmd string) []string {
 // New blank Commands will use basicProcess as their default Process for
 // executing sub-commands unless it is changed via ProcConstructor().
 func NewCommand() *Command {
-	return &Command{makeProc: newBasicProcess,
+	return &Command{makeProc: NewBasicProcess,
 		opts: options.Command{Priority: level.Debug},
 	}
 }
@@ -88,6 +88,11 @@ func (c *Command) GetProcIDs() []string {
 // arguments can be added using Add, Append, AppendArgs, or Extend.
 func (c *Command) ApplyFromOpts(opts *options.Create) *Command {
 	c.opts.Process = *opts
+	return c
+}
+
+func (c *Command) WithOptions(mod func(*options.Command)) *Command {
+	mod(&c.opts)
 	return c
 }
 

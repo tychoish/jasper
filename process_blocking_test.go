@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tychoish/grip"
-	"github.com/tychoish/jasper/internal/executor"
+	"github.com/tychoish/jasper/executor"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/testutil"
 )
@@ -34,7 +34,7 @@ func TestBlockingProcess(t *testing.T) {
 					assert.NotNil(t, ctx)
 					assert.NotZero(t, proc.ID())
 					assert.False(t, proc.Complete(ctx))
-					assert.NotNil(t, makeDefaultTrigger(ctx, nil, &proc.info.Options, "foo"))
+					assert.NotNil(t, MakeDefaultTrigger(ctx, nil, &proc.info.Options, "foo"))
 				},
 				"InfoIDPopulatedInBasicCase": func(ctx context.Context, t *testing.T, proc *blockingProcess) {
 					infoReturned := make(chan struct{})
@@ -89,13 +89,13 @@ func TestBlockingProcess(t *testing.T) {
 					proc.info.Complete = true
 					assert.True(t, proc.Complete(ctx))
 					assert.Error(t, proc.RegisterTrigger(ctx, nil))
-					assert.Error(t, proc.RegisterTrigger(ctx, makeDefaultTrigger(ctx, nil, &proc.info.Options, "foo")))
+					assert.Error(t, proc.RegisterTrigger(ctx, MakeDefaultTrigger(ctx, nil, &proc.info.Options, "foo")))
 					assert.Len(t, proc.triggers, 0)
 				},
 				"TestRegisterPopulatedTrigger": func(ctx context.Context, t *testing.T, proc *blockingProcess) {
 					assert.False(t, proc.Complete(ctx))
 					assert.Error(t, proc.RegisterTrigger(ctx, nil))
-					assert.NoError(t, proc.RegisterTrigger(ctx, makeDefaultTrigger(ctx, nil, &proc.info.Options, "foo")))
+					assert.NoError(t, proc.RegisterTrigger(ctx, MakeDefaultTrigger(ctx, nil, &proc.info.Options, "foo")))
 					assert.Len(t, proc.triggers, 1)
 				},
 				"RunningIsFalseWhenCompleteIsSatisfied": func(ctx context.Context, t *testing.T, proc *blockingProcess) {
@@ -317,7 +317,7 @@ func TestBlockingProcess(t *testing.T) {
 						Args: []string{"ls"},
 					}
 
-					process, err := newBlockingProcess(ctx, opts)
+					process, err := NewBlockingProcess(ctx, opts)
 					require.NoError(t, err)
 
 					opCompleted := make(chan struct{})
@@ -344,7 +344,7 @@ func TestBlockingProcess(t *testing.T) {
 						Args: []string{"ls"},
 					}
 
-					process, err := newBlockingProcess(ctx, opts)
+					process, err := NewBlockingProcess(ctx, opts)
 					require.NoError(t, err)
 
 					opCompleted := make(chan struct{})
@@ -371,7 +371,7 @@ func TestBlockingProcess(t *testing.T) {
 						Args: []string{"ls"},
 					}
 
-					process, err := newBlockingProcess(ctx, opts)
+					process, err := NewBlockingProcess(ctx, opts)
 					require.NoError(t, err)
 
 					opCompleted := make(chan struct{})

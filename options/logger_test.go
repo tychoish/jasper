@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tychoish/grip/level"
-	"github.com/tychoish/grip/send"
 )
 
 func TestLoggerConfigValidate(t *testing.T) {
@@ -219,10 +218,7 @@ func TestLoggerConfigMarshalBSON(t *testing.T) {
 		producer := &DefaultLoggerOptions{
 			Prefix: "jasper",
 			Base: BaseOptions{
-				Level: send.LevelInfo{
-					Default:   level.Info,
-					Threshold: level.Info,
-				},
+				Level:  level.Info,
 				Format: LogFormatPlain,
 			},
 		}
@@ -257,10 +253,7 @@ func TestLoggerConfigMarshalBSON(t *testing.T) {
 			producer: &DefaultLoggerOptions{
 				Prefix: "jasper",
 				Base: BaseOptions{
-					Level: send.LevelInfo{
-						Default:   level.Info,
-						Threshold: level.Info,
-					},
+					Level:  level.Info,
 					Format: LogFormatPlain,
 				},
 			},
@@ -281,10 +274,7 @@ func TestLoggerConfigMarshalBSON(t *testing.T) {
 		rawConfig, err := (&DefaultLoggerOptions{
 			Prefix: "jasper",
 			Base: BaseOptions{
-				Level: send.LevelInfo{
-					Default:   level.Info,
-					Threshold: level.Info,
-				},
+				Level:  level.Info,
 				Format: LogFormatPlain,
 			},
 		}).MarshalBSON()
@@ -336,10 +326,7 @@ func TestLoggerConfigMarshalJSON(t *testing.T) {
 		producer := &DefaultLoggerOptions{
 			Prefix: "jasper",
 			Base: BaseOptions{
-				Level: send.LevelInfo{
-					Default:   level.Info,
-					Threshold: level.Info,
-				},
+				Level:  level.Info,
 				Format: LogFormatPlain,
 			},
 		}
@@ -373,10 +360,7 @@ func TestLoggerConfigMarshalJSON(t *testing.T) {
 			producer: &DefaultLoggerOptions{
 				Prefix: "jasper",
 				Base: BaseOptions{
-					Level: send.LevelInfo{
-						Default:   level.Info,
-						Threshold: level.Info,
-					},
+					Level:  level.Info,
 					Format: LogFormatPlain,
 				},
 			},
@@ -396,10 +380,7 @@ func TestLoggerConfigMarshalJSON(t *testing.T) {
 		rawConfig, err := json.Marshal(&DefaultLoggerOptions{
 			Prefix: "jasper",
 			Base: BaseOptions{
-				Level: send.LevelInfo{
-					Default:   level.Info,
-					Threshold: level.Info,
-				},
+				Level:  level.Info,
 				Format: LogFormatPlain,
 			},
 		})

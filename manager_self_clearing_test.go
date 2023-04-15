@@ -11,7 +11,7 @@ import (
 )
 
 func registerBasedCreate(ctx context.Context, m *selfClearingProcessManager, t *testing.T, opts *options.Create) (Process, error) {
-	sleep, err := newBlockingProcess(ctx, testutil.SleepCreateOpts(10))
+	sleep, err := NewBlockingProcess(ctx, testutil.SleepCreateOpts(10))
 	require.NoError(t, err)
 	require.NotNil(t, sleep)
 	err = m.Register(ctx, sleep)

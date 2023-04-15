@@ -1,4 +1,4 @@
-package executor
+package docker
 
 import (
 	"context"
@@ -20,6 +20,7 @@ import (
 	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
+	"github.com/tychoish/jasper/executor"
 )
 
 type docker struct {
@@ -37,7 +38,7 @@ type docker struct {
 	containerID    string
 	containerMutex sync.RWMutex
 
-	status      Status
+	status      executor.Status
 	statusMutex sync.RWMutex
 
 	pid      int
@@ -48,7 +49,7 @@ type docker struct {
 
 // NewDocker returns an Executor that creates a process within a Docker
 // container. Callers are expected to clean up resources by calling Close.
-func NewDocker(ctx context.Context, client *client.Client, platform, image string, args []string) Executor {
+func NewDocker(ctx context.Context, client *client.Client, platform, image string, args []string) executor.Executor {
 	return &docker{
 		ctx: ctx,
 		execOpts: types.ExecConfig{
@@ -57,7 +58,7 @@ func NewDocker(ctx context.Context, client *client.Client, platform, image strin
 		platform: platform,
 		image:    image,
 		client:   client,
-		status:   Unstarted,
+		status:   executor.Unstarted,
 		pid:      -1,
 		exitCode: -1,
 		signal:   syscall.Signal(-1),
@@ -108,7 +109,7 @@ func (e *docker) Stderr() io.Writer {
 }
 
 func (e *docker) Start() error {
-	if e.getStatus().After(Unstarted) {
+	if e.getStatus().After(executor.Unstarted) {
 		return errors.New("cannot start a process that has already started, exited, or closed")
 	}
 
@@ -120,7 +121,7 @@ func (e *docker) Start() error {
 		return fmt.Errorf("could not start process within container: %w", err)
 	}
 
-	e.setStatus(Running)
+	e.setStatus(executor.Running)
 
 	return nil
 }
@@ -265,10 +266,10 @@ func (e *docker) removeContainer() error {
 }
 
 func (e *docker) Wait() error {
-	if e.getStatus().Before(Running) {
+	if e.getStatus().Before(executor.Running) {
 		return errors.New("cannot wait on unstarted process")
 	}
-	if e.getStatus().After(Running) {
+	if e.getStatus().After(executor.Running) {
 		return e.exitErr
 	}
 
@@ -295,13 +296,13 @@ func (e *docker) Wait() error {
 		}
 	}
 
-	e.setStatus(Exited)
+	e.setStatus(executor.Exited)
 
 	return e.exitErr
 }
 
 func (e *docker) Signal(sig syscall.Signal) error {
-	if e.getStatus() != Running {
+	if e.getStatus() != executor.Running {
 		return errors.New("cannot signal a non-running process")
 	}
 
@@ -321,7 +322,7 @@ func (e *docker) Signal(sig syscall.Signal) error {
 // PID returns the PID of the process in the container, or -1 if the PID cannot
 // be retrieved.
 func (e *docker) PID() int {
-	if e.pid > -1 || !e.getStatus().BetweenInclusive(Running, Exited) {
+	if e.pid > -1 || !e.getStatus().BetweenInclusive(executor.Running, executor.Exited) {
 		return e.pid
 	}
 
@@ -343,7 +344,7 @@ func (e *docker) PID() int {
 // ExitCode returns the exit code of the process in the container, or -1 if the
 // exit code cannot be retrieved.
 func (e *docker) ExitCode() int {
-	if e.exitCode > -1 || !e.getStatus().BetweenInclusive(Running, Exited) {
+	if e.exitCode > -1 || !e.getStatus().BetweenInclusive(executor.Running, executor.Exited) {
 		return e.exitCode
 	}
 
@@ -363,7 +364,7 @@ func (e *docker) ExitCode() int {
 }
 
 func (e *docker) Success() bool {
-	if e.getStatus().Before(Exited) {
+	if e.getStatus().Before(executor.Exited) {
 		return false
 	}
 	return e.exitErr == nil
@@ -382,7 +383,7 @@ func (e *docker) Close() error {
 	catcher := &erc.Collector{}
 	catcher.Add(e.removeContainer())
 	catcher.Add(e.client.Close())
-	e.setStatus(Closed)
+	e.setStatus(executor.Closed)
 	return catcher.Resolve()
 }
 
@@ -411,16 +412,16 @@ func (e *docker) setContainerID(id string) {
 	e.containerID = id
 }
 
-func (e *docker) getStatus() Status {
+func (e *docker) getStatus() executor.Status {
 	e.statusMutex.RLock()
 	defer e.statusMutex.RUnlock()
 	return e.status
 }
 
-func (e *docker) setStatus(status Status) {
+func (e *docker) setStatus(status executor.Status) {
 	e.statusMutex.Lock()
 	defer e.statusMutex.Unlock()
-	if status < e.status && status != Unknown {
+	if status < e.status && status != executor.Unknown {
 		return
 	}
 	e.status = status

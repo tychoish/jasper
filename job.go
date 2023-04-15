@@ -92,7 +92,7 @@ func NewJob(pc ProcessConstructor, cmd string) Job {
 // the command, so running the same command repeatedly may result in
 // job collisions.
 func NewJobBasic(cmd string) Job {
-	j := amboyJobFactory(newBasicProcess)
+	j := amboyJobFactory(NewBasicProcess)
 	j.CmdString = cmd
 	j.SetID(fmt.Sprintf("%s.basic.%x", amboyJobName, sha1.Sum([]byte(cmd))))
 	return j
@@ -119,7 +119,7 @@ func NewJobExtended(pc ProcessConstructor, cmd string, env map[string]string, wd
 // job includes a hash of the command, so running the same command
 // repeatedly may result in job collisions.
 func NewJobBasicExtended(cmd string, env map[string]string, wd string) Job {
-	j := amboyJobFactory(newBasicProcess)
+	j := amboyJobFactory(NewBasicProcess)
 	j.CmdString = cmd
 	j.Environment = env
 	j.WorkingDirectory = wd
@@ -271,7 +271,7 @@ func NewJobForeground(pc ProcessConstructor, opts *options.Create) Job {
 // linewise to the current processes global grip logging instance with
 // error and output separated by level.
 func NewJobBasicForeground(opts *options.Create) Job {
-	j := amboyForegroundOutputJobFactory(newBasicProcess)
+	j := amboyForegroundOutputJobFactory(NewBasicProcess)
 	j.SetID(fmt.Sprintf("%s.basic.%x", j.Type().Name, opts.Hash()))
 	j.Options = opts
 	return j

@@ -13,7 +13,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/tychoish/fun/erc"
-	"github.com/tychoish/jasper/internal/executor"
+	"github.com/tychoish/jasper/executor"
 	"github.com/tychoish/jasper/options"
 )
 
@@ -30,7 +30,8 @@ type blockingProcess struct {
 	info           ProcessInfo
 }
 
-func newBlockingProcess(ctx context.Context, opts *options.Create) (Process, error) {
+// NewBlockingProcess creates a new process
+func NewBlockingProcess(ctx context.Context, opts *options.Create) (Process, error) {
 	id := uuid.New().String()
 	opts.AddEnvVar(EnvironID, id)
 
@@ -377,7 +378,7 @@ func (p *blockingProcess) Wait(ctx context.Context) (int, error) {
 func (p *blockingProcess) Respawn(ctx context.Context) (Process, error) {
 	opts := p.Info(ctx).Options
 	optsCopy := opts.Copy()
-	return newBlockingProcess(ctx, optsCopy)
+	return NewBlockingProcess(ctx, optsCopy)
 }
 
 func (p *blockingProcess) Tag(t string) {

@@ -12,7 +12,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/tychoish/fun/erc"
-	"github.com/tychoish/jasper/internal/executor"
+	"github.com/tychoish/jasper/executor"
 	"github.com/tychoish/jasper/options"
 )
 
@@ -28,7 +28,7 @@ type basicProcess struct {
 	sync.RWMutex
 }
 
-func newBasicProcess(ctx context.Context, opts *options.Create) (Process, error) {
+func NewBasicProcess(ctx context.Context, opts *options.Create) (Process, error) {
 	id := uuid.New().String()
 	opts.AddEnvVar(EnvironID, id)
 
@@ -161,7 +161,7 @@ func (p *basicProcess) Respawn(ctx context.Context) (Process, error) {
 	defer p.RUnlock()
 
 	optsCopy := p.info.Options.Copy()
-	return newBasicProcess(ctx, optsCopy)
+	return NewBasicProcess(ctx, optsCopy)
 }
 
 func (p *basicProcess) Wait(ctx context.Context) (int, error) {

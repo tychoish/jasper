@@ -127,7 +127,7 @@ func TestLoggingCache(t *testing.T) {
 				t.Run("Valid", func(t *testing.T) {
 					msg, err := lp.produceMessage([]byte(`{"msg":"hello world!"}`))
 					require.NoError(t, err)
-					require.Equal(t, `[msg='hello world!']`, msg.String())
+					require.Equal(t, `msg='hello world!'`, msg.String())
 					raw, err := json.Marshal(msg.Raw())
 					require.NoError(t, err)
 					require.Len(t, raw, 22)
@@ -136,7 +136,7 @@ func TestLoggingCache(t *testing.T) {
 					lp.AddMetadata = true
 					msg, err := lp.produceMessage([]byte(`{"msg":"hello world!"}`))
 					require.NoError(t, err)
-					require.Equal(t, `[msg='hello world!']`, msg.String())
+					require.Equal(t, `msg='hello world!'`, msg.String())
 					raw, err := json.Marshal(msg.Raw())
 					require.NoError(t, err)
 					require.True(t, len(raw) >= 150)
@@ -158,7 +158,7 @@ func TestLoggingCache(t *testing.T) {
 					msg, err := lp.produceMessage(doc)
 					require.NoError(t, err)
 
-					require.Equal(t, `[msg='hello world!']`, msg.String())
+					require.Equal(t, `msg='hello world!'`, msg.String())
 					raw, err := json.Marshal(msg.Raw())
 					require.NoError(t, err)
 					require.Len(t, raw, 22)
@@ -168,7 +168,7 @@ func TestLoggingCache(t *testing.T) {
 					msg, err := lp.produceMessage(doc)
 					require.NoError(t, err)
 
-					require.Equal(t, `[msg='hello world!']`, msg.String())
+					require.Equal(t, `msg='hello world!'`, msg.String())
 					raw, err := json.Marshal(msg.Raw())
 					require.NoError(t, err)
 					require.True(t, len(raw) >= 150)

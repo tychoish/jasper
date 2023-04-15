@@ -11,6 +11,8 @@ type synchronizedProcess struct {
 	mutex sync.RWMutex
 }
 
+func SyncrhonizeProcess(proc Process) Process { return &synchronizedProcess{proc: proc} }
+
 func (p *synchronizedProcess) ID() string {
 	p.mutex.RLock()
 	defer p.mutex.RUnlock()

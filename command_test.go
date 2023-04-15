@@ -52,10 +52,10 @@ func TestCommandImplementation(t *testing.T) {
 	cwd, err := os.Getwd()
 	require.NoError(t, err)
 	for procType, makep := range map[string]ProcessConstructor{
-		"BlockingNoLock": newBasicProcess,
-		"BlockingLock":   makeLockingProcess(newBasicProcess),
-		"BasicNoLock":    newBasicProcess,
-		"BasicLock":      makeLockingProcess(newBasicProcess),
+		"BlockingNoLock": NewBasicProcess,
+		"BlockingLock":   makeLockingProcess(NewBasicProcess),
+		"BasicNoLock":    NewBasicProcess,
+		"BasicLock":      makeLockingProcess(NewBasicProcess),
 	} {
 		t.Run(procType, func(t *testing.T) {
 			for runFuncType, runFunc := range map[string]cmdRunFunc{
@@ -347,8 +347,7 @@ func TestCommandImplementation(t *testing.T) {
 										{ls, arg3},
 									}).ContinueOnError(true).IgnoreError(true).Priority(level.Info)
 
-									levelInfo := send.LevelInfo{Default: cmd.opts.Priority, Threshold: cmd.opts.Priority}
-									sender, err := send.NewInMemorySender(t.Name(), levelInfo, 100)
+									sender, err := send.NewInMemorySender(t.Name(), cmd.opts.Priority, 100)
 									require.NoError(t, err)
 
 									subTestCase(ctx, t, cmd, sender.(*send.InMemorySender))

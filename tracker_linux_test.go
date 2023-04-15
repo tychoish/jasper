@@ -20,8 +20,8 @@ func TestLinuxProcessTrackerWithCgroups(t *testing.T) {
 		t.Skip("cannot run Linux process tracker tests with cgroups without admin privileges")
 	}
 	for procName, makeProc := range map[string]ProcessConstructor{
-		"Blocking": newBlockingProcess,
-		"Basic":    newBasicProcess,
+		"Blocking": NewBlockingProcess,
+		"Basic":    NewBasicProcess,
 	} {
 		t.Run(procName, func(t *testing.T) {
 
@@ -163,8 +163,8 @@ func TestLinuxProcessTrackerWithCgroups(t *testing.T) {
 
 func TestLinuxProcessTrackerWithEnvironmentVariables(t *testing.T) {
 	for procName, makeProc := range map[string]ProcessConstructor{
-		"Blocking": newBlockingProcess,
-		"Basic":    newBasicProcess,
+		"Blocking": NewBlockingProcess,
+		"Basic":    NewBasicProcess,
 	} {
 		t.Run(procName, func(t *testing.T) {
 			for testName, testCase := range map[string]func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, opts *options.Create, envVarName string, envVarValue string){

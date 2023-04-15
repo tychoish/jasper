@@ -21,12 +21,12 @@ func NewProcess(ctx context.Context, opts *options.Create) (Process, error) {
 
 	switch opts.Implementation {
 	case options.ProcessImplementationBlocking:
-		proc, err = newBlockingProcess(ctx, opts)
+		proc, err = NewBlockingProcess(ctx, opts)
 		if err != nil {
 			return nil, err
 		}
 	case options.ProcessImplementationBasic:
-		proc, err = newBasicProcess(ctx, opts)
+		proc, err = NewBasicProcess(ctx, opts)
 		if err != nil {
 			return nil, err
 		}

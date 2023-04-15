@@ -25,12 +25,12 @@ func TestAmboyJob(t *testing.T) {
 			return count
 		}
 
-		RegisterJobs(newBasicProcess)
+		RegisterJobs(NewBasicProcess)
 		assert.Equal(t, 4, numJobs())
 	})
 	t.Run("TypeCheck", func(t *testing.T) {
 		t.Run("Default", func(t *testing.T) {
-			job, ok := NewJob(newBasicProcess, "ls").(*amboyJob)
+			job, ok := NewJob(NewBasicProcess, "ls").(*amboyJob)
 			assert.True(t, ok)
 			assert.NotNil(t, job)
 		})
@@ -40,12 +40,12 @@ func TestAmboyJob(t *testing.T) {
 			assert.NotNil(t, job)
 		})
 		t.Run("Simple", func(t *testing.T) {
-			job, ok := NewJobOptions(newBasicProcess, &options.Create{}).(*amboySimpleCapturedOutputJob)
+			job, ok := NewJobOptions(NewBasicProcess, &options.Create{}).(*amboySimpleCapturedOutputJob)
 			assert.True(t, ok)
 			assert.NotNil(t, job)
 		})
 		t.Run("Foreground", func(t *testing.T) {
-			job, ok := NewJobForeground(newBasicProcess, &options.Create{}).(*amboyForegroundOutputJob)
+			job, ok := NewJobForeground(NewBasicProcess, &options.Create{}).(*amboyForegroundOutputJob)
 			assert.True(t, ok)
 			assert.NotNil(t, job)
 		})
@@ -57,7 +57,7 @@ func TestAmboyJob(t *testing.T) {
 	})
 	t.Run("BasicExec", func(t *testing.T) {
 		t.Run("Default", func(t *testing.T) {
-			job := NewJob(newBasicProcess, "ls")
+			job := NewJob(NewBasicProcess, "ls")
 			job.Run(ctx)
 			require.NoError(t, job.Error())
 		})
@@ -67,33 +67,33 @@ func TestAmboyJob(t *testing.T) {
 			require.NoError(t, job.Error())
 		})
 		t.Run("Simple", func(t *testing.T) {
-			job := NewJobOptions(newBasicProcess, &options.Create{Args: []string{"echo", "hi"}})
+			job := NewJobOptions(NewBasicProcess, &options.Create{Args: []string{"echo", "hi"}})
 			job.Run(ctx)
 			require.NoError(t, job.Error())
 		})
 		t.Run("Foreground", func(t *testing.T) {
-			job := NewJobForeground(newBasicProcess, &options.Create{Args: []string{"echo", "hi"}})
+			job := NewJobForeground(NewBasicProcess, &options.Create{Args: []string{"echo", "hi"}})
 			job.Run(ctx)
 			require.NoError(t, job.Error())
 		})
 	})
 	t.Run("ReExecErrors", func(t *testing.T) {
 		t.Run("Default", func(t *testing.T) {
-			job := NewJob(newBasicProcess, "ls")
+			job := NewJob(NewBasicProcess, "ls")
 			job.Run(ctx)
 			require.NoError(t, job.Error())
 			job.Run(ctx)
 			require.Error(t, job.Error())
 		})
 		t.Run("Simple", func(t *testing.T) {
-			job := NewJobOptions(newBasicProcess, &options.Create{Args: []string{"echo", "hi"}})
+			job := NewJobOptions(NewBasicProcess, &options.Create{Args: []string{"echo", "hi"}})
 			job.Run(ctx)
 			require.NoError(t, job.Error())
 			job.Run(ctx)
 			require.Error(t, job.Error())
 		})
 		t.Run("Foreground", func(t *testing.T) {
-			job := NewJobForeground(newBasicProcess, &options.Create{Args: []string{"echo", "hi"}})
+			job := NewJobForeground(NewBasicProcess, &options.Create{Args: []string{"echo", "hi"}})
 			job.Run(ctx)
 			require.NoError(t, job.Error())
 			job.Run(ctx)

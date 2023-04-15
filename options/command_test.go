@@ -44,13 +44,6 @@ func TestCommand(t *testing.T) {
 			require.Len(t, opts.Process.Args, 1)
 			require.Equal(t, "", opts.Process.Args[0])
 		})
-		t.Run("InvalidPriorityCausesError", func(t *testing.T) {
-			opts := &Command{
-				Priority: -1,
-				Commands: [][]string{{""}},
-			}
-			assert.Error(t, opts.Validate())
-		})
 		t.Run("Valid", func(t *testing.T) {
 			opts := &Command{
 				Priority: level.Info,
@@ -60,8 +53,9 @@ func TestCommand(t *testing.T) {
 		})
 	})
 	t.Run("LoggingPreHook", func(t *testing.T) {
-		sender, err := send.NewInternalLogger("pre-hook", send.LevelInfo{Default: level.Debug, Threshold: level.Debug})
-		require.NoError(t, err)
+		sender := send.NewInternalLogger(10)
+		sender.SetPriority(level.Debug)
+		sender.SetName("pre-hook")
 		logger := grip.NewLogger(sender)
 		hook := NewLoggingPreHook(logger, level.Info)
 		assert.NotNil(t, hook)
@@ -79,8 +73,9 @@ func TestCommand(t *testing.T) {
 		assert.NotNil(t, NewLoggingPreHookFromSender(grip.Sender(), level.Debug))
 	})
 	t.Run("MergePreook", func(t *testing.T) {
-		sender, err := send.NewInternalLogger("pre-hook", send.LevelInfo{Default: level.Debug, Threshold: level.Debug})
-		require.NoError(t, err)
+		sender := send.NewInternalLogger(10)
+		sender.SetPriority(level.Debug)
+		sender.SetName("pre-hook")
 		logger := grip.NewLogger(sender)
 
 		hook := MergePreHooks(NewLoggingPreHook(logger, level.Info), NewLoggingPreHook(logger, level.Info), NewLoggingPreHook(logger, level.Info))

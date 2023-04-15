@@ -17,8 +17,8 @@ func TestGetInMemoryLogStream(t *testing.T) {
 	defer cancel()
 
 	for procType, makeProc := range map[string]ProcessConstructor{
-		"Basic":    newBasicProcess,
-		"Blocking": newBlockingProcess,
+		"Basic":    NewBasicProcess,
+		"Blocking": NewBlockingProcess,
 	} {
 		t.Run(procType, func(t *testing.T) {
 
