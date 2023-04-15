@@ -1,4 +1,4 @@
-package jasper
+package jamboy
 
 import (
 	"bytes"
@@ -80,7 +80,7 @@ func amboyJobFactory(pc ProcessConstructor) *amboyJob {
 //
 // Pass the process constructor to allow the amboy jobs to manipulate
 // processes in an existing Manager.
-func NewJob(pc ProcessConstructor, cmd string) Job {
+func NewJob(pc ProcessConstructor, cmd string) amboy.Job {
 	j := amboyJobFactory(pc)
 	j.CmdString = cmd
 	j.SetID(fmt.Sprintf("%s.%x", amboyJobName, sha1.Sum([]byte(cmd))))
@@ -91,7 +91,7 @@ func NewJob(pc ProcessConstructor, cmd string) Job {
 // management internally. The identifier of the job includes a hash of
 // the command, so running the same command repeatedly may result in
 // job collisions.
-func NewJobBasic(cmd string) Job {
+func NewJobBasic(cmd string) amboy.Job {
 	j := amboyJobFactory(NewBasicProcess)
 	j.CmdString = cmd
 	j.SetID(fmt.Sprintf("%s.basic.%x", amboyJobName, sha1.Sum([]byte(cmd))))
@@ -105,7 +105,7 @@ func NewJobBasic(cmd string) Job {
 //
 // Pass the process constructor to allow the amboy jobs to manipulate
 // processes in an existing Manager.
-func NewJobExtended(pc ProcessConstructor, cmd string, env map[string]string, wd string) Job {
+func NewJobExtended(pc ProcessConstructor, cmd string, env map[string]string, wd string) amboy.Job {
 	j := amboyJobFactory(pc)
 	j.CmdString = cmd
 	j.Environment = env
@@ -260,7 +260,7 @@ func amboyForegroundOutputJobFactory(pc ProcessConstructor) *amboyForegroundOutp
 //
 // Pass the process constructor to allow the amboy jobs to manipulate
 // processes in an existing Manager.
-func NewJobForeground(pc ProcessConstructor, opts *options.Create) Job {
+func NewJobForeground(pc ProcessConstructor, opts *options.Create) amboy.Job {
 	j := amboyForegroundOutputJobFactory(pc)
 	j.SetID(fmt.Sprintf("%s.%x", j.Type().Name, opts.Hash()))
 	j.Options = opts
@@ -270,7 +270,7 @@ func NewJobForeground(pc ProcessConstructor, opts *options.Create) Job {
 // NewJobBasicForeground creates an amboy job that writes all output
 // linewise to the current processes global grip logging instance with
 // error and output separated by level.
-func NewJobBasicForeground(opts *options.Create) Job {
+func NewJobBasicForeground(opts *options.Create) amboy.Job {
 	j := amboyForegroundOutputJobFactory(NewBasicProcess)
 	j.SetID(fmt.Sprintf("%s.basic.%x", j.Type().Name, opts.Hash()))
 	j.Options = opts

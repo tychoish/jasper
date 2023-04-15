@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/google/shlex"
-	"github.com/tychoish/amboy"
 	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
@@ -65,6 +64,8 @@ func (c *Command) ProcConstructor(processConstructor ProcessConstructor) *Comman
 	return c
 }
 
+func (c *Command) GetProcessConstructor() ProcessConstructor { return c.makeProc }
+
 // SetRunFunc sets the function that overrides the default behavior when a
 // command is run, allowing the caller to run the command with their own custom
 // function given all the given inputs to the command.
@@ -118,7 +119,7 @@ func (c *Command) String() string {
 // Export returns all of the options.Create that will be used to spawn the
 // processes that run all subcommands.
 func (c *Command) Export() ([]*options.Create, error) {
-	opts, err := c.getCreateOpts()
+	opts, err := c.ExportCreateOptions()
 	if err != nil {
 		return nil, fmt.Errorf("problem getting process creation options: %w", err)
 	}
@@ -534,7 +535,7 @@ func (c *Command) Run(ctx context.Context) error {
 
 	catcher := &erc.Collector{}
 
-	opts, err := c.getCreateOpts()
+	opts, err := c.ExportCreateOptions()
 	if err != nil {
 		catcher.Add(err)
 		catcher.Add(c.Close())
@@ -706,74 +707,6 @@ func (c *Command) SetCombinedWriter(writer io.WriteCloser) *Command {
 	return c
 }
 
-// EnqueueForeground adds separate jobs to the queue for every operation
-// captured in the command. These operations will execute in
-// parallel. The output of the commands are logged, using the default
-// grip sender in the foreground.
-func (c *Command) EnqueueForeground(ctx context.Context, q amboy.Queue) error {
-	jobs, err := c.JobsForeground(ctx)
-	if err != nil {
-		return err
-	}
-
-	catcher := &erc.Collector{}
-	for _, j := range jobs {
-		catcher.Add(q.Put(ctx, j))
-	}
-
-	return catcher.Resolve()
-}
-
-// Enqueue adds separate jobs to the queue for every operation
-// captured in the command. These operations will execute in
-// parallel. The output of the operations is captured in the body of
-// the job.
-func (c *Command) Enqueue(ctx context.Context, q amboy.Queue) error {
-	jobs, err := c.Jobs(ctx)
-	if err != nil {
-		return err
-	}
-
-	catcher := &erc.Collector{}
-	for _, j := range jobs {
-		catcher.Add(q.Put(ctx, j))
-	}
-
-	return catcher.Resolve()
-}
-
-// JobsForeground returns a slice of jobs for every operation
-// captured in the command. The output of the commands are logged,
-// using the default grip sender in the foreground.
-func (c *Command) JobsForeground(ctx context.Context) ([]amboy.Job, error) {
-	opts, err := c.getCreateOpts()
-	if err != nil {
-		return nil, err
-	}
-
-	out := make([]amboy.Job, len(opts))
-	for idx := range opts {
-		out[idx] = NewJobForeground(c.makeProc, opts[idx])
-	}
-	return out, nil
-}
-
-// Jobs returns a slice of jobs for every operation in the
-// command. The output of the commands are captured in the body of the
-// job.
-func (c *Command) Jobs(ctx context.Context) ([]amboy.Job, error) {
-	opts, err := c.getCreateOpts()
-	if err != nil {
-		return nil, err
-	}
-
-	out := make([]amboy.Job, len(opts))
-	for idx := range opts {
-		out[idx] = NewJobOptions(c.makeProc, opts[idx])
-	}
-	return out, nil
-}
-
 func (c *Command) getCmd() string {
 	env := strings.Join(c.opts.Process.ResolveEnvironment(), " ")
 	out := []string{}
@@ -817,8 +750,8 @@ func (c *Command) getCreateOpt(args []string) (*options.Create, error) {
 	return opts, nil
 }
 
-func (c *Command) getCreateOpts() ([]*options.Create, error) {
-	out := []*options.Create{}
+func (c *Command) ExportCreateOptions() ([]*options.Create, error) {
+	out := make([]*options.Create, 0, len(c.opts.Commands))
 	catcher := &erc.Collector{}
 	for _, args := range c.opts.Commands {
 		cmd, err := c.getCreateOpt(args)

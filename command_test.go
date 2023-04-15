@@ -128,7 +128,7 @@ func TestCommandImplementation(t *testing.T) {
 										"NoSudo": func(ctx context.Context, t *testing.T, cmd Command) {
 											cmd.Append(cmd1)
 
-											allOpts, err := cmd.getCreateOpts()
+											allOpts, err := cmd.ExportCreateOptions()
 											require.NoError(t, err)
 											require.Len(t, allOpts, 1)
 											args := strings.Join(allOpts[0].Args, " ")
@@ -144,13 +144,13 @@ func TestCommandImplementation(t *testing.T) {
 											}
 											cmd.Sudo(true).Append(cmd1)
 
-											allOpts, err := cmd.getCreateOpts()
+											allOpts, err := cmd.ExportCreateOptions()
 											require.NoError(t, err)
 											require.Len(t, allOpts, 1)
 											checkArgs(allOpts[0].Args, cmd1)
 
 											cmd.Append(cmd2)
-											allOpts, err = cmd.getCreateOpts()
+											allOpts, err = cmd.ExportCreateOptions()
 											require.NoError(t, err)
 											require.Len(t, allOpts, 2)
 
@@ -165,13 +165,13 @@ func TestCommandImplementation(t *testing.T) {
 												assert.Contains(t, argsStr, expected)
 											}
 
-											allOpts, err := cmd.getCreateOpts()
+											allOpts, err := cmd.ExportCreateOptions()
 											require.NoError(t, err)
 											require.Len(t, allOpts, 1)
 											checkArgs(allOpts[0].Args, cmd1)
 
 											cmd.Add([]string{echo, arg2})
-											allOpts, err = cmd.getCreateOpts()
+											allOpts, err = cmd.ExportCreateOptions()
 											require.NoError(t, err)
 											require.Len(t, allOpts, 2)
 											checkArgs(allOpts[0].Args, cmd1)
@@ -382,14 +382,14 @@ func TestCommandImplementation(t *testing.T) {
 						},
 						"ApplyFromOptsOverridesExistingOptions": func(ctx context.Context, t *testing.T, cmd Command) {
 							_ = cmd.Add([]string{echo, arg1}).Directory("bar")
-							genOpts, err := cmd.getCreateOpts()
+							genOpts, err := cmd.ExportCreateOptions()
 							require.NoError(t, err)
 							require.Len(t, genOpts, 1)
 							assert.Equal(t, "bar", genOpts[0].WorkingDirectory)
 
 							opts := &options.Create{WorkingDirectory: "foo"}
 							_ = cmd.ApplyFromOpts(opts)
-							genOpts, err = cmd.getCreateOpts()
+							genOpts, err = cmd.ExportCreateOptions()
 							require.NoError(t, err)
 							require.Len(t, genOpts, 1)
 							assert.Equal(t, opts.WorkingDirectory, genOpts[0].WorkingDirectory)
@@ -402,7 +402,7 @@ func TestCommandImplementation(t *testing.T) {
 							args := []string{echo, arg1}
 							cmd.opts.Commands = [][]string{}
 							_ = cmd.ApplyFromOpts(opts).Add(args)
-							genOpts, err := cmd.getCreateOpts()
+							genOpts, err := cmd.ExportCreateOptions()
 							require.NoError(t, err)
 							require.Len(t, genOpts, 1)
 							assert.Equal(t, opts.WorkingDirectory, genOpts[0].WorkingDirectory)

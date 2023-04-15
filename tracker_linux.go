@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"syscall"
 
-	"github.com/containerd/cgroups"
+	cgroups "github.com/containerd/cgroups/v3/cgroup1"
 	specs "github.com/opencontainers/runtime-spec/specs-go"
 	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/grip"
@@ -59,7 +59,7 @@ func (t *linuxProcessTracker) setDefaultCgroupIfInvalid() error {
 		return nil
 	}
 
-	cgroup, err := cgroups.New(cgroups.V1, cgroups.StaticPath("/"+t.Name), &specs.LinuxResources{})
+	cgroup, err := cgroups.New(cgroups.StaticPath("/"+t.Name), &specs.LinuxResources{})
 	if err != nil {
 		return fmt.Errorf("could not create default cgroup: %w", err)
 	}

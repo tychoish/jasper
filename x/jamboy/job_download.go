@@ -1,4 +1,4 @@
-package jasper
+package jamboy
 
 import (
 	"context"
@@ -43,7 +43,7 @@ func newDownloadJob() *downloadFileJob {
 // filesystem. The job has a dependency on the downloaded file's path, and
 // will only execute if that file does not exist, unless the force
 // flag is passed.
-func NewDownloadJob(url, path string, force bool) (Job, error) {
+func NewDownloadJob(url, path string, force bool) (amboy.Job, error) {
 	j := newDownloadJob()
 	if err := j.setURL(url); err != nil {
 		return nil, fmt.Errorf("problem constructing Job object (url): %w", err)
