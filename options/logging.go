@@ -1,6 +1,7 @@
 package options
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -116,6 +117,8 @@ func (lp *LoggingPayload) convert() (message.Composer, error) {
 
 func (lp *LoggingPayload) convertMultiMessage(value interface{}) (message.Composer, error) {
 	switch data := value.(type) {
+	case []byte:
+		return lp.convertMultiMessage(bytes.Split(data, []byte("\x00")))
 	case string:
 		return lp.convertMultiMessage(strings.Split(data, "\n"))
 	case []string:
@@ -144,7 +147,14 @@ func (lp *LoggingPayload) convertMultiMessage(value interface{}) (message.Compos
 }
 
 func (lp *LoggingPayload) convertMessage(value interface{}) (message.Composer, error) {
-	return message.Convert(value), nil
+	switch data := value.(type) {
+	case []byte:
+		return lp.produceMessage(data)
+	case string:
+		return lp.produceMessage([]byte(data))
+	default:
+		return message.Convert(value), nil
+	}
 }
 
 func (lp *LoggingPayload) produceMessage(data []byte) (message.Composer, error) {
@@ -166,8 +176,7 @@ func (lp *LoggingPayload) produceMessage(data []byte) (message.Composer, error) 
 		}
 
 		return message.MakeSimpleString(string(data)), nil
-
-	default: // includes string case.
+	default:
 		if lp.AddMetadata {
 			return message.MakeBytes(data), nil
 		}

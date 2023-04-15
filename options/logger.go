@@ -1,6 +1,7 @@
 package options
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"time"
@@ -96,9 +97,6 @@ type RawLoggerConfig []byte
 
 func (lc *RawLoggerConfig) MarshalJSON() ([]byte, error) { return *lc, nil }
 func (lc *RawLoggerConfig) UnmarshalJSON(b []byte) error { *lc = b; return nil }
-
-func (lc RawLoggerConfig) MarshalBSON() ([]byte, error)  { return lc, nil }
-func (lc *RawLoggerConfig) UnmarshalBSON(b []byte) error { *lc = b; return nil }
 
 // LoggerConfig represents the necessary information to construct a new grip
 // send.Sender. LoggerConfig implements the json and bson Marshaler and
@@ -336,9 +334,11 @@ func (s *SafeSender) Close() error {
 	catcher := &erc.Collector{}
 
 	if s.Sender != nil {
+		catcher.Add(s.Sender.Flush(context.TODO()))
 		catcher.Add(s.Sender.Close())
 	}
 	if s.baseSender != nil {
+		catcher.Add(s.baseSender.Flush(context.TODO()))
 		catcher.Add(s.baseSender.Close())
 	}
 

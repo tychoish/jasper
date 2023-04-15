@@ -75,7 +75,7 @@ func TestLoggingCache(t *testing.T) {
 		})
 		t.Run("IvalidMessage", func(t *testing.T) {
 			lp.Format = LoggingPayloadFormatJSON
-			lp.Data = "hello, world!"
+			lp.Data = "{hello, world!\""
 			lp.Priority = level.Trace
 			logger := &CachedLogger{Output: grip.Sender()}
 			require.Error(t, logger.Send(lp))
@@ -185,12 +185,12 @@ func TestLoggingCache(t *testing.T) {
 			t.Run("MultiByteSlice", func(t *testing.T) {
 				msg, err := lp.convertMessage([][]byte{[]byte("hello"), []byte("world")})
 				require.NoError(t, err)
-				require.Equal(t, "[hello world]", msg.String())
+				require.Equal(t, "hello\nworld", msg.String())
 			})
 			t.Run("InterfaceSlice", func(t *testing.T) {
 				msg, err := lp.convertMessage([]interface{}{"hello", true, "world", 42})
 				require.NoError(t, err)
-				require.Equal(t, "hello true world 42", msg.String())
+				require.Equal(t, "hello='true' world='42'", msg.String())
 			})
 			t.Run("Interface", func(t *testing.T) {
 				msg, err := lp.convertMessage(ex{})
@@ -278,6 +278,8 @@ type ex struct{}
 func (ex) String() string { return "hello world!" }
 
 func requireIsGroup(t *testing.T, size int, msg message.Composer) []message.Composer {
+	t.Helper()
+	t.Logf("%T", msg)
 	gc, ok := msg.(*message.GroupComposer)
 	require.True(t, ok)
 	msgs := gc.Messages()

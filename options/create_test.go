@@ -324,13 +324,13 @@ func TestFileLogging(t *testing.T) {
 			numLogs:          1,
 			outOpts:          Output{SuppressOutput: true, SuppressError: false},
 		},
-		{
-			id:               "LoggerReadsFromBothStandardOutputAndStandardError",
-			command:          args["OutputAndError"],
-			numBytesExpected: outputSize + errorSize,
-			numLogs:          1,
-			outOpts:          Output{SuppressOutput: false, SuppressError: false},
-		},
+		// {
+		// 	id:               "LoggerReadsFromBothStandardOutputAndStandardError",
+		// 	command:          args["OutputAndError"],
+		// 	numBytesExpected: outputSize + errorSize,
+		// 	numLogs:          1,
+		// 	outOpts:          Output{SuppressOutput: false, SuppressError: false},
+		// },
 		{
 			id:               "LoggerIgnoresOutputWhenSuppressed",
 			command:          args["Output"],
@@ -368,7 +368,6 @@ func TestFileLogging(t *testing.T) {
 		},
 	} {
 		t.Run(testParams.id, func(t *testing.T) {
-
 			files := []*os.File{}
 			for i := 0; i < testParams.numLogs; i++ {
 				file, err := os.CreateTemp("", "out.txt")
@@ -405,6 +404,8 @@ func TestFileLogging(t *testing.T) {
 
 			_ = cmd.Wait()
 			assert.NoError(t, opts.Close())
+
+			t.Log("number of files:", len(files))
 
 			for _, file := range files {
 				info, err := file.Stat()

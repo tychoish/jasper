@@ -98,23 +98,6 @@ func TestLoggerConfigResolve(t *testing.T) {
 		assert.Nil(t, sender)
 		assert.Error(t, err)
 	})
-	t.Run("MismatchingFormatAndConfig", func(t *testing.T) {
-		rawData, err := json.Marshal(&DefaultLoggerOptions{Prefix: "prefix"})
-		require.NoError(t, err)
-		config := LoggerConfig{
-			Registry: globalLoggerRegistry,
-			info: loggerConfigInfo{
-				Type:   LogDefault,
-				Format: RawLoggerConfigFormatBSON,
-				Config: rawData,
-			},
-		}
-		require.NoError(t, config.validate())
-		require.True(t, config.Registry.Check(config.info.Type))
-		sender, err := config.Resolve()
-		assert.Nil(t, sender)
-		assert.Error(t, err)
-	})
 	t.Run("MismatchingConfigAndProducer", func(t *testing.T) {
 		rawData, err := json.Marshal(&DefaultLoggerOptions{Prefix: "prefix"})
 		require.NoError(t, err)
