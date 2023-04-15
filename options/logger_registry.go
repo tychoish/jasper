@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"sync"
 
-	"github.com/tychoish/birch"
 	"github.com/tychoish/grip/send"
 )
 
@@ -17,24 +16,12 @@ func init() {
 			LogFile:      NewFileLoggerProducer,
 			LogInherited: NewInheritedLoggerProducer,
 			LogInMemory:  NewInMemoryLoggerProducer,
-			LogSplunk:    NewSplunkLoggerProducer,
 		},
 		marshalers: map[RawLoggerConfigFormat]Marshaler{
 			RawLoggerConfigFormatJSON: json.Marshal,
-			RawLoggerConfigFormatBSON: func(val interface{}) ([]byte, error) {
-				return birch.DC.Interface(val).MarshalBSON()
-			},
 		},
 		unmarshalers: map[RawLoggerConfigFormat]Unmarshaler{
 			RawLoggerConfigFormatJSON: json.Unmarshal,
-			RawLoggerConfigFormatBSON: func(data []byte, val interface{}) error {
-				doc, err := birch.DCE.Reader(data)
-				if err != nil {
-					return err
-				}
-
-				return doc.Unmarshal(val)
-			},
 		},
 	}
 }

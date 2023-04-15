@@ -3,7 +3,6 @@ package options
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"io"
 	"os"
 	"os/exec"
@@ -12,8 +11,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tychoish/birch"
-	"github.com/tychoish/grip/x/splunk"
 )
 
 func TestCreateConstructor(t *testing.T) {
@@ -257,81 +254,6 @@ func TestCreate(t *testing.T) {
 
 			assert.NoError(t, opts.Validate())
 			assert.Equal(t, 1, opts.TimeoutSecs)
-		},
-		"ResolveFailsWithInvalidLoggerConfiguration": func(t *testing.T, opts *Create) {
-			config, err := birch.DC.Make(2).Append(
-				birch.EC.SubDocumentFromElements("splunk",
-					birch.EC.String("url", ""),
-					birch.EC.String("token", ""),
-					birch.EC.String("channel", ""),
-				),
-				birch.EC.SubDocumentFromElements("base",
-					birch.EC.SubDocumentFromElements("buffer",
-						birch.EC.Boolean("buffered", false),
-						birch.EC.Duration("duration", 0),
-						birch.EC.Int("max_size", 0),
-					),
-					birch.EC.String("format", ""),
-					birch.EC.SubDocumentFromElements("level",
-						birch.EC.Int("default", 0),
-						birch.EC.Int("threshold", 0),
-					),
-				),
-			).MarshalBSON()
-			require.NoError(t, err)
-			opts.Output.Loggers = []*LoggerConfig{
-				{
-					info: loggerConfigInfo{
-						Type:   LogSplunk,
-						Format: RawLoggerConfigFormatBSON,
-						Config: config,
-					},
-				},
-			}
-			cmd, _, err := opts.Resolve(ctx)
-			assert.Error(t, err)
-			assert.Nil(t, cmd)
-		},
-		"ResolveFailsWithMismatchingLoggerConfiguration": func(t *testing.T, opts *Create) {
-			config, err := json.Marshal(&SplunkLoggerOptions{
-				Splunk: splunk.ConnectionInfo{
-					ServerURL: "https://example.com/",
-				},
-			})
-			require.NoError(t, err)
-			opts.Output.Loggers = []*LoggerConfig{
-				{
-					info: loggerConfigInfo{
-						Type:   LogSplunk,
-						Format: RawLoggerConfigFormatBSON,
-						Config: config,
-					},
-				},
-			}
-			cmd, _, err := opts.Resolve(ctx)
-			assert.Error(t, err)
-			assert.Nil(t, cmd)
-		},
-		"ResolveFailsWithInvalidErrorLoggingConfiguration": func(t *testing.T, opts *Create) {
-			config, err := json.Marshal(&SplunkLoggerOptions{
-				Splunk: splunk.ConnectionInfo{
-					ServerURL: "https://example.com/",
-				},
-			})
-			require.NoError(t, err)
-			opts.Output.Loggers = []*LoggerConfig{
-				{
-					info: loggerConfigInfo{
-						Type:   LogSplunk,
-						Format: RawLoggerConfigFormatJSON,
-						Config: config,
-					},
-				},
-			}
-			opts.Output.SuppressOutput = true
-			cmd, _, err := opts.Resolve(ctx)
-			assert.Error(t, err)
-			assert.Nil(t, cmd)
 		},
 	} {
 		t.Run(name, func(t *testing.T) {

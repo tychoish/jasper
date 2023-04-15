@@ -408,16 +408,6 @@ func TestCommandImplementation(t *testing.T) {
 							assert.Equal(t, opts.WorkingDirectory, genOpts[0].WorkingDirectory)
 							assert.Equal(t, opts.Environment, genOpts[0].Environment)
 						},
-						"GetJobs": func(ctx context.Context, t *testing.T, cmd Command) {
-							jobs, err := cmd.Append("ls", "echo hi", "ls -lha").Jobs(ctx)
-							assert.NoError(t, err)
-							assert.Len(t, jobs, 3)
-						},
-						"GetJobsForeground": func(ctx context.Context, t *testing.T, cmd Command) {
-							jobs, err := cmd.Append("ls", "echo hi", "ls -lha").JobsForeground(ctx)
-							assert.NoError(t, err)
-							assert.Len(t, jobs, 3)
-						},
 						"TagFunctions": func(ctx context.Context, t *testing.T, cmd Command) {
 							tags := []string{"tag0", "tag1"}
 							subCmds := []string{"echo hi", "echo bye"}

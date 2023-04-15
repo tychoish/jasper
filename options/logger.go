@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/tychoish/birch"
 	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/send"
@@ -60,7 +59,6 @@ func (f LogFormat) MakeFormatter() (send.MessageFormatter, error) {
 type RawLoggerConfigFormat string
 
 const (
-	RawLoggerConfigFormatBSON    RawLoggerConfigFormat = "BSON"
 	RawLoggerConfigFormatJSON    RawLoggerConfigFormat = "JSON"
 	RawLoggerConfigFormatInvalid RawLoggerConfigFormat = "invalid"
 )
@@ -68,7 +66,7 @@ const (
 // Validate ensures that RawLoggerConfigFormat is valid.
 func (f RawLoggerConfigFormat) Validate() error {
 	switch f {
-	case RawLoggerConfigFormatBSON, RawLoggerConfigFormatJSON:
+	case RawLoggerConfigFormatJSON:
 		return nil
 	case RawLoggerConfigFormatInvalid:
 		return errors.New("invalid log format")
@@ -188,49 +186,12 @@ func (lc *LoggerConfig) Resolve() (send.Sender, error) {
 	return lc.sender, nil
 }
 
-func (lc *LoggerConfig) MarshalBSON() ([]byte, error) {
-	if err := lc.resolveProducer(); err != nil {
-		return nil, fmt.Errorf("problem resolving logger producer: %w", err)
-	}
-
-	marshaler := lc.getRegistry().Marshaler(RawLoggerConfigFormatBSON)
-	if marshaler == nil {
-		return nil, errors.New("bson marshalling not supported")
-	}
-
-	data, err := marshaler(lc.producer)
-	if err != nil {
-		return nil, fmt.Errorf("problem producing logger config: %w", err)
-	}
-
-	return marshaler(&loggerConfigInfo{
-		Type:   lc.producer.Type(),
-		Format: RawLoggerConfigFormatBSON,
-		Config: data,
-	})
-}
-
 func (lc *LoggerConfig) getRegistry() LoggerRegistry {
 	if lc.Registry == nil {
 		return GetGlobalLoggerRegistry()
 	}
 
 	return lc.Registry
-}
-
-func (lc *LoggerConfig) UnmarshalBSON(b []byte) error {
-	unmarshaler := lc.getRegistry().Unmarshaler(RawLoggerConfigFormatBSON)
-	if unmarshaler == nil {
-		return errors.New("bson unmarshaling not supported")
-	}
-
-	info := loggerConfigInfo{}
-	if err := unmarshaler(b, &info); err != nil {
-		return fmt.Errorf("problem unmarshaling config logger info: %w", err)
-	}
-
-	lc.info = info
-	return nil
 }
 
 func (lc *LoggerConfig) MarshalJSON() ([]byte, error) {
@@ -312,23 +273,6 @@ func (opts *BaseOptions) Validate() error {
 	return catcher.Resolve()
 }
 
-func (opts *BaseOptions) MarshalDocument() (*birch.Document, error) {
-	buf, err := opts.Buffer.MarshalDocument()
-	if err != nil {
-		return nil, err
-	}
-
-	return birch.DC.Elements(
-		birch.EC.String("format", string(opts.Format)),
-		birch.EC.Int("level", int(opts.Level)),
-		birch.EC.SubDocument("buffer", buf),
-	), nil
-}
-
-func (opts *BaseOptions) MarshalBSON() ([]byte, error) {
-	return birch.MarshalDocumentBSON(opts)
-}
-
 // BufferOptions packages options for whether or not a Logger should be
 // buffered and the duration and size of the respective buffer in the case that
 // it should be.
@@ -345,18 +289,6 @@ func (opts *BufferOptions) Validate() error {
 	}
 
 	return nil
-}
-
-func (opts *BufferOptions) MarshalDocument() (*birch.Document, error) {
-	return birch.DC.Elements(
-		birch.EC.Boolean("buffered", opts.Buffered),
-		birch.EC.Duration("duration", opts.Duration),
-		birch.EC.Int("max_size", opts.MaxSize),
-	), nil
-}
-
-func (opts *BufferOptions) MarshalBSON() ([]byte, error) {
-	return birch.MarshalDocumentBSON(opts)
 }
 
 // SafeSender wraps a grip send.Sender and its base sender, ensuring that the

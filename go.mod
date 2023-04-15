@@ -9,10 +9,8 @@ require (
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/opencontainers/runtime-spec v1.0.3-0.20210326190908-1c3f411f0417
 	github.com/stretchr/testify v1.8.1
-	github.com/tychoish/birch v0.2.1
 	github.com/tychoish/fun v0.8.5
 	github.com/tychoish/grip v0.2.4
-	github.com/tychoish/grip/x/splunk v0.0.0-20230408192639-ef555fcdf0fd
 	golang.org/x/crypto v0.5.0
 )
 
@@ -22,7 +20,6 @@ require (
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/frankban/quicktest v1.14.3 // indirect
-	github.com/fuyufjh/splunk-hec-go v0.4.0 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/go-cmp v0.5.7 // indirect

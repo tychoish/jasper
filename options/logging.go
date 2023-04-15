@@ -1,15 +1,12 @@
 package options
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"strings"
 	"time"
 
-	"github.com/tychoish/birch"
 	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
@@ -69,7 +66,6 @@ type LoggingPayload struct {
 type LoggingPayloadFormat string
 
 const (
-	LoggingPayloadFormatBSON   = "bson"
 	LoggingPayloadFormatJSON   = "json"
 	LoggingPayloadFormatSTRING = "string"
 )
@@ -80,7 +76,7 @@ func (lp *LoggingPayload) Validate() error {
 	catcher := &erc.Collector{}
 	erc.When(catcher, lp.Data == nil, "data cannot be empty")
 	switch lp.Format {
-	case "", LoggingPayloadFormatBSON, LoggingPayloadFormatJSON, LoggingPayloadFormatSTRING:
+	case "", LoggingPayloadFormatJSON, LoggingPayloadFormatSTRING:
 	default:
 		catcher.Add(fmt.Errorf("invalid payload format '%s'", lp.Format))
 	}
@@ -122,26 +118,10 @@ func (lp *LoggingPayload) convertMultiMessage(value interface{}) (message.Compos
 	switch data := value.(type) {
 	case string:
 		return lp.convertMultiMessage(strings.Split(data, "\n"))
-	case []byte:
-		payload, err := lp.splitByteSlice(data)
-		if err != nil {
-			return nil, err
-		}
-		return lp.convertMultiMessage(payload)
 	case []string:
 		batch := []message.Composer{}
 		for _, str := range data {
 			elem, err := lp.produceMessage([]byte(str))
-			if err != nil {
-				return nil, err
-			}
-			batch = append(batch, elem)
-		}
-		return message.MakeGroupComposer(batch), nil
-	case [][]byte:
-		batch := []message.Composer{}
-		for _, dt := range data {
-			elem, err := lp.produceMessage(dt)
 			if err != nil {
 				return nil, err
 			}
@@ -180,21 +160,13 @@ func (lp *LoggingPayload) produceMessage(data []byte) (message.Composer, error) 
 		}
 
 		return message.MakeSimpleFields(payload), nil
-	case LoggingPayloadFormatBSON:
-		unmarshler := GetGlobalLoggerRegistry().Unmarshaler(RawLoggerConfigFormatBSON)
-		if unmarshler == nil {
-			return nil, errors.New("no suitable unmarshaller provided")
-		}
-
-		payload := message.Fields{}
-		if err := unmarshler(data, &payload); err != nil {
-			return nil, fmt.Errorf("problem parsing bson from message body: %w", err)
-		}
+	case LoggingPayloadFormatSTRING:
 		if lp.AddMetadata {
-			return message.MakeFields(payload), nil
+			return message.MakeString(string(data)), nil
 		}
 
-		return message.MakeSimpleFields(payload), nil
+		return message.MakeSimpleString(string(data)), nil
+
 	default: // includes string case.
 		if lp.AddMetadata {
 			return message.MakeBytes(data), nil
@@ -202,39 +174,4 @@ func (lp *LoggingPayload) produceMessage(data []byte) (message.Composer, error) 
 
 		return message.MakeSimpleBytes(data), nil
 	}
-}
-
-func (lp *LoggingPayload) splitByteSlice(data []byte) (interface{}, error) {
-	if lp.Format != LoggingPayloadFormatBSON {
-		return bytes.Split(data, []byte("\x00")), nil
-	}
-
-	out := [][]byte{}
-	buf := bytes.NewBuffer(data)
-	for {
-		doc := birch.DC.New()
-		_, err := doc.ReadFrom(buf)
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return nil, fmt.Errorf("problem reading bson from message data: %w", err)
-		}
-
-		payload, err := doc.MarshalBSON()
-		if err != nil {
-			return nil, fmt.Errorf("problem constructing bson form: %w", err)
-		}
-		out = append(out, payload)
-	}
-
-	return out, nil
-}
-
-func byteSlicesToStringSlice(in [][]byte) []string {
-	out := make([]string, len(in))
-	for idx := range in {
-		out[idx] = string(in[idx])
-	}
-	return out
 }

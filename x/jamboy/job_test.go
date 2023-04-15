@@ -100,4 +100,5 @@ func TestAmboyJob(t *testing.T) {
 			require.Error(t, job.Error())
 		})
 	})
+
 }

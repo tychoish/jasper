@@ -3,11 +3,9 @@ package options
 import (
 	"fmt"
 
-	"github.com/tychoish/birch"
 	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/send"
-	"github.com/tychoish/grip/x/splunk"
 )
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -54,21 +52,6 @@ func (opts *DefaultLoggerOptions) Configure() (send.Sender, error) {
 		return nil, fmt.Errorf("problem creating safe default logger: %w", err)
 	}
 	return sender, nil
-}
-func (opts *DefaultLoggerOptions) MarshalDocument() (*birch.Document, error) {
-	base, err := opts.Base.MarshalDocument()
-	if err != nil {
-		return nil, err
-	}
-
-	return birch.DC.Elements(
-		birch.EC.String("prefix", opts.Prefix),
-		birch.EC.SubDocument("base", base),
-	), nil
-}
-
-func (opts *DefaultLoggerOptions) MarshalBSON() ([]byte, error) {
-	return birch.MarshalDocumentBSON(opts)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -192,49 +175,6 @@ func (opts *InMemoryLoggerOptions) Configure() (send.Sender, error) {
 	sender, err = NewSafeSender(sender, opts.Base)
 	if err != nil {
 		return nil, fmt.Errorf("problem creating safe in-memory logger: %w", err)
-	}
-	return sender, nil
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Splunk Logger
-///////////////////////////////////////////////////////////////////////////////
-
-// LogSplunk is the type name for the splunk logger.
-const LogSplunk = "splunk"
-
-// SplunkLoggerOptions packages the options for creating a splunk logger.
-type SplunkLoggerOptions struct {
-	Splunk splunk.ConnectionInfo `json:"splunk" bson:"splunk"`
-	Base   BaseOptions           `json:"base" bson:"base"`
-}
-
-// SplunkLoggerProducer returns a LoggerProducer backed by SplunkLoggerOptions.
-func NewSplunkLoggerProducer() LoggerProducer { return &SplunkLoggerOptions{} }
-
-func (opts *SplunkLoggerOptions) Validate() error {
-	catcher := &erc.Collector{}
-
-	erc.When(catcher, opts.Splunk.Populated(), "missing connection info for output type splunk")
-	catcher.Add(opts.Base.Validate())
-	return catcher.Resolve()
-}
-
-func (*SplunkLoggerOptions) Type() string { return LogSplunk }
-func (opts *SplunkLoggerOptions) Configure() (send.Sender, error) {
-	if err := opts.Validate(); err != nil {
-		return nil, fmt.Errorf("invalid config: %w", err)
-	}
-
-	sender, err := splunk.MakeSender(opts.Splunk)
-	if err != nil {
-		return nil, fmt.Errorf("problem creating base splunk logger: %w", err)
-	}
-	sender.SetName(DefaultLogName)
-	sender.SetPriority(opts.Base.Level)
-	sender, err = NewSafeSender(sender, opts.Base)
-	if err != nil {
-		return nil, fmt.Errorf("problem creating safe splunk logger: %w", err)
 	}
 	return sender, nil
 }

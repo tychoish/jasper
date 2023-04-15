@@ -1,14 +1,11 @@
 package options
 
 import (
-	"bytes"
 	"encoding/json"
-	"math/rand"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tychoish/birch"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
@@ -145,38 +142,6 @@ func TestLoggingCache(t *testing.T) {
 					assert.Contains(t, string(raw), "metadata")
 				})
 			})
-			t.Run("BSON", func(t *testing.T) {
-				lp := &LoggingPayload{Format: LoggingPayloadFormatBSON}
-				doc, err := birch.DC.Interface(map[string]string{"msg": "hello world!"}).MarshalBSON()
-				require.NoError(t, err)
-
-				t.Run("Invalid", func(t *testing.T) {
-					_, err := lp.produceMessage([]byte("\x01\x00"))
-					require.Error(t, err)
-				})
-				t.Run("Valid", func(t *testing.T) {
-					msg, err := lp.produceMessage(doc)
-					require.NoError(t, err)
-
-					require.Equal(t, `msg='hello world!'`, msg.String())
-					raw, err := json.Marshal(msg.Raw())
-					require.NoError(t, err)
-					require.Len(t, raw, 22)
-				})
-				t.Run("ValidMetadata", func(t *testing.T) {
-					lp.AddMetadata = true
-					msg, err := lp.produceMessage(doc)
-					require.NoError(t, err)
-
-					require.Equal(t, `msg='hello world!'`, msg.String())
-					raw, err := json.Marshal(msg.Raw())
-					require.NoError(t, err)
-					require.True(t, len(raw) >= 150)
-					assert.Contains(t, string(raw), "process")
-					assert.Contains(t, string(raw), "hostname")
-					assert.Contains(t, string(raw), "metadata")
-				})
-			})
 			t.Run("String", func(t *testing.T) {
 				lp := &LoggingPayload{Format: LoggingPayloadFormatSTRING}
 
@@ -262,27 +227,6 @@ func TestLoggingCache(t *testing.T) {
 					assert.Equal(t, "hello", group[0].String())
 					assert.Equal(t, "world", group[1].String())
 
-				})
-				t.Run("BSON", func(t *testing.T) {
-					lp.Format = LoggingPayloadFormatBSON
-					defer func() { lp.Format = "" }()
-					buf := &bytes.Buffer{}
-					for i := 0; i < 10; i++ {
-
-						doc, err := birch.DC.MapInterface(map[string]interface{}{
-							"msg": "hello world!",
-							"idx": i,
-							"val": rand.Int63n(1 + int64(i*42)),
-						}).MarshalBSON()
-						require.NoError(t, err)
-						_, err = buf.Write(doc)
-						require.NoError(t, err)
-					}
-
-					msg, err := lp.convertMultiMessage(buf.Bytes())
-					require.NoError(t, err)
-					msgs := requireIsGroup(t, 10, msg)
-					assert.Contains(t, msgs[0].String(), "idx='0'")
 				})
 			})
 			t.Run("InterfaceSlice", func(t *testing.T) {
