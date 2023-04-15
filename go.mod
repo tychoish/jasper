@@ -3,9 +3,7 @@ module github.com/tychoish/jasper
 go 1.18
 
 require (
-	github.com/cheynewallace/tabby v1.1.0
 	github.com/containerd/cgroups v1.1.0
-	github.com/evergreen-ci/service v1.0.1-0.20200225230430-d9382e39d768
 	github.com/golang/protobuf v1.5.2
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/google/uuid v1.3.0
@@ -20,7 +18,6 @@ require (
 	github.com/tychoish/grip v0.2.4
 	github.com/tychoish/grip/x/metrics v0.0.0-20230408192639-ef555fcdf0fd
 	github.com/tychoish/grip/x/splunk v0.0.0-20230408192639-ef555fcdf0fd
-	github.com/urfave/cli v1.22.4
 	golang.org/x/crypto v0.5.0
 	google.golang.org/grpc v1.50.1
 	google.golang.org/protobuf v1.28.1
@@ -29,7 +26,6 @@ require (
 require (
 	github.com/VividCortex/ewma v1.1.1 // indirect
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
-	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
@@ -47,9 +43,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rs/cors v1.8.3 // indirect
-	github.com/russross/blackfriday/v2 v2.0.1 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
-	github.com/shurcooL/sanitized_anchor_name v1.0.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.11 // indirect
 	github.com/tklauser/numcpus v0.6.0 // indirect
 	github.com/tychoish/birch/x/ftdc v0.0.0-20230218012303-165f4d35e29f // indirect
