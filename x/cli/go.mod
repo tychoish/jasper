@@ -31,7 +31,7 @@ require (
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
@@ -51,24 +51,32 @@ require (
 	github.com/tklauser/go-sysconf v0.3.11 // indirect
 	github.com/tklauser/numcpus v0.6.0 // indirect
 	github.com/tychoish/amboy v0.0.0-20230408193931-6ba4e429a638 // indirect
-	github.com/tychoish/birch v0.2.1 // indirect
-	github.com/tychoish/birch/x/ftdc v0.0.0-20230218012303-165f4d35e29f // indirect
-	github.com/tychoish/birch/x/mrpc v0.0.0-20230408192718-ea2b06ab9878 // indirect
+	github.com/tychoish/birch v0.2.3-0.20230413052020-46068f63d7bb // indirect
+	github.com/tychoish/birch/x/ftdc v0.0.0-20230413052020-46068f63d7bb // indirect
+	github.com/tychoish/birch/x/mrpc v0.0.0-20230413052020-46068f63d7bb // indirect
 	github.com/tychoish/gimlet v0.0.0-20230130001449-8987c96bb886 // indirect
-	github.com/tychoish/grip/x/metrics v0.0.0-20230408192639-ef555fcdf0fd // indirect
+	github.com/tychoish/grip/x/metrics v0.0.0-20230414135146-97625602a7ee // indirect
+	github.com/tychoish/jasper/x/remote v0.0.0-00010101000000-000000000000 // indirect
+	github.com/tychoish/jasper/x/splunk v0.0.0-00010101000000-000000000000 // indirect
 	github.com/ulikunitz/xz v0.5.11 // indirect
 	github.com/urfave/negroni v1.0.0 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	golang.org/x/crypto v0.5.0 // indirect
-	golang.org/x/mod v0.7.0 // indirect
-	golang.org/x/net v0.5.0 // indirect
-	golang.org/x/sys v0.4.0 // indirect
-	golang.org/x/text v0.6.0 // indirect
-	golang.org/x/tools v0.5.0 // indirect
-	google.golang.org/genproto v0.0.0-20221014213838-99cd37c6964a // indirect
-	google.golang.org/grpc v1.50.1 // indirect
-	google.golang.org/protobuf v1.28.1 // indirect
+	golang.org/x/mod v0.8.0 // indirect
+	golang.org/x/net v0.9.0 // indirect
+	golang.org/x/sys v0.7.0 // indirect
+	golang.org/x/text v0.9.0 // indirect
+	golang.org/x/tools v0.6.0 // indirect
+	google.golang.org/genproto v0.0.0-20230110181048-76db0878b65f // indirect
+	google.golang.org/grpc v1.54.0 // indirect
+	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/tychoish/jasper/x/remote => ../remote
+
+replace github.com/tychoish/jasper/x/splunk => ../splunk
+
+replace gitub.com/tychoish/jasper => ../../
