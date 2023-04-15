@@ -65,7 +65,7 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 
 				time.Sleep(5 * time.Millisecond) // let time pass...
 				assert.False(t, proc.Info(ctx).Successful)
-				assert.True(t, time.Since(startAt) < 20*time.Second)
+				check.True(t, time.Since(startAt) < 20*time.Second)
 			},
 		},
 		{
@@ -130,8 +130,8 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 				require.NoError(t, err)
 				time.Sleep(10 * time.Millisecond) // give the process time to start background machinery
 				_, err = proc.Wait(ctx)
-				assert.NoError(t, err)
-				assert.True(t, proc.Complete(ctx))
+				check.NotError(t, err)
+				check.True(t, proc.Complete(ctx))
 			},
 		},
 		{
@@ -141,8 +141,8 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 				pctx, pcancel := context.WithCancel(ctx)
 				proc, err := makep(ctx, opts)
 				require.NoError(t, err)
-				assert.True(t, proc.Running(ctx))
-				assert.NoError(t, err)
+				check.True(t, proc.Running(ctx))
+				check.NotError(t, err)
 				pcancel()
 				_, err = proc.Wait(pctx)
 				assert.Error(t, err)
@@ -162,7 +162,7 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 				proc, err := makep(ctx, opts)
 				require.NoError(t, err)
 				_, err = proc.Wait(ctx)
-				assert.NoError(t, err)
+				check.NotError(t, err)
 				assert.Error(t, proc.RegisterSignalTriggerID(ctx, jasper.CleanTerminationSignalTrigger))
 			},
 		},
@@ -181,7 +181,7 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 				opts := testutil.SleepCreateOpts(3)
 				proc, err := makep(ctx, opts)
 				require.NoError(t, err)
-				assert.NoError(t, proc.RegisterSignalTriggerID(ctx, jasper.CleanTerminationSignalTrigger))
+				check.NotError(t, proc.RegisterSignalTriggerID(ctx, jasper.CleanTerminationSignalTrigger))
 			},
 		},
 		{
@@ -196,7 +196,7 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 				newProc, err := proc.Respawn(ctx)
 				require.NoError(t, err)
 				_, err = newProc.Wait(ctx)
-				assert.NoError(t, err)
+				check.NotError(t, err)
 			},
 		},
 		{
@@ -227,10 +227,10 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 				require.NoError(t, err)
 
 				newProc, err := proc.Respawn(ctx)
-				assert.NoError(t, err)
+				check.NotError(t, err)
 				_, err = newProc.Wait(ctx)
 				require.NoError(t, err)
-				assert.True(t, newProc.Info(ctx).Successful)
+				check.True(t, newProc.Info(ctx).Successful)
 			},
 		},
 		{
@@ -242,10 +242,10 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 				require.NotNil(t, proc)
 
 				newProc, err := proc.Respawn(ctx)
-				assert.NoError(t, err)
+				check.NotError(t, err)
 				_, err = newProc.Wait(ctx)
 				require.NoError(t, err)
-				assert.True(t, newProc.Info(ctx).Successful)
+				check.True(t, newProc.Info(ctx).Successful)
 			},
 		},
 		{
@@ -260,10 +260,10 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 
 				newProc, err := proc.Respawn(ctx)
 				require.NoError(t, err)
-				assert.True(t, newProc.Running(ctx))
+				check.True(t, newProc.Running(ctx))
 				_, err = newProc.Wait(ctx)
 				require.NoError(t, err)
-				assert.True(t, proc.Complete(ctx))
+				check.True(t, proc.Complete(ctx))
 			},
 		},
 		{
@@ -273,7 +273,7 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 				require.NoError(t, err)
 				require.NotNil(t, proc)
 				exitCode, err := proc.Wait(ctx)
-				assert.NoError(t, err)
+				check.NotError(t, err)
 				assert.Equal(t, 0, exitCode)
 			},
 		},
@@ -346,7 +346,7 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 					assert.Equal(t, int(syscall.SIGKILL), exitCode)
 				}
 				info := proc.Info(ctx)
-				assert.True(t, info.Timeout)
+				check.True(t, info.Timeout)
 			},
 		},
 		{
@@ -356,11 +356,11 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 				require.NoError(t, err)
 
 				_, err = proc.Wait(ctx)
-				assert.NoError(t, err)
+				check.NotError(t, err)
 
 				err = proc.Signal(ctx, syscall.SIGTERM)
 				require.Error(t, err)
-				assert.True(t, strings.Contains(err.Error(), "cannot signal a process that has terminated"))
+				check.True(t, strings.Contains(err.Error(), "cannot signal a process that has terminated"))
 			},
 		},
 		{
@@ -370,9 +370,9 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 				require.NoError(t, err)
 
 				_, err = proc.Wait(ctx)
-				assert.NoError(t, err)
+				check.NotError(t, err)
 
-				assert.True(t, proc.Complete(ctx))
+				check.True(t, proc.Complete(ctx))
 			},
 		},
 		{
@@ -487,8 +487,8 @@ func TestProcessImplementations(t *testing.T) {
 
 								firstID := proc.ID()
 								_, err = proc.Wait(ctx)
-								assert.NoError(t, err)
-								assert.True(t, proc.Complete(ctx))
+								check.NotError(t, err)
+								check.True(t, proc.Complete(ctx))
 								proc.(*rpcProcess).info.Id += "_foo"
 								proc.(*rpcProcess).info.Complete = false
 								require.NotEqual(t, firstID, proc.ID())
@@ -504,7 +504,7 @@ func TestProcessImplementations(t *testing.T) {
 
 								firstID := proc.ID()
 								_, err = proc.Wait(ctx)
-								assert.NoError(t, err)
+								check.NotError(t, err)
 								proc.(*rpcProcess).info.Id += "_foo"
 								proc.(*rpcProcess).info.Complete = false
 								require.NotEqual(t, firstID, proc.ID())

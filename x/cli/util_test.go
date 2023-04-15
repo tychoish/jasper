@@ -104,8 +104,8 @@ func TestMakeRemoteClient(t *testing.T) {
 			manager, err := jasper.NewSynchronizedManager(false)
 			require.NoError(t, err)
 			closeService, client := makeServiceAndClient(ctx, t, testutil.GetPortNumber(), manager)
-			assert.NoError(t, closeService())
-			assert.NoError(t, client.CloseConnection())
+			check.NotError(t, closeService())
+			check.NotError(t, client.CloseConnection())
 		})
 	}
 }
@@ -145,7 +145,7 @@ func TestCLICommon(t *testing.T) {
 							input := &mockInput{}
 							require.NoError(t, doPassthroughInputOutput(c, input, mockRequest("")))
 							assert.Equal(t, expectedInput, input.Value)
-							assert.True(t, input.validated)
+							check.True(t, input.validated)
 							return nil
 						})
 					})
@@ -157,7 +157,7 @@ func TestCLICommon(t *testing.T) {
 							outputVal := "bar"
 							require.NoError(t, doPassthroughInputOutput(c, input, mockRequest(outputVal)))
 							assert.Equal(t, "foo", input.Value)
-							assert.True(t, input.validated)
+							check.True(t, input.validated)
 
 							expectedOutput := `{"value":"bar"}`
 							_, err := stdout.Seek(0, 0)
@@ -207,11 +207,11 @@ func TestCLICommon(t *testing.T) {
 					require.NoError(t, err)
 					closeService, client := makeServiceAndClient(ctx, t, port, manager)
 					defer func() {
-						assert.NoError(t, client.CloseConnection())
-						assert.NoError(t, closeService())
+						check.NotError(t, client.CloseConnection())
+						check.NotError(t, closeService())
 					}()
 
-					assert.NoError(t, testCase(ctx, t, c, client))
+					check.NotError(t, testCase(ctx, t, c, client))
 				})
 			}
 		})
@@ -227,15 +227,15 @@ func TestWithService(t *testing.T) {
 	assert.Error(t, withService(&rpcDaemon{}, &service.Config{}, svcFunc))
 	assert.False(t, svcFuncRan)
 
-	assert.NoError(t, withService(&rpcDaemon{}, &service.Config{Name: "foo"}, svcFunc))
-	assert.True(t, svcFuncRan)
+	check.NotError(t, withService(&rpcDaemon{}, &service.Config{Name: "foo"}, svcFunc))
+	check.True(t, svcFuncRan)
 }
 
 func TestRunServices(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
 	defer cancel()
 
-	assert.NoError(t, runServices(ctx))
+	check.NotError(t, runServices(ctx))
 	assert.Equal(t, context.DeadlineExceeded, ctx.Err())
 
 	ctx, cancel = context.WithCancel(context.Background())
@@ -247,7 +247,7 @@ func TestRunServices(t *testing.T) {
 
 	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Millisecond)
 	defer cancel()
-	assert.NoError(t, runServices(ctx, func(ctx context.Context) (util.CloseFunc, error) {
+	check.NotError(t, runServices(ctx, func(ctx context.Context) (util.CloseFunc, error) {
 		return func() error { return nil }, nil
 	}))
 
@@ -269,10 +269,10 @@ func TestRunServices(t *testing.T) {
 	defer cancel()
 	closeFuncCalled = false
 
-	assert.NoError(t, runServices(ctx, func(ctx context.Context) (util.CloseFunc, error) {
+	check.NotError(t, runServices(ctx, func(ctx context.Context) (util.CloseFunc, error) {
 		return closeFunc, nil
 	}))
-	assert.True(t, closeFuncCalled)
+	check.True(t, closeFuncCalled)
 
 	anotherCloseFuncCalled := false
 	anotherCloseFunc := func() error {
@@ -285,7 +285,7 @@ func TestRunServices(t *testing.T) {
 	}, func(ctx context.Context) (util.CloseFunc, error) {
 		return anotherCloseFunc, errors.New("fail to make another service")
 	}))
-	assert.True(t, closeFuncCalled)
+	check.True(t, closeFuncCalled)
 	assert.False(t, anotherCloseFuncCalled)
 
 	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Millisecond)
@@ -293,11 +293,11 @@ func TestRunServices(t *testing.T) {
 	closeFuncCalled = false
 	anotherCloseFuncCalled = false
 
-	assert.NoError(t, runServices(ctx, func(ctx context.Context) (util.CloseFunc, error) {
+	check.NotError(t, runServices(ctx, func(ctx context.Context) (util.CloseFunc, error) {
 		return closeFunc, nil
 	}, func(ctx context.Context) (util.CloseFunc, error) {
 		return anotherCloseFunc, nil
 	}))
-	assert.True(t, closeFuncCalled)
-	assert.True(t, anotherCloseFuncCalled)
+	check.True(t, closeFuncCalled)
+	check.True(t, anotherCloseFuncCalled)
 }

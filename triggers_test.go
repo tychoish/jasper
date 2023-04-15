@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/testutil"
 )
@@ -33,7 +34,7 @@ func TestDefaultTrigger(t *testing.T) {
 
 			out, err := manager.List(ctx, options.All)
 			require.NoError(t, err)
-			require.Len(t, out, 1)
+			require.Equal(t, len(out), 1)
 			_, err = out[0].Wait(ctx)
 			require.NoError(t, err)
 			info := out[0].Info(ctx)
@@ -48,7 +49,7 @@ func TestDefaultTrigger(t *testing.T) {
 
 			out, err := manager.List(ctx, options.All)
 			require.NoError(t, err)
-			require.Len(t, out, 1)
+			require.Equal(t, len(out), 1)
 			info := out[0].Info(ctx)
 			assert.True(t, info.IsRunning || info.Complete)
 		},
@@ -104,9 +105,9 @@ func TestDefaultTrigger(t *testing.T) {
 
 			out, err := manager.List(ctx, options.All)
 			require.NoError(t, err)
-			require.Len(t, out, 1)
+			require.Equal(t, len(out), 1)
 			_, err = out[0].Wait(ctx)
-			assert.NoError(t, err)
+			check.NotError(t, err)
 			info := out[0].Info(ctx)
 			assert.True(t, info.IsRunning || info.Complete)
 		},
@@ -120,9 +121,9 @@ func TestDefaultTrigger(t *testing.T) {
 
 			out, err := manager.List(ctx, options.All)
 			require.NoError(t, err)
-			require.Len(t, out, 1)
+			require.Equal(t, len(out), 1)
 			_, err = out[0].Wait(ctx)
-			assert.NoError(t, err)
+			check.NotError(t, err)
 			info := out[0].Info(ctx)
 			assert.True(t, info.IsRunning || info.Complete)
 		},

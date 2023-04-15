@@ -60,7 +60,7 @@ func TestMongodShutdownEvent(t *testing.T) {
 			require.NoError(t, SignalEvent(ctx, mongodShutdownEvent))
 
 			exitCode, err := proc.Wait(ctx)
-			assert.NoError(t, err)
+			check.NotError(t, err)
 			assert.Zero(t, exitCode)
 			assert.False(t, proc.Running(ctx))
 		})

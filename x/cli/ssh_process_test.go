@@ -140,7 +140,7 @@ func TestSSHProcess(t *testing.T) {
 				},
 			)
 
-			assert.True(t, proc.Complete(ctx))
+			check.True(t, proc.Complete(ctx))
 			assert.Empty(t, inputChecker.ID)
 		},
 		"RespawnPassesWithValidResponse": func(ctx context.Context, t *testing.T, proc *sshProcess, manager *sshClient, baseManager *mock.Manager) {

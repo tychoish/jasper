@@ -109,7 +109,7 @@ func TestCLILoggingCache(t *testing.T) {
 
 					getResp := &LoggingCacheLenResponse{}
 					require.NoError(t, execCLICommandOutput(t, c, loggingCacheLen(), getResp))
-					assert.True(t, getResp.Successful())
+					check.True(t, getResp.Successful())
 					assert.Zero(t, getResp.Length)
 				},
 				"RemoveWithNonexistentIDNoops": func(ctx context.Context, t *testing.T, c *cli.Context) {
@@ -119,13 +119,13 @@ func TestCLILoggingCache(t *testing.T) {
 					require.NoError(t, err)
 					resp := &OutcomeResponse{}
 					require.NoError(t, execCLICommandInputOutput(t, c, loggingCacheRemove(), input, resp))
-					assert.True(t, resp.Successful())
+					check.True(t, resp.Successful())
 
 					getResp := &CachedLoggerResponse{}
 					getInput, err := json.Marshal(IDInput{ID: logger.ID})
 					require.NoError(t, err)
 					require.NoError(t, execCLICommandInputOutput(t, c, loggingCacheGet(), getInput, getResp))
-					assert.True(t, getResp.Successful())
+					check.True(t, getResp.Successful())
 					assert.NotZero(t, getResp.Logger)
 				},
 				"LenSucceeds": func(ctx context.Context, t *testing.T, c *cli.Context) {
@@ -148,7 +148,7 @@ func TestCLILoggingCache(t *testing.T) {
 					require.NoError(t, err)
 					resp := &OutcomeResponse{}
 					require.NoError(t, execCLICommandInputOutput(t, c, loggingCachePrune(), input, resp))
-					assert.True(t, resp.Successful())
+					check.True(t, resp.Successful())
 
 					lenResp = &LoggingCacheLenResponse{}
 					require.NoError(t, execCLICommandOutput(t, c, loggingCacheLen(), lenResp))
@@ -166,7 +166,7 @@ func TestCLILoggingCache(t *testing.T) {
 					closeService := makeService(ctx, t, port, manager)
 					require.NoError(t, err)
 					defer func() {
-						assert.NoError(t, closeService())
+						check.NotError(t, closeService())
 					}()
 
 					testCase(ctx, t, c)

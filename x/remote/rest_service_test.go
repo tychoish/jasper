@@ -16,6 +16,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/mock"
 	"github.com/tychoish/jasper/options"
@@ -35,7 +36,7 @@ func TestRestService(t *testing.T) {
 
 	tempDir, err := os.MkdirTemp(testutil.BuildDirectory(), filepath.Base(t.Name()))
 	require.NoError(t, err)
-	defer func() { assert.NoError(t, os.RemoveAll(tempDir)) }()
+	defer func() { check.NotError(t, os.RemoveAll(tempDir)) }()
 
 	for name, test := range map[string]func(context.Context, *testing.T, *Service, *restClient){
 		"VerifyFixtures": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
@@ -308,7 +309,7 @@ func TestRestService(t *testing.T) {
 			}
 
 			err := proc.Signal(ctx, syscall.SIGTERM)
-			assert.NoError(t, err)
+			check.NotError(t, err)
 
 		},
 		"SignalFailsToParsePID": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
@@ -352,8 +353,8 @@ func TestRestService(t *testing.T) {
 			file, err := os.CreateTemp(tempDir, "out.txt")
 			require.NoError(t, err)
 			defer func() {
-				assert.NoError(t, file.Close())
-				assert.NoError(t, os.RemoveAll(file.Name()))
+				check.NotError(t, file.Close())
+				check.NotError(t, os.RemoveAll(file.Name()))
 			}()
 
 			fileLogger := &options.LoggerConfig{}
@@ -389,8 +390,8 @@ func TestRestService(t *testing.T) {
 			tmpFile, err := os.CreateTemp(tempDir, filepath.Base(t.Name()))
 			require.NoError(t, err)
 			defer func() {
-				assert.NoError(t, tmpFile.Close())
-				assert.NoError(t, os.RemoveAll(tmpFile.Name()))
+				check.NotError(t, tmpFile.Close())
+				check.NotError(t, os.RemoveAll(tmpFile.Name()))
 			}()
 
 			opts := options.WriteFile{Path: tmpFile.Name(), Content: []byte("foo")}
@@ -405,8 +406,8 @@ func TestRestService(t *testing.T) {
 			tmpFile, err := os.CreateTemp(tempDir, filepath.Base(t.Name()))
 			require.NoError(t, err)
 			defer func() {
-				assert.NoError(t, tmpFile.Close())
-				assert.NoError(t, os.RemoveAll(tmpFile.Name()))
+				check.NotError(t, tmpFile.Close())
+				check.NotError(t, os.RemoveAll(tmpFile.Name()))
 			}()
 
 			buf := []byte("foo")
@@ -422,8 +423,8 @@ func TestRestService(t *testing.T) {
 			tmpFile, err := os.CreateTemp(tempDir, filepath.Base(t.Name()))
 			require.NoError(t, err)
 			defer func() {
-				assert.NoError(t, tmpFile.Close())
-				assert.NoError(t, os.RemoveAll(tmpFile.Name()))
+				check.NotError(t, tmpFile.Close())
+				check.NotError(t, os.RemoveAll(tmpFile.Name()))
 			}()
 
 			const mb = 1024 * 1024

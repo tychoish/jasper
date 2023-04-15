@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
@@ -41,7 +42,7 @@ func TestCommand(t *testing.T) {
 			assert.Nil(t, opts.Process.Args)
 			require.Error(t, opts.Validate())
 			assert.NotNil(t, opts.Process.Args)
-			require.Len(t, opts.Process.Args, 1)
+			require.Equal(t, len(opts.Process.Args), 1)
 			require.Equal(t, "", opts.Process.Args[0])
 		})
 		t.Run("Valid", func(t *testing.T) {
@@ -49,7 +50,7 @@ func TestCommand(t *testing.T) {
 				Priority: level.Info,
 				Commands: [][]string{{""}},
 			}
-			assert.NoError(t, opts.Validate())
+			check.NotError(t, opts.Validate())
 		})
 	})
 	t.Run("LoggingPreHook", func(t *testing.T) {
@@ -88,12 +89,12 @@ func TestCommand(t *testing.T) {
 			t.Run("Counter", func(t *testing.T) {
 				mock := &testPostHook{}
 				assert.Equal(t, 0, mock.count)
-				assert.NoError(t, mock.hook(nil))
+				check.NotError(t, mock.hook(nil))
 				assert.Equal(t, 1, mock.count)
 			})
 			t.Run("Abort", func(t *testing.T) {
 				mock := &testPostHook{abort: true}
-				assert.NoError(t, mock.hook(nil))
+				check.NotError(t, mock.hook(nil))
 				assert.Equal(t, 1, mock.count)
 				assert.Equal(t, 0, mock.errsSeen)
 
@@ -105,7 +106,7 @@ func TestCommand(t *testing.T) {
 		t.Run("Merged", func(t *testing.T) {
 			mock := &testPostHook{abort: true}
 			hook := MergePostHooks(mock.hook, mock.hook)
-			assert.NoError(t, hook(nil))
+			check.NotError(t, hook(nil))
 			assert.Equal(t, 2, mock.count)
 			assert.Error(t, hook(errors.New("hi")))
 			assert.Equal(t, 4, mock.count)
@@ -114,7 +115,7 @@ func TestCommand(t *testing.T) {
 		t.Run("ShortCircuit", func(t *testing.T) {
 			mock := &testPostHook{abort: true}
 			hook := MergeAbortingPostHooks(mock.hook, mock.hook)
-			assert.NoError(t, hook(nil))
+			check.NotError(t, hook(nil))
 			assert.Equal(t, 2, mock.count)
 
 			assert.Error(t, hook(errors.New("hi")))
@@ -124,7 +125,7 @@ func TestCommand(t *testing.T) {
 		t.Run("Passthrough", func(t *testing.T) {
 			mock := &testPostHook{}
 			hook := MergeAbortingPassthroughPostHooks(mock.hook, mock.hook)
-			assert.NoError(t, hook(nil))
+			check.NotError(t, hook(nil))
 			assert.Equal(t, 2, mock.count)
 			assert.Equal(t, 0, mock.errsSeen)
 

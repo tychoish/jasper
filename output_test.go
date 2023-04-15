@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/testutil"
 )
@@ -25,30 +25,30 @@ func TestGetInMemoryLogStream(t *testing.T) {
 			for testName, testCase := range map[string]func(ctx context.Context, t *testing.T, opts *options.Create, makeProc ProcessConstructor, output string){
 				"FailsWithNilProcess": func(ctx context.Context, t *testing.T, opts *options.Create, makeProc ProcessConstructor, output string) {
 					logs, err := GetInMemoryLogStream(ctx, nil, 1)
-					assert.Error(t, err)
-					assert.Nil(t, logs)
+					check.Error(t, err)
+					check.Nil(t, logs)
 				},
 				"FailsWithInvalidCount": func(ctx context.Context, t *testing.T, opts *options.Create, makeProc ProcessConstructor, output string) {
 					proc, err := makeProc(ctx, opts)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 
 					_, err = proc.Wait(ctx)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 
 					logs, err := GetInMemoryLogStream(ctx, proc, 0)
-					assert.Error(t, err)
-					assert.Nil(t, logs)
+					check.Error(t, err)
+					check.Nil(t, logs)
 				},
 				"FailsWithoutInMemoryLogger": func(ctx context.Context, t *testing.T, opts *options.Create, makeProc ProcessConstructor, output string) {
 					proc, err := makeProc(ctx, opts)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 
 					_, err = proc.Wait(ctx)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 
 					logs, err := GetInMemoryLogStream(ctx, proc, 100)
-					assert.Error(t, err)
-					assert.Nil(t, logs)
+					check.Error(t, err)
+					check.Nil(t, logs)
 				},
 				"SucceedsWithInMemoryLogger": func(ctx context.Context, t *testing.T, opts *options.Create, makeProc ProcessConstructor, output string) {
 					loggerProducer := &options.InMemoryLoggerOptions{
@@ -58,28 +58,28 @@ func TestGetInMemoryLogStream(t *testing.T) {
 						},
 					}
 					config := &options.LoggerConfig{}
-					require.NoError(t, config.Set(loggerProducer))
+					assert.NotError(t, config.Set(loggerProducer))
 					opts.Output.Loggers = []*options.LoggerConfig{config}
 					proc, err := makeProc(ctx, opts)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 
 					_, err = proc.Wait(ctx)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 
 					logs, err := GetInMemoryLogStream(ctx, proc, 100)
-					assert.NoError(t, err)
-					assert.Contains(t, logs, output)
+					check.NotError(t, err)
+					check.Contains(t, logs, output)
 				},
 				"MultipleInMemoryLoggersReturnLogsFromOnlyOne": func(ctx context.Context, t *testing.T, opts *options.Create, makeProc ProcessConstructor, output string) {
 					config1 := &options.LoggerConfig{}
-					require.NoError(t, config1.Set(&options.InMemoryLoggerOptions{
+					assert.NotError(t, config1.Set(&options.InMemoryLoggerOptions{
 						InMemoryCap: 100,
 						Base: options.BaseOptions{
 							Format: options.LogFormatPlain,
 						},
 					}))
 					config2 := &options.LoggerConfig{}
-					require.NoError(t, config2.Set(&options.InMemoryLoggerOptions{
+					assert.NotError(t, config2.Set(&options.InMemoryLoggerOptions{
 						InMemoryCap: 100,
 						Base: options.BaseOptions{
 							Format: options.LogFormatPlain,
@@ -87,14 +87,14 @@ func TestGetInMemoryLogStream(t *testing.T) {
 					}))
 					opts.Output.Loggers = []*options.LoggerConfig{config1, config2}
 					proc, err := makeProc(ctx, opts)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 
 					_, err = proc.Wait(ctx)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 
 					logs, err := GetInMemoryLogStream(ctx, proc, 100)
-					assert.NoError(t, err)
-					assert.Contains(t, logs, output)
+					check.NotError(t, err)
+					check.Contains(t, logs, output)
 
 					outputCount := 0
 					for _, log := range logs {
@@ -102,7 +102,7 @@ func TestGetInMemoryLogStream(t *testing.T) {
 							outputCount++
 						}
 					}
-					assert.Equal(t, 1, outputCount)
+					check.Equal(t, 1, outputCount)
 				},
 				// "": func(ctx context.Context, t *testing.T, opts *options.Create, output string) {},
 			} {

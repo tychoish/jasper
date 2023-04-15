@@ -8,6 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/testutil"
@@ -27,8 +28,8 @@ func TestCLIRemote(t *testing.T) {
 					tmpFile, err := os.CreateTemp(testutil.BuildDirectory(), "out.txt")
 					require.NoError(t, err)
 					defer func() {
-						assert.NoError(t, tmpFile.Close())
-						assert.NoError(t, os.RemoveAll(tmpFile.Name()))
+						check.NotError(t, tmpFile.Close())
+						check.NotError(t, os.RemoveAll(tmpFile.Name()))
 					}()
 
 					input, err := json.Marshal(remote.Download{
@@ -59,14 +60,14 @@ func TestCLIRemote(t *testing.T) {
 					resp := &LogStreamResponse{}
 					require.NoError(t, execCLICommandInputOutput(t, c, remoteGetLogStream(), input, resp))
 
-					assert.True(t, resp.Successful())
+					check.True(t, resp.Successful())
 				},
 				"WriteFileSucceeds": func(ctx context.Context, t *testing.T, c *cli.Context) {
 					tmpFile, err := os.CreateTemp(testutil.BuildDirectory(), "write_file")
 					require.NoError(t, err)
 					defer func() {
-						assert.NoError(t, tmpFile.Close())
-						assert.NoError(t, os.RemoveAll(tmpFile.Name()))
+						check.NotError(t, tmpFile.Close())
+						check.NotError(t, os.RemoveAll(tmpFile.Name()))
 					}()
 
 					opts := options.WriteFile{Path: tmpFile.Name(), Content: []byte("foo")}
@@ -76,7 +77,7 @@ func TestCLIRemote(t *testing.T) {
 
 					require.NoError(t, execCLICommandInputOutput(t, c, remoteWriteFile(), input, resp))
 
-					assert.True(t, resp.Successful())
+					check.True(t, resp.Successful())
 
 					data, err := os.ReadFile(opts.Path)
 					require.NoError(t, err)
@@ -94,7 +95,7 @@ func TestCLIRemote(t *testing.T) {
 					closeService := makeService(ctx, t, port, manager)
 					require.NoError(t, err)
 					defer func() {
-						assert.NoError(t, closeService())
+						check.NotError(t, closeService())
 					}()
 
 					testCase(ctx, t, c)

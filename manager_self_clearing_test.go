@@ -6,6 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/testutil"
 )
@@ -30,7 +31,7 @@ func pureCreate(ctx context.Context, m *selfClearingProcessManager, t *testing.T
 func fillUp(ctx context.Context, t *testing.T, manager *selfClearingProcessManager, numProcs int) {
 	procs, err := createProcs(ctx, testutil.SleepCreateOpts(5), manager, numProcs)
 	require.NoError(t, err)
-	require.Len(t, procs, numProcs)
+	require.Equal(t, len(procs), numProcs)
 }
 
 func TestSelfClearingManager(t *testing.T) {
@@ -46,7 +47,7 @@ func TestSelfClearingManager(t *testing.T) {
 			for name, test := range map[string]func(context.Context, *testing.T, *selfClearingProcessManager, testutil.OptsModify){
 				"SucceedsWhenFree": func(ctx context.Context, t *testing.T, manager *selfClearingProcessManager, mod testutil.OptsModify) {
 					proc, err := createFunc(ctx, manager, t, testutil.TrueCreateOpts())
-					assert.NoError(t, err)
+					check.NotError(t, err)
 					assert.NotNil(t, proc)
 				},
 				"ErrorsWhenFull": func(ctx context.Context, t *testing.T, manager *selfClearingProcessManager, mod testutil.OptsModify) {
@@ -59,7 +60,7 @@ func TestSelfClearingManager(t *testing.T) {
 				"PartiallySucceedsWhenAlmostFull": func(ctx context.Context, t *testing.T, manager *selfClearingProcessManager, mod testutil.OptsModify) {
 					fillUp(ctx, t, manager, manager.maxProcs-1)
 					firstSleep, err := createFunc(ctx, manager, t, testutil.SleepCreateOpts(10))
-					assert.NoError(t, err)
+					check.NotError(t, err)
 					assert.NotNil(t, firstSleep)
 					secondSleep, err := createFunc(ctx, manager, t, testutil.SleepCreateOpts(10))
 					assert.Error(t, err)
@@ -78,7 +79,7 @@ func TestSelfClearingManager(t *testing.T) {
 						require.NoError(t, err)
 					}
 					sleepProc, err = createFunc(ctx, manager, t, sleepOpts)
-					assert.NoError(t, err)
+					check.NotError(t, err)
 					assert.NotNil(t, sleepProc)
 				},
 				//"": func(ctx context.Context, t *testing.T, manager *selfClearingProcessManager) {},
@@ -95,7 +96,7 @@ func TestSelfClearingManager(t *testing.T) {
 						test(tctx, t, selfClearingManager.(*selfClearingProcessManager), func(o *options.Create) {
 							o.Implementation = options.ProcessImplementationBlocking
 						})
-						assert.NoError(t, selfClearingManager.Close(tctx))
+						check.NotError(t, selfClearingManager.Close(tctx))
 					})
 				})
 				t.Run("Basic", func(t *testing.T) {
@@ -108,7 +109,7 @@ func TestSelfClearingManager(t *testing.T) {
 						test(tctx, t, selfClearingManager.(*selfClearingProcessManager), func(o *options.Create) {
 							o.Implementation = options.ProcessImplementationBasic
 						})
-						assert.NoError(t, selfClearingManager.Close(tctx))
+						check.NotError(t, selfClearingManager.Close(tctx))
 					})
 				})
 

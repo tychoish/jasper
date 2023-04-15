@@ -88,7 +88,7 @@ func TestDaemon(t *testing.T) {
 			require.NoError(t, err)
 			closeDaemon, client := makeDaemonAndClient(ctx, t, manager)
 			defer func() {
-				assert.NoError(t, closeDaemon())
+				check.NotError(t, closeDaemon())
 			}()
 
 			opts := &options.Create{

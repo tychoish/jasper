@@ -64,7 +64,7 @@ func TestWindowsEvents(t *testing.T) {
 
 					client := makeClient(ctx, t)
 					defer func() {
-						assert.NoError(t, client.CloseConnection())
+						check.NotError(t, client.CloseConnection())
 					}()
 
 					testCase(ctx, t, client)

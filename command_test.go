@@ -12,6 +12,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/send"
 	"github.com/tychoish/jasper/options"
@@ -32,9 +33,9 @@ func verifyCommandAndGetOutput(ctx context.Context, t *testing.T, cmd *Command, 
 	cmd.SetCombinedWriter(bufCloser)
 
 	if success {
-		assert.NoError(t, run(cmd, ctx))
+		check.NotError(t, run(cmd, ctx))
 	} else {
-		assert.Error(t, run(cmd, ctx))
+		check.Error(t, run(cmd, ctx))
 	}
 
 	return bufCloser.String()
@@ -42,7 +43,7 @@ func verifyCommandAndGetOutput(ctx context.Context, t *testing.T, cmd *Command, 
 
 func checkOutput(t *testing.T, exists bool, output string, expectedOutputs ...string) {
 	for _, expected := range expectedOutputs {
-		assert.True(t, exists == strings.Contains(output, expected), "out='%s' and expected='%s'", output, expected)
+		check.True(t, exists == strings.Contains(output, expected), "out='%s' and expected='%s'", output, expected)
 	}
 }
 
@@ -68,37 +69,37 @@ func TestCommandImplementation(t *testing.T) {
 							cmd.ID(t.Name()).Priority(level.Info).Add(
 								[]string{echo, arg1},
 							).Directory(cwd)
-							assert.NoError(t, runFunc(&cmd, ctx))
+							check.NotError(t, runFunc(&cmd, ctx))
 						},
 						"UnsuccessfulRunCommandErrors": func(ctx context.Context, t *testing.T, cmd Command) {
 							cmd.ID(t.Name()).Priority(level.Info).Add(
 								[]string{ls, arg2},
 							).Directory(cwd)
 							err := runFunc(&cmd, ctx)
-							assert.Error(t, err)
-							assert.True(t, strings.Contains(err.Error(), "exit status"))
+							check.Error(t, err)
+							check.True(t, strings.Contains(err.Error(), "exit status"))
 						},
 						"WaitErrorsIfNeverStarted": func(ctx context.Context, t *testing.T, cmd Command) {
 							_, err := cmd.Wait(ctx)
-							assert.Error(t, err)
+							check.Error(t, err)
 						},
 						"WaitErrorsIfProcessErrors": func(ctx context.Context, t *testing.T, cmd Command) {
 							cmd.Append("false")
-							assert.Error(t, runFunc(&cmd, ctx))
+							check.Error(t, runFunc(&cmd, ctx))
 							exitCode, err := cmd.Wait(ctx)
-							assert.Error(t, err)
+							check.Error(t, err)
 							assert.NotZero(t, exitCode)
 						},
 						"WaitOnBackgroundRunWaitsForProcessCompletion": func(ctx context.Context, t *testing.T, cmd Command) {
 							cmd.Append("sleep 1", "sleep 1").Background(true)
 							require.NoError(t, runFunc(&cmd, ctx))
 							exitCode, err := cmd.Wait(ctx)
-							assert.NoError(t, err)
+							check.NotError(t, err)
 							assert.Zero(t, exitCode)
 
 							for _, proc := range cmd.procs {
-								assert.True(t, proc.Info(ctx).Complete)
-								assert.True(t, proc.Info(ctx).Successful)
+								check.True(t, proc.Info(ctx).Complete)
+								check.True(t, proc.Info(ctx).Successful)
 							}
 						},
 						"SudoFunctions": func(ctx context.Context, t *testing.T, cmd Command) {
@@ -119,18 +120,18 @@ func TestCommandImplementation(t *testing.T) {
 									for subTestName, subTestCase := range map[string]func(ctx context.Context, t *testing.T, cmd Command){
 										"VerifySudoCmd": func(ctx context.Context, t *testing.T, cmd Command) {
 											cmd.Sudo(true)
-											assert.Equal(t, strings.Join(cmd.sudoCmd(), " "), sudoCmd)
+											check.Equal(t, strings.Join(cmd.sudoCmd(), " "), sudoCmd)
 										},
 										"VerifySudoCmdWithUser": func(ctx context.Context, t *testing.T, cmd Command) {
 											cmd.SudoAs(sudoUser)
-											assert.Equal(t, strings.Join(cmd.sudoCmd(), " "), sudoAsCmd)
+											check.Equal(t, strings.Join(cmd.sudoCmd(), " "), sudoAsCmd)
 										},
 										"NoSudo": func(ctx context.Context, t *testing.T, cmd Command) {
 											cmd.Append(cmd1)
 
 											allOpts, err := cmd.ExportCreateOptions()
 											require.NoError(t, err)
-											require.Len(t, allOpts, 1)
+											require.Equal(t, len(allOpts), 1)
 											args := strings.Join(allOpts[0].Args, " ")
 
 											assert.NotContains(t, args, sudoCmd)
@@ -146,13 +147,13 @@ func TestCommandImplementation(t *testing.T) {
 
 											allOpts, err := cmd.ExportCreateOptions()
 											require.NoError(t, err)
-											require.Len(t, allOpts, 1)
+											require.Equal(t, len(allOpts), 1)
 											checkArgs(allOpts[0].Args, cmd1)
 
 											cmd.Append(cmd2)
 											allOpts, err = cmd.ExportCreateOptions()
 											require.NoError(t, err)
-											require.Len(t, allOpts, 2)
+											require.Equal(t, len(allOpts), 2)
 
 											checkArgs(allOpts[0].Args, cmd1)
 											checkArgs(allOpts[1].Args, cmd2)
@@ -167,13 +168,13 @@ func TestCommandImplementation(t *testing.T) {
 
 											allOpts, err := cmd.ExportCreateOptions()
 											require.NoError(t, err)
-											require.Len(t, allOpts, 1)
+											require.Equal(t, len(allOpts), 1)
 											checkArgs(allOpts[0].Args, cmd1)
 
 											cmd.Add([]string{echo, arg2})
 											allOpts, err = cmd.ExportCreateOptions()
 											require.NoError(t, err)
-											require.Len(t, allOpts, 2)
+											require.Equal(t, len(allOpts), 2)
 											checkArgs(allOpts[0].Args, cmd1)
 											checkArgs(allOpts[1].Args, cmd2)
 										},
@@ -191,10 +192,10 @@ func TestCommandImplementation(t *testing.T) {
 						},
 						"InvalidArgsCommandErrors": func(ctx context.Context, t *testing.T, cmd Command) {
 							cmd.Add([]string{})
-							assert.EqualError(t, runFunc(&cmd, ctx), "cannot have empty args")
+							check.EqualError(t, runFunc(&cmd, ctx), "cannot have empty args")
 						},
 						"ZeroSubCommandsIsVacuouslySuccessful": func(ctx context.Context, t *testing.T, cmd Command) {
-							assert.NoError(t, runFunc(&cmd, ctx))
+							check.NotError(t, runFunc(&cmd, ctx))
 						},
 						"PreconditionDeterminesExecution": func(ctx context.Context, t *testing.T, cmd Command) {
 							for _, precondition := range []func() bool{
@@ -220,7 +221,7 @@ func TestCommandImplementation(t *testing.T) {
 									{echo, arg3},
 								},
 							).Directory(cwd)
-							assert.Error(t, runFunc(&cmd, ctx))
+							check.Error(t, runFunc(&cmd, ctx))
 						},
 						"ExecutionFlags": func(ctx context.Context, t *testing.T, cmd Command) {
 							numCombinations := int(math.Pow(2, 3))
@@ -360,8 +361,8 @@ func TestCommandImplementation(t *testing.T) {
 								{echo, arg2},
 								{ls, arg3},
 							}
-							assert.NoError(t, cmd.Extend(subCmds).ContinueOnError(true).IgnoreError(true).Run(ctx))
-							assert.Len(t, cmd.GetProcIDs(), len(subCmds))
+							check.NotError(t, cmd.Extend(subCmds).ContinueOnError(true).IgnoreError(true).Run(ctx))
+							check.Equal(t, len(cmd.GetProcIDs()), len(subCmds))
 						},
 						"ApplyFromOptsUpdatesCmdCorrectly": func(ctx context.Context, t *testing.T, cmd Command) {
 							opts := &options.Create{
@@ -378,21 +379,21 @@ func TestCommandImplementation(t *testing.T) {
 
 							assert.False(t, cmd.opts.Process.Output.SendOutputToError)
 							cmd.SetOutputOptions(opts)
-							assert.True(t, cmd.opts.Process.Output.SendOutputToError)
+							check.True(t, cmd.opts.Process.Output.SendOutputToError)
 						},
 						"ApplyFromOptsOverridesExistingOptions": func(ctx context.Context, t *testing.T, cmd Command) {
 							_ = cmd.Add([]string{echo, arg1}).Directory("bar")
 							genOpts, err := cmd.ExportCreateOptions()
 							require.NoError(t, err)
-							require.Len(t, genOpts, 1)
-							assert.Equal(t, "bar", genOpts[0].WorkingDirectory)
+							require.Equal(t, len(genOpts), 1)
+							check.Equal(t, "bar", genOpts[0].WorkingDirectory)
 
 							opts := &options.Create{WorkingDirectory: "foo"}
 							_ = cmd.ApplyFromOpts(opts)
 							genOpts, err = cmd.ExportCreateOptions()
 							require.NoError(t, err)
-							require.Len(t, genOpts, 1)
-							assert.Equal(t, opts.WorkingDirectory, genOpts[0].WorkingDirectory)
+							require.Equal(t, len(genOpts), 1)
+							check.Equal(t, opts.WorkingDirectory, genOpts[0].WorkingDirectory)
 						},
 						"CreateOptionsAppliedInGetCreateOptionsForLocalCommand": func(ctx context.Context, t *testing.T, cmd Command) {
 							opts := &options.Create{
@@ -404,9 +405,9 @@ func TestCommandImplementation(t *testing.T) {
 							_ = cmd.ApplyFromOpts(opts).Add(args)
 							genOpts, err := cmd.ExportCreateOptions()
 							require.NoError(t, err)
-							require.Len(t, genOpts, 1)
-							assert.Equal(t, opts.WorkingDirectory, genOpts[0].WorkingDirectory)
-							assert.Equal(t, opts.Environment, genOpts[0].Environment)
+							require.Equal(t, len(genOpts), 1)
+							check.Equal(t, opts.WorkingDirectory, genOpts[0].WorkingDirectory)
+							check.Equal(t, opts.Environment, genOpts[0].Environment)
 						},
 						"TagFunctions": func(ctx context.Context, t *testing.T, cmd Command) {
 							tags := []string{"tag0", "tag1"}
@@ -418,7 +419,7 @@ func TestCommandImplementation(t *testing.T) {
 									}
 									cmd.SetTags(tags)
 									require.NoError(t, cmd.Run(ctx))
-									assert.Len(t, cmd.procs, len(subCmds))
+									check.Equal(t, len(cmd.procs), len(subCmds))
 									for _, proc := range cmd.procs {
 										assert.Subset(t, tags, proc.GetTags())
 										assert.Subset(t, proc.GetTags(), tags)
@@ -430,7 +431,7 @@ func TestCommandImplementation(t *testing.T) {
 									}
 									cmd.AppendTags(tags...)
 									require.NoError(t, cmd.Run(ctx))
-									assert.Len(t, cmd.procs, len(subCmds))
+									check.Equal(t, len(cmd.procs), len(subCmds))
 									for _, proc := range cmd.procs {
 										assert.Subset(t, tags, proc.GetTags())
 										assert.Subset(t, proc.GetTags(), tags)
@@ -442,7 +443,7 @@ func TestCommandImplementation(t *testing.T) {
 									}
 									cmd.ExtendTags(tags)
 									require.NoError(t, cmd.Run(ctx))
-									assert.Len(t, cmd.procs, len(subCmds))
+									check.Equal(t, len(cmd.procs), len(subCmds))
 									for _, proc := range cmd.procs {
 										assert.Subset(t, tags, proc.GetTags())
 										assert.Subset(t, proc.GetTags(), tags)
@@ -465,10 +466,10 @@ func TestCommandImplementation(t *testing.T) {
 							optslist, err := cmd.Export()
 							require.NoError(t, err)
 
-							require.Len(t, optslist, 3)
-							assert.Equal(t, []string{"echo", "hello", "world"}, optslist[0].Args)
-							assert.Equal(t, []string{"echo", "hello world"}, optslist[1].Args)
-							assert.Equal(t, []string{"echo", "hello\"world\""}, optslist[2].Args)
+							require.Equal(t, len(optslist), 3)
+							check.Equal(t, []string{"echo", "hello", "world"}, optslist[0].Args)
+							check.Equal(t, []string{"echo", "hello world"}, optslist[1].Args)
+							check.Equal(t, []string{"echo", "hello\"world\""}, optslist[2].Args)
 						},
 						"RunFuncReceivesPopulatedOptions": func(ctx context.Context, t *testing.T, cmd Command) {
 							prio := level.Warning
@@ -480,16 +481,16 @@ func TestCommandImplementation(t *testing.T) {
 								Sudo(true).SudoAs(user).
 								SetRunFunc(func(opts options.Command) error {
 									runFuncCalled = true
-									assert.True(t, opts.ContinueOnError)
-									assert.True(t, opts.IgnoreError)
-									assert.True(t, opts.RunBackground)
-									assert.True(t, opts.Sudo)
-									assert.Equal(t, user, opts.SudoUser)
-									assert.Equal(t, prio, opts.Priority)
+									check.True(t, opts.ContinueOnError)
+									check.True(t, opts.IgnoreError)
+									check.True(t, opts.RunBackground)
+									check.True(t, opts.Sudo)
+									check.Equal(t, user, opts.SudoUser)
+									check.Equal(t, prio, opts.Priority)
 									return nil
 								})
 							require.NoError(t, cmd.Run(ctx))
-							assert.True(t, runFuncCalled)
+							check.True(t, runFuncCalled)
 						},
 						// "": func(ctx context.Context, t *testing.T, cmd Command) {},
 					} {
@@ -519,5 +520,5 @@ func TestRunParallelRunsInParallel(t *testing.T) {
 	defer cancel()
 	// If this does not run in parallel, the context will timeout and we will
 	// get an error.
-	assert.NoError(t, cmd.RunParallel(cctx))
+	check.NotError(t, cmd.RunParallel(cctx))
 }

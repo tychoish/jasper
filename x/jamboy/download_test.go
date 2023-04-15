@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tychoish/amboy/queue"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/jasper/testutil"
@@ -41,7 +42,7 @@ func TestCreateValidDownloadJobs(t *testing.T) {
 		assert.NotNil(t, job)
 	}
 
-	assert.NoError(t, catcher.Resolve())
+	check.NotError(t, catcher.Resolve())
 }
 
 func TestCreateDownloadJobsWithInvalidPath(t *testing.T) {
@@ -85,7 +86,7 @@ func TestProcessDownloadJobs(t *testing.T) {
 	fileServerAddr := fmt.Sprintf("localhost:%d", port)
 	fileServer := &http.Server{Addr: fileServerAddr, Handler: http.FileServer(http.Dir(fileServerDir))}
 	defer func() {
-		assert.NoError(t, fileServer.Close())
+		check.NotError(t, fileServer.Close())
 	}()
 	listener, err := net.Listen("tcp", fileServerAddr)
 	require.NoError(t, err)
@@ -116,7 +117,7 @@ func TestProcessDownloadJobs(t *testing.T) {
 		}
 		return nil
 	}
-	assert.NoError(t, processDownloadJobs(ctx, checkFileNonempty)(q))
+	check.NotError(t, processDownloadJobs(ctx, checkFileNonempty)(q))
 }
 
 func TestDoExtract(t *testing.T) {
@@ -194,7 +195,7 @@ func TestDoExtract(t *testing.T) {
 				assert.Error(t, opts.Extract())
 				return
 			}
-			assert.NoError(t, opts.Extract())
+			check.NotError(t, opts.Extract())
 
 			fileInfo, err := os.Stat("second-" + archiveFile.Name())
 			require.NoError(t, err)

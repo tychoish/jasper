@@ -25,7 +25,7 @@ func TestCleanTerminationSignalTrigger(t *testing.T) {
 					assert.True(t, trigger(proc.Info(ctx), syscall.SIGTERM))
 
 					exitCode, err := proc.Wait(ctx)
-					assert.NoError(t, err)
+					check.NotError(t, err)
 					assert.Zero(t, exitCode)
 					assert.False(t, proc.Running(ctx))
 
@@ -40,7 +40,7 @@ func TestCleanTerminationSignalTrigger(t *testing.T) {
 
 					assert.True(t, proc.Running(ctx))
 
-					assert.NoError(t, proc.Signal(ctx, syscall.SIGKILL))
+					check.NotError(t, proc.Signal(ctx, syscall.SIGKILL))
 				},
 				"CleanTerminationFailsForExitedProcess": func(ctx context.Context, opts *options.Create, makep ProcessConstructor) {
 					opts = testutil.TrueCreateOpts()
@@ -48,7 +48,7 @@ func TestCleanTerminationSignalTrigger(t *testing.T) {
 					require.NoError(t, err)
 
 					exitCode, err := proc.Wait(ctx)
-					assert.NoError(t, err)
+					check.NotError(t, err)
 					assert.Zero(t, exitCode)
 
 					trigger := makeCleanTerminationSignalTrigger()

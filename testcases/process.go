@@ -12,6 +12,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/testutil"
@@ -39,14 +40,14 @@ func ProcessCases() map[string]ProcessCase {
 		"ErrorToCreateWithInvalidArgs": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			opts.Args = []string{}
 			proc, err := makep(ctx, opts)
-			assert.Error(t, err)
+			check.Error(t, err)
 			assert.Nil(t, proc)
 		},
 		"WithCanceledContextProcessCreationFails": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			pctx, pcancel := context.WithCancel(ctx)
 			pcancel()
 			proc, err := makep(pctx, opts)
-			assert.Error(t, err)
+			check.Error(t, err)
 			assert.Nil(t, proc)
 		},
 		"CanceledContextTimesOutEarly": func(ctx context.Context, t *testing.T, _ *options.Create, makep jasper.ProcessConstructor) {
@@ -101,7 +102,7 @@ func ProcessCases() map[string]ProcessCase {
 			proc.Tag("foo")
 			assert.Contains(t, proc.GetTags(), "foo")
 			proc.ResetTags()
-			assert.Len(t, proc.GetTags(), 0)
+			assert.Equal(t, len(proc.GetTags()), 0)
 		},
 		"TagsAreSetLike": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			proc, err := makep(ctx, opts)
@@ -111,16 +112,16 @@ func ProcessCases() map[string]ProcessCase {
 				proc.Tag("foo")
 			}
 
-			assert.Len(t, proc.GetTags(), 1)
+			assert.Equal(t, len(proc.GetTags()), 1)
 			proc.Tag("bar")
-			assert.Len(t, proc.GetTags(), 2)
+			assert.Equal(t, len(proc.GetTags()), 2)
 		},
 		"CompleteIsTrueAfterWait": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			proc, err := makep(ctx, opts)
 			require.NoError(t, err)
 			time.Sleep(10 * time.Millisecond) // give the process time to start background machinery
 			_, err = proc.Wait(ctx)
-			assert.NoError(t, err)
+			check.NotError(t, err)
 			assert.True(t, proc.Complete(ctx))
 		},
 		"WaitReturnsWithCanceledContext": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
@@ -129,52 +130,52 @@ func ProcessCases() map[string]ProcessCase {
 			proc, err := makep(ctx, opts)
 			require.NoError(t, err)
 			assert.True(t, proc.Running(ctx))
-			assert.NoError(t, err)
+			check.NotError(t, err)
 			pcancel()
 			_, err = proc.Wait(pctx)
-			assert.Error(t, err)
+			check.Error(t, err)
 		},
 		"RegisterTriggerErrorsForNil": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			proc, err := makep(ctx, opts)
 			require.NoError(t, err)
-			assert.Error(t, proc.RegisterTrigger(ctx, nil))
+			check.Error(t, proc.RegisterTrigger(ctx, nil))
 		},
 		"RegisterSignalTriggerErrorsForNil": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			proc, err := makep(ctx, opts)
 			require.NoError(t, err)
-			assert.Error(t, proc.RegisterSignalTrigger(ctx, nil))
+			check.Error(t, proc.RegisterSignalTrigger(ctx, nil))
 		},
 		"RegisterSignalTriggerErrorsForExitedProcess": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			proc, err := makep(ctx, opts)
 			require.NoError(t, err)
 			_, err = proc.Wait(ctx)
-			assert.NoError(t, err)
-			assert.Error(t, proc.RegisterSignalTrigger(ctx, func(_ jasper.ProcessInfo, _ syscall.Signal) bool { return false }))
+			check.NotError(t, err)
+			check.Error(t, proc.RegisterSignalTrigger(ctx, func(_ jasper.ProcessInfo, _ syscall.Signal) bool { return false }))
 		},
 		"RegisterSignalTriggerIDErrorsForExitedProcess": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			proc, err := makep(ctx, opts)
 			require.NoError(t, err)
 			_, err = proc.Wait(ctx)
-			assert.NoError(t, err)
-			assert.Error(t, proc.RegisterSignalTriggerID(ctx, jasper.CleanTerminationSignalTrigger))
+			check.NotError(t, err)
+			check.Error(t, proc.RegisterSignalTriggerID(ctx, jasper.CleanTerminationSignalTrigger))
 		},
 		"RegisterSignalTriggerIDFailsWithInvalidTriggerID": func(ctx context.Context, t *testing.T, _ *options.Create, makep jasper.ProcessConstructor) {
 			opts := testutil.SleepCreateOpts(3)
 			proc, err := makep(ctx, opts)
 			require.NoError(t, err)
-			assert.Error(t, proc.RegisterSignalTriggerID(ctx, jasper.SignalTriggerID("foo")))
+			check.Error(t, proc.RegisterSignalTriggerID(ctx, jasper.SignalTriggerID("foo")))
 		},
 		"RegisterSignalTriggerIDPassesWithValidTriggerID": func(ctx context.Context, t *testing.T, _ *options.Create, makep jasper.ProcessConstructor) {
 			opts := testutil.SleepCreateOpts(3)
 			proc, err := makep(ctx, opts)
 			require.NoError(t, err)
-			assert.NoError(t, proc.RegisterSignalTriggerID(ctx, jasper.CleanTerminationSignalTrigger))
+			check.NotError(t, proc.RegisterSignalTriggerID(ctx, jasper.CleanTerminationSignalTrigger))
 		},
 		"DefaultTriggerSucceeds": func(ctx context.Context, t *testing.T, _ *options.Create, makep jasper.ProcessConstructor) {
 			opts := testutil.SleepCreateOpts(3)
 			proc, err := makep(ctx, opts)
 			require.NoError(t, err)
-			assert.NoError(t, proc.RegisterTrigger(ctx, jasper.MakeDefaultTrigger(ctx, nil, opts, "foo")))
+			check.NotError(t, proc.RegisterTrigger(ctx, jasper.MakeDefaultTrigger(ctx, nil, opts, "foo")))
 		},
 		"OptionsCloseTriggerRegisteredByDefault": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			count := 0
@@ -204,16 +205,16 @@ func ProcessCases() map[string]ProcessCase {
 			require.NoError(t, err)
 
 			expectedSig := syscall.SIGKILL
-			assert.NoError(t, proc.RegisterSignalTrigger(ctx, func(info jasper.ProcessInfo, actualSig syscall.Signal) bool {
+			check.NotError(t, proc.RegisterSignalTrigger(ctx, func(info jasper.ProcessInfo, actualSig syscall.Signal) bool {
 				assert.Equal(t, expectedSig, actualSig)
 				assert.True(t, info.IsRunning)
 				assert.False(t, info.Complete)
 				return false
 			}))
-			assert.NoError(t, proc.Signal(ctx, expectedSig))
+			check.NotError(t, proc.Signal(ctx, expectedSig))
 
 			exitCode, err := proc.Wait(ctx)
-			assert.Error(t, err)
+			check.Error(t, err)
 			if runtime.GOOS == "windows" {
 				assert.Equal(t, 1, exitCode)
 			} else {
@@ -229,21 +230,21 @@ func ProcessCases() map[string]ProcessCase {
 
 			expectedSig := syscall.SIGKILL
 			shouldSkipNextTime := true
-			assert.NoError(t, proc.RegisterSignalTrigger(ctx, func(info jasper.ProcessInfo, actualSig syscall.Signal) bool {
+			check.NotError(t, proc.RegisterSignalTrigger(ctx, func(info jasper.ProcessInfo, actualSig syscall.Signal) bool {
 				assert.Equal(t, expectedSig, actualSig)
 				skipSignal := shouldSkipNextTime
 				shouldSkipNextTime = false
 				return skipSignal
 			}))
 
-			assert.NoError(t, proc.Signal(ctx, expectedSig))
+			check.NotError(t, proc.Signal(ctx, expectedSig))
 			assert.True(t, proc.Running(ctx))
 			assert.False(t, proc.Complete(ctx))
 
-			assert.NoError(t, proc.Signal(ctx, expectedSig))
+			check.NotError(t, proc.Signal(ctx, expectedSig))
 
 			exitCode, err := proc.Wait(ctx)
-			assert.Error(t, err)
+			check.Error(t, err)
 			if runtime.GOOS == "windows" {
 				assert.Equal(t, 1, exitCode)
 			} else {
@@ -257,8 +258,8 @@ func ProcessCases() map[string]ProcessCase {
 			file, err := os.CreateTemp(testutil.BuildDirectory(), "out.txt")
 			require.NoError(t, err)
 			defer func() {
-				assert.NoError(t, file.Close())
-				assert.NoError(t, os.RemoveAll(file.Name()))
+				check.NotError(t, file.Close())
+				check.NotError(t, os.RemoveAll(file.Name()))
 			}()
 			info, err := file.Stat()
 			require.NoError(t, err)
@@ -275,14 +276,14 @@ func ProcessCases() map[string]ProcessCase {
 			require.NoError(t, err)
 
 			_, err = proc.Wait(ctx)
-			assert.NoError(t, err)
+			check.NotError(t, err)
 		},
 		"ProcessWritesToLog": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			file, err := os.CreateTemp(testutil.BuildDirectory(), "out.txt")
 			require.NoError(t, err)
 			defer func() {
-				assert.NoError(t, file.Close())
-				assert.NoError(t, os.RemoveAll(file.Name()))
+				check.NotError(t, file.Close())
+				check.NotError(t, os.RemoveAll(file.Name()))
 			}()
 			info, err := file.Stat()
 			require.NoError(t, err)
@@ -300,7 +301,7 @@ func ProcessCases() map[string]ProcessCase {
 			require.NoError(t, err)
 
 			_, err = proc.Wait(ctx)
-			assert.NoError(t, err)
+			check.NotError(t, err)
 
 			// File is not guaranteed to be written once Wait() returns and closers begin executing,
 			// so wait for file to be non-empty.
@@ -330,8 +331,8 @@ func ProcessCases() map[string]ProcessCase {
 			file, err := os.CreateTemp(testutil.BuildDirectory(), "out.txt")
 			require.NoError(t, err)
 			defer func() {
-				assert.NoError(t, file.Close())
-				assert.NoError(t, os.RemoveAll(file.Name()))
+				check.NotError(t, file.Close())
+				check.NotError(t, os.RemoveAll(file.Name()))
 			}()
 			info, err := file.Stat()
 			require.NoError(t, err)
@@ -384,7 +385,7 @@ func ProcessCases() map[string]ProcessCase {
 			newProc, err := proc.Respawn(ctx)
 			require.NoError(t, err)
 			_, err = newProc.Wait(ctx)
-			assert.NoError(t, err)
+			check.NotError(t, err)
 		},
 		"RespawnedProcessGivesSameResult": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			proc, err := makep(ctx, opts)
@@ -436,7 +437,7 @@ func ProcessCases() map[string]ProcessCase {
 			require.NotNil(t, proc)
 
 			countIncremented := make(chan bool)
-			assert.NoError(t, proc.RegisterTrigger(ctx, func(pInfo jasper.ProcessInfo) {
+			check.NotError(t, proc.RegisterTrigger(ctx, func(pInfo jasper.ProcessInfo) {
 				count++
 				countIncremented <- true
 			}))
@@ -452,7 +453,7 @@ func ProcessCases() map[string]ProcessCase {
 			newProc, err := proc.Respawn(ctx)
 			require.NoError(t, err)
 			require.NotNil(t, newProc)
-			assert.NoError(t, newProc.RegisterTrigger(ctx, func(pIfno jasper.ProcessInfo) {
+			check.NotError(t, newProc.RegisterTrigger(ctx, func(pIfno jasper.ProcessInfo) {
 				count++
 				countIncremented <- true
 			}))
@@ -485,7 +486,7 @@ func ProcessCases() map[string]ProcessCase {
 			require.NoError(t, err)
 			require.NotNil(t, proc)
 			exitCode, err := proc.Wait(ctx)
-			assert.NoError(t, err)
+			check.NotError(t, err)
 			assert.Equal(t, 0, exitCode)
 		},
 		"WaitGivesFailureExitCode": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
@@ -493,7 +494,7 @@ func ProcessCases() map[string]ProcessCase {
 			require.NoError(t, err)
 			require.NotNil(t, proc)
 			exitCode, err := proc.Wait(ctx)
-			assert.Error(t, err)
+			check.Error(t, err)
 			assert.Equal(t, 1, exitCode)
 		},
 		"WaitGivesProperExitCodeOnSignalDeath": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
@@ -501,9 +502,9 @@ func ProcessCases() map[string]ProcessCase {
 			require.NoError(t, err)
 			require.NotNil(t, proc)
 			sig := syscall.SIGTERM
-			assert.NoError(t, proc.Signal(ctx, sig))
+			check.NotError(t, proc.Signal(ctx, sig))
 			exitCode, err := proc.Wait(ctx)
-			assert.Error(t, err)
+			check.Error(t, err)
 			if runtime.GOOS == "windows" {
 				assert.Equal(t, 1, exitCode)
 			} else {
@@ -515,9 +516,9 @@ func ProcessCases() map[string]ProcessCase {
 			require.NoError(t, err)
 			require.NotNil(t, proc)
 			sig := syscall.SIGABRT
-			assert.NoError(t, proc.Signal(ctx, sig))
+			check.NotError(t, proc.Signal(ctx, sig))
 			exitCode, err := proc.Wait(ctx)
-			assert.Error(t, err)
+			check.Error(t, err)
 			if runtime.GOOS == "windows" {
 				assert.Equal(t, 1, exitCode)
 			} else {
@@ -539,7 +540,7 @@ func ProcessCases() map[string]ProcessCase {
 			}()
 			select {
 			case <-waitFinished:
-				assert.Error(t, err)
+				check.Error(t, err)
 				assert.Equal(t, -1, exitCode)
 			case <-ctx.Done():
 				assert.Fail(t, "call to Wait() took too long to finish")
@@ -553,7 +554,7 @@ func ProcessCases() map[string]ProcessCase {
 			require.NoError(t, err)
 
 			exitCode, err := proc.Wait(ctx)
-			assert.Error(t, err)
+			check.Error(t, err)
 			if runtime.GOOS == "windows" {
 				assert.Equal(t, 1, exitCode)
 			} else {
@@ -566,7 +567,7 @@ func ProcessCases() map[string]ProcessCase {
 			require.NoError(t, err)
 
 			_, err = proc.Wait(ctx)
-			assert.NoError(t, err)
+			check.NotError(t, err)
 
 			err = proc.Signal(ctx, syscall.SIGTERM)
 			require.Error(t, err)

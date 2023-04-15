@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper/options"
 )
 
@@ -34,7 +35,7 @@ func TestLogging(t *testing.T) {
 		{
 			Name: "PutGet",
 			Case: func(t *testing.T, cache LoggingCache) {
-				assert.NoError(t, cache.Put("id", &options.CachedLogger{ID: "id"}))
+				check.NotError(t, cache.Put("id", &options.CachedLogger{ID: "id"}))
 				assert.Equal(t, 1, cache.Len())
 				lg := cache.Get("id")
 				require.NotNil(t, lg)
@@ -44,7 +45,7 @@ func TestLogging(t *testing.T) {
 		{
 			Name: "PutDuplicate",
 			Case: func(t *testing.T, cache LoggingCache) {
-				assert.NoError(t, cache.Put("id", &options.CachedLogger{ID: "id"}))
+				check.NotError(t, cache.Put("id", &options.CachedLogger{ID: "id"}))
 				assert.Error(t, cache.Put("id", &options.CachedLogger{ID: "id"}))
 				assert.Equal(t, 1, cache.Len())
 			},
@@ -52,7 +53,7 @@ func TestLogging(t *testing.T) {
 		{
 			Name: "Prune",
 			Case: func(t *testing.T, cache LoggingCache) {
-				assert.NoError(t, cache.Put("id", &options.CachedLogger{ID: "id"}))
+				check.NotError(t, cache.Put("id", &options.CachedLogger{ID: "id"}))
 				assert.Equal(t, 1, cache.Len())
 				cache.Prune(time.Now().Add(-time.Minute))
 				assert.Equal(t, 1, cache.Len())

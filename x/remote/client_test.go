@@ -19,6 +19,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tychoish/birch"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
@@ -96,19 +97,19 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 				modify(opts)
 				procs, err := createProcs(ctx, opts, client, 10)
 				require.NoError(t, err)
-				assert.Len(t, procs, 10)
+				assert.Equal(t, len(procs), 10)
 
 				procs, err = client.List(ctx, options.All)
 				require.NoError(t, err)
-				assert.Len(t, procs, 10)
+				assert.Equal(t, len(procs), 10)
 
 				procs, err = client.List(ctx, options.Running)
 				require.NoError(t, err)
-				assert.Len(t, procs, 10)
+				assert.Equal(t, len(procs), 10)
 
 				procs, err = client.List(ctx, options.Successful)
 				require.NoError(t, err)
-				assert.Len(t, procs, 0)
+				assert.Equal(t, len(procs), 0)
 			},
 		},
 		{
@@ -116,7 +117,7 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 			Case: func(ctx context.Context, t *testing.T, client Manager) {
 				all, err := client.List(ctx, options.All)
 				require.NoError(t, err)
-				assert.Len(t, all, 0)
+				assert.Equal(t, len(all), 0)
 			},
 		},
 		{
@@ -135,7 +136,7 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 				modify(opts)
 				created, err := createProcs(ctx, opts, client, 10)
 				require.NoError(t, err)
-				assert.Len(t, created, 10)
+				assert.Equal(t, len(created), 10)
 				cancel()
 				output, err := client.List(cctx, options.All)
 				require.Error(t, err)
@@ -156,7 +157,7 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 				listOut, err := client.List(ctx, options.Successful)
 				require.NoError(t, err)
 
-				if assert.Len(t, listOut, 1) {
+				if assert.Equal(t, len(listOut), 1) {
 					assert.Equal(t, listOut[0].ID(), proc.ID())
 				}
 			},
@@ -198,7 +199,7 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 			Case: func(ctx context.Context, t *testing.T, client Manager) {
 				procs, err := client.Group(ctx, "foo")
 				require.NoError(t, err)
-				assert.Len(t, procs, 0)
+				assert.Equal(t, len(procs), 0)
 			},
 		},
 		{
@@ -213,7 +214,7 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 				cancel()
 				procs, err := client.Group(cctx, "foo")
 				require.Error(t, err)
-				assert.Len(t, procs, 0)
+				assert.Equal(t, len(procs), 0)
 				assert.Contains(t, err.Error(), "canceled")
 			},
 		},
@@ -230,7 +231,7 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 
 				procs, err := client.Group(ctx, "foo")
 				require.NoError(t, err)
-				require.Len(t, procs, 1)
+				require.Equal(t, len(procs), 1)
 				assert.Equal(t, procs[0].ID(), proc.ID())
 			},
 		},
@@ -251,7 +252,7 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 
 				_, err := createProcs(ctx, opts, client, 10)
 				require.NoError(t, err)
-				assert.NoError(t, client.Close(ctx))
+				check.NotError(t, client.Close(ctx))
 			},
 		},
 		{
@@ -281,7 +282,7 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 				}
 
 				require.NoError(t, err)
-				assert.NoError(t, client.Close(ctx))
+				check.NotError(t, client.Close(ctx))
 			},
 		},
 		{
@@ -302,7 +303,7 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 				require.Error(t, err)
 				procs, err := client.List(ctx, options.All)
 				require.NoError(t, err)
-				assert.Len(t, procs, 0)
+				assert.Equal(t, len(procs), 0)
 			},
 		},
 		{
@@ -520,7 +521,7 @@ func TestManager(t *testing.T) {
 										logs, err := client.GetLogStream(ctx, proc.ID(), 1)
 										require.NoError(t, err)
 
-										require.Len(t, logs.Logs, 1)
+										require.Equal(t, len(logs.Logs), 1)
 										assert.Equal(t, expectedOutput, strings.TrimSpace(logs.Logs[0]))
 									},
 									"BytesCopiedByRespawnedProcess": func(ctx context.Context, t *testing.T, opts *options.Create, expectedOutput string, stdin []byte) {
@@ -535,7 +536,7 @@ func TestManager(t *testing.T) {
 										logs, err := client.GetLogStream(ctx, proc.ID(), 1)
 										require.NoError(t, err)
 
-										require.Len(t, logs.Logs, 1)
+										require.Equal(t, len(logs.Logs), 1)
 										assert.Equal(t, expectedOutput, strings.TrimSpace(logs.Logs[0]))
 
 										newProc, err := proc.Respawn(ctx)
@@ -547,7 +548,7 @@ func TestManager(t *testing.T) {
 										logs, err = client.GetLogStream(ctx, newProc.ID(), 1)
 										require.NoError(t, err)
 
-										require.Len(t, logs.Logs, 1)
+										require.Equal(t, len(logs.Logs), 1)
 										assert.Equal(t, expectedOutput, strings.TrimSpace(logs.Logs[0]))
 									},
 								} {
@@ -576,7 +577,7 @@ func TestManager(t *testing.T) {
 								tmpFile, err := os.CreateTemp(testutil.BuildDirectory(), filepath.Base(t.Name()))
 								require.NoError(t, err)
 								defer func() {
-									assert.NoError(t, os.RemoveAll(tmpFile.Name()))
+									check.NotError(t, os.RemoveAll(tmpFile.Name()))
 								}()
 								require.NoError(t, tmpFile.Close())
 
@@ -595,7 +596,7 @@ func TestManager(t *testing.T) {
 								tmpFile, err := os.CreateTemp(testutil.BuildDirectory(), filepath.Base(t.Name()))
 								require.NoError(t, err)
 								defer func() {
-									assert.NoError(t, os.RemoveAll(tmpFile.Name()))
+									check.NotError(t, os.RemoveAll(tmpFile.Name()))
 								}()
 								require.NoError(t, tmpFile.Close())
 
@@ -615,7 +616,7 @@ func TestManager(t *testing.T) {
 								tmpFile, err := os.CreateTemp(testutil.BuildDirectory(), filepath.Base(t.Name()))
 								require.NoError(t, err)
 								defer func() {
-									assert.NoError(t, os.RemoveAll(tmpFile.Name()))
+									check.NotError(t, os.RemoveAll(tmpFile.Name()))
 								}()
 								require.NoError(t, tmpFile.Close())
 
@@ -635,8 +636,8 @@ func TestManager(t *testing.T) {
 								tmpFile, err := os.CreateTemp(testutil.BuildDirectory(), filepath.Base(t.Name()))
 								require.NoError(t, err)
 								defer func() {
-									assert.NoError(t, tmpFile.Close())
-									assert.NoError(t, os.RemoveAll(tmpFile.Name()))
+									check.NotError(t, tmpFile.Close())
+									check.NotError(t, os.RemoveAll(tmpFile.Name()))
 								}()
 
 								const mb = 1024 * 1024
@@ -656,7 +657,7 @@ func TestManager(t *testing.T) {
 								path := filepath.Join(testutil.BuildDirectory(), filepath.Base(t.Name()))
 								require.NoError(t, os.RemoveAll(path))
 								defer func() {
-									assert.NoError(t, os.RemoveAll(path))
+									check.NotError(t, os.RemoveAll(path))
 								}()
 
 								opts := options.WriteFile{Path: path}
@@ -746,7 +747,7 @@ func TestManager(t *testing.T) {
 										}
 										require.NoError(t, client.DownloadFile(ctx, opts))
 										defer func() {
-											assert.NoError(t, os.RemoveAll(opts.Path))
+											check.NotError(t, os.RemoveAll(opts.Path))
 										}()
 
 										fileInfo, err := os.Stat(opts.Path)
@@ -757,7 +758,7 @@ func TestManager(t *testing.T) {
 										file, err := os.CreateTemp(tempDir, "out.txt")
 										require.NoError(t, err)
 										defer func() {
-											assert.NoError(t, os.RemoveAll(file.Name()))
+											check.NotError(t, os.RemoveAll(file.Name()))
 										}()
 										require.NoError(t, file.Close())
 
@@ -767,7 +768,7 @@ func TestManager(t *testing.T) {
 										}
 										require.NoError(t, client.DownloadFile(ctx, opts))
 										defer func() {
-											assert.NoError(t, os.RemoveAll(opts.Path))
+											check.NotError(t, os.RemoveAll(opts.Path))
 										}()
 
 										fileInfo, err := os.Stat(file.Name())
@@ -778,13 +779,13 @@ func TestManager(t *testing.T) {
 										downloadDir, err := os.MkdirTemp(tempDir, "out")
 										require.NoError(t, err)
 										defer func() {
-											assert.NoError(t, os.RemoveAll(downloadDir))
+											check.NotError(t, os.RemoveAll(downloadDir))
 										}()
 
 										fileServerDir, err := os.MkdirTemp(tempDir, "file_server")
 										require.NoError(t, err)
 										defer func() {
-											assert.NoError(t, os.RemoveAll(fileServerDir))
+											check.NotError(t, os.RemoveAll(fileServerDir))
 										}()
 
 										fileName := "foo.zip"
@@ -800,7 +801,7 @@ func TestManager(t *testing.T) {
 										fileServerAddr := fmt.Sprintf("localhost:%d", port)
 										fileServer := &http.Server{Addr: fileServerAddr, Handler: http.FileServer(http.Dir(fileServerDir))}
 										defer func() {
-											assert.NoError(t, fileServer.Close())
+											check.NotError(t, fileServer.Close())
 										}()
 										listener, err := net.Listen("tcp", fileServerAddr)
 										require.NoError(t, err)
@@ -835,13 +836,13 @@ func TestManager(t *testing.T) {
 										file, err := os.CreateTemp(tempDir, filepath.Base(t.Name()))
 										require.NoError(t, err)
 										defer func() {
-											assert.NoError(t, os.RemoveAll(file.Name()))
+											check.NotError(t, os.RemoveAll(file.Name()))
 										}()
 										require.NoError(t, file.Close())
 										extractDir, err := os.MkdirTemp(tempDir, filepath.Base(t.Name())+"_extract")
 										require.NoError(t, err)
 										defer func() {
-											assert.NoError(t, os.RemoveAll(file.Name()))
+											check.NotError(t, os.RemoveAll(file.Name()))
 										}()
 
 										opts := remote.Download{
@@ -859,7 +860,7 @@ func TestManager(t *testing.T) {
 										extractDir, err := os.MkdirTemp(tempDir, filepath.Base(t.Name())+"_extract")
 										require.NoError(t, err)
 										defer func() {
-											assert.NoError(t, os.RemoveAll(extractDir))
+											check.NotError(t, os.RemoveAll(extractDir))
 										}()
 										opts := remote.Download{
 											URL:  "https://example.com",
@@ -880,7 +881,7 @@ func TestManager(t *testing.T) {
 										file, err := os.CreateTemp(tempDir, filepath.Base(t.Name()))
 										require.NoError(t, err)
 										defer func() {
-											assert.NoError(t, os.RemoveAll(file.Name()))
+											check.NotError(t, os.RemoveAll(file.Name()))
 										}()
 										require.NoError(t, file.Close())
 										assert.Error(t, client.DownloadFile(ctx, remote.Download{URL: "", Path: file.Name()}))
@@ -889,7 +890,7 @@ func TestManager(t *testing.T) {
 										file, err := os.CreateTemp(tempDir, "out.txt")
 										require.NoError(t, err)
 										defer func() {
-											assert.NoError(t, os.RemoveAll(file.Name()))
+											check.NotError(t, os.RemoveAll(file.Name()))
 										}()
 										require.NoError(t, file.Close())
 										assert.Error(t, client.DownloadFile(ctx, remote.Download{URL: "https://example.com/foo", Path: file.Name()}))
@@ -907,7 +908,7 @@ func TestManager(t *testing.T) {
 										tempDir, err := os.MkdirTemp(testutil.BuildDirectory(), filepath.Base(t.Name()))
 										require.NoError(t, err)
 										defer func() {
-											assert.NoError(t, os.RemoveAll(tempDir))
+											check.NotError(t, os.RemoveAll(tempDir))
 										}()
 										testCase(ctx, t, client, tempDir)
 									})
@@ -920,7 +921,7 @@ func TestManager(t *testing.T) {
 								file, err := os.CreateTemp(testutil.BuildDirectory(), filepath.Base(t.Name()))
 								require.NoError(t, err)
 								defer func() {
-									assert.NoError(t, os.RemoveAll(file.Name()))
+									check.NotError(t, os.RemoveAll(file.Name()))
 								}()
 								require.NoError(t, file.Close())
 
@@ -958,11 +959,11 @@ func TestManager(t *testing.T) {
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								proc, err := client.CreateProcess(ctx, testutil.SleepCreateOpts(1))
 								require.NoError(t, err)
-								assert.True(t, proc.Running(ctx))
+								check.True(t, proc.Running(ctx))
 
 								assert.Error(t, proc.RegisterSignalTriggerID(ctx, jasper.SignalTriggerID("foo")))
 
-								assert.NoError(t, proc.Signal(ctx, syscall.SIGTERM))
+								check.NotError(t, proc.Signal(ctx, syscall.SIGTERM))
 							},
 						},
 						clientTestCase{
@@ -970,11 +971,11 @@ func TestManager(t *testing.T) {
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								proc, err := client.CreateProcess(ctx, testutil.SleepCreateOpts(1))
 								require.NoError(t, err)
-								assert.True(t, proc.Running(ctx))
+								check.True(t, proc.Running(ctx))
 
-								assert.NoError(t, proc.RegisterSignalTriggerID(ctx, jasper.CleanTerminationSignalTrigger))
+								check.NotError(t, proc.RegisterSignalTriggerID(ctx, jasper.CleanTerminationSignalTrigger))
 
-								assert.NoError(t, proc.Signal(ctx, syscall.SIGTERM))
+								check.NotError(t, proc.Signal(ctx, syscall.SIGTERM))
 							},
 						},
 						clientTestCase{
@@ -1120,7 +1121,7 @@ func TestManager(t *testing.T) {
 								logger1, err := lc.Create("logger1", &options.Output{})
 								require.NoError(t, err)
 								defer func() {
-									assert.NoError(t, lc.Clear(ctx))
+									check.NotError(t, lc.Clear(ctx))
 								}()
 
 								payload := options.LoggingPayload{
@@ -1129,7 +1130,7 @@ func TestManager(t *testing.T) {
 									Priority: level.Warning,
 									Format:   options.LoggingPayloadFormatSTRING,
 								}
-								assert.NoError(t, client.SendMessages(ctx, payload))
+								check.NotError(t, client.SendMessages(ctx, payload))
 							},
 						},
 						clientTestCase{
@@ -1153,14 +1154,14 @@ func TestManager(t *testing.T) {
 							Name: "ScriptingSetup",
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								harness := createTestScriptingHarness(ctx, t, client, ".")
-								assert.NoError(t, harness.Setup(ctx))
+								check.NotError(t, harness.Setup(ctx))
 							},
 						},
 						clientTestCase{
 							Name: "ScriptingCleanup",
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								harness := createTestScriptingHarness(ctx, t, client, ".")
-								assert.NoError(t, harness.Cleanup(ctx))
+								check.NotError(t, harness.Cleanup(ctx))
 							},
 						},
 						clientTestCase{
@@ -1169,14 +1170,14 @@ func TestManager(t *testing.T) {
 								tmpdir, err := os.MkdirTemp(testutil.BuildDirectory(), "scripting_tests")
 								require.NoError(t, err)
 								defer func() {
-									assert.NoError(t, os.RemoveAll(tmpdir))
+									check.NotError(t, os.RemoveAll(tmpdir))
 								}()
 								harness := createTestScriptingHarness(ctx, t, client, tmpdir)
 
 								require.NoError(t, err)
 								tmpFile := filepath.Join(tmpdir, "fake_script.go")
 								require.NoError(t, os.WriteFile(tmpFile, []byte(`package main; import "os"; func main() { os.Exit(0) }`), 0755))
-								assert.NoError(t, harness.Run(ctx, []string{tmpFile}))
+								check.NotError(t, harness.Run(ctx, []string{tmpFile}))
 							},
 						},
 						clientTestCase{
@@ -1185,7 +1186,7 @@ func TestManager(t *testing.T) {
 								tmpdir, err := os.MkdirTemp(testutil.BuildDirectory(), "scripting_tests")
 								require.NoError(t, err)
 								defer func() {
-									assert.NoError(t, os.RemoveAll(tmpdir))
+									check.NotError(t, os.RemoveAll(tmpdir))
 								}()
 								harness := createTestScriptingHarness(ctx, t, client, tmpdir)
 
@@ -1200,11 +1201,11 @@ func TestManager(t *testing.T) {
 								tmpdir, err := os.MkdirTemp(testutil.BuildDirectory(), "scripting_tests")
 								require.NoError(t, err)
 								defer func() {
-									assert.NoError(t, os.RemoveAll(tmpdir))
+									check.NotError(t, os.RemoveAll(tmpdir))
 								}()
 
 								harness := createTestScriptingHarness(ctx, t, client, tmpdir)
-								assert.NoError(t, harness.RunScript(ctx, `package main; import "fmt"; func main() { fmt.Println("Hello World") }`))
+								check.NotError(t, harness.RunScript(ctx, `package main; import "fmt"; func main() { fmt.Println("Hello World") }`))
 							},
 						},
 						clientTestCase{
@@ -1213,7 +1214,7 @@ func TestManager(t *testing.T) {
 								tmpdir, err := os.MkdirTemp(testutil.BuildDirectory(), "scripting_tests")
 								require.NoError(t, err)
 								defer func() {
-									assert.NoError(t, os.RemoveAll(tmpdir))
+									check.NotError(t, os.RemoveAll(tmpdir))
 								}()
 
 								harness := createTestScriptingHarness(ctx, t, client, tmpdir)
@@ -1226,7 +1227,7 @@ func TestManager(t *testing.T) {
 								tmpdir, err := os.MkdirTemp(testutil.BuildDirectory(), "scripting_tests")
 								require.NoError(t, err)
 								defer func() {
-									assert.NoError(t, os.RemoveAll(tmpdir))
+									check.NotError(t, os.RemoveAll(tmpdir))
 								}()
 								harness := createTestScriptingHarness(ctx, t, client, tmpdir)
 
@@ -1248,7 +1249,7 @@ func TestManager(t *testing.T) {
 								tmpdir, err := os.MkdirTemp(testutil.BuildDirectory(), "scripting_tests")
 								require.NoError(t, err)
 								defer func() {
-									assert.NoError(t, os.RemoveAll(tmpdir))
+									check.NotError(t, os.RemoveAll(tmpdir))
 								}()
 								harness := createTestScriptingHarness(ctx, t, client, tmpdir)
 
@@ -1256,7 +1257,7 @@ func TestManager(t *testing.T) {
 								require.NoError(t, os.WriteFile(tmpFile, []byte(`package main; import "testing"; func TestMain(t *testing.T) { return }`), 0755))
 								results, err := harness.Test(ctx, tmpdir, scripting.TestOptions{Name: "dummy"})
 								require.NoError(t, err)
-								require.Len(t, results, 1)
+								require.Equal(t, len(results), 1)
 							},
 						},
 					) {

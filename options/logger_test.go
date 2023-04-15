@@ -6,6 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/grip/level"
 )
 
@@ -35,7 +36,7 @@ func TestLoggerConfigValidate(t *testing.T) {
 				Format: RawLoggerConfigFormatBSON,
 			},
 		}
-		assert.NoError(t, config.validate())
+		check.NotError(t, config.validate())
 		assert.Equal(t, globalLoggerRegistry, config.Registry)
 	})
 	t.Run("SetRegistry", func(t *testing.T) {
@@ -47,7 +48,7 @@ func TestLoggerConfigValidate(t *testing.T) {
 				Format: RawLoggerConfigFormatBSON,
 			},
 		}
-		assert.NoError(t, config.validate())
+		check.NotError(t, config.validate())
 		assert.Equal(t, registry, config.Registry)
 	})
 }
@@ -141,7 +142,7 @@ func TestLoggerConfigResolve(t *testing.T) {
 		}
 		sender, err := config.Resolve()
 		assert.NotNil(t, sender)
-		assert.NoError(t, err)
+		check.NotError(t, err)
 	})
 	t.Run("ProducerAndSenderUnsetJSON", func(t *testing.T) {
 		rawConfig, err := json.Marshal(&DefaultLoggerOptions{Base: BaseOptions{Format: LogFormatPlain}})
@@ -156,7 +157,7 @@ func TestLoggerConfigResolve(t *testing.T) {
 		}
 		sender, err := config.Resolve()
 		assert.NotNil(t, sender)
-		assert.NoError(t, err)
+		check.NotError(t, err)
 	})
 }
 
@@ -232,7 +233,7 @@ func TestLoggerConfigMarshalJSON(t *testing.T) {
 		require.NoError(t, json.Unmarshal(data, roundTripped))
 		sender, err := roundTripped.Resolve()
 		assert.NotNil(t, sender)
-		assert.NoError(t, err)
+		check.NotError(t, err)
 		assert.Equal(t, config.info.Config, roundTripped.info.Config)
 	})
 }

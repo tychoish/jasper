@@ -105,7 +105,7 @@ func TestSSHLoggingCache(t *testing.T) {
 				makeOutcomeResponse(nil),
 			)
 
-			assert.NoError(t, lc.CloseAndRemove(ctx, "foo"))
+			check.NotError(t, lc.CloseAndRemove(ctx, "foo"))
 		},
 		"CloseAndRemoveFailsWithInvalidResponse": func(ctx context.Context, t *testing.T, lc *sshLoggingCache, client *sshClient, baseManager *mock.Manager) {
 			inputChecker := &IDInput{}
@@ -127,7 +127,7 @@ func TestSSHLoggingCache(t *testing.T) {
 				makeOutcomeResponse(nil),
 			)
 
-			assert.NoError(t, lc.Clear(ctx))
+			check.NotError(t, lc.Clear(ctx))
 		},
 		"ClearFailsWithInvalidResponse": func(ctx context.Context, t *testing.T, lc *sshLoggingCache, client *sshClient, baseManager *mock.Manager) {
 			inputChecker := &IDInput{}

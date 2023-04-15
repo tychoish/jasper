@@ -37,7 +37,7 @@ func TestCLIProcess(t *testing.T) {
 					require.NoError(t, execCLICommandInputOutput(t, c, processInfo(), input, resp))
 					require.True(t, resp.Successful())
 					assert.Equal(t, jasperProcID, resp.Info.ID)
-					assert.True(t, resp.Info.IsRunning)
+					check.True(t, resp.Info.IsRunning)
 				},
 				"InfoWithNonexistentIDFails": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
 					input, err := json.Marshal(IDInput{nonexistentID})
@@ -57,7 +57,7 @@ func TestCLIProcess(t *testing.T) {
 					resp := &RunningResponse{}
 					require.NoError(t, execCLICommandInputOutput(t, c, processRunning(), input, resp))
 					require.True(t, resp.Successful())
-					assert.True(t, resp.Running)
+					check.True(t, resp.Running)
 				},
 				"RunningWithNonexistentIDFails": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
 					input, err := json.Marshal(IDInput{nonexistentID})
@@ -182,7 +182,7 @@ func TestCLIProcess(t *testing.T) {
 					closeService := makeService(ctx, t, port, manager)
 					require.NoError(t, err)
 					defer func() {
-						assert.NoError(t, closeService())
+						check.NotError(t, closeService())
 					}()
 
 					resp := &InfoResponse{}

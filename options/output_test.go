@@ -20,12 +20,12 @@ func TestOutputOptions(t *testing.T) {
 	cases := map[string]testCase{
 		"NilOptionsValidate": func(t *testing.T, opts Output) {
 			assert.Zero(t, opts)
-			assert.NoError(t, opts.Validate())
+			check.NotError(t, opts.Validate())
 		},
 		"ErrorOutputSpecified": func(t *testing.T, opts Output) {
 			opts.Output = stdout
 			opts.Error = stderr
-			assert.NoError(t, opts.Validate())
+			check.NotError(t, opts.Validate())
 		},
 		"SuppressErrorWhenSpecified": func(t *testing.T, opts Output) {
 			opts.Error = stderr
@@ -80,24 +80,24 @@ func TestOutputOptions(t *testing.T) {
 		},
 		"OutputGetterNilIsIoDiscard": func(t *testing.T, opts Output) {
 			out, err := opts.GetOutput()
-			assert.NoError(t, err)
+			check.NotError(t, err)
 			assert.Equal(t, io.Discard, out)
 		},
 		"OutputGetterWhenPopulatedIsCorrect": func(t *testing.T, opts Output) {
 			opts.Output = stdout
 			out, err := opts.GetOutput()
-			assert.NoError(t, err)
+			check.NotError(t, err)
 			assert.Equal(t, stdout, out)
 		},
 		"ErrorGetterNilIsIoDiscard": func(t *testing.T, opts Output) {
 			outErr, err := opts.GetError()
-			assert.NoError(t, err)
+			check.NotError(t, err)
 			assert.Equal(t, io.Discard, outErr)
 		},
 		"ErrorGetterWhenPopulatedIsCorrect": func(t *testing.T, opts Output) {
 			opts.Error = stderr
 			outErr, err := opts.GetError()
-			assert.NoError(t, err)
+			check.NotError(t, err)
 			assert.Equal(t, stderr, outErr)
 		},
 		"RedirectErrorHasCorrectSemantics": func(t *testing.T, opts Output) {
@@ -105,7 +105,7 @@ func TestOutputOptions(t *testing.T) {
 			opts.Error = stderr
 			opts.SendErrorToOutput = true
 			outErr, err := opts.GetError()
-			assert.NoError(t, err)
+			check.NotError(t, err)
 			assert.Equal(t, stdout, outErr)
 		},
 		"RedirectOutputHasCorrectSemantics": func(t *testing.T, opts Output) {
@@ -113,7 +113,7 @@ func TestOutputOptions(t *testing.T) {
 			opts.Error = stderr
 			opts.SendOutputToError = true
 			out, err := opts.GetOutput()
-			assert.NoError(t, err)
+			check.NotError(t, err)
 			assert.Equal(t, stderr, out)
 		},
 		"RedirectCannotHaveCycle": func(t *testing.T, opts Output) {
@@ -133,7 +133,7 @@ func TestOutputOptions(t *testing.T) {
 				},
 			}
 			opts.SuppressOutput = true
-			assert.NoError(t, opts.Validate())
+			check.NotError(t, opts.Validate())
 		},
 		"SuppressErrorWithLogger": func(t *testing.T, opts Output) {
 			opts.Loggers = []*LoggerConfig{
@@ -145,7 +145,7 @@ func TestOutputOptions(t *testing.T) {
 				},
 			}
 			opts.SuppressError = true
-			assert.NoError(t, opts.Validate())
+			check.NotError(t, opts.Validate())
 		},
 		"SuppressOutputAndErrorWithLogger": func(t *testing.T, opts Output) {
 			opts.Loggers = []*LoggerConfig{
@@ -158,7 +158,7 @@ func TestOutputOptions(t *testing.T) {
 			}
 			opts.SuppressOutput = true
 			opts.SuppressError = true
-			assert.NoError(t, opts.Validate())
+			check.NotError(t, opts.Validate())
 		},
 		"RedirectOutputWithLogger": func(t *testing.T, opts Output) {
 			opts.Loggers = []*LoggerConfig{
@@ -170,7 +170,7 @@ func TestOutputOptions(t *testing.T) {
 				},
 			}
 			opts.SendOutputToError = true
-			assert.NoError(t, opts.Validate())
+			check.NotError(t, opts.Validate())
 		},
 		"RedirectErrorWithLogger": func(t *testing.T, opts Output) {
 			opts.Loggers = []*LoggerConfig{
@@ -182,7 +182,7 @@ func TestOutputOptions(t *testing.T) {
 				},
 			}
 			opts.SendErrorToOutput = true
-			assert.NoError(t, opts.Validate())
+			check.NotError(t, opts.Validate())
 		},
 		"GetOutputWithStdoutAndLogger": func(t *testing.T, opts Output) {
 			opts.Output = stdout
@@ -203,8 +203,8 @@ func TestOutputOptions(t *testing.T) {
 
 			msg := "foo"
 			_, err = out.Write([]byte(msg))
-			assert.NoError(t, err)
-			assert.NoError(t, opts.outputSender.Close())
+			check.NotError(t, err)
+			check.NotError(t, opts.outputSender.Close())
 
 			assert.Equal(t, msg, stdout.String())
 
@@ -237,8 +237,8 @@ func TestOutputOptions(t *testing.T) {
 
 			msg := "foo"
 			_, err = errOut.Write([]byte(msg))
-			assert.NoError(t, err)
-			assert.NoError(t, opts.errorSender.Close())
+			check.NotError(t, err)
+			check.NotError(t, opts.errorSender.Close())
 
 			assert.Equal(t, msg, stderr.String())
 
@@ -279,7 +279,7 @@ func TestOutputIntegrationTableTest(t *testing.T) {
 	}
 
 	for idx, opt := range shouldPass {
-		assert.NoError(t, opt.Validate(), "%d: %+v", idx, opt)
+		check.NotError(t, opt.Validate(), "%d: %+v", idx, opt)
 	}
 
 }

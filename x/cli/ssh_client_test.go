@@ -11,6 +11,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/mock"
 	"github.com/tychoish/jasper/options"
@@ -118,7 +119,7 @@ func TestSSHClient(t *testing.T) {
 			cmd := []string{"echo", "foo"}
 			require.NoError(t, client.CreateCommand(ctx).Add(cmd).Run(ctx))
 
-			require.Len(t, inputChecker.Commands, 1)
+			require.Equal(t, len(inputChecker.Commands), 1)
 			assert.Equal(t, cmd, inputChecker.Commands[0])
 		},
 		"RunCommandFailsIfBaseManagerCreateFails": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
@@ -175,8 +176,8 @@ func TestSSHClient(t *testing.T) {
 					successfulFound = true
 				}
 			}
-			assert.True(t, runningFound)
-			assert.True(t, successfulFound)
+			check.True(t, runningFound)
+			check.True(t, successfulFound)
 		},
 		"ListFailsIfBaseManagerCreateFails": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
 			baseManager.FailCreate = true
@@ -214,7 +215,7 @@ func TestSSHClient(t *testing.T) {
 			require.NoError(t, err)
 			assert.Equal(t, tag, inputChecker.Tag)
 
-			require.Len(t, procs, 1)
+			require.Equal(t, len(procs), 1)
 			sshProc, ok := procs[0].(*sshProcess)
 			require.True(t, ok)
 			assert.Equal(t, info, sshProc.info)
@@ -304,7 +305,7 @@ func TestSSHClient(t *testing.T) {
 			assert.Error(t, client.Close(ctx))
 		},
 		"CloseConnectionPasses": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
-			assert.NoError(t, client.CloseConnection())
+			check.NotError(t, client.CloseConnection())
 		},
 		"DownloadFilePassesWithValidResponse": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
 			inputChecker := remote.Download{}

@@ -127,7 +127,7 @@ func TestLoggingCache(t *testing.T) {
 					require.Equal(t, `msg='hello world!'`, msg.String())
 					raw, err := json.Marshal(msg.Raw())
 					require.NoError(t, err)
-					require.Len(t, raw, 22)
+					require.Equal(t, len(raw), 22)
 				})
 				t.Run("ValidMetadata", func(t *testing.T) {
 					lp.AddMetadata = true
@@ -283,6 +283,6 @@ func requireIsGroup(t *testing.T, size int, msg message.Composer) []message.Comp
 	gc, ok := msg.(*message.GroupComposer)
 	require.True(t, ok)
 	msgs := gc.Messages()
-	require.Len(t, msgs, size)
+	require.Equal(t, len(msgs), size)
 	return msgs
 }

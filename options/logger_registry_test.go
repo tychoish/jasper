@@ -28,7 +28,7 @@ func TestLoggerRegistry(t *testing.T) {
 	assert.True(t, ok)
 
 	factories := registry.Names()
-	require.Len(t, factories, len(registeredFactories))
+	require.Equal(t, len(factories), len(registeredFactories))
 	for _, factoryName := range factories {
 		_, ok := registeredFactories[factoryName]
 		require.True(t, ok)

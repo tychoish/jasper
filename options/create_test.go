@@ -11,6 +11,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert/check"
 )
 
 func TestCreateConstructor(t *testing.T) {
@@ -57,7 +58,7 @@ func TestCreateConstructor(t *testing.T) {
 				return
 			}
 
-			assert.NoError(t, err)
+			check.NotError(t, err)
 			assert.NotNil(t, opt)
 			assert.Equal(t, test.args, opt.Args)
 		})
@@ -71,7 +72,7 @@ func TestCreate(t *testing.T) {
 	defer cancel()
 	for name, test := range map[string]func(t *testing.T, opts *Create){
 		"DefaultConfigForTestsValidate": func(t *testing.T, opts *Create) {
-			assert.NoError(t, opts.Validate())
+			check.NotError(t, opts.Validate())
 		},
 		"EmptyArgsShouldNotValidate": func(t *testing.T, opts *Create) {
 			opts.Args = []string{}
@@ -79,7 +80,7 @@ func TestCreate(t *testing.T) {
 		},
 		"ZeroTimeoutShouldNotError": func(t *testing.T, opts *Create) {
 			opts.Timeout = 0
-			assert.NoError(t, opts.Validate())
+			check.NotError(t, opts.Validate())
 		},
 		"SmallTimeoutShouldNotValidate": func(t *testing.T, opts *Create) {
 			opts.Timeout = time.Millisecond
@@ -87,7 +88,7 @@ func TestCreate(t *testing.T) {
 		},
 		"LargeTimeoutShouldValidate": func(t *testing.T, opts *Create) {
 			opts.Timeout = time.Hour
-			assert.NoError(t, opts.Validate())
+			check.NotError(t, opts.Validate())
 		},
 		"StandardInputBytesSetsStandardInput": func(t *testing.T, opts *Create) {
 			stdinBytesStr := "foo"
@@ -118,15 +119,15 @@ func TestCreate(t *testing.T) {
 		},
 		"ExtantWorkingDirectoryShouldPass": func(t *testing.T, opts *Create) {
 			wd, err := os.Getwd()
-			assert.NoError(t, err)
+			check.NotError(t, err)
 			assert.NotZero(t, wd)
 
 			opts.WorkingDirectory = wd
-			assert.NoError(t, opts.Validate())
+			check.NotError(t, opts.Validate())
 		},
 		"WorkingDirectoryShouldErrorForFiles": func(t *testing.T, opts *Create) {
 			gobin, err := exec.LookPath("go")
-			assert.NoError(t, err)
+			check.NotError(t, err)
 			assert.NotZero(t, gobin)
 
 			opts.WorkingDirectory = gobin
@@ -152,13 +153,13 @@ func TestCreate(t *testing.T) {
 		},
 		"WithoutOverrideEnvironmentEnvIsPopulated": func(t *testing.T, opts *Create) {
 			cmd, _, err := opts.Resolve(ctx)
-			assert.NoError(t, err)
+			check.NotError(t, err)
 			assert.NotEmpty(t, cmd.Env())
 		},
 		"WithOverrideEnvironmentEnvIsEmpty": func(t *testing.T, opts *Create) {
 			opts.OverrideEnviron = true
 			cmd, _, err := opts.Resolve(ctx)
-			assert.NoError(t, err)
+			check.NotError(t, err)
 			assert.Empty(t, cmd.Env())
 		},
 		"EnvironmentVariablesArePropagated": func(t *testing.T, opts *Create) {
@@ -167,22 +168,22 @@ func TestCreate(t *testing.T) {
 			}
 
 			cmd, _, err := opts.Resolve(ctx)
-			assert.NoError(t, err)
+			check.NotError(t, err)
 			assert.Contains(t, cmd.Env(), "foo=bar")
 			assert.NotContains(t, cmd.Env(), "bar=foo")
 		},
 		"MultipleArgsArePropagated": func(t *testing.T, opts *Create) {
 			opts.Args = append(opts.Args, "-lha")
 			cmd, _, err := opts.Resolve(ctx)
-			assert.NoError(t, err)
-			require.Len(t, cmd.Args(), 2)
+			check.NotError(t, err)
+			require.Equal(t, len(cmd.Args()), 2)
 			assert.Contains(t, cmd.Args()[0], "ls")
 			assert.Equal(t, cmd.Args()[1], "-lha")
 		},
 		"WithOnlyCommandsArgsHasOneVal": func(t *testing.T, opts *Create) {
 			cmd, _, err := opts.Resolve(ctx)
-			assert.NoError(t, err)
-			require.Len(t, cmd.Args(), 1)
+			check.NotError(t, err)
+			require.Equal(t, len(cmd.Args()), 1)
 			assert.Equal(t, "ls", cmd.Args()[0])
 		},
 		"WithTimeout": func(t *testing.T, opts *Create) {
@@ -192,7 +193,7 @@ func TestCreate(t *testing.T) {
 			cmd, deadline, err := opts.Resolve(ctx)
 			require.NoError(t, err)
 			assert.True(t, time.Now().Before(deadline))
-			assert.NoError(t, cmd.Start())
+			check.NotError(t, cmd.Start())
 			assert.Error(t, cmd.Wait())
 			assert.True(t, time.Now().After(deadline))
 		},
@@ -204,7 +205,7 @@ func TestCreate(t *testing.T) {
 
 			cmd, deadline, err := opts.Resolve(ctx)
 			require.NoError(t, err)
-			assert.NoError(t, cmd.Start())
+			check.NotError(t, cmd.Start())
 			assert.Error(t, cmd.Wait())
 			assert.Equal(t, context.DeadlineExceeded, tctx.Err())
 			assert.True(t, time.Now().After(deadline))
@@ -218,11 +219,11 @@ func TestCreate(t *testing.T) {
 			start := time.Now()
 			cmd, deadline, err := opts.Resolve(ctx)
 			require.NoError(t, err)
-			assert.NoError(t, cmd.Start())
+			check.NotError(t, cmd.Start())
 			assert.Error(t, cmd.Wait())
 			elapsed := time.Since(start)
 			assert.True(t, elapsed > opts.Timeout)
-			assert.NoError(t, tctx.Err())
+			check.NotError(t, tctx.Err())
 			assert.True(t, time.Now().After(deadline))
 		},
 		"ClosersAreAlwaysCalled": func(t *testing.T, opts *Create) {
@@ -231,7 +232,7 @@ func TestCreate(t *testing.T) {
 				func() (_ error) { counter++; return },
 				func() (_ error) { counter += 2; return },
 			)
-			assert.NoError(t, opts.Close())
+			check.NotError(t, opts.Close())
 			assert.Equal(t, counter, 3)
 
 		},
@@ -245,14 +246,14 @@ func TestCreate(t *testing.T) {
 			opts.TimeoutSecs = 100
 			opts.Timeout = 0
 
-			assert.NoError(t, opts.Validate())
+			check.NotError(t, opts.Validate())
 			assert.Equal(t, 100*time.Second, opts.Timeout)
 		},
 		"ValidationOverrideDefaultsForDuration": func(t *testing.T, opts *Create) {
 			opts.TimeoutSecs = 0
 			opts.Timeout = time.Second
 
-			assert.NoError(t, opts.Validate())
+			check.NotError(t, opts.Validate())
 			assert.Equal(t, 1, opts.TimeoutSecs)
 		},
 	} {
@@ -281,8 +282,8 @@ func TestFileLogging(t *testing.T) {
 	goodFile, err := os.CreateTemp("", "this_file_exists")
 	require.NoError(t, err)
 	defer func() {
-		assert.NoError(t, goodFile.Close())
-		assert.NoError(t, os.RemoveAll(goodFile.Name()))
+		check.NotError(t, goodFile.Close())
+		check.NotError(t, os.RemoveAll(goodFile.Name()))
 	}()
 
 	goodFileName := goodFile.Name()
@@ -373,8 +374,8 @@ func TestFileLogging(t *testing.T) {
 				file, err := os.CreateTemp("", "out.txt")
 				require.NoError(t, err)
 				defer func() {
-					assert.NoError(t, file.Close())
-					assert.NoError(t, os.RemoveAll(file.Name()))
+					check.NotError(t, file.Close())
+					check.NotError(t, os.RemoveAll(file.Name()))
 				}()
 				info, err := file.Stat()
 				require.NoError(t, err)
@@ -403,13 +404,13 @@ func TestFileLogging(t *testing.T) {
 			require.NoError(t, cmd.Start())
 
 			_ = cmd.Wait()
-			assert.NoError(t, opts.Close())
+			check.NotError(t, opts.Close())
 
 			t.Log("number of files:", len(files))
 
 			for _, file := range files {
 				info, err := file.Stat()
-				assert.NoError(t, err)
+				check.NotError(t, err)
 				assert.Equal(t, testParams.numBytesExpected, info.Size())
 			}
 		})

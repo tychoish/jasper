@@ -9,7 +9,7 @@ import (
 func TestClientOptions(t *testing.T) {
 	for testName, testCase := range map[string]func(t *testing.T, opts *ClientOptions){
 		"ValidateSucceedsWithValidOptions": func(t *testing.T, opts *ClientOptions) {
-			assert.NoError(t, opts.Validate())
+			check.NotError(t, opts.Validate())
 		},
 		"ValidateFailsWithEmptyOptions": func(t *testing.T, _ *ClientOptions) {
 			opts := &ClientOptions{}

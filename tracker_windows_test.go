@@ -34,21 +34,21 @@ func TestWindowsProcessTracker(t *testing.T) {
 		"NewWindowsProcessTrackerCreatesJob": func(_ context.Context, t *testing.T, tracker *windowsProcessTracker, opts *options.Create) {
 			require.NotNil(t, tracker.job)
 			info, err := QueryInformationJobObjectProcessIdList(tracker.job.handle)
-			assert.NoError(t, err)
+			check.NotError(t, err)
 			assert.Equal(t, 0, int(info.NumberOfAssignedProcesses))
 		},
 		"AddProcessToTrackerAssignsPID": func(ctx context.Context, t *testing.T, tracker *windowsProcessTracker, opts *options.Create) {
 			opts1, opts2 := opts, opts.Copy()
 			proc1, err := newBasicProcess(ctx, opts1)
 			require.NoError(t, err)
-			assert.NoError(t, tracker.Add(proc1.Info(ctx)))
+			check.NotError(t, tracker.Add(proc1.Info(ctx)))
 
 			proc2, err := newBasicProcess(ctx, opts2)
 			require.NoError(t, err)
-			assert.NoError(t, tracker.Add(proc2.Info(ctx)))
+			check.NotError(t, tracker.Add(proc2.Info(ctx)))
 
 			info, err := QueryInformationJobObjectProcessIdList(tracker.job.handle)
-			assert.NoError(t, err)
+			check.NotError(t, err)
 			assert.Equal(t, 2, int(info.NumberOfAssignedProcesses))
 			assert.Contains(t, info.ProcessIdList, uint64(proc1.Info(ctx).PID))
 			assert.Contains(t, info.ProcessIdList, uint64(proc2.Info(ctx).PID))
@@ -57,53 +57,53 @@ func TestWindowsProcessTracker(t *testing.T) {
 			proc, err := newBasicProcess(ctx, opts)
 			require.NoError(t, err)
 
-			assert.NoError(t, tracker.Add(proc.Info(ctx)))
+			check.NotError(t, tracker.Add(proc.Info(ctx)))
 
 			info, err := QueryInformationJobObjectProcessIdList(tracker.job.handle)
-			assert.NoError(t, err)
+			check.NotError(t, err)
 			assert.Equal(t, 1, int(info.NumberOfAssignedProcesses))
 			assert.Contains(t, info.ProcessIdList, uint64(proc.Info(ctx).PID))
 
-			assert.NoError(t, tracker.Cleanup())
+			check.NotError(t, tracker.Cleanup())
 
 			exitCode, err := proc.Wait(ctx)
 			assert.Zero(t, exitCode)
-			assert.NoError(t, err)
+			check.NotError(t, err)
 			assert.Nil(t, ctx.Err())
 			assert.True(t, proc.Complete(ctx))
 		},
 		"CleanupWithNoProcessesDoesNotError": func(ctx context.Context, t *testing.T, tracker *windowsProcessTracker, opts *options.Create) {
-			assert.NoError(t, tracker.Cleanup())
+			check.NotError(t, tracker.Cleanup())
 		},
 		"DoubleCleanupDoesNotError": func(ctx context.Context, t *testing.T, tracker *windowsProcessTracker, opts *options.Create) {
 			proc, err := newBasicProcess(ctx, opts)
 			require.NoError(t, err)
 
-			assert.NoError(t, tracker.Add(proc.Info(ctx)))
+			check.NotError(t, tracker.Add(proc.Info(ctx)))
 
 			info, err := QueryInformationJobObjectProcessIdList(tracker.job.handle)
-			assert.NoError(t, err)
+			check.NotError(t, err)
 			assert.Equal(t, 1, int(info.NumberOfAssignedProcesses))
 			assert.Contains(t, info.ProcessIdList, uint64(proc.Info(ctx).PID))
 
-			assert.NoError(t, tracker.Cleanup())
-			assert.NoError(t, tracker.Cleanup())
+			check.NotError(t, tracker.Cleanup())
+			check.NotError(t, tracker.Cleanup())
 
 			exitCode, err := proc.Wait(ctx)
 			assert.Zero(t, exitCode)
-			assert.NoError(t, err)
+			check.NotError(t, err)
 			assert.Nil(t, ctx.Err())
 			assert.True(t, proc.Complete(ctx))
 		},
 		"CanAddProcessAfterCleanup": func(ctx context.Context, t *testing.T, tracker *windowsProcessTracker, opts *options.Create) {
-			assert.NoError(t, tracker.Cleanup())
+			check.NotError(t, tracker.Cleanup())
 
 			proc, err := newBasicProcess(ctx, opts)
 			require.NoError(t, err)
 
-			assert.NoError(t, tracker.Add(proc.Info(ctx)))
+			check.NotError(t, tracker.Add(proc.Info(ctx)))
 			info, err := QueryInformationJobObjectProcessIdList(tracker.job.handle)
-			assert.NoError(t, err)
+			check.NotError(t, err)
 			assert.Equal(t, 1, int(info.NumberOfAssignedProcesses))
 		},
 		// "": func(ctx context.Context, t *testing.T, tracker *windowsProcessTracker) {},
@@ -118,7 +118,7 @@ func TestWindowsProcessTracker(t *testing.T) {
 
 			tracker, err := makeTracker()
 			defer func() {
-				assert.NoError(t, tracker.Cleanup())
+				check.NotError(t, tracker.Cleanup())
 			}()
 			require.NoError(t, err)
 			require.NotNil(t, tracker)

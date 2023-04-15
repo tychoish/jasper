@@ -274,7 +274,7 @@ func TestJobRegistry(t *testing.T) {
 		names = append(names, n)
 	}
 
-	assert.Len(t, names, 1)
+	assert.Equal(t, len(names), 1)
 
 	jobType := downloadJobName
 	j, err := registry.GetJobFactory(jobType)

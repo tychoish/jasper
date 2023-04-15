@@ -12,6 +12,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/testutil"
@@ -43,7 +44,7 @@ func TestScriptingHarness(t *testing.T) {
 	tmpdir, err := os.MkdirTemp(testutil.BuildDirectory(), "scripting_tests")
 	require.NoError(t, err)
 	defer func() {
-		assert.NoError(t, os.RemoveAll(tmpdir))
+		check.NotError(t, os.RemoveAll(tmpdir))
 	}()
 
 	type seTest struct {
@@ -217,7 +218,7 @@ func TestScriptingHarness(t *testing.T) {
 						tmpFile := filepath.Join(tmpdir, "fake_script.go")
 						require.NoError(t, os.WriteFile(tmpFile, []byte(`package main; import ("fmt";"errors"; ); func main() { fmt.Println(errors.New("error")) }`), 0755))
 						defer func() {
-							assert.NoError(t, os.Remove(tmpFile))
+							check.NotError(t, os.Remove(tmpFile))
 						}()
 						err = se.Run(ctx, []string{tmpFile})
 						require.NoError(t, err)
@@ -233,7 +234,7 @@ func TestScriptingHarness(t *testing.T) {
 						tmpFile := filepath.Join(tmpdir, "fake_script.go")
 						require.NoError(t, os.WriteFile(tmpFile, []byte(`package main; import "os"; func main() { os.Exit(0) }`), 0755))
 						defer func() {
-							assert.NoError(t, os.Remove(tmpFile))
+							check.NotError(t, os.Remove(tmpFile))
 						}()
 						err = se.Run(ctx, []string{tmpFile})
 						require.NoError(t, err)
@@ -249,7 +250,7 @@ func TestScriptingHarness(t *testing.T) {
 						tmpFile := filepath.Join(tmpdir, "fake_script.go")
 						require.NoError(t, os.WriteFile(tmpFile, []byte(`package main; import "os"; func main() { os.Exit(0) }`), 0755))
 						defer func() {
-							assert.NoError(t, os.Remove(tmpFile))
+							check.NotError(t, os.Remove(tmpFile))
 						}()
 						_, err := se.Build(ctx, testutil.BuildDirectory(), []string{
 							"-o", filepath.Join(tmpdir, "fake_script"),
@@ -278,7 +279,7 @@ func TestScriptingHarness(t *testing.T) {
 
 				t.Run("ID", func(t *testing.T) {
 					require.Equal(t, env.DefaultOptions.ID(), se.ID())
-					assert.Len(t, se.ID(), 40)
+					assert.Equal(t, len(se.ID()), 40)
 				})
 				t.Run("Caching", func(t *testing.T) {
 					start := time.Now()
@@ -297,7 +298,7 @@ func TestScriptingHarness(t *testing.T) {
 				se := makeScriptingEnv(ctx, t, manager, env.DefaultOptions)
 				res, err := se.Test(ctx, tmpdir)
 				require.NoError(t, err)
-				require.Len(t, res, 0)
+				require.Equal(t, len(res), 0)
 			})
 			t.Run("Cleanup", func(t *testing.T) {
 				se := makeScriptingEnv(ctx, t, manager, env.DefaultOptions)

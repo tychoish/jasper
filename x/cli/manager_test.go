@@ -41,8 +41,8 @@ func TestCLIManager(t *testing.T) {
 					input, err := json.Marshal(mock.Process{})
 					require.NoError(t, err)
 					resp := &OutcomeResponse{}
-					assert.NoError(t, execCLICommandInputOutput(t, c, managerClear(), input, resp))
-					assert.NoError(t, execCLICommandInputOutput(t, c, managerClose(), input, resp))
+					check.NotError(t, execCLICommandInputOutput(t, c, managerClear(), input, resp))
+					check.NotError(t, execCLICommandInputOutput(t, c, managerClose(), input, resp))
 				},
 				"CreateProcessPasses": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
 					input, err := json.Marshal(options.Create{
@@ -125,12 +125,12 @@ func TestCLIManager(t *testing.T) {
 				"ClearPasses": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
 					resp := &OutcomeResponse{}
 					require.NoError(t, execCLICommandOutput(t, c, managerClear(), resp))
-					assert.True(t, resp.Successful())
+					check.True(t, resp.Successful())
 				},
 				"ClosePasses": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
 					resp := &OutcomeResponse{}
 					require.NoError(t, execCLICommandOutput(t, c, managerClose(), resp))
-					assert.True(t, resp.Successful())
+					check.True(t, resp.Successful())
 				},
 			} {
 				t.Run(testName, func(t *testing.T) {
@@ -143,7 +143,7 @@ func TestCLIManager(t *testing.T) {
 					closeService := makeService(ctx, t, port, manager)
 					require.NoError(t, err)
 					defer func() {
-						assert.NoError(t, closeService())
+						check.NotError(t, closeService())
 					}()
 
 					resp := &InfoResponse{}

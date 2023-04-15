@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/jasper/executor"
 	"github.com/tychoish/jasper/options"
@@ -30,16 +30,16 @@ func TestBlockingProcess(t *testing.T) {
 			t.Parallel()
 			for name, testCase := range map[string]func(context.Context, *testing.T, *blockingProcess){
 				"VerifyTestCaseConfiguration": func(ctx context.Context, t *testing.T, proc *blockingProcess) {
-					assert.NotNil(t, proc)
-					assert.NotNil(t, ctx)
-					assert.NotZero(t, proc.ID())
-					assert.False(t, proc.Complete(ctx))
-					assert.NotNil(t, MakeDefaultTrigger(ctx, nil, &proc.info.Options, "foo"))
+					check.NotZero(t, proc)
+					check.True(t, ctx != nil)
+					check.NotZero(t, proc.ID())
+					check.True(t, !proc.Complete(ctx))
+					check.True(t, nil != MakeDefaultTrigger(ctx, nil, &proc.info.Options, "foo"))
 				},
 				"InfoIDPopulatedInBasicCase": func(ctx context.Context, t *testing.T, proc *blockingProcess) {
 					infoReturned := make(chan struct{})
 					go func() {
-						assert.Equal(t, proc.Info(ctx).ID, proc.ID())
+						check.Equal(t, proc.Info(ctx).ID, proc.ID())
 						close(infoReturned)
 					}()
 
@@ -53,7 +53,7 @@ func TestBlockingProcess(t *testing.T) {
 						cctx, cancel := context.WithCancel(ctx)
 						cancel()
 
-						assert.False(t, proc.Info(cctx).Complete)
+						check.True(t, !proc.Info(cctx).Complete)
 						close(signal)
 					}()
 
@@ -72,7 +72,7 @@ func TestBlockingProcess(t *testing.T) {
 						cctx, cancel := context.WithCancel(ctx)
 						cancel()
 
-						assert.Error(t, proc.Signal(cctx, syscall.SIGTERM))
+						check.Error(t, proc.Signal(cctx, syscall.SIGTERM))
 						close(signal)
 					}()
 
@@ -87,26 +87,26 @@ func TestBlockingProcess(t *testing.T) {
 				},
 				"TestRegisterTriggerAfterComplete": func(ctx context.Context, t *testing.T, proc *blockingProcess) {
 					proc.info.Complete = true
-					assert.True(t, proc.Complete(ctx))
-					assert.Error(t, proc.RegisterTrigger(ctx, nil))
-					assert.Error(t, proc.RegisterTrigger(ctx, MakeDefaultTrigger(ctx, nil, &proc.info.Options, "foo")))
-					assert.Len(t, proc.triggers, 0)
+					check.True(t, proc.Complete(ctx))
+					check.Error(t, proc.RegisterTrigger(ctx, nil))
+					check.Error(t, proc.RegisterTrigger(ctx, MakeDefaultTrigger(ctx, nil, &proc.info.Options, "foo")))
+					check.Equal(t, len(proc.triggers), 0)
 				},
 				"TestRegisterPopulatedTrigger": func(ctx context.Context, t *testing.T, proc *blockingProcess) {
-					assert.False(t, proc.Complete(ctx))
-					assert.Error(t, proc.RegisterTrigger(ctx, nil))
-					assert.NoError(t, proc.RegisterTrigger(ctx, MakeDefaultTrigger(ctx, nil, &proc.info.Options, "foo")))
-					assert.Len(t, proc.triggers, 1)
+					check.True(t, !proc.Complete(ctx))
+					check.Error(t, proc.RegisterTrigger(ctx, nil))
+					check.NotError(t, proc.RegisterTrigger(ctx, MakeDefaultTrigger(ctx, nil, &proc.info.Options, "foo")))
+					check.Equal(t, len(proc.triggers), 1)
 				},
 				"RunningIsFalseWhenCompleteIsSatisfied": func(ctx context.Context, t *testing.T, proc *blockingProcess) {
 					proc.info.Complete = true
-					assert.True(t, proc.Complete(ctx))
-					assert.False(t, proc.Running(ctx))
+					check.True(t, proc.Complete(ctx))
+					check.True(t, !proc.Running(ctx))
 				},
 				"RunningIsFalseWithEmptyPid": func(ctx context.Context, t *testing.T, proc *blockingProcess) {
 					signal := make(chan struct{})
 					go func() {
-						assert.False(t, proc.Running(ctx))
+						check.True(t, !proc.Running(ctx))
 						close(signal)
 					}()
 
@@ -120,7 +120,7 @@ func TestBlockingProcess(t *testing.T) {
 				"RunningIsFalseWithNilCmd": func(ctx context.Context, t *testing.T, proc *blockingProcess) {
 					signal := make(chan struct{})
 					go func() {
-						assert.False(t, proc.Running(ctx))
+						check.True(t, !proc.Running(ctx))
 						close(signal)
 					}()
 
@@ -132,7 +132,7 @@ func TestBlockingProcess(t *testing.T) {
 				"RunningIsTrueWithValidPid": func(ctx context.Context, t *testing.T, proc *blockingProcess) {
 					signal := make(chan struct{})
 					go func() {
-						assert.True(t, proc.Running(ctx))
+						check.True(t, proc.Running(ctx))
 						close(signal)
 					}()
 
@@ -147,19 +147,19 @@ func TestBlockingProcess(t *testing.T) {
 					proc.ops <- func(_ executor.Executor) {}
 					cctx, cancel := context.WithCancel(ctx)
 					cancel()
-					assert.False(t, proc.Running(cctx))
+					check.True(t, !proc.Running(cctx))
 				},
 				"SignalIsErrorAfterComplete": func(ctx context.Context, t *testing.T, proc *blockingProcess) {
 					proc.info = ProcessInfo{Complete: true}
-					assert.True(t, proc.Complete(ctx))
+					check.True(t, proc.Complete(ctx))
 
-					assert.Error(t, proc.Signal(ctx, syscall.SIGTERM))
+					check.Error(t, proc.Signal(ctx, syscall.SIGTERM))
 				},
 				"SignalNilProcessIsError": func(ctx context.Context, t *testing.T, proc *blockingProcess) {
 					signal := make(chan struct{})
 					go func() {
-						assert.False(t, proc.Complete(ctx))
-						assert.Error(t, proc.Signal(ctx, syscall.SIGTERM))
+						check.True(t, !proc.Complete(ctx))
+						check.Error(t, proc.Signal(ctx, syscall.SIGTERM))
 						close(signal)
 					}()
 
@@ -172,13 +172,13 @@ func TestBlockingProcess(t *testing.T) {
 					cctx, cancel := context.WithCancel(ctx)
 					cancel()
 
-					assert.Error(t, proc.Signal(cctx, syscall.SIGTERM))
+					check.Error(t, proc.Signal(cctx, syscall.SIGTERM))
 				},
 				"SignalErrorsInvalidProcess": func(ctx context.Context, t *testing.T, proc *blockingProcess) {
 					signal := make(chan struct{})
 					go func() {
-						assert.False(t, proc.Complete(ctx))
-						assert.Error(t, proc.Signal(ctx, syscall.SIGTERM))
+						check.True(t, !proc.Complete(ctx))
+						check.Error(t, proc.Signal(ctx, syscall.SIGTERM))
 						close(signal)
 					}()
 
@@ -197,26 +197,26 @@ func TestBlockingProcess(t *testing.T) {
 
 					cmd, deadline, err := proc.info.Options.Resolve(ctx)
 					require.NoError(t, err)
-					assert.NoError(t, cmd.Start())
+					check.NotError(t, cmd.Start())
 
 					go proc.reactor(ctx, deadline, cmd)
 					_, err = proc.Wait(cctx)
 					require.Error(t, err)
-					assert.Contains(t, err.Error(), "operation canceled")
+					check.Contains(t, err.Error(), "operation canceled")
 				},
 				"WaitShouldReturnNilForSuccessfulCommandsWithoutIDs": func(ctx context.Context, t *testing.T, proc *blockingProcess) {
 					proc.info.Options.Args = []string{"sleep", "10"}
 					proc.ops = make(chan func(executor.Executor))
 
 					cmd, _, err := proc.info.Options.Resolve(ctx)
-					assert.NoError(t, err)
-					assert.NoError(t, cmd.Start())
+					check.NotError(t, err)
+					check.NotError(t, cmd.Start())
 					signal := make(chan struct{})
 					go func() {
 						// this is the crucial
-						// assertion of this tests
+						// checkion of this tests
 						_, err := proc.Wait(ctx)
-						assert.NoError(t, err)
+						check.NotError(t, err)
 						close(signal)
 					}()
 
@@ -244,14 +244,14 @@ func TestBlockingProcess(t *testing.T) {
 					proc.ops = make(chan func(executor.Executor))
 
 					cmd, _, err := proc.info.Options.Resolve(ctx)
-					assert.NoError(t, err)
-					assert.NoError(t, cmd.Start())
+					check.NotError(t, err)
+					check.NotError(t, cmd.Start())
 					signal := make(chan struct{})
 					go func() {
 						// this is the crucial
-						// assertion of this tests
+						// checkion of this tests
 						_, err := proc.Wait(ctx)
-						assert.NoError(t, err)
+						check.NotError(t, err)
 						close(signal)
 					}()
 
@@ -280,14 +280,14 @@ func TestBlockingProcess(t *testing.T) {
 					proc.ops = make(chan func(executor.Executor))
 
 					cmd, _, err := proc.info.Options.Resolve(ctx)
-					assert.NoError(t, err)
-					assert.NoError(t, cmd.Start())
+					check.NotError(t, err)
+					check.NotError(t, cmd.Start())
 					signal := make(chan struct{})
 					go func() {
-						// this is the crucial assertion
+						// this is the crucial checkion
 						// of this tests.
 						_, err := proc.Wait(ctx)
-						assert.Error(t, err)
+						check.Error(t, err)
 						close(signal)
 					}()
 
@@ -336,7 +336,7 @@ func TestBlockingProcess(t *testing.T) {
 					select {
 					case <-opCompleted:
 					case <-longCtx.Done():
-						assert.Fail(t, "context timed out waiting for op to return")
+						check.Fail(t, "context timed out waiting for op to return")
 					}
 				},
 				"RunningDoesNotWaitForContextTimeoutAfterProcessCompletes": func(ctx context.Context, t *testing.T, proc *blockingProcess) {
@@ -363,7 +363,7 @@ func TestBlockingProcess(t *testing.T) {
 					select {
 					case <-opCompleted:
 					case <-longCtx.Done():
-						assert.Fail(t, "context timed out waiting for op to return")
+						check.Fail(t, "context timed out waiting for op to return")
 					}
 				},
 				"SignalDoesNotWaitForContextTimeoutAfterProcessCompletes": func(ctx context.Context, t *testing.T, proc *blockingProcess) {
@@ -389,7 +389,7 @@ func TestBlockingProcess(t *testing.T) {
 					select {
 					case <-opCompleted:
 					case <-longCtx.Done():
-						assert.Fail(t, "context timed out waiting for op to return")
+						t.Error("context timed out waiting for op to return")
 					}
 				},
 				// "": func(ctx context.Context, t *testing.T, proc *blockingProcess) {},

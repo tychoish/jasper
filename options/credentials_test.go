@@ -9,6 +9,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert/check"
 )
 
 func TestCredentials(t *testing.T) {
@@ -72,24 +73,24 @@ EKTcWGekdmdDPsHloRNtsiCa697B2O9IFA==
 	for testName, testCase := range map[string]func(t *testing.T){
 		"NewCredeentialsNonexistentFile": func(t *testing.T) {
 			creds, err := NewCredentialsFromFile("nonexistent_file")
-			assert.Error(t, err)
-			assert.Nil(t, creds)
+			check.Error(t, err)
+			check.Nil(t, creds)
 		},
 		"NewCredentialsEmptyFile": func(t *testing.T) {
 			file := makeFile(t)
 			defer func() {
-				assert.NoError(t, file.Close())
-				assert.NoError(t, os.RemoveAll(file.Name()))
+				check.NotError(t, file.Close())
+				check.NotError(t, os.RemoveAll(file.Name()))
 			}()
 			creds, err := NewCredentialsFromFile(file.Name())
-			assert.Error(t, err)
-			assert.Nil(t, creds)
+			check.Error(t, err)
+			check.Nil(t, creds)
 		},
 		"NewCredentialsMissingFields": func(t *testing.T) {
 			file := makeFile(t)
 			defer func() {
-				assert.NoError(t, file.Close())
-				assert.NoError(t, os.RemoveAll(file.Name()))
+				check.NotError(t, file.Close())
+				check.NotError(t, os.RemoveAll(file.Name()))
 			}()
 			_, err := file.Write([]byte(fmt.Sprintf(`{
 				"ca_cert": %s,
@@ -97,13 +98,13 @@ EKTcWGekdmdDPsHloRNtsiCa697B2O9IFA==
 			}`, jsonRootCert, jsonCert)))
 			require.NoError(t, err)
 			_, err = NewCredentialsFromFile(file.Name())
-			assert.Error(t, err)
+			check.Error(t, err)
 		},
 		"NewCredentialsSucceeds": func(t *testing.T) {
 			file := makeFile(t)
 			defer func() {
-				assert.NoError(t, file.Close())
-				assert.NoError(t, os.RemoveAll(file.Name()))
+				check.NotError(t, file.Close())
+				check.NotError(t, os.RemoveAll(file.Name()))
 			}()
 			_, err := file.Write([]byte(fmt.Sprintf(`{
 				"ca_cert": %s,
@@ -137,8 +138,8 @@ EKTcWGekdmdDPsHloRNtsiCa697B2O9IFA==
 				Key:    pemKey,
 			}
 			config, err := creds.Resolve()
-			assert.Error(t, err)
-			assert.Nil(t, config)
+			check.Error(t, err)
+			check.Nil(t, config)
 		},
 		"ResolveMissingFields": func(t *testing.T) {
 			creds := &CertificateCredentials{
@@ -146,8 +147,8 @@ EKTcWGekdmdDPsHloRNtsiCa697B2O9IFA==
 				Cert:   pemCert,
 			}
 			config, err := creds.Resolve()
-			assert.Error(t, err)
-			assert.Nil(t, config)
+			check.Error(t, err)
+			check.Nil(t, config)
 		},
 		"ResolveSucceeds": func(t *testing.T) {
 			creds := &CertificateCredentials{

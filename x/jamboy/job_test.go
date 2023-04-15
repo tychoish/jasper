@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tychoish/amboy/registry"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper/options"
 )
 
@@ -31,27 +32,27 @@ func TestAmboyJob(t *testing.T) {
 	t.Run("TypeCheck", func(t *testing.T) {
 		t.Run("Default", func(t *testing.T) {
 			job, ok := NewJob(NewBasicProcess, "ls").(*amboyJob)
-			assert.True(t, ok)
+			check.True(t, ok)
 			assert.NotNil(t, job)
 		})
 		t.Run("DefaultBasic", func(t *testing.T) {
 			job, ok := NewJobBasic("ls").(*amboyJob)
-			assert.True(t, ok)
+			check.True(t, ok)
 			assert.NotNil(t, job)
 		})
 		t.Run("Simple", func(t *testing.T) {
 			job, ok := NewJobOptions(NewBasicProcess, &options.Create{}).(*amboySimpleCapturedOutputJob)
-			assert.True(t, ok)
+			check.True(t, ok)
 			assert.NotNil(t, job)
 		})
 		t.Run("Foreground", func(t *testing.T) {
 			job, ok := NewJobForeground(NewBasicProcess, &options.Create{}).(*amboyForegroundOutputJob)
-			assert.True(t, ok)
+			check.True(t, ok)
 			assert.NotNil(t, job)
 		})
 		t.Run("ForegroundBasic", func(t *testing.T) {
 			job, ok := NewJobBasicForeground(&options.Create{}).(*amboyForegroundOutputJob)
-			assert.True(t, ok)
+			check.True(t, ok)
 			assert.NotNil(t, job)
 		})
 	})

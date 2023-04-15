@@ -28,7 +28,7 @@ func TestCLIRemoteUnix(t *testing.T) {
 					require.NoError(t, err)
 					resp := &OutcomeResponse{}
 					require.NoError(t, execCLICommandInputOutput(t, c, remoteSignalEvent(), input, resp))
-					assert.True(t, resp.Successful())
+					check.True(t, resp.Successful())
 				},
 			} {
 				t.Run(testName, func(t *testing.T) {
@@ -42,7 +42,7 @@ func TestCLIRemoteUnix(t *testing.T) {
 					closeService := makeService(ctx, t, port, manager)
 					require.NoError(t, err)
 					defer func() {
-						assert.NoError(t, closeService())
+						check.NotError(t, closeService())
 					}()
 
 					testCase(ctx, t, c)

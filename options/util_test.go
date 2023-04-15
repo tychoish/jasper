@@ -16,7 +16,7 @@ func TestMakeEnclosingDirectories(t *testing.T) {
 	path := "foo"
 	_, err := os.Stat(path)
 	require.True(t, os.IsNotExist(err))
-	assert.NoError(t, makeEnclosingDirectories(path))
+	check.NotError(t, makeEnclosingDirectories(path))
 	defer os.RemoveAll(path)
 
 	_, path, _, ok := runtime.Caller(0)
@@ -62,7 +62,7 @@ func TestWriteFile(t *testing.T) {
 			}
 			err := writeFile(bytes.NewBufferString(testCase.content), testCase.path)
 			if testCase.shouldPass {
-				assert.NoError(t, err)
+				check.NotError(t, err)
 			} else {
 				assert.Error(t, err)
 			}
@@ -80,12 +80,12 @@ func TestWriteFileOptions(t *testing.T) {
 				},
 				"OnlyDefaultsPermForZeroValue": func(t *testing.T) {
 					opts := WriteFile{Path: "/foo", Perm: 0777}
-					assert.NoError(t, opts.Validate())
+					check.NotError(t, opts.Validate())
 					assert.EqualValues(t, 0777, opts.Perm)
 				},
 				"PassesAndDefaults": func(t *testing.T) {
 					opts := WriteFile{Path: "/foo"}
-					assert.NoError(t, opts.Validate())
+					check.NotError(t, opts.Validate())
 					assert.NotEqual(t, os.FileMode(0000), opts.Perm)
 				},
 				"PassesWithContent": func(t *testing.T) {
@@ -93,14 +93,14 @@ func TestWriteFileOptions(t *testing.T) {
 						Path:    "/foo",
 						Content: []byte("foo"),
 					}
-					assert.NoError(t, opts.Validate())
+					check.NotError(t, opts.Validate())
 				},
 				"PassesWithReader": func(t *testing.T) {
 					opts := WriteFile{
 						Path:   "/foo",
 						Reader: bytes.NewBufferString("foo"),
 					}
-					assert.NoError(t, opts.Validate())
+					check.NotError(t, opts.Validate())
 				},
 				"FailsWithMultipleContentSources": func(t *testing.T) {
 					opts := WriteFile{
@@ -158,7 +158,7 @@ func TestWriteFileOptions(t *testing.T) {
 			for testName, testCase := range map[string]func(t *testing.T, opts WriteFile){
 				"DoesNotErrorWithoutContentSource": func(t *testing.T, opts WriteFile) {
 					didWrite := false
-					assert.NoError(t, opts.WriteBufferedContent(func(WriteFile) error {
+					check.NotError(t, opts.WriteBufferedContent(func(WriteFile) error {
 						didWrite = true
 						return nil
 					}))
@@ -266,7 +266,7 @@ func TestWriteFileOptions(t *testing.T) {
 					require.NoError(t, err)
 					opts := WriteFile{Path: filepath.Join(filepath.Dir(cwd), filepath.Base(t.Name()))}
 					defer func() {
-						assert.NoError(t, os.RemoveAll(opts.Path))
+						check.NotError(t, os.RemoveAll(opts.Path))
 					}()
 					testCase(t, opts)
 				})
@@ -301,7 +301,7 @@ func TestWriteFileOptions(t *testing.T) {
 					require.NoError(t, err)
 					opts := WriteFile{Path: filepath.Join(filepath.Dir(cwd), filepath.Base(t.Name()))}
 					defer func() {
-						assert.NoError(t, os.RemoveAll(opts.Path))
+						check.NotError(t, os.RemoveAll(opts.Path))
 					}()
 					testCase(t, opts)
 				})

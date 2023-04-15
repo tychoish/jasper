@@ -42,7 +42,7 @@ func TestExtractResponse(t *testing.T) {
 						resp, err := ExtractOutcomeResponse(input)
 						if outcome.Success {
 							require.NoError(t, err)
-							assert.True(t, resp.Successful())
+							check.True(t, resp.Successful())
 						} else {
 							require.Error(t, err)
 							assert.False(t, resp.Successful())
@@ -69,7 +69,7 @@ func TestExtractResponse(t *testing.T) {
 						resp, err := ExtractInfoResponse(input)
 						if outcome.Success {
 							require.NoError(t, err)
-							assert.True(t, resp.Successful())
+							check.True(t, resp.Successful())
 						} else {
 							require.Error(t, err)
 							assert.False(t, resp.Successful())
@@ -100,7 +100,7 @@ func TestExtractResponse(t *testing.T) {
 						resp, err := ExtractInfosResponse(input)
 						if outcome.Success {
 							require.NoError(t, err)
-							assert.True(t, resp.Successful())
+							check.True(t, resp.Successful())
 						} else {
 							require.Error(t, err)
 							assert.False(t, resp.Successful())
@@ -122,7 +122,7 @@ func TestExtractResponse(t *testing.T) {
 								info2Found = true
 							}
 						}
-						assert.True(t, info1Found && info2Found)
+						check.True(t, info1Found && info2Found)
 					},
 				},
 				"TagsResponse": {
@@ -137,7 +137,7 @@ func TestExtractResponse(t *testing.T) {
 						resp, err := ExtractTagsResponse(input)
 						if outcome.Success {
 							require.NoError(t, err)
-							assert.True(t, resp.Successful())
+							check.True(t, resp.Successful())
 						} else {
 							require.Error(t, err)
 							assert.False(t, resp.Successful())
@@ -166,7 +166,7 @@ func TestExtractResponse(t *testing.T) {
 						resp, err := ExtractWaitResponse(input)
 						if outcome.Success {
 							require.NoError(t, err)
-							assert.True(t, resp.Successful())
+							check.True(t, resp.Successful())
 							assert.Equal(t, n1, resp.ExitCode)
 							assert.Contains(t, resp.Error, errMsg)
 						} else {
@@ -193,7 +193,7 @@ func TestExtractResponse(t *testing.T) {
 						resp, err := ExtractRunningResponse(input)
 						if outcome.Success {
 							require.NoError(t, err)
-							assert.True(t, resp.Successful())
+							check.True(t, resp.Successful())
 						} else {
 							require.Error(t, err)
 							assert.False(t, resp.Successful())
@@ -205,7 +205,7 @@ func TestExtractResponse(t *testing.T) {
 							}
 						}
 
-						assert.True(t, resp.Running)
+						check.True(t, resp.Running)
 					},
 				},
 				"CompleteResponse": {
@@ -220,7 +220,7 @@ func TestExtractResponse(t *testing.T) {
 						resp, err := ExtractCompleteResponse(input)
 						if outcome.Success {
 							require.NoError(t, err)
-							assert.True(t, resp.Successful())
+							check.True(t, resp.Successful())
 						} else {
 							require.Error(t, err)
 							assert.False(t, resp.Successful())
@@ -232,7 +232,7 @@ func TestExtractResponse(t *testing.T) {
 							}
 						}
 
-						assert.True(t, resp.Complete)
+						check.True(t, resp.Complete)
 					},
 				},
 				"ServiceStatusResponse": {
@@ -247,7 +247,7 @@ func TestExtractResponse(t *testing.T) {
 						resp, err := ExtractServiceStatusResponse(input)
 						if outcome.Success {
 							require.NoError(t, err)
-							assert.True(t, resp.Successful())
+							check.True(t, resp.Successful())
 						} else {
 							require.Error(t, err)
 							assert.False(t, resp.Successful())
@@ -277,7 +277,7 @@ func TestExtractResponse(t *testing.T) {
 						resp, err := ExtractLogStreamResponse(input)
 						if outcome.Success {
 							require.NoError(t, err)
-							assert.True(t, resp.Successful())
+							check.True(t, resp.Successful())
 						} else {
 							require.Error(t, err)
 							assert.False(t, resp.Successful())
@@ -291,7 +291,7 @@ func TestExtractResponse(t *testing.T) {
 
 						require.Len(t, resp.LogStream.Logs, 1)
 						assert.Equal(t, "foo", resp.LogStream.Logs[0])
-						assert.True(t, resp.LogStream.Done)
+						check.True(t, resp.LogStream.Done)
 					},
 				},
 				"BuildloggerURLsResponse": {
@@ -306,7 +306,7 @@ func TestExtractResponse(t *testing.T) {
 						resp, err := ExtractBuildloggerURLsResponse(input)
 						if outcome.Success {
 							require.NoError(t, err)
-							assert.True(t, resp.Successful())
+							check.True(t, resp.Successful())
 						} else {
 							require.Error(t, err)
 							assert.False(t, resp.Successful())
