@@ -7,6 +7,7 @@ import (
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/scripting"
+	roptions "github.com/tychoish/jasper/x/remote/options"
 )
 
 // infoRequest represents a request for runtime information regarding the
@@ -198,7 +199,7 @@ type writeFileRequest struct {
 }
 
 type downloadFileRequest struct {
-	Options options.Download `bson:"download_file"`
+	Options roptions.Download `bson:"download_file"`
 }
 
 type getLogStreamRequest struct {

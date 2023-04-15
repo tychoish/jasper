@@ -19,6 +19,8 @@ import (
 	"github.com/tychoish/jasper/util"
 )
 
+const RawLoggerConfigFormatBSON options.RawLoggerConfigFormat = "BSON"
+
 type mdbService struct {
 	mrpc.Service
 	manager      jasper.Manager
@@ -48,8 +50,8 @@ func StartMDBService(ctx context.Context, m jasper.Manager, addr net.Addr) (util
 		Service:      baseSvc,
 		manager:      m,
 		harnessCache: scripting.NewCache(),
-		unmarshaler:  options.GetGlobalLoggerRegistry().Unmarshaler(options.RawLoggerConfigFormatBSON),
-		marshaler:    options.GetGlobalLoggerRegistry().Marshaler(options.RawLoggerConfigFormatBSON),
+		unmarshaler:  options.GetGlobalLoggerRegistry().Unmarshaler(RawLoggerConfigFormatBSON),
+		marshaler:    options.GetGlobalLoggerRegistry().Marshaler(RawLoggerConfigFormatBSON),
 	}
 	if err := svc.registerHandlers(); err != nil {
 		return nil, fmt.Errorf("error registering handlers: %w", err)

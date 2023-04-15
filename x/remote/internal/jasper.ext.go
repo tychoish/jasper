@@ -15,6 +15,8 @@ import (
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/scripting"
+	roptions "github.com/tychoish/jasper/x/remote/options"
+	jsplunk "github.com/tychoish/jasper/x/splunk"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -450,7 +452,7 @@ func ConvertSplunkInfo(opts splunk.ConnectionInfo) *SplunkInfo {
 // Export takes a protobuf RPC SplunkLoggerOptions struct and returns the
 // analogous Jasper options.LoggerProducer.
 func (opts SplunkLoggerOptions) Export() options.LoggerProducer {
-	return &options.SplunkLoggerOptions{
+	return &jsplunk.SplunkLoggerOptions{
 		Splunk: opts.Splunk.Export(),
 		Base:   opts.Base.Export(),
 	}
@@ -462,8 +464,6 @@ func (f RawLoggerConfigFormat) Export() options.RawLoggerConfigFormat {
 	switch f {
 	case RawLoggerConfigFormat_RAWLOGGERCONFIGFORMATJSON:
 		return options.RawLoggerConfigFormatJSON
-	case RawLoggerConfigFormat_RAWLOGGERCONFIGFORMATBSON:
-		return options.RawLoggerConfigFormatBSON
 	default:
 		return options.RawLoggerConfigFormatInvalid
 	}
@@ -476,8 +476,6 @@ func ConvertRawLoggerConfigFormat(f options.RawLoggerConfigFormat) RawLoggerConf
 	switch f {
 	case options.RawLoggerConfigFormatJSON:
 		return RawLoggerConfigFormat_RAWLOGGERCONFIGFORMATJSON
-	case options.RawLoggerConfigFormatBSON:
-		return RawLoggerConfigFormat_RAWLOGGERCONFIGFORMATBSON
 	default:
 		return RawLoggerConfigFormat_RAWLOGGERCONFIGFORMATUNKNOWN
 	}
@@ -495,18 +493,18 @@ func (logger RawLoggerConfig) Export() (*options.LoggerConfig, error) {
 
 // Export takes a protobuf RPC DownloadInfo struct and returns the analogous
 // options.Download struct.
-func (opts *DownloadInfo) Export() options.Download {
-	return options.Download{
+func (opts *DownloadInfo) Export() roptions.Download {
+	return roptions.Download{
 		Path:        opts.Path,
 		URL:         opts.Url,
 		ArchiveOpts: opts.ArchiveOpts.Export(),
 	}
 }
 
-// ConvertDownloadOptions takes an options.Download struct and returns an
+// ConvertDownloadOptions takes an remote.Download struct and returns an
 // equivalent protobuf RPC DownloadInfo struct. ConvertDownloadOptions is the
 // inverse of (*DownloadInfo) Export().
-func ConvertDownloadOptions(opts options.Download) *DownloadInfo {
+func ConvertDownloadOptions(opts roptions.Download) *DownloadInfo {
 	return &DownloadInfo{
 		Path:        opts.Path,
 		Url:         opts.URL,
@@ -539,29 +537,29 @@ func ConvertWriteFileOptions(opts options.WriteFile) *WriteFileInfo {
 
 // Export takes a protobuf RPC ArchiveFormat struct and returns the analogous
 // Jasper ArchiveFormat struct.
-func (format ArchiveFormat) Export() options.ArchiveFormat {
+func (format ArchiveFormat) Export() roptions.ArchiveFormat {
 	switch format {
 	case ArchiveFormat_ARCHIVEAUTO:
-		return options.ArchiveAuto
+		return roptions.ArchiveAuto
 	case ArchiveFormat_ARCHIVETARGZ:
-		return options.ArchiveTarGz
+		return roptions.ArchiveTarGz
 	case ArchiveFormat_ARCHIVEZIP:
-		return options.ArchiveZip
+		return roptions.ArchiveZip
 	default:
-		return options.ArchiveFormat("")
+		return roptions.ArchiveFormat("")
 	}
 }
 
 // ConvertArchiveFormat takes a Jasper ArchiveFormat struct and returns an
 // equivalent protobuf RPC ArchiveFormat struct. ConvertArchiveFormat is the
 // inverse of (ArchiveFormat) Export().
-func ConvertArchiveFormat(format options.ArchiveFormat) ArchiveFormat {
+func ConvertArchiveFormat(format roptions.ArchiveFormat) ArchiveFormat {
 	switch format {
-	case options.ArchiveAuto:
+	case roptions.ArchiveAuto:
 		return ArchiveFormat_ARCHIVEAUTO
-	case options.ArchiveTarGz:
+	case roptions.ArchiveTarGz:
 		return ArchiveFormat_ARCHIVETARGZ
-	case options.ArchiveZip:
+	case roptions.ArchiveZip:
 		return ArchiveFormat_ARCHIVEZIP
 	default:
 		return ArchiveFormat_ARCHIVEUNKNOWN
@@ -570,8 +568,8 @@ func ConvertArchiveFormat(format options.ArchiveFormat) ArchiveFormat {
 
 // Export takes a protobuf RPC ArchiveOptions struct and returns the analogous
 // Jasper ArchiveOptions struct.
-func (opts ArchiveOptions) Export() options.Archive {
-	return options.Archive{
+func (opts ArchiveOptions) Export() roptions.Archive {
+	return roptions.Archive{
 		ShouldExtract: opts.ShouldExtract,
 		Format:        opts.Format.Export(),
 		TargetPath:    opts.TargetPath,
@@ -581,7 +579,7 @@ func (opts ArchiveOptions) Export() options.Archive {
 // ConvertArchiveOptions takes a Jasper ArchiveOptions struct and returns an
 // equivalent protobuf RPC ArchiveOptions struct. ConvertArchiveOptions is the
 // inverse of (ArchiveOptions) Export().
-func ConvertArchiveOptions(opts options.Archive) *ArchiveOptions {
+func ConvertArchiveOptions(opts roptions.Archive) *ArchiveOptions {
 	return &ArchiveOptions{
 		ShouldExtract: opts.ShouldExtract,
 		Format:        ConvertArchiveFormat(opts.Format),
@@ -841,10 +839,8 @@ func ConvertScriptingTestOptions(args []scripting.TestOptions) []*ScriptingHarne
 // analogous LoggingPayloadFormat.
 func (lf LoggingPayloadFormat) Export() options.LoggingPayloadFormat {
 	switch lf {
-	case LoggingPayloadFormat_FORMATBSON:
-		return options.LoggingPayloadFormatJSON
 	case LoggingPayloadFormat_FORMATJSON:
-		return options.LoggingPayloadFormatBSON
+		return options.LoggingPayloadFormatJSON
 	case LoggingPayloadFormat_FORMATSTRING:
 		return options.LoggingPayloadFormatSTRING
 	default:
@@ -859,8 +855,6 @@ func ConvertLoggingPayloadFormat(in options.LoggingPayloadFormat) LoggingPayload
 	switch in {
 	case options.LoggingPayloadFormatJSON:
 		return LoggingPayloadFormat_FORMATJSON
-	case options.LoggingPayloadFormatBSON:
-		return LoggingPayloadFormat_FORMATBSON
 	case options.LoggingPayloadFormatSTRING:
 		return LoggingPayloadFormat_FORMATSTRING
 	default:
@@ -900,15 +894,6 @@ func convertMessage(format options.LoggingPayloadFormat, m interface{}) *Logging
 		switch format {
 		case options.LoggingPayloadFormatSTRING:
 			out.Data = &LoggingPayloadData_Msg{Msg: m.String()}
-		case options.LoggingPayloadFormatBSON:
-			var payload []byte
-
-			marshaler := options.GetGlobalLoggerRegistry().Marshaler(options.RawLoggerConfigFormatBSON)
-			if marshaler != nil {
-				payload, _ = marshaler(m.Raw())
-			}
-
-			out.Data = &LoggingPayloadData_Raw{Raw: payload}
 		case options.LoggingPayloadFormatJSON:
 			payload, _ := json.Marshal(m.Raw())
 			out.Data = &LoggingPayloadData_Raw{Raw: payload}

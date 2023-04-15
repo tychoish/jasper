@@ -3,6 +3,7 @@ package remote
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -14,9 +15,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/mholt/archiver"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tychoish/birch"
+	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/send"
@@ -737,7 +740,7 @@ func TestManager(t *testing.T) {
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								for testName, testCase := range map[string]func(ctx context.Context, t *testing.T, client Manager, tempDir string){
 									"CreatesFileIfNonexistent": func(ctx context.Context, t *testing.T, client Manager, tempDir string) {
-										opts := options.Download{
+										opts := remote.Download{
 											URL:  "https://example.com",
 											Path: filepath.Join(tempDir, filepath.Base(t.Name())),
 										}
@@ -758,7 +761,7 @@ func TestManager(t *testing.T) {
 										}()
 										require.NoError(t, file.Close())
 
-										opts := options.Download{
+										opts := remote.Download{
 											URL:  "https://example.com",
 											Path: file.Name(),
 										}
@@ -808,12 +811,12 @@ func TestManager(t *testing.T) {
 										baseURL := fmt.Sprintf("http://%s", fileServerAddr)
 										require.NoError(t, testutil.WaitForRESTService(ctx, baseURL))
 
-										opts := options.Download{
+										opts := remote.Download{
 											URL:  fmt.Sprintf("%s/%s", baseURL, fileName),
 											Path: destFilePath,
-											ArchiveOpts: options.Archive{
+											ArchiveOpts: remote.Archive{
 												ShouldExtract: true,
-												Format:        options.ArchiveZip,
+												Format:        remote.ArchiveZip,
 												TargetPath:    destExtractDir,
 											},
 										}
@@ -841,12 +844,12 @@ func TestManager(t *testing.T) {
 											assert.NoError(t, os.RemoveAll(file.Name()))
 										}()
 
-										opts := options.Download{
+										opts := remote.Download{
 											URL:  "https://example.com",
 											Path: file.Name(),
-											ArchiveOpts: options.Archive{
+											ArchiveOpts: remote.Archive{
 												ShouldExtract: true,
-												Format:        options.ArchiveFormat("foo"),
+												Format:        remote.ArchiveFormat("foo"),
 												TargetPath:    extractDir,
 											},
 										}
@@ -858,12 +861,12 @@ func TestManager(t *testing.T) {
 										defer func() {
 											assert.NoError(t, os.RemoveAll(extractDir))
 										}()
-										opts := options.Download{
+										opts := remote.Download{
 											URL:  "https://example.com",
 											Path: filepath.Join(tempDir, filepath.Base(t.Name())),
-											ArchiveOpts: options.Archive{
+											ArchiveOpts: remote.Archive{
 												ShouldExtract: true,
-												Format:        options.ArchiveAuto,
+												Format:        remote.ArchiveAuto,
 												TargetPath:    extractDir,
 											},
 										}
@@ -880,7 +883,7 @@ func TestManager(t *testing.T) {
 											assert.NoError(t, os.RemoveAll(file.Name()))
 										}()
 										require.NoError(t, file.Close())
-										assert.Error(t, client.DownloadFile(ctx, options.Download{URL: "", Path: file.Name()}))
+										assert.Error(t, client.DownloadFile(ctx, remote.Download{URL: "", Path: file.Name()}))
 									},
 									"FailsForNonexistentURL": func(ctx context.Context, t *testing.T, client Manager, tempDir string) {
 										file, err := os.CreateTemp(tempDir, "out.txt")
@@ -889,7 +892,7 @@ func TestManager(t *testing.T) {
 											assert.NoError(t, os.RemoveAll(file.Name()))
 										}()
 										require.NoError(t, file.Close())
-										assert.Error(t, client.DownloadFile(ctx, options.Download{URL: "https://example.com/foo", Path: file.Name()}))
+										assert.Error(t, client.DownloadFile(ctx, remote.Download{URL: "https://example.com/foo", Path: file.Name()}))
 									},
 									"FailsForInsufficientPermissions": func(ctx context.Context, t *testing.T, client Manager, tempDir string) {
 										if os.Geteuid() == 0 {
@@ -897,7 +900,7 @@ func TestManager(t *testing.T) {
 										} else if runtime.GOOS == "windows" {
 											t.Skip("cannot test download permissions on windows")
 										}
-										assert.Error(t, client.DownloadFile(ctx, options.Download{URL: "https://example.com", Path: "/foo/bar"}))
+										assert.Error(t, client.DownloadFile(ctx, remote.Download{URL: "https://example.com", Path: "/foo/bar"}))
 									},
 								} {
 									t.Run(testName, func(t *testing.T) {
@@ -1279,4 +1282,47 @@ func createTestScriptingHarness(ctx context.Context, t *testing.T, client Manage
 	require.NoError(t, err)
 
 	return harness
+}
+
+// AddFileToDirectory adds an archive file given by fileName with the given
+// fileContents to the directory.
+func AddFileToDirectory(dir string, fileName string, fileContents string) error {
+	if format, _ := archiver.ByExtension(fileName); format != nil {
+		builder, ok := format.(archiver.Archiver)
+		if !ok {
+			return errors.New("unsupported archive format")
+		}
+
+		tmpFile, err := os.CreateTemp(dir, "tmp.txt")
+		if err != nil {
+			return err
+		}
+		defer os.RemoveAll(tmpFile.Name())
+		if _, err := tmpFile.Write([]byte(fileContents)); err != nil {
+			catcher := &erc.Collector{}
+			catcher.Add(err)
+			catcher.Add(tmpFile.Close())
+			return catcher.Resolve()
+		}
+		if err := tmpFile.Close(); err != nil {
+			return err
+		}
+
+		if err := builder.Archive([]string{tmpFile.Name()}, filepath.Join(dir, fileName)); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	file, err := os.Create(filepath.Join(dir, fileName))
+	if err != nil {
+		return err
+	}
+	if _, err := file.Write([]byte(fileContents)); err != nil {
+		catcher := &erc.Collector{}
+		catcher.Add(err)
+		catcher.Add(file.Close())
+		return catcher.Resolve()
+	}
+	return file.Close()
 }

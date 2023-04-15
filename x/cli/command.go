@@ -445,15 +445,15 @@ func DownloadCMD() cli.Command {
 				return nil
 			}),
 		Action: func(c *cli.Context) error {
-			opts := options.Download{
+			opts := remote.Download{
 				URL:  c.String(urlFlagName),
 				Path: c.String(pathFlagName),
 			}
 
 			if path := c.String(extractPathFlagName); path != "" {
-				opts.ArchiveOpts = options.Archive{
+				opts.ArchiveOpts = remote.Archive{
 					ShouldExtract: true,
-					Format:        options.ArchiveAuto,
+					Format:        remote.ArchiveAuto,
 					TargetPath:    path,
 				}
 			}

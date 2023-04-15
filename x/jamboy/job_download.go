@@ -13,7 +13,6 @@ import (
 	"github.com/tychoish/amboy/job"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
-	"github.com/tychoish/jasper/options"
 )
 
 const downloadJobName = "jasper-download-job"
@@ -91,11 +90,11 @@ func (j *downloadFileJob) Run(ctx context.Context) {
 		return
 	}
 
-	opts := options.Download{
+	opts := remote.Download{
 		URL:  j.URL,
 		Path: fn,
-		ArchiveOpts: options.Archive{
-			Format:        options.ArchiveAuto,
+		ArchiveOpts: remote.Archive{
+			Format:        remote.ArchiveAuto,
 			ShouldExtract: true,
 			TargetPath:    getTargetDirectory(fn),
 		},

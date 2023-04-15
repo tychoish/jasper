@@ -15,6 +15,7 @@ import (
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/scripting"
+	roptions "github.com/tychoish/jasper/x/remote/options"
 )
 
 type mdbClient struct {
@@ -44,8 +45,8 @@ func (c *mdbClient) makeProcess(info jasper.ProcessInfo) *mdbProcess {
 func NewMDBClient(ctx context.Context, addr net.Addr, reqTimeout time.Duration) (Manager, error) {
 	client := &mdbClient{
 		namespace:   namespace,
-		unmarshaler: options.GetGlobalLoggerRegistry().Unmarshaler(options.RawLoggerConfigFormatBSON),
-		marshaler:   options.GetGlobalLoggerRegistry().Marshaler(options.RawLoggerConfigFormatBSON),
+		unmarshaler: options.GetGlobalLoggerRegistry().Unmarshaler(RawLoggerConfigFormatBSON),
+		marshaler:   options.GetGlobalLoggerRegistry().Marshaler(RawLoggerConfigFormatBSON),
 	}
 
 	client.timeout = reqTimeout
@@ -493,7 +494,7 @@ func (c *mdbClient) Group(ctx context.Context, tag string) ([]jasper.Process, er
 }
 
 func (c *mdbClient) Get(ctx context.Context, id string) (jasper.Process, error) {
-	unmarshaler := options.GetGlobalLoggerRegistry().Unmarshaler(options.RawLoggerConfigFormatBSON)
+	unmarshaler := options.GetGlobalLoggerRegistry().Unmarshaler(RawLoggerConfigFormatBSON)
 	if unmarshaler == nil {
 		return nil, errors.New("could not find registered unmarshaler")
 	}
@@ -605,7 +606,7 @@ func (c *mdbClient) CloseConnection() error {
 	return c.conn.Close()
 }
 
-func (c *mdbClient) DownloadFile(ctx context.Context, opts options.Download) error {
+func (c *mdbClient) DownloadFile(ctx context.Context, opts roptions.Download) error {
 	payload, err := c.makeRequest(downloadFileRequest{Options: opts})
 	if err != nil {
 		return fmt.Errorf("could not build request: %w", err)

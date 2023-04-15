@@ -83,7 +83,7 @@ func TestRestService(t *testing.T) {
 			assert.Error(t, err)
 			assert.Contains(t, err.Error(), "problem building request")
 
-			err = client.DownloadFile(ctx, options.Download{URL: "foo", Path: "bar"})
+			err = client.DownloadFile(ctx, remote.Download{URL: "foo", Path: "bar"})
 			assert.Error(t, err)
 			assert.Contains(t, err.Error(), "problem building request")
 		},
@@ -118,7 +118,7 @@ func TestRestService(t *testing.T) {
 			assert.Error(t, err)
 			assert.Contains(t, err.Error(), "problem making request")
 
-			err = client.DownloadFile(ctx, options.Download{URL: "foo", Path: "bar"})
+			err = client.DownloadFile(ctx, remote.Download{URL: "foo", Path: "bar"})
 			assert.Error(t, err)
 			assert.Contains(t, err.Error(), "problem making request")
 		},

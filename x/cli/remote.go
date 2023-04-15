@@ -54,7 +54,7 @@ func remoteDownloadFile() cli.Command {
 		Flags:  clientFlags(),
 		Before: clientBefore(),
 		Action: func(c *cli.Context) error {
-			input := options.Download{}
+			input := remote.Download{}
 			return doPassthroughInputOutput(c, &input, func(ctx context.Context, client remote.Manager) interface{} {
 				return makeOutcomeResponse(client.DownloadFile(ctx, input))
 			})

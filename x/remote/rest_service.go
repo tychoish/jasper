@@ -15,6 +15,7 @@ import (
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/scripting"
+	roptions "github.com/tychoish/jasper/x/remote/options"
 )
 
 // Service defines a REST service that provides a remote manager, using
@@ -410,7 +411,7 @@ func (s *Service) signalProcess(rw http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Service) downloadFile(rw http.ResponseWriter, r *http.Request) {
-	var opts options.Download
+	var opts roptions.Download
 	if err := gimlet.GetJSON(r.Body, &opts); err != nil {
 		writeError(rw, gimlet.ErrorResponse{
 			StatusCode: http.StatusBadRequest,

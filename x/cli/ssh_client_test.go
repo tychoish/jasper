@@ -16,6 +16,7 @@ import (
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/scripting"
 	"github.com/tychoish/jasper/testutil"
+	"github.com/tychoish/jasper/x/remote"
 )
 
 func TestNewSSHClient(t *testing.T) {
@@ -306,14 +307,14 @@ func TestSSHClient(t *testing.T) {
 			assert.NoError(t, client.CloseConnection())
 		},
 		"DownloadFilePassesWithValidResponse": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
-			inputChecker := options.Download{}
+			inputChecker := remote.Download{}
 			baseManager.Create = makeCreateFunc(
 				t, client,
 				[]string{RemoteCommand, DownloadFileCommand},
 				&inputChecker,
 				makeOutcomeResponse(nil),
 			)
-			opts := options.Download{URL: "https://example.com", Path: "/foo"}
+			opts := remote.Download{URL: "https://example.com", Path: "/foo"}
 			require.NoError(t, client.DownloadFile(ctx, opts))
 
 			assert.Equal(t, opts, inputChecker)
@@ -325,12 +326,12 @@ func TestSSHClient(t *testing.T) {
 				nil,
 				invalidResponse(),
 			)
-			opts := options.Download{URL: "https://example.com", Path: "/foo"}
+			opts := remote.Download{URL: "https://example.com", Path: "/foo"}
 			assert.Error(t, client.DownloadFile(ctx, opts))
 		},
 		"DownloadFileFailsIfBaseManagerCreateFails": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
 			baseManager.FailCreate = true
-			opts := options.Download{URL: "https://example.com", Path: "/foo"}
+			opts := remote.Download{URL: "https://example.com", Path: "/foo"}
 			assert.Error(t, client.DownloadFile(ctx, opts))
 		},
 		"GetLogStreamPassesWithValidResponse": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {

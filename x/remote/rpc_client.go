@@ -14,9 +14,10 @@ import (
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
-	internal "github.com/tychoish/jasper/x/remote/internal"
 	"github.com/tychoish/jasper/scripting"
 	"github.com/tychoish/jasper/util"
+	internal "github.com/tychoish/jasper/x/remote/internal"
+	roptions "github.com/tychoish/jasper/x/remote/options"
 	grpc "google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
@@ -218,7 +219,7 @@ func (c *rpcClient) CloseConnection() error {
 	return c.clientCloser()
 }
 
-func (c *rpcClient) DownloadFile(ctx context.Context, opts options.Download) error {
+func (c *rpcClient) DownloadFile(ctx context.Context, opts roptions.Download) error {
 	resp, err := c.client.DownloadFile(ctx, internal.ConvertDownloadOptions(opts))
 	if err != nil {
 		return err

@@ -12,6 +12,7 @@ import (
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/testutil"
 	"github.com/tychoish/jasper/util"
+	"github.com/tychoish/jasper/x/remote"
 	"github.com/urfave/cli"
 )
 
@@ -30,7 +31,7 @@ func TestCLIRemote(t *testing.T) {
 						assert.NoError(t, os.RemoveAll(tmpFile.Name()))
 					}()
 
-					input, err := json.Marshal(options.Download{
+					input, err := json.Marshal(remote.Download{
 						URL:  "https://example.com",
 						Path: tmpFile.Name(),
 					})

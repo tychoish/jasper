@@ -2,16 +2,20 @@ package mock
 
 import (
 	"context"
+	"fmt"
+	"runtime"
 
 	"github.com/tychoish/jasper"
+	"github.com/tychoish/jasper/mock"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/scripting"
+	roptions "github.com/tychoish/jasper/x/remote/options"
 )
 
 // RemoteClient implements the RemoteClient interface with exported fields
 // to configure and introspect the mock's behavior.
 type RemoteClient struct {
-	Manager
+	mock.Manager
 	FailCloseConnection bool
 	FailDownloadFile    bool
 	FailGetLogStream    bool
@@ -21,7 +25,7 @@ type RemoteClient struct {
 	FailSendMessages    bool
 
 	// DownloadFile input
-	DownloadOptions options.Download
+	DownloadOptions roptions.Download
 
 	// LogStream input/output
 	LogStreamID    string
@@ -44,7 +48,7 @@ func (c *RemoteClient) CloseConnection() error {
 
 // DownloadFile stores the given download options. If FailDownloadFile is set,
 // it returns an error.
-func (c *RemoteClient) DownloadFile(ctx context.Context, opts options.Download) error {
+func (c *RemoteClient) DownloadFile(ctx context.Context, opts roptions.Download) error {
 	if c.FailDownloadFile {
 		return mockFail()
 	}
@@ -107,4 +111,12 @@ func (c *RemoteClient) CreateScripting(ctx context.Context, opts options.Scripti
 		return nil, mockFail()
 	}
 	return c.ScriptingEnv, nil
+}
+
+func mockFail() error {
+	progCounter := make([]uintptr, 2)
+	n := runtime.Callers(2, progCounter)
+	frames := runtime.CallersFrames(progCounter[:n])
+	frame, _ := frames.Next()
+	return fmt.Errorf("function failed: %s", frame.Function)
 }

@@ -17,7 +17,6 @@ import (
 	"github.com/tychoish/amboy/queue"
 	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/grip"
-	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/testutil"
 )
 
@@ -126,38 +125,38 @@ func TestDoExtract(t *testing.T) {
 		expectSuccess bool
 		invalidCreate bool
 		fileExtension string
-		format        options.ArchiveFormat
+		format        remote.ArchiveFormat
 	}{
 		"Auto": {
 			archiveMaker:  archiver.NewTarGz(),
 			expectSuccess: true,
 			fileExtension: ".tar.gz",
-			format:        options.ArchiveAuto,
+			format:        remote.ArchiveAuto,
 		},
 		"TarGz": {
 			archiveMaker:  archiver.NewTarGz(),
 			expectSuccess: true,
 			fileExtension: ".tar.gz",
-			format:        options.ArchiveTarGz,
+			format:        remote.ArchiveTarGz,
 		},
 		"Zip": {
 			archiveMaker:  archiver.NewZip(),
 			expectSuccess: true,
 			fileExtension: ".zip",
-			format:        options.ArchiveZip,
+			format:        remote.ArchiveZip,
 		},
 		"InvalidArchiveFormat": {
 			archiveMaker:  archiver.NewTarGz(),
 			expectSuccess: false,
 			invalidCreate: true,
 			fileExtension: ".foo",
-			format:        options.ArchiveFormat("foo"),
+			format:        remote.ArchiveFormat("foo"),
 		},
 		"MismatchedArchiveFileAndFormat": {
 			archiveMaker:  archiver.NewTarGz(),
 			expectSuccess: false,
 			fileExtension: ".tar.gz",
-			format:        options.ArchiveZip,
+			format:        remote.ArchiveZip,
 		},
 	} {
 		t.Run(testName, func(t *testing.T) {
@@ -183,9 +182,9 @@ func TestDoExtract(t *testing.T) {
 			}
 			require.NoError(t, err)
 
-			opts := options.Download{
+			opts := remote.Download{
 				Path: "second-" + archiveFile.Name(),
-				ArchiveOpts: options.Archive{
+				ArchiveOpts: remote.Archive{
 					ShouldExtract: true,
 					Format:        testCase.format,
 					TargetPath:    extractDir,
@@ -213,16 +212,59 @@ func TestDoExtractUnarchivedFile(t *testing.T) {
 	require.NoError(t, err)
 	defer os.Remove(file.Name())
 
-	opts := options.Download{
+	opts := remote.Download{
 		URL:  "https://example.com",
 		Path: file.Name(),
-		ArchiveOpts: options.Archive{
+		ArchiveOpts: remote.Archive{
 			ShouldExtract: true,
-			Format:        options.ArchiveAuto,
+			Format:        remote.ArchiveAuto,
 			TargetPath:    "build",
 		},
 	}
 	err = opts.Extract()
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "could not detect archive format")
+}
+
+// AddFileToDirectory adds an archive file given by fileName with the given
+// fileContents to the directory.
+func AddFileToDirectory(dir string, fileName string, fileContents string) error {
+	if format, _ := archiver.ByExtension(fileName); format != nil {
+		builder, ok := format.(archiver.Archiver)
+		if !ok {
+			return errors.New("unsupported archive format")
+		}
+
+		tmpFile, err := os.CreateTemp(dir, "tmp.txt")
+		if err != nil {
+			return err
+		}
+		defer os.RemoveAll(tmpFile.Name())
+		if _, err := tmpFile.Write([]byte(fileContents)); err != nil {
+			catcher := &erc.Collector{}
+			catcher.Add(err)
+			catcher.Add(tmpFile.Close())
+			return catcher.Resolve()
+		}
+		if err := tmpFile.Close(); err != nil {
+			return err
+		}
+
+		if err := builder.Archive([]string{tmpFile.Name()}, filepath.Join(dir, fileName)); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	file, err := os.Create(filepath.Join(dir, fileName))
+	if err != nil {
+		return err
+	}
+	if _, err := file.Write([]byte(fileContents)); err != nil {
+		catcher := &erc.Collector{}
+		catcher.Add(err)
+		catcher.Add(file.Close())
+		return catcher.Resolve()
+	}
+	return file.Close()
 }

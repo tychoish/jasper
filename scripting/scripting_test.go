@@ -215,7 +215,7 @@ func TestScriptingHarness(t *testing.T) {
 					Case: func(t *testing.T, opts options.ScriptingHarness) {
 						se := makeScriptingEnv(ctx, t, manager, opts)
 						tmpFile := filepath.Join(tmpdir, "fake_script.go")
-						require.NoError(t, os.WriteFile(tmpFile, []byte(`package main; import ("fmt"; ); func main() { fmt.Println(errors.New("error")) }`), 0755))
+						require.NoError(t, os.WriteFile(tmpFile, []byte(`package main; import ("fmt";"errors"; ); func main() { fmt.Println(errors.New("error")) }`), 0755))
 						defer func() {
 							assert.NoError(t, os.Remove(tmpFile))
 						}()

@@ -11,8 +11,8 @@ import (
 
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
-	"github.com/tychoish/jasper/x/remote"
 	"github.com/tychoish/jasper/scripting"
+	"github.com/tychoish/jasper/x/remote"
 )
 
 // sshClient uses SSH to access a remote machine's Jasper CLI, which has access
@@ -198,7 +198,7 @@ func (c *sshClient) CloseConnection() error {
 	return nil
 }
 
-func (c *sshClient) DownloadFile(ctx context.Context, opts options.Download) error {
+func (c *sshClient) DownloadFile(ctx context.Context, opts remote.Download) error {
 	output, err := c.runRemoteCommand(ctx, DownloadFileCommand, &opts)
 	if err != nil {
 		return err

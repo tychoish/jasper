@@ -18,6 +18,7 @@ import (
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/scripting"
+	roptions "github.com/tychoish/jasper/x/remote/options"
 )
 
 // NewRestClient creates a REST client that connects to the given address
@@ -323,7 +324,7 @@ func (c *restClient) GetLogStream(ctx context.Context, id string, count int) (ja
 	return stream, nil
 }
 
-func (c *restClient) DownloadFile(ctx context.Context, opts options.Download) error {
+func (c *restClient) DownloadFile(ctx context.Context, opts roptions.Download) error {
 	body, err := makeBody(opts)
 	if err != nil {
 		return fmt.Errorf("problem building request: %w", err)
