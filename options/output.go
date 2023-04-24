@@ -25,8 +25,8 @@ type Output struct {
 	// behavior is not desired, use Output instead of Loggers.
 	Loggers []*LoggerConfig `bson:"loggers" json:"loggers,omitempty" yaml:"loggers"`
 
-	outputSender *send.WriterSender
-	errorSender  *send.WriterSender
+	outputSender send.WriterSender
+	errorSender  send.WriterSender
 	outputMulti  io.Writer
 	errorMulti   io.Writer
 }
@@ -215,10 +215,6 @@ func (o *Output) Close() error {
 	// underlying send.Sender.
 	if o.outputSender != nil {
 		catcher.Add(o.outputSender.Close())
-		if o.outputSender.Sender != nil {
-			catcher.Add(o.outputSender.Sender.Close())
-		}
-
 	}
 	if o.errorSender != nil {
 		catcher.Add(o.errorSender.Close())
@@ -227,7 +223,7 @@ func (o *Output) Close() error {
 		// Since senders are shared, only close error's senders if output hasn't
 		// already closed them.
 		if o.SuppressOutput || o.SendOutputToError {
-			catcher.Add(o.errorSender.Sender.Close())
+			catcher.Add(o.errorSender.Close())
 		}
 	}
 

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -88,14 +89,14 @@ func TestCommandImplementation(t *testing.T) {
 							check.Error(t, runFunc(&cmd, ctx))
 							exitCode, err := cmd.Wait(ctx)
 							check.Error(t, err)
-							assert.NotZero(t, exitCode)
+							check.NotZero(t, exitCode)
 						},
 						"WaitOnBackgroundRunWaitsForProcessCompletion": func(ctx context.Context, t *testing.T, cmd Command) {
 							cmd.Append("sleep 1", "sleep 1").Background(true)
 							require.NoError(t, runFunc(&cmd, ctx))
 							exitCode, err := cmd.Wait(ctx)
 							check.NotError(t, err)
-							assert.Zero(t, exitCode)
+							check.Zero(t, exitCode)
 
 							for _, proc := range cmd.procs {
 								check.True(t, proc.Info(ctx).Complete)
@@ -134,14 +135,14 @@ func TestCommandImplementation(t *testing.T) {
 											require.Equal(t, len(allOpts), 1)
 											args := strings.Join(allOpts[0].Args, " ")
 
-											assert.NotContains(t, args, sudoCmd)
+											check.NotSubstring(t, args, sudoCmd)
 										},
 										"Sudo": func(ctx context.Context, t *testing.T, cmd Command) {
 											checkArgs := func(args []string, expected string) {
 												argsStr := strings.Join(args, " ")
-												assert.Contains(t, argsStr, sudoCmd)
-												assert.NotContains(t, argsStr, sudoAsCmd)
-												assert.Contains(t, argsStr, expected)
+												check.Substring(t, argsStr, sudoCmd)
+												check.NotSubstring(t, argsStr, sudoAsCmd)
+												check.Substring(t, argsStr, expected)
 											}
 											cmd.Sudo(true).Append(cmd1)
 
@@ -162,8 +163,8 @@ func TestCommandImplementation(t *testing.T) {
 											cmd.SudoAs(sudoUser).Add([]string{echo, arg1})
 											checkArgs := func(args []string, expected string) {
 												argsStr := strings.Join(args, " ")
-												assert.Contains(t, argsStr, sudoAsCmd)
-												assert.Contains(t, argsStr, expected)
+												check.Substring(t, argsStr, sudoAsCmd)
+												check.Substring(t, argsStr, expected)
 											}
 
 											allOpts, err := cmd.ExportCreateOptions()
@@ -377,7 +378,7 @@ func TestCommandImplementation(t *testing.T) {
 								SendOutputToError: true,
 							}
 
-							assert.False(t, cmd.opts.Process.Output.SendOutputToError)
+							check.True(t, !cmd.opts.Process.Output.SendOutputToError)
 							cmd.SetOutputOptions(opts)
 							check.True(t, cmd.opts.Process.Output.SendOutputToError)
 						},
@@ -411,6 +412,7 @@ func TestCommandImplementation(t *testing.T) {
 						},
 						"TagFunctions": func(ctx context.Context, t *testing.T, cmd Command) {
 							tags := []string{"tag0", "tag1"}
+							sort.Strings(tags)
 							subCmds := []string{"echo hi", "echo bye"}
 							for subTestName, subTestCase := range map[string]func(ctx context.Context, t *testing.T, cmd Command){
 								"SetTags": func(ctx context.Context, t *testing.T, cmd Command) {
@@ -420,6 +422,7 @@ func TestCommandImplementation(t *testing.T) {
 									cmd.SetTags(tags)
 									require.NoError(t, cmd.Run(ctx))
 									check.Equal(t, len(cmd.procs), len(subCmds))
+
 									for _, proc := range cmd.procs {
 										assert.Subset(t, tags, proc.GetTags())
 										assert.Subset(t, proc.GetTags(), tags)
