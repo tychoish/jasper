@@ -12,7 +12,7 @@ const defaultContextKey ctxKey = "__JASPER_STD_MANAGER"
 
 // WithManager attaches a Manager instance to the context
 func WithManager(ctx context.Context, mgr Manager) context.Context {
-	return WithContextManager(ctx, mgr, string(defaultContextKey))
+	return WithContextManager(ctx, string(defaultContextKey), mgr)
 }
 
 // Context resolves a jasper.Manager from the given context, and if one does
@@ -22,8 +22,24 @@ func Context(ctx context.Context) Manager { return ContextManager(ctx, string(de
 
 // WithContextManager attaches a jasper.Manager with a specific name
 // to the context.
-func WithContextManager(ctx context.Context, mgr Manager, name string) context.Context {
+func WithContextManager(ctx context.Context, name string, mgr Manager) context.Context {
 	return context.WithValue(ctx, ctxKey(name), mgr)
+}
+
+// WithNewContextLogger checks if a logger is configured with a
+// specific name in the current context. If this logger exists,
+// WithNewContextLogger is a noop; otherwise, it constructs a logger
+// with the sender produced by the provided function and attaches it
+// to the context returning that context.
+//
+// The name provided controls the id of the logger in the context, not
+// the name of the logger.
+func WithNewContextManager(ctx context.Context, name string, fn func() Manager) context.Context {
+	if HasContextManager(ctx, name) {
+		return ctx
+	}
+
+	return WithContextManager(ctx, name, fn())
 }
 
 // ContextLoger produces a jasper.Manager stored in the context by a given

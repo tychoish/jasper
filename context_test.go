@@ -26,4 +26,10 @@ func TestContext(t *testing.T) {
 		t.Fatal("should be the same ")
 	}
 
+	ctx = WithNewContextManager(ctx, string(defaultContextKey), func() Manager { panic("should not panic") })
+	check.True(t, HasContextManager(ctx, string(defaultContextKey)))
+	check.Panic(t, func() {
+		ctx = WithNewContextManager(ctx, "novel-key", func() Manager { panic("should not panic") })
+	})
+
 }
