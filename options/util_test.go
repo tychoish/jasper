@@ -10,6 +10,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert/check"
 )
 
 func TestMakeEnclosingDirectories(t *testing.T) {

@@ -310,7 +310,7 @@ func ProcessCases() map[string]ProcessCase {
 				done := false
 				for !done {
 					info, err = file.Stat()
-					require.NoError(t, err)
+					check.NotError(t, err)
 					if info.Size() > 0 {
 						done = true
 						fileWrite <- done
@@ -335,8 +335,13 @@ func ProcessCases() map[string]ProcessCase {
 				check.NotError(t, os.RemoveAll(file.Name()))
 			}()
 			info, err := file.Stat()
-			require.NoError(t, err)
-			assert.Zero(t, info.Size())
+
+			if err != nil {
+				check.NotError(t, err)
+				return
+			}
+
+			check.Zero(t, info.Size())
 
 			logger := &options.LoggerConfig{}
 			require.NoError(t, logger.Set(&options.FileLoggerOptions{
@@ -352,15 +357,20 @@ func ProcessCases() map[string]ProcessCase {
 			opts.Args = []string{"echo", "foobar"}
 
 			proc, err := makep(ctx, opts)
-			require.NoError(t, err)
-			_, err = proc.Wait(ctx)
-			require.NoError(t, err)
+			if err != nil {
+				t.Error(err)
+			}
+			if _, err = proc.Wait(ctx); err != nil {
+				t.Error(err)
+			}
 
 			fileWrite := make(chan int64)
 			go func() {
 				for {
 					info, err = file.Stat()
-					require.NoError(t, err)
+					if err != nil {
+						return
+					}
 					if info.Size() > 0 {
 						fileWrite <- info.Size()
 						break

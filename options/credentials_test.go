@@ -74,7 +74,7 @@ EKTcWGekdmdDPsHloRNtsiCa697B2O9IFA==
 		"NewCredeentialsNonexistentFile": func(t *testing.T) {
 			creds, err := NewCredentialsFromFile("nonexistent_file")
 			check.Error(t, err)
-			check.Nil(t, creds)
+			check.Zero(t, creds)
 		},
 		"NewCredentialsEmptyFile": func(t *testing.T) {
 			file := makeFile(t)
@@ -84,7 +84,7 @@ EKTcWGekdmdDPsHloRNtsiCa697B2O9IFA==
 			}()
 			creds, err := NewCredentialsFromFile(file.Name())
 			check.Error(t, err)
-			check.Nil(t, creds)
+			check.Zero(t, creds)
 		},
 		"NewCredentialsMissingFields": func(t *testing.T) {
 			file := makeFile(t)
@@ -139,7 +139,7 @@ EKTcWGekdmdDPsHloRNtsiCa697B2O9IFA==
 			}
 			config, err := creds.Resolve()
 			check.Error(t, err)
-			check.Nil(t, config)
+			check.Zero(t, config)
 		},
 		"ResolveMissingFields": func(t *testing.T) {
 			creds := &CertificateCredentials{
@@ -148,7 +148,7 @@ EKTcWGekdmdDPsHloRNtsiCa697B2O9IFA==
 			}
 			config, err := creds.Resolve()
 			check.Error(t, err)
-			check.Nil(t, config)
+			check.Zero(t, config)
 		},
 		"ResolveSucceeds": func(t *testing.T) {
 			creds := &CertificateCredentials{

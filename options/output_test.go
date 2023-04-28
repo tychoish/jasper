@@ -8,6 +8,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert/check"
+	"github.com/tychoish/fun/testt"
 	"github.com/tychoish/grip/send"
 )
 
@@ -279,7 +281,8 @@ func TestOutputIntegrationTableTest(t *testing.T) {
 	}
 
 	for idx, opt := range shouldPass {
-		check.NotError(t, opt.Validate(), "%d: %+v", idx, opt)
+		testt.Logf(t, "%d: %+v", idx, opt)
+		check.NotError(t, opt.Validate())
 	}
 
 }
