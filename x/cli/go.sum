@@ -89,11 +89,10 @@ github.com/tychoish/birch/x/mrpc v0.0.0-20230413052020-46068f63d7bb h1:l6yzSrJbt
 github.com/tychoish/birch/x/mrpc v0.0.0-20230413052020-46068f63d7bb/go.mod h1:SyMVnkunrAoJF8VRylz3OpeTS6IxJ2kgQW3dfzoF+O4=
 github.com/tychoish/fun v0.9.0 h1:HVDvKrJUB66AenwxyAIqVj9elySwbW45XC7YTuhtzHQ=
 github.com/tychoish/gimlet v0.0.0-20230130001449-8987c96bb886 h1:IFXT3WhVVHQf2dvMoS/DvV+HbKnfSYjnsNkPbyduLWQ=
-github.com/tychoish/grip v0.2.5 h1:U9yrOmgu0VzZ3ywdmewIzdNJGkfV/pzdbuPMAaMelJo=
+github.com/tychoish/grip v0.2.8 h1:noqFFVWhHbHJ/9TX+caSLNkrbq+Vsf4bQirQEW20EX8=
 github.com/tychoish/grip/x/metrics v0.0.0-20230414135146-97625602a7ee h1:WdORe70Qk3ieaQLd3wMSVuXmc7mJfkQrQ/rb1fxnSio=
 github.com/tychoish/grip/x/metrics v0.0.0-20230414135146-97625602a7ee/go.mod h1:rMHIbZFnaJiB7I4yD4D/TfLIg5mzMb94mPVbebN/uP0=
-github.com/tychoish/grip/x/splunk v0.0.0-20230414135146-97625602a7ee h1:NV4z26eQU6yv+ealvdcl3yXjVeHxc76RBeHCVCnxq1w=
-github.com/tychoish/grip/x/splunk v0.0.0-20230414135146-97625602a7ee/go.mod h1:ux4OPW2fI0q8wXdo6Q6F9t5S2hCA/+Qzee1zJUJdZjk=
+github.com/tychoish/grip/x/splunk v0.0.0-20230427110835-c9728a14310e h1:rwbBimjv/XJRekPBec8a2LiyKWog7VBPybHVOsb6plg=
 github.com/tychoish/jasper v0.0.0-20230415083349-ed64615c7d7e h1:TrjqIuiBPYg2Sx/2wwxrwQ364r3SRTHyp6PRALSLtSs=
 github.com/ulikunitz/xz v0.5.6/go.mod h1:2bypXElzHzzJZwzH67Y6wb67pO62Rzfn7BSiF4ABRW8=
 github.com/ulikunitz/xz v0.5.11 h1:kpFauv27b6ynzBNT/Xy+1k+fK4WswhN/6PN5WhFAGw8=
@@ -108,8 +107,7 @@ github.com/yusufpapurcu/wmi v1.2.2 h1:KBNDSne4vP5mbSWnJbO+51IMOXJB67QiYCSBrubbPR
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550/go.mod h1:yigFU9vqHzYiE8UmvKecakEJjdnWj3jj499lnFckfCI=
 golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
-golang.org/x/crypto v0.5.0 h1:U/0M97KRkSFvyD/3FSmdP5W5swImpNgle/EHFhOsQPE=
-golang.org/x/crypto v0.5.0/go.mod h1:NK/OQwhpMQP3MwtdjgLlYHnH9ebylxKWv3e0fK+mkQU=
+golang.org/x/crypto v0.8.0 h1:pd9TJtTueMTVQXzk8E2XESSMQDj/U7OUu0PqJqPXQjQ=
 golang.org/x/mod v0.3.0/go.mod h1:s0Qsj1ACt9ePp/hMypM3fl4fZqREWJwdYDEqhRiZZUA=
 golang.org/x/mod v0.8.0 h1:LUYupSeNrTNCGzR/hVBk2NHZO4hXcVaW1k4Qx7rjPx8=
 golang.org/x/net v0.0.0-20190404232315-eb5bcb51f2a3/go.mod h1:t9HGtf8HONx5eT2rtn7q6eTqICYqUVnKs3thJo3Qplg=

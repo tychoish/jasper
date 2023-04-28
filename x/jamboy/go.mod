@@ -8,7 +8,7 @@ require (
 	github.com/stretchr/testify v1.8.2
 	github.com/tychoish/amboy v0.0.0-20230414135238-247e579b3b94
 	github.com/tychoish/fun v0.9.0
-	github.com/tychoish/grip v0.2.5
+	github.com/tychoish/grip v0.2.8
 	github.com/tychoish/jasper v0.0.0-20230415083349-ed64615c7d7e
 )
 
@@ -43,7 +43,7 @@ require (
 	github.com/tychoish/grip/x/splunk v0.0.0-20230414135146-97625602a7ee // indirect
 	github.com/ulikunitz/xz v0.5.11 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
-	golang.org/x/crypto v0.5.0 // indirect
+	golang.org/x/crypto v0.8.0 // indirect
 	golang.org/x/mod v0.8.0 // indirect
 	golang.org/x/net v0.9.0 // indirect
 	golang.org/x/sys v0.7.0 // indirect

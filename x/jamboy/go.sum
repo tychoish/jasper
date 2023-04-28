@@ -90,8 +90,7 @@ github.com/tychoish/birch v0.2.3-0.20230413052020-46068f63d7bb h1:OkrodiggeLld3U
 github.com/tychoish/birch v0.2.3-0.20230413052020-46068f63d7bb/go.mod h1:wWvJb+OqSUWmW44XSUUxAw77Qq87uFAtGgcue+Ex9Zs=
 github.com/tychoish/fun v0.9.0 h1:HVDvKrJUB66AenwxyAIqVj9elySwbW45XC7YTuhtzHQ=
 github.com/tychoish/fun v0.9.0/go.mod h1:84A+BwGecz23UotmbB4mtvVS5ZcsZpspecduxpwF/XM=
-github.com/tychoish/grip v0.2.5 h1:U9yrOmgu0VzZ3ywdmewIzdNJGkfV/pzdbuPMAaMelJo=
-github.com/tychoish/grip v0.2.5/go.mod h1:jQlzC/krYSoYf2HF5FSYBwc1ABVkWz+DKyvmff36PGc=
+github.com/tychoish/grip v0.2.8 h1:noqFFVWhHbHJ/9TX+caSLNkrbq+Vsf4bQirQEW20EX8=
 github.com/tychoish/grip/x/splunk v0.0.0-20230414135146-97625602a7ee h1:NV4z26eQU6yv+ealvdcl3yXjVeHxc76RBeHCVCnxq1w=
 github.com/tychoish/grip/x/splunk v0.0.0-20230414135146-97625602a7ee/go.mod h1:ux4OPW2fI0q8wXdo6Q6F9t5S2hCA/+Qzee1zJUJdZjk=
 github.com/tychoish/jasper v0.0.0-20230415083349-ed64615c7d7e h1:TrjqIuiBPYg2Sx/2wwxrwQ364r3SRTHyp6PRALSLtSs=
@@ -106,8 +105,7 @@ github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9dec
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550/go.mod h1:yigFU9vqHzYiE8UmvKecakEJjdnWj3jj499lnFckfCI=
 golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
-golang.org/x/crypto v0.5.0 h1:U/0M97KRkSFvyD/3FSmdP5W5swImpNgle/EHFhOsQPE=
-golang.org/x/crypto v0.5.0/go.mod h1:NK/OQwhpMQP3MwtdjgLlYHnH9ebylxKWv3e0fK+mkQU=
+golang.org/x/crypto v0.8.0 h1:pd9TJtTueMTVQXzk8E2XESSMQDj/U7OUu0PqJqPXQjQ=
 golang.org/x/exp v0.0.0-20180321215751-8460e604b9de/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
 golang.org/x/exp v0.0.0-20180807140117-3d87b88a115f/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
 golang.org/x/exp v0.0.0-20190125153040-c74c464bbbf2 h1:y102fOLFqhV41b+4GPiJoa0k/x+pJcEi2/HB1Y5T6fU=
