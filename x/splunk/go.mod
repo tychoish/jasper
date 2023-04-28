@@ -1,4 +1,4 @@
-module github.com/tychoish/x/splunk
+module github.com/tychoish/jasper/x/splunk
 
 go 1.20
 
