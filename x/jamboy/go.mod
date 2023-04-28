@@ -1,4 +1,4 @@
-module github.com/tychoish/x/jamboy
+module github.com/tychoish/jasper/x/jamboy
 
 go 1.20
 
