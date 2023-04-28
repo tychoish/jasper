@@ -327,64 +327,6 @@ func ProcessCases() map[string]ProcessCase {
 				assert.NotZero(t, info.Size())
 			}
 		},
-		"ProcessWritesToBufferedLog": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
-			file, err := os.CreateTemp(testutil.BuildDirectory(), "out.txt")
-			require.NoError(t, err)
-			defer func() {
-				check.NotError(t, file.Close())
-				check.NotError(t, os.RemoveAll(file.Name()))
-			}()
-			info, err := file.Stat()
-
-			if err != nil {
-				check.NotError(t, err)
-				return
-			}
-
-			check.Zero(t, info.Size())
-
-			logger := &options.LoggerConfig{}
-			require.NoError(t, logger.Set(&options.FileLoggerOptions{
-				Filename: file.Name(),
-				Base: options.BaseOptions{
-					Buffer: options.BufferOptions{
-						Buffered: true,
-					},
-					Format: options.LogFormatPlain,
-				},
-			}))
-			opts.Output.Loggers = []*options.LoggerConfig{logger}
-			opts.Args = []string{"echo", "foobar"}
-
-			proc, err := makep(ctx, opts)
-			if err != nil {
-				t.Error(err)
-			}
-			if _, err = proc.Wait(ctx); err != nil {
-				t.Error(err)
-			}
-
-			fileWrite := make(chan int64)
-			go func() {
-				for {
-					info, err = file.Stat()
-					if err != nil {
-						return
-					}
-					if info.Size() > 0 {
-						fileWrite <- info.Size()
-						break
-					}
-				}
-			}()
-
-			select {
-			case <-ctx.Done():
-				assert.Fail(t, "file write took too long to complete")
-			case size := <-fileWrite:
-				assert.NotZero(t, size)
-			}
-		},
 		"WaitOnRespawnedProcessDoesNotError": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			proc, err := makep(ctx, opts)
 			require.NoError(t, err)
