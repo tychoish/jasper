@@ -25,8 +25,8 @@ type Output struct {
 	// behavior is not desired, use Output instead of Loggers.
 	Loggers []*LoggerConfig `bson:"loggers" json:"loggers,omitempty" yaml:"loggers"`
 
-	outputSender *send.WriterSender
-	errorSender  *send.WriterSender
+	outputSender send.WriterSender
+	errorSender  send.WriterSender
 	outputMulti  io.Writer
 	errorMulti   io.Writer
 }
