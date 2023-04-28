@@ -8,7 +8,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/opencontainers/runtime-spec v1.0.3-0.20210326190908-1c3f411f0417
 	github.com/stretchr/testify v1.8.1
-	github.com/tychoish/fun v0.8.6
+	github.com/tychoish/fun v0.9.0
 	github.com/tychoish/grip v0.2.5
 	golang.org/x/crypto v0.5.0
 )
