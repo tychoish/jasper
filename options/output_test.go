@@ -6,7 +6,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/fun/testt"
@@ -21,7 +20,8 @@ func TestOutputOptions(t *testing.T) {
 
 	cases := map[string]testCase{
 		"NilOptionsValidate": func(t *testing.T, opts Output) {
-			assert.Zero(t, opts)
+			check.True(t, opts.Output == nil)
+			check.True(t, opts.Error == nil)
 			check.NotError(t, opts.Validate())
 		},
 		"ErrorOutputSpecified": func(t *testing.T, opts Output) {
@@ -32,75 +32,75 @@ func TestOutputOptions(t *testing.T) {
 		"SuppressErrorWhenSpecified": func(t *testing.T, opts Output) {
 			opts.Error = stderr
 			opts.SuppressError = true
-			assert.Error(t, opts.Validate())
+			check.Error(t, opts.Validate())
 		},
 		"SuppressOutputWhenSpecified": func(t *testing.T, opts Output) {
 			opts.Output = stdout
 			opts.SuppressOutput = true
-			assert.Error(t, opts.Validate())
+			check.Error(t, opts.Validate())
 		},
 		"RedirectErrorToNillFails": func(t *testing.T, opts Output) {
 			opts.SendOutputToError = true
-			assert.Error(t, opts.Validate())
+			check.Error(t, opts.Validate())
 		},
 		"RedirectOutputToError": func(t *testing.T, opts Output) {
 			opts.SendOutputToError = true
-			assert.Error(t, opts.Validate())
+			check.Error(t, opts.Validate())
 		},
 		"SuppressAndRedirectOutputIsInvalid": func(t *testing.T, opts Output) {
 			opts.SuppressOutput = true
 			opts.SendOutputToError = true
-			assert.Error(t, opts.Validate())
+			check.Error(t, opts.Validate())
 		},
 		"SuppressAndRedirectErrorIsInvalid": func(t *testing.T, opts Output) {
 			opts.SuppressError = true
 			opts.SendErrorToOutput = true
-			assert.Error(t, opts.Validate())
+			check.Error(t, opts.Validate())
 		},
 		"DiscardIsNilForOutput": func(t *testing.T, opts Output) {
 			opts.Error = stderr
 			opts.Output = io.Discard
 
-			assert.True(t, opts.outputIsNull())
-			assert.False(t, opts.errorIsNull())
+			check.True(t, opts.outputIsNull())
+			check.True(t, !opts.errorIsNull())
 		},
 		"NilForOutputIsValid": func(t *testing.T, opts Output) {
 			opts.Error = stderr
-			assert.True(t, opts.outputIsNull())
-			assert.False(t, opts.errorIsNull())
+			check.True(t, opts.outputIsNull())
+			check.True(t, !opts.errorIsNull())
 		},
 		"DiscardIsNilForError": func(t *testing.T, opts Output) {
 			opts.Error = io.Discard
 			opts.Output = stdout
-			assert.True(t, opts.errorIsNull())
-			assert.False(t, opts.outputIsNull())
+			check.True(t, opts.errorIsNull())
+			check.True(t, !opts.outputIsNull())
 		},
 		"NilForErrorIsValid": func(t *testing.T, opts Output) {
 			opts.Output = stdout
-			assert.True(t, opts.errorIsNull())
-			assert.False(t, opts.outputIsNull())
+			check.True(t, opts.errorIsNull())
+			check.True(t, !opts.outputIsNull())
 		},
 		"OutputGetterNilIsIoDiscard": func(t *testing.T, opts Output) {
 			out, err := opts.GetOutput()
 			check.NotError(t, err)
-			assert.Equal(t, io.Discard, out)
+			check.True(t, io.Discard == out)
 		},
 		"OutputGetterWhenPopulatedIsCorrect": func(t *testing.T, opts Output) {
 			opts.Output = stdout
 			out, err := opts.GetOutput()
 			check.NotError(t, err)
-			assert.Equal(t, stdout, out)
+			check.True(t, stdout == out)
 		},
 		"ErrorGetterNilIsIoDiscard": func(t *testing.T, opts Output) {
 			outErr, err := opts.GetError()
 			check.NotError(t, err)
-			assert.Equal(t, io.Discard, outErr)
+			check.True(t, io.Discard == outErr)
 		},
 		"ErrorGetterWhenPopulatedIsCorrect": func(t *testing.T, opts Output) {
 			opts.Error = stderr
 			outErr, err := opts.GetError()
 			check.NotError(t, err)
-			assert.Equal(t, stderr, outErr)
+			check.True(t, stderr == outErr)
 		},
 		"RedirectErrorHasCorrectSemantics": func(t *testing.T, opts Output) {
 			opts.Output = stdout
@@ -108,7 +108,7 @@ func TestOutputOptions(t *testing.T) {
 			opts.SendErrorToOutput = true
 			outErr, err := opts.GetError()
 			check.NotError(t, err)
-			assert.Equal(t, stdout, outErr)
+			check.True(t, stdout == outErr)
 		},
 		"RedirectOutputHasCorrectSemantics": func(t *testing.T, opts Output) {
 			opts.Output = stdout
@@ -116,14 +116,14 @@ func TestOutputOptions(t *testing.T) {
 			opts.SendOutputToError = true
 			out, err := opts.GetOutput()
 			check.NotError(t, err)
-			assert.Equal(t, stderr, out)
+			check.True(t, stderr == out)
 		},
 		"RedirectCannotHaveCycle": func(t *testing.T, opts Output) {
 			opts.Output = stdout
 			opts.Error = stderr
 			opts.SendOutputToError = true
 			opts.SendErrorToOutput = true
-			assert.Error(t, opts.Validate())
+			check.Error(t, opts.Validate())
 		},
 		"SuppressOutputWithLogger": func(t *testing.T, opts Output) {
 			opts.Loggers = []*LoggerConfig{
@@ -208,7 +208,7 @@ func TestOutputOptions(t *testing.T) {
 			check.NotError(t, err)
 			check.NotError(t, opts.outputSender.Close())
 
-			assert.Equal(t, msg, stdout.String())
+			check.Equal(t, msg, stdout.String())
 
 			safeSender, ok := opts.Loggers[0].sender.(*SafeSender)
 			require.True(t, ok)
@@ -218,7 +218,7 @@ func TestOutputOptions(t *testing.T) {
 			logOut, err := sender.GetString()
 			require.NoError(t, err)
 			require.Equal(t, 1, len(logOut))
-			assert.Equal(t, msg, strings.Join(logOut, ""))
+			check.Equal(t, msg, strings.Join(logOut, ""))
 		},
 		"GetErrorWithErrorAndLogger": func(t *testing.T, opts Output) {
 			opts.Error = stderr
@@ -242,7 +242,7 @@ func TestOutputOptions(t *testing.T) {
 			check.NotError(t, err)
 			check.NotError(t, opts.errorSender.Close())
 
-			assert.Equal(t, msg, stderr.String())
+			check.Equal(t, msg, stderr.String())
 
 			safeSender, ok := opts.Loggers[0].sender.(*SafeSender)
 			require.True(t, ok)
@@ -252,7 +252,7 @@ func TestOutputOptions(t *testing.T) {
 			logErr, err := sender.GetString()
 			require.NoError(t, err)
 			require.Equal(t, 1, len(logErr))
-			assert.Equal(t, msg, strings.Join(logErr, ""))
+			check.Equal(t, msg, strings.Join(logErr, ""))
 		},
 		// "": func(t *testing.T, opts Output) {}
 	}
@@ -276,8 +276,8 @@ func TestOutputIntegrationTableTest(t *testing.T) {
 		{Output: buf, SendErrorToOutput: true},
 	}
 
-	for idx, opt := range shouldFail {
-		assert.Error(t, opt.Validate(), "%d: %+v", idx, opt)
+	for _, opt := range shouldFail {
+		check.Error(t, opt.Validate())
 	}
 
 	for idx, opt := range shouldPass {

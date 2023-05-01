@@ -7,7 +7,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tychoish/fun/assert/check"
 )
@@ -115,9 +114,9 @@ EKTcWGekdmdDPsHloRNtsiCa697B2O9IFA==
 			creds, err := NewCredentialsFromFile(file.Name())
 			require.NoError(t, err)
 			require.NotNil(t, creds)
-			assert.Equal(t, pemRootCert, creds.CACert)
-			assert.Equal(t, pemCert, creds.Cert)
-			assert.Equal(t, pemKey, creds.Key)
+			check.Equal(t, pemRootCert, creds.CACert)
+			check.Equal(t, pemCert, creds.Cert)
+			check.Equal(t, pemKey, creds.Key)
 		},
 		"Export": func(t *testing.T) {
 			creds := &CertificateCredentials{
@@ -127,9 +126,9 @@ EKTcWGekdmdDPsHloRNtsiCa697B2O9IFA==
 			}
 			credBytes, err := creds.Export()
 			require.NoError(t, err)
-			assert.True(t, bytes.Contains(credBytes, jsonRootCert))
-			assert.True(t, bytes.Contains(credBytes, jsonCert))
-			assert.True(t, bytes.Contains(credBytes, jsonKey))
+			check.True(t, bytes.Contains(credBytes, jsonRootCert))
+			check.True(t, bytes.Contains(credBytes, jsonCert))
+			check.True(t, bytes.Contains(credBytes, jsonKey))
 		},
 		"ResolveInvalidCert": func(t *testing.T) {
 			creds := &CertificateCredentials{
@@ -158,7 +157,7 @@ EKTcWGekdmdDPsHloRNtsiCa697B2O9IFA==
 			}
 			config, err := creds.Resolve()
 			require.NoError(t, err)
-			assert.NotNil(t, config)
+			check.True(t, config != nil)
 		},
 	} {
 		t.Run(testName, func(t *testing.T) {

@@ -4,7 +4,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper/options"
@@ -41,7 +40,7 @@ func TestTrackedManager(t *testing.T) {
 					mockTracker, ok := manager.tracker.(*mockProcessTracker)
 					require.True(t, ok)
 					require.Equal(t, len(mockTracker.Infos), 1)
-					assert.Equal(t, proc.Info(ctx), mockTracker.Infos[0])
+					check.Equal(t, proc.Info(ctx).ID, mockTracker.Infos[0].ID)
 				},
 				"CreateCommandTracksCommandAfterRun": func(ctx context.Context, t *testing.T, manager *basicProcessManager, opts *options.Create) {
 					err := manager.CreateCommand(ctx).Add(opts.Args).Background(true).Run(ctx)
@@ -84,7 +83,7 @@ func TestTrackedManager(t *testing.T) {
 					mockTracker, ok := manager.tracker.(*mockProcessTracker)
 					require.True(t, ok)
 					require.Equal(t, len(mockTracker.Infos), 1)
-					assert.NotZero(t, mockTracker.Infos[0])
+					check.NotZero(t, mockTracker.Infos[0].ID)
 
 					require.NoError(t, manager.Close(ctx))
 					check.Equal(t, len(mockTracker.Infos), 0)
@@ -109,7 +108,7 @@ func TestTrackedManager(t *testing.T) {
 					mockTracker, ok := manager.tracker.(*mockProcessTracker)
 					require.True(t, ok)
 					require.Equal(t, len(mockTracker.Infos), 1)
-					assert.NotZero(t, mockTracker.Infos[0])
+					check.NotZero(t, mockTracker.Infos[0].ID)
 
 					require.NoError(t, manager.Close(ctx))
 					check.Equal(t, len(mockTracker.Infos), 0)

@@ -9,7 +9,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tychoish/fun/assert/check"
 )
@@ -53,14 +52,14 @@ func TestCreateConstructor(t *testing.T) {
 		t.Run(test.id, func(t *testing.T) {
 			opt, err := MakeCreation(test.cmd)
 			if test.shouldFail {
-				assert.Error(t, err)
-				assert.Nil(t, opt)
+				check.Error(t, err)
+				check.True(t, opt == nil)
 				return
 			}
 
 			check.NotError(t, err)
-			assert.NotNil(t, opt)
-			assert.Equal(t, test.args, opt.Args)
+			check.True(t, opt != nil)
+			check.EqualItems(t, test.args, opt.Args)
 		})
 	}
 }
@@ -76,7 +75,7 @@ func TestCreate(t *testing.T) {
 		},
 		"EmptyArgsShouldNotValidate": func(t *testing.T, opts *Create) {
 			opts.Args = []string{}
-			assert.Error(t, opts.Validate())
+			check.Error(t, opts.Validate())
 		},
 		"ZeroTimeoutShouldNotError": func(t *testing.T, opts *Create) {
 			opts.Timeout = 0
@@ -84,7 +83,7 @@ func TestCreate(t *testing.T) {
 		},
 		"SmallTimeoutShouldNotValidate": func(t *testing.T, opts *Create) {
 			opts.Timeout = time.Millisecond
-			assert.Error(t, opts.Validate())
+			check.Error(t, opts.Validate())
 		},
 		"LargeTimeoutShouldValidate": func(t *testing.T, opts *Create) {
 			opts.Timeout = time.Hour
@@ -98,7 +97,7 @@ func TestCreate(t *testing.T) {
 
 			out, err := io.ReadAll(opts.StandardInput)
 			require.NoError(t, err)
-			assert.EqualValues(t, stdinBytesStr, out)
+			check.Equal(t, stdinBytesStr, string(out))
 		},
 		"StandardInputBytesTakePrecedenceOverStandardInput": func(t *testing.T, opts *Create) {
 			stdinStr := "foo"
@@ -111,16 +110,16 @@ func TestCreate(t *testing.T) {
 
 			out, err := io.ReadAll(opts.StandardInput)
 			require.NoError(t, err)
-			assert.EqualValues(t, stdinBytesStr, out)
+			check.Equal(t, stdinBytesStr, string(out))
 		},
 		"NonExistingWorkingDirectoryShouldNotValidate": func(t *testing.T, opts *Create) {
 			opts.WorkingDirectory = "foo"
-			assert.Error(t, opts.Validate())
+			check.Error(t, opts.Validate())
 		},
 		"ExtantWorkingDirectoryShouldPass": func(t *testing.T, opts *Create) {
 			wd, err := os.Getwd()
 			check.NotError(t, err)
-			assert.NotZero(t, wd)
+			check.NotZero(t, wd)
 
 			opts.WorkingDirectory = wd
 			check.NotError(t, opts.Validate())
@@ -128,39 +127,39 @@ func TestCreate(t *testing.T) {
 		"WorkingDirectoryShouldErrorForFiles": func(t *testing.T, opts *Create) {
 			gobin, err := exec.LookPath("go")
 			check.NotError(t, err)
-			assert.NotZero(t, gobin)
+			check.NotZero(t, gobin)
 
 			opts.WorkingDirectory = gobin
-			assert.Error(t, opts.Validate())
+			check.Error(t, opts.Validate())
 		},
 		"MustSpecifyValidOutput": func(t *testing.T, opts *Create) {
 			opts.Output.SendErrorToOutput = true
 			opts.Output.SendOutputToError = true
-			assert.Error(t, opts.Validate())
+			check.Error(t, opts.Validate())
 		},
 		"WorkingDirectoryUnresolveableShouldNotError": func(t *testing.T, opts *Create) {
 			cmd, _, err := opts.Resolve(ctx)
 			require.NoError(t, err)
 			require.NotNil(t, cmd)
-			assert.NotZero(t, cmd.Dir())
-			assert.Equal(t, opts.WorkingDirectory, cmd.Dir())
+			check.NotZero(t, cmd.Dir())
+			check.Equal(t, opts.WorkingDirectory, cmd.Dir())
 		},
 		"ResolveFailsIfOptionsAreFatal": func(t *testing.T, opts *Create) {
 			opts.Args = []string{}
 			cmd, _, err := opts.Resolve(ctx)
-			assert.Error(t, err)
-			assert.Nil(t, cmd)
+			check.Error(t, err)
+			check.True(t, cmd == nil)
 		},
 		"WithoutOverrideEnvironmentEnvIsPopulated": func(t *testing.T, opts *Create) {
 			cmd, _, err := opts.Resolve(ctx)
 			check.NotError(t, err)
-			assert.NotEmpty(t, cmd.Env())
+			check.Equal(t, len(cmd.Env()), 0)
 		},
 		"WithOverrideEnvironmentEnvIsEmpty": func(t *testing.T, opts *Create) {
 			opts.OverrideEnviron = true
 			cmd, _, err := opts.Resolve(ctx)
 			check.NotError(t, err)
-			assert.Empty(t, cmd.Env())
+			check.Equal(t, len(cmd.Env()), 0)
 		},
 		"EnvironmentVariablesArePropagated": func(t *testing.T, opts *Create) {
 			opts.Environment = map[string]string{
@@ -169,22 +168,22 @@ func TestCreate(t *testing.T) {
 
 			cmd, _, err := opts.Resolve(ctx)
 			check.NotError(t, err)
-			assert.Contains(t, cmd.Env(), "foo=bar")
-			assert.NotContains(t, cmd.Env(), "bar=foo")
+			check.Contains(t, cmd.Env(), "foo=bar")
+			check.NotContains(t, cmd.Env(), "bar=foo")
 		},
 		"MultipleArgsArePropagated": func(t *testing.T, opts *Create) {
 			opts.Args = append(opts.Args, "-lha")
 			cmd, _, err := opts.Resolve(ctx)
 			check.NotError(t, err)
 			require.Equal(t, len(cmd.Args()), 2)
-			assert.Contains(t, cmd.Args()[0], "ls")
-			assert.Equal(t, cmd.Args()[1], "-lha")
+			check.Equal(t, cmd.Args()[0], "ls")
+			check.Equal(t, cmd.Args()[1], "-lha")
 		},
 		"WithOnlyCommandsArgsHasOneVal": func(t *testing.T, opts *Create) {
 			cmd, _, err := opts.Resolve(ctx)
 			check.NotError(t, err)
 			require.Equal(t, len(cmd.Args()), 1)
-			assert.Equal(t, "ls", cmd.Args()[0])
+			check.Equal(t, "ls", cmd.Args()[0])
 		},
 		"WithTimeout": func(t *testing.T, opts *Create) {
 			opts.Timeout = time.Second
@@ -192,10 +191,10 @@ func TestCreate(t *testing.T) {
 
 			cmd, deadline, err := opts.Resolve(ctx)
 			require.NoError(t, err)
-			assert.True(t, time.Now().Before(deadline))
+			check.True(t, time.Now().Before(deadline))
 			check.NotError(t, cmd.Start())
-			assert.Error(t, cmd.Wait())
-			assert.True(t, time.Now().After(deadline))
+			check.Error(t, cmd.Wait())
+			check.True(t, time.Now().After(deadline))
 		},
 		"ReturnedContextWrapsResolveContext": func(t *testing.T, opts *Create) {
 			opts.Args = []string{"sleep", "10"}
@@ -206,9 +205,9 @@ func TestCreate(t *testing.T) {
 			cmd, deadline, err := opts.Resolve(ctx)
 			require.NoError(t, err)
 			check.NotError(t, cmd.Start())
-			assert.Error(t, cmd.Wait())
-			assert.Equal(t, context.DeadlineExceeded, tctx.Err())
-			assert.True(t, time.Now().After(deadline))
+			check.Error(t, cmd.Wait())
+			check.ErrorIs(t, tctx.Err(), context.DeadlineExceeded)
+			check.True(t, time.Now().After(deadline))
 		},
 		"ReturnedContextErrorsOnTimeout": func(t *testing.T, opts *Create) {
 			opts.Args = []string{"sleep", "10"}
@@ -220,11 +219,11 @@ func TestCreate(t *testing.T) {
 			cmd, deadline, err := opts.Resolve(ctx)
 			require.NoError(t, err)
 			check.NotError(t, cmd.Start())
-			assert.Error(t, cmd.Wait())
+			check.Error(t, cmd.Wait())
 			elapsed := time.Since(start)
-			assert.True(t, elapsed > opts.Timeout)
+			check.True(t, elapsed > opts.Timeout)
 			check.NotError(t, tctx.Err())
-			assert.True(t, time.Now().After(deadline))
+			check.True(t, time.Now().After(deadline))
 		},
 		"ClosersAreAlwaysCalled": func(t *testing.T, opts *Create) {
 			var counter int
@@ -233,28 +232,28 @@ func TestCreate(t *testing.T) {
 				func() (_ error) { counter += 2; return },
 			)
 			check.NotError(t, opts.Close())
-			assert.Equal(t, counter, 3)
+			check.Equal(t, counter, 3)
 
 		},
 		"ConflictingTimeoutOptions": func(t *testing.T, opts *Create) {
 			opts.TimeoutSecs = 100
 			opts.Timeout = time.Hour
 
-			assert.Error(t, opts.Validate())
+			check.Error(t, opts.Validate())
 		},
 		"ValidationOverrideDefaultsForSecond": func(t *testing.T, opts *Create) {
 			opts.TimeoutSecs = 100
 			opts.Timeout = 0
 
 			check.NotError(t, opts.Validate())
-			assert.Equal(t, 100*time.Second, opts.Timeout)
+			check.Equal(t, 100*time.Second, opts.Timeout)
 		},
 		"ValidationOverrideDefaultsForDuration": func(t *testing.T, opts *Create) {
 			opts.TimeoutSecs = 0
 			opts.Timeout = time.Second
 
 			check.NotError(t, opts.Validate())
-			assert.Equal(t, 1, opts.TimeoutSecs)
+			check.Equal(t, 1, opts.TimeoutSecs)
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
@@ -379,7 +378,7 @@ func TestFileLogging(t *testing.T) {
 				}()
 				info, err := file.Stat()
 				require.NoError(t, err)
-				assert.Zero(t, info.Size())
+				check.Zero(t, info.Size())
 				files = append(files, file)
 			}
 
@@ -411,7 +410,7 @@ func TestFileLogging(t *testing.T) {
 			for _, file := range files {
 				info, err := file.Stat()
 				check.NotError(t, err)
-				assert.Equal(t, testParams.numBytesExpected, info.Size())
+				check.Equal(t, testParams.numBytesExpected, info.Size())
 			}
 		})
 	}

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
@@ -23,22 +23,22 @@ func TestLoggingCache(t *testing.T) {
 				Error:  errorSender,
 			}
 			require.NoError(t, logger.Close())
-			assert.True(t, outputSender.Closed)
-			assert.True(t, errorSender.Closed)
+			check.True(t, outputSender.Closed)
+			check.True(t, errorSender.Closed)
 		})
 		t.Run("OutputSender", func(t *testing.T) {
 			outputSender := NewMockSender("output")
 
 			logger := &CachedLogger{Output: outputSender}
 			require.NoError(t, logger.Close())
-			assert.True(t, outputSender.Closed)
+			check.True(t, outputSender.Closed)
 		})
 		t.Run("ErrorSender", func(t *testing.T) {
 			errorSender := NewMockSender("error")
 
 			logger := &CachedLogger{Error: errorSender}
 			require.NoError(t, logger.Close())
-			assert.True(t, errorSender.Closed)
+			check.True(t, errorSender.Closed)
 		})
 		t.Run("SameSender", func(t *testing.T) {
 			outputSender := NewMockSender("output")
@@ -48,21 +48,21 @@ func TestLoggingCache(t *testing.T) {
 				Error:  outputSender,
 			}
 			require.NoError(t, logger.Close())
-			assert.True(t, outputSender.Closed)
+			check.True(t, outputSender.Closed)
 		})
 		t.Run("OutputSenderCloseError", func(t *testing.T) {
 			outputSender := NewMockSender("output")
 			outputSender.Closed = true
 
 			logger := &CachedLogger{Output: outputSender}
-			assert.Error(t, logger.Close())
+			check.Error(t, logger.Close())
 		})
 		t.Run("ErrorSenderCloseError", func(t *testing.T) {
 			errorSender := NewMockSender("output")
 			errorSender.Closed = true
 
 			logger := &CachedLogger{Error: errorSender}
-			assert.Error(t, logger.Close())
+			check.Error(t, logger.Close())
 		})
 
 	})
@@ -71,7 +71,7 @@ func TestLoggingCache(t *testing.T) {
 		cl := &CachedLogger{}
 		t.Run("Unconfigured", func(t *testing.T) {
 			err := cl.Send(lp)
-			assert.Error(t, err)
+			check.Error(t, err)
 		})
 		t.Run("IvalidMessage", func(t *testing.T) {
 			lp.Format = LoggingPayloadFormatJSON
@@ -83,33 +83,33 @@ func TestLoggingCache(t *testing.T) {
 
 	})
 	t.Run("OutputTargeting", func(t *testing.T) {
-		output := send.MakeInternalLogger()
-		error := send.MakeInternalLogger()
+		output := send.MakeInternal()
+		error := send.MakeInternal()
 		lp := &LoggingPayload{Data: "hello world!", Priority: level.Info}
 		t.Run("Output", func(t *testing.T) {
-			assert.Equal(t, 0, output.Len())
+			check.Equal(t, 0, output.Len())
 			cl := &CachedLogger{Output: output}
 			require.NoError(t, cl.Send(lp))
 			require.Equal(t, 1, output.Len())
 			msg := output.GetMessage()
-			assert.Equal(t, "hello world!", msg.Message.String())
+			check.Equal(t, "hello world!", msg.Message.String())
 		})
 		t.Run("Error", func(t *testing.T) {
-			assert.Equal(t, 0, error.Len())
+			check.Equal(t, 0, error.Len())
 			cl := &CachedLogger{Error: error}
 			require.NoError(t, cl.Send(lp))
 			require.Equal(t, 1, error.Len())
 			msg := error.GetMessage()
-			assert.Equal(t, "hello world!", msg.Message.String())
+			check.Equal(t, "hello world!", msg.Message.String())
 		})
 		t.Run("ErrorForce", func(t *testing.T) {
 			lp.PreferSendToError = true
-			assert.Equal(t, 0, error.Len())
+			check.Equal(t, 0, error.Len())
 			cl := &CachedLogger{Error: error, Output: output}
 			require.NoError(t, cl.Send(lp))
 			require.Equal(t, 1, error.Len())
 			msg := error.GetMessage()
-			assert.Equal(t, "hello world!", msg.Message.String())
+			check.Equal(t, "hello world!", msg.Message.String())
 		})
 	})
 	t.Run("Messages", func(t *testing.T) {
@@ -137,9 +137,9 @@ func TestLoggingCache(t *testing.T) {
 					raw, err := json.Marshal(msg.Raw())
 					require.NoError(t, err)
 					require.True(t, len(raw) >= 150)
-					assert.Contains(t, string(raw), "process")
-					assert.Contains(t, string(raw), "hostname")
-					assert.Contains(t, string(raw), "metadata")
+					check.Substring(t, string(raw), "process")
+					check.Substring(t, string(raw), "hostname")
+					check.Substring(t, string(raw), "metadata")
 				})
 			})
 			t.Run("String", func(t *testing.T) {
@@ -215,8 +215,8 @@ func TestLoggingCache(t *testing.T) {
 					msg, err := lp.convertMultiMessage("hello\nworld")
 					require.NoError(t, err)
 					group := requireIsGroup(t, 2, msg)
-					assert.Equal(t, "hello", group[0].String())
-					assert.Equal(t, "world", group[1].String())
+					check.Equal(t, "hello", group[0].String())
+					check.Equal(t, "world", group[1].String())
 				})
 			})
 			t.Run("Byte", func(t *testing.T) {
@@ -224,8 +224,8 @@ func TestLoggingCache(t *testing.T) {
 					msg, err := lp.convertMultiMessage([]byte("hello\x00world"))
 					require.NoError(t, err)
 					group := requireIsGroup(t, 2, msg)
-					assert.Equal(t, "hello", group[0].String())
-					assert.Equal(t, "world", group[1].String())
+					check.Equal(t, "hello", group[0].String())
+					check.Equal(t, "world", group[1].String())
 
 				})
 			})
@@ -233,9 +233,9 @@ func TestLoggingCache(t *testing.T) {
 				msg, err := lp.convertMultiMessage([]interface{}{"hello", true, "world", 42})
 				require.NoError(t, err)
 				msgs := requireIsGroup(t, 4, msg)
-				assert.Equal(t, "hello", msgs[0].String())
-				assert.Equal(t, "true", msgs[1].String())
-				assert.Equal(t, "42", msgs[3].String())
+				check.Equal(t, "hello", msgs[0].String())
+				check.Equal(t, "true", msgs[1].String())
+				check.Equal(t, "42", msgs[3].String())
 			})
 			t.Run("Composers", func(t *testing.T) {
 				msg, err := lp.convertMultiMessage([]message.Composer{
@@ -245,8 +245,8 @@ func TestLoggingCache(t *testing.T) {
 				})
 				require.NoError(t, err)
 				msgs := requireIsGroup(t, 3, msg)
-				assert.Equal(t, "hello world", msgs[0].String())
-				assert.Equal(t, "grip", msgs[2].String())
+				check.Equal(t, "hello world", msgs[0].String())
+				check.Equal(t, "grip", msgs[2].String())
 			})
 
 		})
@@ -258,16 +258,16 @@ func TestLoggingCache(t *testing.T) {
 				require.NoError(t, err)
 				msgs := requireIsGroup(t, 2, msg)
 
-				assert.Equal(t, "hello", msgs[0].String())
-				assert.Equal(t, "world", msgs[1].String())
+				check.Equal(t, "hello", msgs[0].String())
+				check.Equal(t, "world", msgs[1].String())
 			})
 			t.Run("Single", func(t *testing.T) {
 				lp.IsMulti = false
 				msg, err := lp.convert()
 				require.NoError(t, err)
 				_, ok := msg.(*message.GroupComposer)
-				assert.False(t, ok)
-				assert.Equal(t, "hello world", msg.String())
+				check.True(t, !ok)
+				check.Equal(t, "hello world", msg.String())
 			})
 		})
 	})

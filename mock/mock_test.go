@@ -3,11 +3,14 @@ package mock
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper"
 )
 
 func TestMockInterfaces(t *testing.T) {
-	assert.Implements(t, (*jasper.Manager)(nil), &Manager{})
-	assert.Implements(t, (*jasper.Process)(nil), &Process{})
+	_, ok := jasper.Manager(&Manager{}).(*Manager)
+	check.True(t, ok)
+
+	_, ok = jasper.Process(&Process{}).(*Process)
+	check.True(t, ok)
 }

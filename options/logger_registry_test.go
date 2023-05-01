@@ -3,8 +3,8 @@ package options
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert/check"
 )
 
 func TestLoggerRegistry(t *testing.T) {
@@ -12,20 +12,20 @@ func TestLoggerRegistry(t *testing.T) {
 	registeredFactories := map[string]LoggerProducerFactory{}
 
 	registeredFactories[LogDefault] = NewDefaultLoggerProducer
-	assert.False(t, registry.Check(LogDefault))
+	check.True(t, !registry.Check(LogDefault))
 	registry.Register(NewDefaultLoggerProducer)
-	assert.True(t, registry.Check(LogDefault))
+	check.True(t, registry.Check(LogDefault))
 	factory, ok := registry.Resolve(LogDefault)
-	assert.Equal(t, NewDefaultLoggerProducer(), factory())
-	assert.True(t, ok)
+	check.Equal(t, NewDefaultLoggerProducer(), factory())
+	check.True(t, ok)
 
 	registeredFactories[LogFile] = NewFileLoggerProducer
-	assert.False(t, registry.Check(LogFile))
+	check.True(t, !registry.Check(LogFile))
 	registry.Register(NewFileLoggerProducer)
-	assert.True(t, registry.Check(LogFile))
+	check.True(t, registry.Check(LogFile))
 	factory, ok = registry.Resolve(LogFile)
-	assert.Equal(t, NewFileLoggerProducer(), factory())
-	assert.True(t, ok)
+	check.Equal(t, NewFileLoggerProducer(), factory())
+	check.True(t, ok)
 
 	factories := registry.Names()
 	require.Equal(t, len(factories), len(registeredFactories))

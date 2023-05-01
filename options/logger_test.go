@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/grip/level"
@@ -17,7 +16,7 @@ func TestLoggerConfigValidate(t *testing.T) {
 		config := LoggerConfig{
 			info: loggerConfigInfo{Format: RawLoggerConfigFormatJSON},
 		}
-		assert.Error(t, config.validate())
+		check.Error(t, config.validate())
 	})
 	t.Run("InvalidLoggerConfigFormat", func(t *testing.T) {
 		config := LoggerConfig{
@@ -27,7 +26,7 @@ func TestLoggerConfigValidate(t *testing.T) {
 				Config: []byte("some bytes"),
 			},
 		}
-		assert.Error(t, config.validate())
+		check.Error(t, config.validate())
 	})
 	t.Run("UnsetRegistry", func(t *testing.T) {
 		config := LoggerConfig{
@@ -37,7 +36,7 @@ func TestLoggerConfigValidate(t *testing.T) {
 			},
 		}
 		check.NotError(t, config.validate())
-		assert.Equal(t, globalLoggerRegistry, config.Registry)
+		check.True(t, globalLoggerRegistry == config.Registry)
 	})
 	t.Run("SetRegistry", func(t *testing.T) {
 		registry := NewBasicLoggerRegistry()
@@ -49,7 +48,7 @@ func TestLoggerConfigValidate(t *testing.T) {
 			},
 		}
 		check.NotError(t, config.validate())
-		assert.Equal(t, registry, config.Registry)
+		check.True(t, registry == config.Registry)
 	})
 }
 
@@ -61,9 +60,9 @@ func TestLoggerConfigSet(t *testing.T) {
 				Format: RawLoggerConfigFormatBSON,
 			},
 		}
-		assert.Error(t, config.Set(&DefaultLoggerOptions{}))
-		assert.Empty(t, config.info.Type)
-		assert.Nil(t, config.producer)
+		check.Error(t, config.Set(&DefaultLoggerOptions{}))
+		check.Equal(t, len(config.info.Type), 0)
+		check.True(t, config.producer == nil)
 	})
 	t.Run("RegisteredLogger", func(t *testing.T) {
 		config := LoggerConfig{
@@ -73,8 +72,8 @@ func TestLoggerConfigSet(t *testing.T) {
 			},
 		}
 		require.NoError(t, config.Set(&DefaultLoggerOptions{}))
-		assert.Equal(t, LogDefault, config.info.Type)
-		assert.Equal(t, &DefaultLoggerOptions{}, config.producer)
+		check.Equal(t, LogDefault, config.info.Type)
+		check.True(t, &DefaultLoggerOptions{} == config.producer)
 	})
 }
 
@@ -83,8 +82,8 @@ func TestLoggerConfigResolve(t *testing.T) {
 		config := LoggerConfig{}
 		require.Error(t, config.validate())
 		sender, err := config.Resolve()
-		assert.Nil(t, sender)
-		assert.Error(t, err)
+		check.True(t, sender == nil)
+		check.Error(t, err)
 	})
 	t.Run("UnregisteredLogger", func(t *testing.T) {
 		config := LoggerConfig{
@@ -96,8 +95,8 @@ func TestLoggerConfigResolve(t *testing.T) {
 		}
 		require.NoError(t, config.validate())
 		sender, err := config.Resolve()
-		assert.Nil(t, sender)
-		assert.Error(t, err)
+		check.True(t, sender == nil)
+		check.Error(t, err)
 	})
 	t.Run("MismatchingConfigAndProducer", func(t *testing.T) {
 		rawData, err := json.Marshal(&DefaultLoggerOptions{Prefix: "prefix"})
@@ -113,8 +112,8 @@ func TestLoggerConfigResolve(t *testing.T) {
 		require.NoError(t, config.validate())
 		require.True(t, config.Registry.Check(config.info.Type))
 		sender, err := config.Resolve()
-		assert.Nil(t, sender)
-		assert.Error(t, err)
+		check.True(t, sender == nil)
+		check.Error(t, err)
 	})
 	t.Run("InvalidProducerConfig", func(t *testing.T) {
 		config := LoggerConfig{
@@ -128,8 +127,8 @@ func TestLoggerConfigResolve(t *testing.T) {
 		require.NoError(t, config.validate())
 		require.True(t, config.Registry.Check(config.info.Type))
 		sender, err := config.Resolve()
-		assert.Nil(t, sender)
-		assert.Error(t, err)
+		check.True(t, sender == nil)
+		check.Error(t, err)
 	})
 	t.Run("SenderUnset", func(t *testing.T) {
 		config := LoggerConfig{
@@ -141,7 +140,7 @@ func TestLoggerConfigResolve(t *testing.T) {
 			producer: &DefaultLoggerOptions{Base: BaseOptions{Format: LogFormatPlain}},
 		}
 		sender, err := config.Resolve()
-		assert.NotNil(t, sender)
+		check.True(t, sender != nil)
 		check.NotError(t, err)
 	})
 	t.Run("ProducerAndSenderUnsetJSON", func(t *testing.T) {
@@ -156,7 +155,7 @@ func TestLoggerConfigResolve(t *testing.T) {
 			},
 		}
 		sender, err := config.Resolve()
-		assert.NotNil(t, sender)
+		check.True(t, sender != nil)
 		check.NotError(t, err)
 	})
 }
@@ -170,7 +169,7 @@ func TestLoggerConfigMarshalJSON(t *testing.T) {
 			},
 		}
 		_, err := json.Marshal(&config)
-		assert.Error(t, err)
+		check.Error(t, err)
 	})
 	t.Run("UnregisteredLogger", func(t *testing.T) {
 		config := LoggerConfig{
@@ -182,7 +181,7 @@ func TestLoggerConfigMarshalJSON(t *testing.T) {
 			},
 		}
 		_, err := json.Marshal(&config)
-		assert.Error(t, err)
+		check.Error(t, err)
 	})
 	t.Run("ExistingProducer", func(t *testing.T) {
 		config := LoggerConfig{
@@ -201,14 +200,14 @@ func TestLoggerConfigMarshalJSON(t *testing.T) {
 		}
 		data, err := json.Marshal(&config)
 		require.NoError(t, err)
-		assert.NotNil(t, data)
+		check.True(t, data != nil)
 		unmarshalledConfig := &LoggerConfig{}
 		require.NoError(t, json.Unmarshal(data, unmarshalledConfig))
-		assert.Equal(t, config.info.Type, unmarshalledConfig.info.Type)
-		assert.Equal(t, RawLoggerConfigFormatJSON, unmarshalledConfig.info.Format)
+		check.Equal(t, config.info.Type, unmarshalledConfig.info.Type)
+		check.Equal(t, RawLoggerConfigFormatJSON, unmarshalledConfig.info.Format)
 		_, err = unmarshalledConfig.Resolve()
 		require.NoError(t, err)
-		assert.Equal(t, config.producer, unmarshalledConfig.producer)
+		check.True(t, config.producer == unmarshalledConfig.producer)
 	})
 	t.Run("RoundTrip", func(t *testing.T) {
 		rawConfig, err := json.Marshal(&DefaultLoggerOptions{
@@ -232,8 +231,8 @@ func TestLoggerConfigMarshalJSON(t *testing.T) {
 		roundTripped := &LoggerConfig{}
 		require.NoError(t, json.Unmarshal(data, roundTripped))
 		sender, err := roundTripped.Resolve()
-		assert.NotNil(t, sender)
+		check.True(t, sender != nil)
 		check.NotError(t, err)
-		assert.Equal(t, config.info.Config, roundTripped.info.Config)
+		check.EqualItems(t, config.info.Config, roundTripped.info.Config)
 	})
 }

@@ -59,7 +59,7 @@ func TestCreateDownloadJobsWithInvalidPath(t *testing.T) {
 	jobs := createDownloadJobs(dir, urls, catcher)
 
 	for range jobs {
-		assert.Fail(t, "should not create job for bad url")
+		t.Error("should not create job for bad url")
 	}
 	err := catcher.Resolve()
 	require.Error(t, err)

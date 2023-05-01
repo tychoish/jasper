@@ -5,8 +5,8 @@ import (
 	"syscall"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/testutil"
 )
@@ -22,23 +22,23 @@ func TestCleanTerminationSignalTrigger(t *testing.T) {
 					proc, err := makep(ctx, opts)
 					require.NoError(t, err)
 					trigger := makeCleanTerminationSignalTrigger()
-					assert.True(t, trigger(proc.Info(ctx), syscall.SIGTERM))
+					check.True(t, trigger(proc.Info(ctx), syscall.SIGTERM))
 
 					exitCode, err := proc.Wait(ctx)
 					check.NotError(t, err)
-					assert.Zero(t, exitCode)
-					assert.False(t, proc.Running(ctx))
+					check.Zero(t, exitCode)
+					check.True(t, !proc.Running(ctx))
 
 					// Subsequent executions of trigger should fail.
-					assert.False(t, trigger(proc.Info(ctx), syscall.SIGTERM))
+					check.True(t, !trigger(proc.Info(ctx), syscall.SIGTERM))
 				},
 				"CleanTerminationIgnoresNonSIGTERM": func(ctx context.Context, opts *options.Create, makep ProcessConstructor) {
 					proc, err := makep(ctx, opts)
 					require.NoError(t, err)
 					trigger := makeCleanTerminationSignalTrigger()
-					assert.False(t, trigger(proc.Info(ctx), syscall.SIGHUP))
+					check.True(t, !trigger(proc.Info(ctx), syscall.SIGHUP))
 
-					assert.True(t, proc.Running(ctx))
+					check.True(t, proc.Running(ctx))
 
 					check.NotError(t, proc.Signal(ctx, syscall.SIGKILL))
 				},
@@ -49,10 +49,10 @@ func TestCleanTerminationSignalTrigger(t *testing.T) {
 
 					exitCode, err := proc.Wait(ctx)
 					check.NotError(t, err)
-					assert.Zero(t, exitCode)
+					check.Zero(t, exitCode)
 
 					trigger := makeCleanTerminationSignalTrigger()
-					assert.False(t, trigger(proc.Info(ctx), syscall.SIGTERM))
+					check.True(t, !trigger(proc.Info(ctx), syscall.SIGTERM))
 				},
 			} {
 				t.Run(testName, func(t *testing.T) {

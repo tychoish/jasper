@@ -11,6 +11,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/testutil"
@@ -325,7 +326,7 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 					require.Error(t, err)
 					assert.Equal(t, -1, exitCode)
 				case <-ctx.Done():
-					assert.Fail(t, "call to Wait() took too long to finish")
+					t.Error("call to Wait() took too long to finish")
 				}
 			},
 		},

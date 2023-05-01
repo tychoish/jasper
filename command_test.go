@@ -11,7 +11,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/grip/level"
@@ -421,11 +420,12 @@ func TestCommandImplementation(t *testing.T) {
 									}
 									cmd.SetTags(tags)
 									require.NoError(t, cmd.Run(ctx))
-									check.Equal(t, len(cmd.procs), len(subCmds))
 
+									check.Equal(t, len(cmd.procs), len(subCmds))
 									for _, proc := range cmd.procs {
-										assert.Subset(t, tags, proc.GetTags())
-										assert.Subset(t, proc.GetTags(), tags)
+										ptags := proc.GetTags()
+										sort.Strings(ptags)
+										check.EqualItems(t, tags, ptags)
 									}
 								},
 								"AppendTags": func(ctx context.Context, t *testing.T, cmd Command) {
@@ -435,9 +435,11 @@ func TestCommandImplementation(t *testing.T) {
 									cmd.AppendTags(tags...)
 									require.NoError(t, cmd.Run(ctx))
 									check.Equal(t, len(cmd.procs), len(subCmds))
+
 									for _, proc := range cmd.procs {
-										assert.Subset(t, tags, proc.GetTags())
-										assert.Subset(t, proc.GetTags(), tags)
+										ptags := proc.GetTags()
+										sort.Strings(ptags)
+										check.EqualItems(t, tags, ptags)
 									}
 								},
 								"ExtendTags": func(ctx context.Context, t *testing.T, cmd Command) {
@@ -448,8 +450,9 @@ func TestCommandImplementation(t *testing.T) {
 									require.NoError(t, cmd.Run(ctx))
 									check.Equal(t, len(cmd.procs), len(subCmds))
 									for _, proc := range cmd.procs {
-										assert.Subset(t, tags, proc.GetTags())
-										assert.Subset(t, proc.GetTags(), tags)
+										ptags := proc.GetTags()
+										sort.Strings(ptags)
+										check.EqualItems(t, tags, ptags)
 									}
 								},
 							} {

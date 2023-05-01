@@ -9,8 +9,8 @@ import (
 	"syscall"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/testutil"
 )
@@ -33,7 +33,7 @@ func TestBasicManagerWithTrackedProcesses(t *testing.T) {
 
 					info, err := QueryInformationJobObjectProcessIdList(tracker.job.handle)
 					check.NotError(t, err)
-					assert.Zero(t, info.NumberOfAssignedProcesses)
+					check.Zero(t, info.NumberOfAssignedProcesses)
 				},
 				"CreateAddsProcess": func(ctx context.Context, t *testing.T, m *basicProcessManager, tracker *windowsProcessTracker, opts *options.Create) {
 					proc, err := m.CreateProcess(ctx, opts)
@@ -41,8 +41,8 @@ func TestBasicManagerWithTrackedProcesses(t *testing.T) {
 
 					info, err := QueryInformationJobObjectProcessIdList(tracker.job.handle)
 					check.NotError(t, err)
-					assert.Equal(t, 1, int(info.NumberOfAssignedProcesses))
-					assert.Equal(t, proc.Info(ctx).PID, int(info.ProcessIdList[0]))
+					check.Equal(t, 1, int(info.NumberOfAssignedProcesses))
+					check.Equal(t, proc.Info(ctx).PID, int(info.ProcessIdList[0]))
 					check.NotError(t, m.Close(ctx))
 				},
 				"RegisterAddsProcess": func(ctx context.Context, t *testing.T, m *basicProcessManager, tracker *windowsProcessTracker, opts *options.Create) {
@@ -52,8 +52,8 @@ func TestBasicManagerWithTrackedProcesses(t *testing.T) {
 
 					info, err := QueryInformationJobObjectProcessIdList(tracker.job.handle)
 					check.NotError(t, err)
-					assert.Equal(t, 1, int(info.NumberOfAssignedProcesses))
-					assert.Equal(t, proc.Info(ctx).PID, int(info.ProcessIdList[0]))
+					check.Equal(t, 1, int(info.NumberOfAssignedProcesses))
+					check.Equal(t, proc.Info(ctx).PID, int(info.ProcessIdList[0]))
 					check.NotError(t, m.Close(ctx))
 				},
 				"ClosePerformsProcessTrackingCleanup": func(ctx context.Context, t *testing.T, m *basicProcessManager, tracker *windowsProcessTracker, opts *options.Create) {
@@ -62,15 +62,15 @@ func TestBasicManagerWithTrackedProcesses(t *testing.T) {
 
 					info, err := QueryInformationJobObjectProcessIdList(tracker.job.handle)
 					check.NotError(t, err)
-					assert.Equal(t, 1, int(info.NumberOfAssignedProcesses))
-					assert.Equal(t, proc.Info(ctx).PID, int(info.ProcessIdList[0]))
+					check.Equal(t, 1, int(info.NumberOfAssignedProcesses))
+					check.Equal(t, proc.Info(ctx).PID, int(info.ProcessIdList[0]))
 					check.NotError(t, m.Close(ctx))
 
 					exitCode, err := proc.Wait(ctx)
 					check.NotError(t, err)
-					assert.Zero(t, exitCode)
-					assert.False(t, proc.Running(ctx))
-					assert.True(t, proc.Complete(ctx))
+					check.Zero(t, exitCode)
+					check.True(t, !proc.Running(ctx))
+					check.True(t, proc.Complete(ctx))
 				},
 				"CloseOnTerminatedProcessSucceeds": func(ctx context.Context, t *testing.T, m *basicProcessManager, tracker *windowsProcessTracker, opts *options.Create) {
 					proc, err := m.CreateProcess(ctx, opts)
@@ -78,8 +78,8 @@ func TestBasicManagerWithTrackedProcesses(t *testing.T) {
 
 					info, err := QueryInformationJobObjectProcessIdList(tracker.job.handle)
 					check.NotError(t, err)
-					assert.Equal(t, 1, int(info.NumberOfAssignedProcesses))
-					assert.Equal(t, proc.Info(ctx).PID, int(info.ProcessIdList[0]))
+					check.Equal(t, 1, int(info.NumberOfAssignedProcesses))
+					check.Equal(t, proc.Info(ctx).PID, int(info.ProcessIdList[0]))
 
 					check.NotError(t, proc.Signal(ctx, syscall.SIGKILL))
 					check.NotError(t, m.Close(ctx))

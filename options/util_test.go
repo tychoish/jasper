@@ -8,7 +8,6 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tychoish/fun/assert/check"
 )
@@ -25,7 +24,7 @@ func TestMakeEnclosingDirectories(t *testing.T) {
 	info, err := os.Stat(path)
 	require.False(t, os.IsNotExist(err))
 	require.False(t, info.IsDir())
-	assert.Error(t, makeEnclosingDirectories(path))
+	check.Error(t, makeEnclosingDirectories(path))
 }
 
 func TestWriteFile(t *testing.T) {
@@ -65,7 +64,7 @@ func TestWriteFile(t *testing.T) {
 			if testCase.shouldPass {
 				check.NotError(t, err)
 			} else {
-				assert.Error(t, err)
+				check.Error(t, err)
 			}
 		})
 	}
@@ -77,17 +76,17 @@ func TestWriteFileOptions(t *testing.T) {
 			for testName, testCase := range map[string]func(t *testing.T){
 				"FailsForZeroValue": func(t *testing.T) {
 					opts := WriteFile{}
-					assert.Error(t, opts.Validate())
+					check.Error(t, opts.Validate())
 				},
 				"OnlyDefaultsPermForZeroValue": func(t *testing.T) {
 					opts := WriteFile{Path: "/foo", Perm: 0777}
 					check.NotError(t, opts.Validate())
-					assert.EqualValues(t, 0777, opts.Perm)
+					check.Equal(t, 0777, opts.Perm)
 				},
 				"PassesAndDefaults": func(t *testing.T) {
 					opts := WriteFile{Path: "/foo"}
 					check.NotError(t, opts.Validate())
-					assert.NotEqual(t, os.FileMode(0000), opts.Perm)
+					check.NotEqual(t, os.FileMode(0000), opts.Perm)
 				},
 				"PassesWithContent": func(t *testing.T) {
 					opts := WriteFile{
@@ -109,7 +108,7 @@ func TestWriteFileOptions(t *testing.T) {
 						Content: []byte("foo"),
 						Reader:  bytes.NewBufferString("bar"),
 					}
-					assert.Error(t, opts.Validate())
+					check.Error(t, opts.Validate())
 				},
 			} {
 				t.Run(testName, func(t *testing.T) {
@@ -123,30 +122,30 @@ func TestWriteFileOptions(t *testing.T) {
 					opts.Content = []byte("foo")
 					opts.Reader = bytes.NewBufferString("bar")
 					_, err := opts.ContentReader()
-					assert.Error(t, err)
+					check.Error(t, err)
 				},
 				"PreservesReaderIfSet": func(t *testing.T, opts WriteFile) {
 					expected := []byte("foo")
 					opts.Reader = bytes.NewBuffer(expected)
 					reader, err := opts.ContentReader()
 					require.NoError(t, err)
-					assert.Equal(t, opts.Reader, reader)
+					check.True(t, opts.Reader == reader)
 
 					content, err := io.ReadAll(reader)
 					require.NoError(t, err)
-					assert.Equal(t, expected, content)
+					check.EqualItems(t, expected, content)
 				},
 				"SetsReaderIfContentSet": func(t *testing.T, opts WriteFile) {
 					expected := []byte("foo")
 					opts.Content = expected
 					reader, err := opts.ContentReader()
 					require.NoError(t, err)
-					assert.Equal(t, reader, opts.Reader)
-					assert.Empty(t, opts.Content)
+					check.True(t, reader == opts.Reader)
+					check.Equal(t, len(opts.Content), 0)
 
 					content, err := io.ReadAll(reader)
 					require.NoError(t, err)
-					assert.Equal(t, expected, content)
+					check.EqualItems(t, expected, content)
 				},
 			} {
 				t.Run(testName, func(t *testing.T) {
@@ -163,12 +162,12 @@ func TestWriteFileOptions(t *testing.T) {
 						didWrite = true
 						return nil
 					}))
-					assert.True(t, didWrite)
+					check.True(t, didWrite)
 				},
 				"FailsForMultipleContentSources": func(t *testing.T, opts WriteFile) {
 					opts.Content = []byte("foo")
 					opts.Reader = bytes.NewBufferString("bar")
-					assert.Error(t, opts.WriteBufferedContent(func(WriteFile) error { return nil }))
+					check.Error(t, opts.WriteBufferedContent(func(WriteFile) error { return nil }))
 				},
 				"ReadsFromContent": func(t *testing.T, opts WriteFile) {
 					expected := []byte("foo")
@@ -178,7 +177,7 @@ func TestWriteFileOptions(t *testing.T) {
 						content = append(content, opts.Content...)
 						return nil
 					}))
-					assert.Equal(t, expected, content)
+					check.EqualItems(t, expected, content)
 				},
 				"ReadsFromReader": func(t *testing.T, opts WriteFile) {
 					expected := []byte("foo")
@@ -188,7 +187,7 @@ func TestWriteFileOptions(t *testing.T) {
 						content = append(content, opts.Content...)
 						return nil
 					}))
-					assert.Equal(t, expected, content)
+					check.EqualItems(t, expected, content)
 				},
 			} {
 				t.Run(testName, func(t *testing.T) {
@@ -205,7 +204,7 @@ func TestWriteFileOptions(t *testing.T) {
 
 					stat, err := os.Stat(opts.Path)
 					require.NoError(t, err)
-					assert.Zero(t, stat.Size())
+					check.Zero(t, stat.Size())
 				},
 				"WritesWithReader": func(t *testing.T, opts WriteFile) {
 					opts.Reader = bytes.NewBuffer(content)
@@ -214,7 +213,7 @@ func TestWriteFileOptions(t *testing.T) {
 
 					fileContent, err := os.ReadFile(opts.Path)
 					require.NoError(t, err)
-					assert.Equal(t, content, fileContent)
+					check.EqualItems(t, content, fileContent)
 				},
 				"WritesWithContent": func(t *testing.T, opts WriteFile) {
 					opts.Content = content
@@ -223,7 +222,7 @@ func TestWriteFileOptions(t *testing.T) {
 
 					fileContent, err := os.ReadFile(opts.Path)
 					require.NoError(t, err)
-					assert.Equal(t, content, fileContent)
+					check.EqualItems(t, content, fileContent)
 				},
 				"AppendsToFile": func(t *testing.T, opts WriteFile) {
 					f, err := os.OpenFile(opts.Path, os.O_WRONLY|os.O_CREATE, 0666)
@@ -240,8 +239,8 @@ func TestWriteFileOptions(t *testing.T) {
 
 					fileContent, err := os.ReadFile(opts.Path)
 					require.NoError(t, err)
-					assert.Equal(t, initialContent, fileContent[:len(initialContent)])
-					assert.Equal(t, content, fileContent[len(fileContent)-len(content):])
+					check.EqualItems(t, initialContent, fileContent[:len(initialContent)])
+					check.EqualItems(t, content, fileContent[len(fileContent)-len(content):])
 				},
 				"TruncatesExistingFile": func(t *testing.T, opts WriteFile) {
 					f, err := os.OpenFile(opts.Path, os.O_WRONLY|os.O_CREATE, 0666)
@@ -257,7 +256,7 @@ func TestWriteFileOptions(t *testing.T) {
 
 					fileContent, err := os.ReadFile(opts.Path)
 					require.NoError(t, err)
-					assert.Equal(t, content, fileContent)
+					check.EqualItems(t, content, fileContent)
 				},
 			} {
 				t.Run(testName, func(t *testing.T) {
@@ -288,11 +287,11 @@ func TestWriteFileOptions(t *testing.T) {
 
 					stat, err := os.Stat(opts.Path)
 					require.NoError(t, err)
-					assert.Equal(t, opts.Perm, stat.Mode())
+					check.Equal(t, opts.Perm, stat.Mode())
 				},
 				"FailsWithoutFile": func(t *testing.T, opts WriteFile) {
 					opts.Perm = 0400
-					assert.Error(t, opts.SetPerm())
+					check.Error(t, opts.SetPerm())
 				},
 			} {
 				t.Run(testName, func(t *testing.T) {

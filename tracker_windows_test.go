@@ -10,8 +10,8 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/testutil"
 )
@@ -35,7 +35,7 @@ func TestWindowsProcessTracker(t *testing.T) {
 			require.NotNil(t, tracker.job)
 			info, err := QueryInformationJobObjectProcessIdList(tracker.job.handle)
 			check.NotError(t, err)
-			assert.Equal(t, 0, int(info.NumberOfAssignedProcesses))
+			check.Equal(t, 0, int(info.NumberOfAssignedProcesses))
 		},
 		"AddProcessToTrackerAssignsPID": func(ctx context.Context, t *testing.T, tracker *windowsProcessTracker, opts *options.Create) {
 			opts1, opts2 := opts, opts.Copy()
@@ -49,9 +49,9 @@ func TestWindowsProcessTracker(t *testing.T) {
 
 			info, err := QueryInformationJobObjectProcessIdList(tracker.job.handle)
 			check.NotError(t, err)
-			assert.Equal(t, 2, int(info.NumberOfAssignedProcesses))
-			assert.Contains(t, info.ProcessIdList, uint64(proc1.Info(ctx).PID))
-			assert.Contains(t, info.ProcessIdList, uint64(proc2.Info(ctx).PID))
+			check.Equal(t, 2, int(info.NumberOfAssignedProcesses))
+			check.Contains(t, info.ProcessIdList, uint64(proc1.Info(ctx).PID))
+			check.Contains(t, info.ProcessIdList, uint64(proc2.Info(ctx).PID))
 		},
 		"AddedProcessIsTerminatedOnCleanup": func(ctx context.Context, t *testing.T, tracker *windowsProcessTracker, opts *options.Create) {
 			proc, err := newBasicProcess(ctx, opts)
@@ -61,16 +61,16 @@ func TestWindowsProcessTracker(t *testing.T) {
 
 			info, err := QueryInformationJobObjectProcessIdList(tracker.job.handle)
 			check.NotError(t, err)
-			assert.Equal(t, 1, int(info.NumberOfAssignedProcesses))
-			assert.Contains(t, info.ProcessIdList, uint64(proc.Info(ctx).PID))
+			check.Equal(t, 1, int(info.NumberOfAssignedProcesses))
+			check.Contains(t, info.ProcessIdList, uint64(proc.Info(ctx).PID))
 
 			check.NotError(t, tracker.Cleanup())
 
 			exitCode, err := proc.Wait(ctx)
-			assert.Zero(t, exitCode)
+			check.Zero(t, exitCode)
 			check.NotError(t, err)
-			assert.Nil(t, ctx.Err())
-			assert.True(t, proc.Complete(ctx))
+			check.NotError(t, ctx.Err())
+			check.True(t, proc.Complete(ctx))
 		},
 		"CleanupWithNoProcessesDoesNotError": func(ctx context.Context, t *testing.T, tracker *windowsProcessTracker, opts *options.Create) {
 			check.NotError(t, tracker.Cleanup())
@@ -83,17 +83,17 @@ func TestWindowsProcessTracker(t *testing.T) {
 
 			info, err := QueryInformationJobObjectProcessIdList(tracker.job.handle)
 			check.NotError(t, err)
-			assert.Equal(t, 1, int(info.NumberOfAssignedProcesses))
-			assert.Contains(t, info.ProcessIdList, uint64(proc.Info(ctx).PID))
+			check.Equal(t, 1, int(info.NumberOfAssignedProcesses))
+			check.Contains(t, info.ProcessIdList, uint64(proc.Info(ctx).PID))
 
 			check.NotError(t, tracker.Cleanup())
 			check.NotError(t, tracker.Cleanup())
 
 			exitCode, err := proc.Wait(ctx)
-			assert.Zero(t, exitCode)
+			check.Zero(t, exitCode)
 			check.NotError(t, err)
-			assert.Nil(t, ctx.Err())
-			assert.True(t, proc.Complete(ctx))
+			check.NotError(t, ctx.Err())
+			check.True(t, proc.Complete(ctx))
 		},
 		"CanAddProcessAfterCleanup": func(ctx context.Context, t *testing.T, tracker *windowsProcessTracker, opts *options.Create) {
 			check.NotError(t, tracker.Cleanup())
@@ -104,7 +104,7 @@ func TestWindowsProcessTracker(t *testing.T) {
 			check.NotError(t, tracker.Add(proc.Info(ctx)))
 			info, err := QueryInformationJobObjectProcessIdList(tracker.job.handle)
 			check.NotError(t, err)
-			assert.Equal(t, 1, int(info.NumberOfAssignedProcesses))
+			check.Equal(t, 1, int(info.NumberOfAssignedProcesses))
 		},
 		// "": func(ctx context.Context, t *testing.T, tracker *windowsProcessTracker) {},
 	} {

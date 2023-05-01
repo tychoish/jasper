@@ -9,7 +9,6 @@ import (
 	"syscall"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper/options"
@@ -32,34 +31,34 @@ func TestLinuxProcessTrackerWithCgroups(t *testing.T) {
 					require.True(t, tracker.validCgroup())
 					pids, err := tracker.listCgroupPIDs()
 					require.NoError(t, err)
-					assert.Equal(t, len(pids), 0)
+					check.Equal(t, len(pids), 0)
 				},
 				"NilCgroupIsInvalid": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc Process) {
 					tracker.cgroup = nil
-					assert.False(t, tracker.validCgroup())
+					check.False(t, tracker.validCgroup())
 				},
 				"DeletedCgroupIsInvalid": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc Process) {
 					require.NoError(t, tracker.cgroup.Delete())
-					assert.False(t, tracker.validCgroup())
+					check.False(t, tracker.validCgroup())
 				},
 				"SetDefaultCgroupIfInvalidNoopsIfCgroupIsValid": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc Process) {
 					cgroup := tracker.cgroup
-					assert.NotNil(t, cgroup)
+					check.True(t, cgroup != nil)
 					check.NotError(t, tracker.setDefaultCgroupIfInvalid())
-					assert.Equal(t, cgroup, tracker.cgroup)
+					check.True(t, cgroup == tracker.cgroup)
 				},
 				"SetDefaultCgroupIfNilSetsIfCgroupIsInvalid": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc Process) {
 					tracker.cgroup = nil
 					check.NotError(t, tracker.setDefaultCgroupIfInvalid())
-					assert.NotNil(t, tracker.cgroup)
+					check.True(t, tracker.cgroup != nil)
 				},
 				"AddNewProcessSucceeds": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc Process) {
 					check.NotError(t, tracker.Add(proc.Info(ctx)))
 
 					pids, err := tracker.listCgroupPIDs()
 					require.NoError(t, err)
-					assert.Equal(t, len(pids), 1)
-					assert.Contains(t, pids, proc.Info(ctx).PID)
+					check.Equal(t, len(pids), 1)
+					check.Contains(t, pids, proc.Info(ctx).PID)
 				},
 				"DoubleAddProcessSucceedsButDoesNotDuplicateProcessInCgroup": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc Process) {
 					pid := proc.Info(ctx).PID
@@ -68,8 +67,8 @@ func TestLinuxProcessTrackerWithCgroups(t *testing.T) {
 
 					pids, err := tracker.listCgroupPIDs()
 					require.NoError(t, err)
-					assert.Equal(t, len(pids), 1)
-					assert.Contains(t, pids, pid)
+					check.Equal(t, len(pids), 1)
+					check.Contains(t, pids, pid)
 				},
 				"ListCgroupPIDsDoesNotSeeTerminatedProcesses": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc Process) {
 					require.NoError(t, tracker.Add(proc.Info(ctx)))
@@ -78,23 +77,23 @@ func TestLinuxProcessTrackerWithCgroups(t *testing.T) {
 					err := proc.Signal(ctx, syscall.SIGTERM)
 					check.NotError(t, err)
 					exitCode, err := proc.Wait(ctx)
-					assert.Error(t, err)
-					assert.Equal(t, exitCode, int(syscall.SIGTERM))
+					check.Error(t, err)
+					check.Equal(t, exitCode, int(syscall.SIGTERM))
 
 					pids, err := tracker.listCgroupPIDs()
 					require.NoError(t, err)
-					assert.Equal(t, len(pids), 0)
+					check.Equal(t, len(pids), 0)
 				},
 				"ListCgroupPIDsDoesNotErrorIfCgroupDeleted": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc Process) {
 					check.NotError(t, tracker.cgroup.Delete())
 					pids, err := tracker.listCgroupPIDs()
 					check.NotError(t, err)
-					assert.Equal(t, len(pids), 0)
+					check.Equal(t, len(pids), 0)
 				},
 				"CleanupNoProcsSucceeds": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc Process) {
 					pids, err := tracker.listCgroupPIDs()
 					require.NoError(t, err)
-					assert.Equal(t, len(pids), 0)
+					check.Equal(t, len(pids), 0)
 					check.NotError(t, tracker.Cleanup())
 				},
 				"CleanupTerminatesProcessInCgroup": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc Process) {
@@ -110,7 +109,7 @@ func TestLinuxProcessTrackerWithCgroups(t *testing.T) {
 					select {
 					case <-procTerminated:
 					case <-ctx.Done():
-						assert.Fail(t, "context timed out before process was complete")
+						t.Error("context timed out before process was complete")
 					}
 				},
 				"CleanupAfterDoubleAddDoesNotError": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc Process) {
@@ -133,8 +132,8 @@ func TestLinuxProcessTrackerWithCgroups(t *testing.T) {
 					require.NoError(t, tracker.Add(newProc.Info(ctx)))
 					pids, err := tracker.listCgroupPIDs()
 					require.NoError(t, err)
-					assert.Equal(t, len(pids), 1)
-					assert.Contains(t, pids, newProc.Info(ctx).PID)
+					check.Equal(t, len(pids), 1)
+					check.Contains(t, pids, newProc.Info(ctx).PID)
 				},
 			} {
 				t.Run(name, func(t *testing.T) {
@@ -188,7 +187,7 @@ func TestLinuxProcessTrackerWithEnvironmentVariables(t *testing.T) {
 					select {
 					case <-procTerminated:
 					case <-ctx.Done():
-						assert.Fail(t, "context timed out before process was complete")
+						t.Error("context timed out before process was complete")
 					}
 				},
 				"CleanupIgnoresAddedProcessesWithoutEnvironmentVariable": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, opts *options.Create, envVarName string, envVarValue string) {
@@ -202,7 +201,7 @@ func TestLinuxProcessTrackerWithEnvironmentVariables(t *testing.T) {
 					// it.
 					tracker.cgroup = nil
 					check.NotError(t, tracker.Cleanup())
-					assert.True(t, proc.Running(ctx))
+					check.True(t, proc.Running(ctx))
 				},
 				// "": func(ctx, context.Context, t *testing.T, tracker *linuxProcessTracker, envVarName string, envVarValue string) {},
 			} {
@@ -258,7 +257,7 @@ func TestManagerSetsEnvironmentVariables(t *testing.T) {
 					require.NotNil(t, env)
 					value, ok := env[ManagerEnvironID]
 					require.True(t, ok)
-					assert.Equal(t, value, manager.id, "process should have manager environment variable set")
+					check.Equal(t, value, manager.id, "process should have manager environment variable set")
 				},
 				"CreateCommandAddsEnvironmentVariables": func(ctx context.Context, t *testing.T, manager *basicProcessManager) {
 					envVar := ManagerEnvironID
@@ -276,7 +275,7 @@ func TestManagerSetsEnvironmentVariables(t *testing.T) {
 					require.NotNil(t, env)
 					actualValue, ok := env[envVar]
 					require.True(t, ok)
-					assert.Equal(t, value, actualValue)
+					check.Equal(t, value, actualValue)
 				},
 			} {
 				t.Run(testName, func(t *testing.T) {

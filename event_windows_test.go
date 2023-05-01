@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper/options"
 )
 
@@ -61,8 +61,8 @@ func TestMongodShutdownEvent(t *testing.T) {
 
 			exitCode, err := proc.Wait(ctx)
 			check.NotError(t, err)
-			assert.Zero(t, exitCode)
-			assert.False(t, proc.Running(ctx))
+			check.Zero(t, exitCode)
+			check.True(t, !proc.Running(ctx))
 		})
 	}
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper/options"
@@ -48,30 +47,30 @@ func TestSelfClearingManager(t *testing.T) {
 				"SucceedsWhenFree": func(ctx context.Context, t *testing.T, manager *selfClearingProcessManager, mod testutil.OptsModify) {
 					proc, err := createFunc(ctx, manager, t, testutil.TrueCreateOpts())
 					check.NotError(t, err)
-					assert.NotNil(t, proc)
+					check.NotZero(t, proc.ID())
 				},
 				"ErrorsWhenFull": func(ctx context.Context, t *testing.T, manager *selfClearingProcessManager, mod testutil.OptsModify) {
 					fillUp(ctx, t, manager, manager.maxProcs)
 
 					sleep, err := createFunc(ctx, manager, t, testutil.SleepCreateOpts(10))
-					assert.Error(t, err)
-					assert.Nil(t, sleep)
+					check.Error(t, err)
+					check.True(t, sleep == nil)
 				},
 				"PartiallySucceedsWhenAlmostFull": func(ctx context.Context, t *testing.T, manager *selfClearingProcessManager, mod testutil.OptsModify) {
 					fillUp(ctx, t, manager, manager.maxProcs-1)
 					firstSleep, err := createFunc(ctx, manager, t, testutil.SleepCreateOpts(10))
 					check.NotError(t, err)
-					assert.NotNil(t, firstSleep)
+					check.NotZero(t, firstSleep.ID())
 					secondSleep, err := createFunc(ctx, manager, t, testutil.SleepCreateOpts(10))
-					assert.Error(t, err)
-					assert.Nil(t, secondSleep)
+					check.Error(t, err)
+					check.True(t, secondSleep == nil)
 				},
 				"InitialFailureIsResolvedByWaiting": func(ctx context.Context, t *testing.T, manager *selfClearingProcessManager, mod testutil.OptsModify) {
 					fillUp(ctx, t, manager, manager.maxProcs)
 					sleepOpts := testutil.SleepCreateOpts(100)
 					sleepProc, err := createFunc(ctx, manager, t, sleepOpts)
-					assert.Error(t, err)
-					assert.Nil(t, sleepProc)
+					check.Error(t, err)
+					check.True(t, sleepProc == nil)
 					otherSleepProcs, err := manager.List(ctx, options.All)
 					require.NoError(t, err)
 					for _, otherSleepProc := range otherSleepProcs {
@@ -80,7 +79,7 @@ func TestSelfClearingManager(t *testing.T) {
 					}
 					sleepProc, err = createFunc(ctx, manager, t, sleepOpts)
 					check.NotError(t, err)
-					assert.NotNil(t, sleepProc)
+					check.True(t, sleepProc != nil)
 				},
 				//"": func(ctx context.Context, t *testing.T, manager *selfClearingProcessManager) {},
 			} {

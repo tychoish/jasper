@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper/options"
@@ -21,9 +20,9 @@ func TestDefaultTrigger(t *testing.T) {
 			require.NotNil(t, ctx)
 			out, err := manager.List(ctx, options.All)
 			require.NoError(t, err)
-			assert.Empty(t, out)
-			assert.NotNil(t, MakeDefaultTrigger(ctx, manager, testutil.TrueCreateOpts(), parentID))
-			assert.NotNil(t, MakeDefaultTrigger(ctx, manager, nil, ""))
+			check.Equal(t, len(out), 0)
+			check.True(t, MakeDefaultTrigger(ctx, manager, testutil.TrueCreateOpts(), parentID) != nil)
+			check.True(t, MakeDefaultTrigger(ctx, manager, nil, "") != nil)
 		},
 		"OneOnFailure": func(ctx context.Context, t *testing.T, manager Manager) {
 			opts := testutil.FalseCreateOpts()
@@ -38,7 +37,7 @@ func TestDefaultTrigger(t *testing.T) {
 			_, err = out[0].Wait(ctx)
 			require.NoError(t, err)
 			info := out[0].Info(ctx)
-			assert.True(t, info.IsRunning || info.Complete)
+			check.True(t, info.IsRunning || info.Complete)
 		},
 		"OneOnSuccess": func(ctx context.Context, t *testing.T, manager Manager) {
 			opts := testutil.TrueCreateOpts()
@@ -51,7 +50,7 @@ func TestDefaultTrigger(t *testing.T) {
 			require.NoError(t, err)
 			require.Equal(t, len(out), 1)
 			info := out[0].Info(ctx)
-			assert.True(t, info.IsRunning || info.Complete)
+			check.True(t, info.IsRunning || info.Complete)
 		},
 		"FailureTriggerDoesNotWorkWithCanceledContext": func(ctx context.Context, t *testing.T, manager Manager) {
 			cctx, cancel := context.WithCancel(ctx)
@@ -64,7 +63,7 @@ func TestDefaultTrigger(t *testing.T) {
 
 			out, err := manager.List(ctx, options.All)
 			require.NoError(t, err)
-			assert.Empty(t, out)
+			check.Equal(t, 0, len(out))
 		},
 		"SuccessTriggerDoesNotWorkWithCanceledContext": func(ctx context.Context, t *testing.T, manager Manager) {
 			cctx, cancel := context.WithCancel(ctx)
@@ -77,21 +76,21 @@ func TestDefaultTrigger(t *testing.T) {
 
 			out, err := manager.List(ctx, options.All)
 			require.NoError(t, err)
-			assert.Empty(t, out)
+			check.Equal(t, 0, len(out))
 		},
 		"SuccessOutcomeWithNoTriggers": func(ctx context.Context, t *testing.T, manager Manager) {
 			trigger := MakeDefaultTrigger(ctx, manager, testutil.TrueCreateOpts(), parentID)
 			trigger(ProcessInfo{})
 			out, err := manager.List(ctx, options.All)
 			require.NoError(t, err)
-			assert.Empty(t, out)
+			check.Equal(t, 0, len(out))
 		},
 		"FailureOutcomeWithNoTriggers": func(ctx context.Context, t *testing.T, manager Manager) {
 			trigger := MakeDefaultTrigger(ctx, manager, testutil.TrueCreateOpts(), parentID)
 			trigger(ProcessInfo{Successful: true})
 			out, err := manager.List(ctx, options.All)
 			require.NoError(t, err)
-			assert.Empty(t, out)
+			check.Equal(t, 0, len(out))
 		},
 		"TimeoutWithTimeout": func(ctx context.Context, t *testing.T, manager Manager) {
 			opts := testutil.FalseCreateOpts()
@@ -109,7 +108,7 @@ func TestDefaultTrigger(t *testing.T) {
 			_, err = out[0].Wait(ctx)
 			check.NotError(t, err)
 			info := out[0].Info(ctx)
-			assert.True(t, info.IsRunning || info.Complete)
+			check.True(t, info.IsRunning || info.Complete)
 		},
 		"TimeoutWithoutTimeout": func(ctx context.Context, t *testing.T, manager Manager) {
 			opts := testutil.FalseCreateOpts()
@@ -125,7 +124,7 @@ func TestDefaultTrigger(t *testing.T) {
 			_, err = out[0].Wait(ctx)
 			check.NotError(t, err)
 			info := out[0].Info(ctx)
-			assert.True(t, info.IsRunning || info.Complete)
+			check.True(t, info.IsRunning || info.Complete)
 		},
 		"TimeoutWithCanceledContext": func(ctx context.Context, t *testing.T, manager Manager) {
 			cctx, cancel := context.WithCancel(ctx)
@@ -140,7 +139,7 @@ func TestDefaultTrigger(t *testing.T) {
 
 			out, err := manager.List(ctx, options.All)
 			require.NoError(t, err)
-			assert.Empty(t, out)
+			check.Equal(t, 0, len(out))
 		},
 		"OptionsCloseTriggerCallsClosers": func(ctx context.Context, t *testing.T, manager Manager) {
 			count := 0
@@ -150,7 +149,7 @@ func TestDefaultTrigger(t *testing.T) {
 
 			trigger := makeOptionsCloseTrigger()
 			trigger(info)
-			assert.Equal(t, 1, count)
+			check.Equal(t, 1, count)
 		},
 		// "": func(ctx context.Context, t *testing.T, manager Manager) {},
 	} {

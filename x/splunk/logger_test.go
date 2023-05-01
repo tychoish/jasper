@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/grip/send"
 	"github.com/tychoish/grip/x/splunk"
 	"github.com/tychoish/jasper/options"
@@ -50,8 +50,8 @@ func TestLogger(t *testing.T) {
 			// 	},
 			// }
 			cmd, _, err := opts.Resolve(ctx)
-			assert.Error(t, err)
-			assert.Nil(t, cmd)
+			check.Error(t, err)
+			check.True(t, cmd == nil)
 		},
 		"ResolveFailsWithInvalidErrorLoggingConfiguration": func(t *testing.T, opts *options.Create) {
 			config, err := json.Marshal(&SplunkLoggerOptions{
@@ -72,8 +72,8 @@ func TestLogger(t *testing.T) {
 			// }
 			opts.Output.SuppressOutput = true
 			cmd, _, err := opts.Resolve(ctx)
-			assert.Error(t, err)
-			assert.Nil(t, cmd)
+			check.Error(t, err)
+			check.True(t, cmd == nil)
 		},
 	} {
 		t.Run(name, func(t *testing.T) {

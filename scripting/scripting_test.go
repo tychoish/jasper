@@ -10,7 +10,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper"
@@ -279,14 +278,13 @@ func TestScriptingHarness(t *testing.T) {
 
 				t.Run("ID", func(t *testing.T) {
 					require.Equal(t, env.DefaultOptions.ID(), se.ID())
-					assert.Equal(t, len(se.ID()), 40)
+					check.Equal(t, len(se.ID()), 40)
 				})
 				t.Run("Caching", func(t *testing.T) {
 					start := time.Now()
 					require.NoError(t, se.Setup(ctx))
 
-					assert.True(t, time.Since(start) < dur, "%s < %s",
-						time.Since(start), dur)
+					check.True(t, time.Since(start) < dur)
 				})
 			})
 			for _, test := range env.Tests {
