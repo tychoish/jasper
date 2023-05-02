@@ -49,7 +49,7 @@ func unparseFlagSet(c *cli.Context, serviceType string) []string {
 	return []string{}
 }
 
-func requireStringFlag(name string) cli.BeforeFunc {
+func requiretringFlag(name string) cli.BeforeFunc {
 	return func(c *cli.Context) error {
 		if c.String(name) == "" {
 			return fmt.Errorf("must specify string for flag '--%s'", name)

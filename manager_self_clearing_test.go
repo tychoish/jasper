@@ -4,7 +4,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper/options"
@@ -14,7 +13,7 @@ import (
 func registerBasedCreate(ctx context.Context, m *selfClearingProcessManager, t *testing.T, opts *options.Create) (Process, error) {
 	sleep, err := NewBlockingProcess(ctx, testutil.SleepCreateOpts(10))
 	assert.NotError(t, err)
-	require.NotNil(t, sleep)
+	assert.True(t, sleep != nil)
 	err = m.Register(ctx, sleep)
 	if err != nil {
 		// Mimic the behavior of Create()'s error return.
@@ -31,7 +30,7 @@ func pureCreate(ctx context.Context, m *selfClearingProcessManager, t *testing.T
 func fillUp(ctx context.Context, t *testing.T, manager *selfClearingProcessManager, numProcs int) {
 	procs, err := createProcs(ctx, testutil.SleepCreateOpts(5), manager, numProcs)
 	assert.NotError(t, err)
-	require.Equal(t, len(procs), numProcs)
+	assert.Equal(t, len(procs), numProcs)
 }
 
 func TestSelfClearingManager(t *testing.T) {

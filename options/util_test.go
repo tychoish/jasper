@@ -8,22 +8,22 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 )
 
 func TestMakeEnclosingDirectories(t *testing.T) {
 	path := "foo"
 	_, err := os.Stat(path)
-	require.True(t, os.IsNotExist(err))
+	assert.True(t, os.IsNotExist(err))
 	check.NotError(t, makeEnclosingDirectories(path))
 	defer os.RemoveAll(path)
 
 	_, path, _, ok := runtime.Caller(0)
-	require.True(t, ok)
+	assert.True(t, ok)
 	info, err := os.Stat(path)
-	require.False(t, os.IsNotExist(err))
-	require.False(t, info.IsDir())
+	assert.True(t, !os.IsNotExist(err))
+	assert.True(t, !info.IsDir())
 	check.Error(t, makeEnclosingDirectories(path))
 }
 
@@ -128,23 +128,23 @@ func TestWriteFileOptions(t *testing.T) {
 					expected := []byte("foo")
 					opts.Reader = bytes.NewBuffer(expected)
 					reader, err := opts.ContentReader()
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					check.True(t, opts.Reader == reader)
 
 					content, err := io.ReadAll(reader)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					check.EqualItems(t, expected, content)
 				},
 				"SetsReaderIfContentSet": func(t *testing.T, opts WriteFile) {
 					expected := []byte("foo")
 					opts.Content = expected
 					reader, err := opts.ContentReader()
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					check.True(t, reader == opts.Reader)
 					check.Equal(t, len(opts.Content), 0)
 
 					content, err := io.ReadAll(reader)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					check.EqualItems(t, expected, content)
 				},
 			} {
@@ -173,7 +173,7 @@ func TestWriteFileOptions(t *testing.T) {
 					expected := []byte("foo")
 					opts.Content = expected
 					content := []byte{}
-					require.NoError(t, opts.WriteBufferedContent(func(opts WriteFile) error {
+					assert.NotError(t, opts.WriteBufferedContent(func(opts WriteFile) error {
 						content = append(content, opts.Content...)
 						return nil
 					}))
@@ -183,7 +183,7 @@ func TestWriteFileOptions(t *testing.T) {
 					expected := []byte("foo")
 					opts.Reader = bytes.NewBuffer(expected)
 					content := []byte{}
-					require.NoError(t, opts.WriteBufferedContent(func(opts WriteFile) error {
+					assert.NotError(t, opts.WriteBufferedContent(func(opts WriteFile) error {
 						content = append(content, opts.Content...)
 						return nil
 					}))
@@ -200,62 +200,62 @@ func TestWriteFileOptions(t *testing.T) {
 			content := []byte("foo")
 			for testName, testCase := range map[string]func(t *testing.T, opts WriteFile){
 				"AllowsEmptyWriteToCreateFile": func(t *testing.T, opts WriteFile) {
-					require.NoError(t, opts.DoWrite())
+					assert.NotError(t, opts.DoWrite())
 
 					stat, err := os.Stat(opts.Path)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					check.Zero(t, stat.Size())
 				},
 				"WritesWithReader": func(t *testing.T, opts WriteFile) {
 					opts.Reader = bytes.NewBuffer(content)
 
-					require.NoError(t, opts.DoWrite())
+					assert.NotError(t, opts.DoWrite())
 
 					fileContent, err := os.ReadFile(opts.Path)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					check.EqualItems(t, content, fileContent)
 				},
 				"WritesWithContent": func(t *testing.T, opts WriteFile) {
 					opts.Content = content
 
-					require.NoError(t, opts.DoWrite())
+					assert.NotError(t, opts.DoWrite())
 
 					fileContent, err := os.ReadFile(opts.Path)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					check.EqualItems(t, content, fileContent)
 				},
 				"AppendsToFile": func(t *testing.T, opts WriteFile) {
 					f, err := os.OpenFile(opts.Path, os.O_WRONLY|os.O_CREATE, 0666)
 					initialContent := []byte("bar")
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					_, err = f.Write(initialContent)
-					require.NoError(t, err)
-					require.NoError(t, f.Close())
+					assert.NotError(t, err)
+					assert.NotError(t, f.Close())
 
 					opts.Append = true
 					opts.Content = content
 
-					require.NoError(t, opts.DoWrite())
+					assert.NotError(t, opts.DoWrite())
 
 					fileContent, err := os.ReadFile(opts.Path)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					check.EqualItems(t, initialContent, fileContent[:len(initialContent)])
 					check.EqualItems(t, content, fileContent[len(fileContent)-len(content):])
 				},
 				"TruncatesExistingFile": func(t *testing.T, opts WriteFile) {
 					f, err := os.OpenFile(opts.Path, os.O_WRONLY|os.O_CREATE, 0666)
 					initialContent := []byte("bar")
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					_, err = f.Write(initialContent)
-					require.NoError(t, err)
-					require.NoError(t, f.Close())
+					assert.NotError(t, err)
+					assert.NotError(t, f.Close())
 
 					opts.Content = content
 
-					require.NoError(t, opts.DoWrite())
+					assert.NotError(t, opts.DoWrite())
 
 					fileContent, err := os.ReadFile(opts.Path)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					check.EqualItems(t, content, fileContent)
 				},
 			} {
@@ -263,7 +263,7 @@ func TestWriteFileOptions(t *testing.T) {
 					// TODO: we can't use testutil.BuildDirectory() because it
 					// will cause a cycle.
 					cwd, err := os.Getwd()
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					opts := WriteFile{Path: filepath.Join(filepath.Dir(cwd), filepath.Base(t.Name()))}
 					defer func() {
 						check.NotError(t, os.RemoveAll(opts.Path))
@@ -279,14 +279,14 @@ func TestWriteFileOptions(t *testing.T) {
 			for testName, testCase := range map[string]func(t *testing.T, opts WriteFile){
 				"SetsPermissions": func(t *testing.T, opts WriteFile) {
 					f, err := os.OpenFile(opts.Path, os.O_RDWR|os.O_CREATE, 0666)
-					require.NoError(t, err)
-					require.NoError(t, f.Close())
+					assert.NotError(t, err)
+					assert.NotError(t, f.Close())
 
 					opts.Perm = 0400
-					require.NoError(t, opts.SetPerm())
+					assert.NotError(t, opts.SetPerm())
 
 					stat, err := os.Stat(opts.Path)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					check.Equal(t, opts.Perm, stat.Mode())
 				},
 				"FailsWithoutFile": func(t *testing.T, opts WriteFile) {
@@ -298,7 +298,7 @@ func TestWriteFileOptions(t *testing.T) {
 					// TODO: we can't use testutil.BuildDirectory() because it
 					// will cause a cycle.
 					cwd, err := os.Getwd()
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					opts := WriteFile{Path: filepath.Join(filepath.Dir(cwd), filepath.Base(t.Name()))}
 					defer func() {
 						check.NotError(t, os.RemoveAll(opts.Path))

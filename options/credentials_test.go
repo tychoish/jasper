@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 )
 
@@ -38,7 +38,7 @@ WHPbqCRiOwY1nQ2pM714A5AuTHhdUDqB1O6gyHA43LL5Z/qHQF1hwFGPa4NrzQU6
 yuGnBXj8ytqU0CwIPX4WecigUCAkVDNx
 -----END CERTIFICATE-----`)
 	jsonRootCert, err := json.Marshal(pemRootCert)
-	require.NoError(t, err)
+	assert.NotError(t, err)
 
 	pemCert := []byte(`-----BEGIN CERTIFICATE-----
 MIIBhTCCASugAwIBAgIQIRi6zePL6mKjOipn+dNuaTAKBggqhkjOPQQDAjASMRAw
@@ -52,7 +52,7 @@ Wf86aX6PepsntZv2GYlA5UpabfT2EZICICpJ5h/iI+i341gBmLiAFQOyTDT+/wQc
 6MF9+Yw1Yy0t
 -----END CERTIFICATE-----`)
 	jsonCert, err := json.Marshal(pemCert)
-	require.NoError(t, err)
+	assert.NotError(t, err)
 
 	pemKey := []byte(`-----BEGIN EC PRIVATE KEY-----
 MHcCAQEEIIrYSSNQFaA2Hwf1duRSxKtLYX5CB04fSeQ6tF1aY/PuoAoGCCqGSM49
@@ -61,11 +61,11 @@ EKTcWGekdmdDPsHloRNtsiCa697B2O9IFA==
 -----END EC PRIVATE KEY-----
 `)
 	jsonKey, err := json.Marshal(pemKey)
-	require.NoError(t, err)
+	assert.NotError(t, err)
 
 	makeFile := func(t *testing.T) *os.File {
 		file, err := os.CreateTemp("", "creds")
-		require.NoError(t, err)
+		assert.NotError(t, err)
 		return file
 	}
 
@@ -95,7 +95,7 @@ EKTcWGekdmdDPsHloRNtsiCa697B2O9IFA==
 				"ca_cert": %s,
 				"cert": %s
 			}`, jsonRootCert, jsonCert)))
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			_, err = NewCredentialsFromFile(file.Name())
 			check.Error(t, err)
 		},
@@ -110,10 +110,10 @@ EKTcWGekdmdDPsHloRNtsiCa697B2O9IFA==
 				"cert": %s,
 				"key": %s
 			}`, jsonRootCert, jsonCert, jsonKey)))
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			creds, err := NewCredentialsFromFile(file.Name())
-			require.NoError(t, err)
-			require.NotNil(t, creds)
+			assert.NotError(t, err)
+			assert.True(t, creds != nil)
 			check.Equal(t, string(pemRootCert), string(creds.CACert))
 			check.Equal(t, string(pemCert), string(creds.Cert))
 			check.Equal(t, string(pemKey), string(creds.Key))
@@ -125,7 +125,7 @@ EKTcWGekdmdDPsHloRNtsiCa697B2O9IFA==
 				Key:    pemKey,
 			}
 			credBytes, err := creds.Export()
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			check.True(t, bytes.Contains(credBytes, jsonRootCert))
 			check.True(t, bytes.Contains(credBytes, jsonCert))
 			check.True(t, bytes.Contains(credBytes, jsonKey))
@@ -156,7 +156,7 @@ EKTcWGekdmdDPsHloRNtsiCa697B2O9IFA==
 				Key:    pemKey,
 			}
 			config, err := creds.Resolve()
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			check.True(t, config != nil)
 		},
 	} {

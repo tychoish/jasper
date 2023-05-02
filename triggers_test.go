@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/testutil"
@@ -16,10 +16,10 @@ func TestDefaultTrigger(t *testing.T) {
 
 	for name, testcase := range map[string]func(context.Context, *testing.T, Manager){
 		"VerifyFixtures": func(ctx context.Context, t *testing.T, manager Manager) {
-			require.NotNil(t, manager)
-			require.NotNil(t, ctx)
+			assert.True(t, manager != nil)
+			assert.True(t, ctx != nil)
 			out, err := manager.List(ctx, options.All)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			check.Equal(t, len(out), 0)
 			check.True(t, MakeDefaultTrigger(ctx, manager, testutil.TrueCreateOpts(), parentID) != nil)
 			check.True(t, MakeDefaultTrigger(ctx, manager, nil, "") != nil)
@@ -32,10 +32,10 @@ func TestDefaultTrigger(t *testing.T) {
 			trigger(ProcessInfo{})
 
 			out, err := manager.List(ctx, options.All)
-			require.NoError(t, err)
-			require.Equal(t, len(out), 1)
+			assert.NotError(t, err)
+			assert.Equal(t, len(out), 1)
 			_, err = out[0].Wait(ctx)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			info := out[0].Info(ctx)
 			check.True(t, info.IsRunning || info.Complete)
 		},
@@ -47,8 +47,8 @@ func TestDefaultTrigger(t *testing.T) {
 			trigger(ProcessInfo{Successful: true})
 
 			out, err := manager.List(ctx, options.All)
-			require.NoError(t, err)
-			require.Equal(t, len(out), 1)
+			assert.NotError(t, err)
+			assert.Equal(t, len(out), 1)
 			info := out[0].Info(ctx)
 			check.True(t, info.IsRunning || info.Complete)
 		},
@@ -62,7 +62,7 @@ func TestDefaultTrigger(t *testing.T) {
 			trigger(ProcessInfo{})
 
 			out, err := manager.List(ctx, options.All)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			check.Equal(t, 0, len(out))
 		},
 		"SuccessTriggerDoesNotWorkWithCanceledContext": func(ctx context.Context, t *testing.T, manager Manager) {
@@ -75,21 +75,21 @@ func TestDefaultTrigger(t *testing.T) {
 			trigger(ProcessInfo{Successful: true})
 
 			out, err := manager.List(ctx, options.All)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			check.Equal(t, 0, len(out))
 		},
 		"SuccessOutcomeWithNoTriggers": func(ctx context.Context, t *testing.T, manager Manager) {
 			trigger := MakeDefaultTrigger(ctx, manager, testutil.TrueCreateOpts(), parentID)
 			trigger(ProcessInfo{})
 			out, err := manager.List(ctx, options.All)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			check.Equal(t, 0, len(out))
 		},
 		"FailureOutcomeWithNoTriggers": func(ctx context.Context, t *testing.T, manager Manager) {
 			trigger := MakeDefaultTrigger(ctx, manager, testutil.TrueCreateOpts(), parentID)
 			trigger(ProcessInfo{Successful: true})
 			out, err := manager.List(ctx, options.All)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			check.Equal(t, 0, len(out))
 		},
 		"TimeoutWithTimeout": func(ctx context.Context, t *testing.T, manager Manager) {
@@ -103,8 +103,8 @@ func TestDefaultTrigger(t *testing.T) {
 			trigger(ProcessInfo{Timeout: true})
 
 			out, err := manager.List(ctx, options.All)
-			require.NoError(t, err)
-			require.Equal(t, len(out), 1)
+			assert.NotError(t, err)
+			assert.Equal(t, len(out), 1)
 			_, err = out[0].Wait(ctx)
 			check.NotError(t, err)
 			info := out[0].Info(ctx)
@@ -119,8 +119,8 @@ func TestDefaultTrigger(t *testing.T) {
 			trigger(ProcessInfo{Timeout: true})
 
 			out, err := manager.List(ctx, options.All)
-			require.NoError(t, err)
-			require.Equal(t, len(out), 1)
+			assert.NotError(t, err)
+			assert.Equal(t, len(out), 1)
 			_, err = out[0].Wait(ctx)
 			check.NotError(t, err)
 			info := out[0].Info(ctx)
@@ -138,7 +138,7 @@ func TestDefaultTrigger(t *testing.T) {
 			trigger(ProcessInfo{Timeout: true})
 
 			out, err := manager.List(ctx, options.All)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			check.Equal(t, 0, len(out))
 		},
 		"OptionsCloseTriggerCallsClosers": func(ctx context.Context, t *testing.T, manager Manager) {

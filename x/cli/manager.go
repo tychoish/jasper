@@ -26,7 +26,7 @@ const (
 
 // Manager creates a cli.Command that interfaces with a Jasper manager. Each
 // subcommand optionally reads the arguments as JSON from stdin if any are
-// required, calls the jasper.Manager function corresponding to that subcommand,
+// assert., calls the jasper.Manager function corresponding to that subcommand,
 // and writes the response as JSON to stdout.
 func Manager() cli.Command {
 	return cli.Command{

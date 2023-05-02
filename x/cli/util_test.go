@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/evergreen-ci/service"
-	"github.com/stretchr/testify/require"
 	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper"
@@ -90,8 +89,8 @@ func TestWriteOutputInvalidOutput(t *testing.T) {
 func TestMakeRemoteClientInvalidService(t *testing.T) {
 	ctx := context.Background()
 	client, err := newRemoteClient(ctx, "invalid", "localhost", testutil.GetPortNumber(), "")
-	require.Error(t, err)
-	require.Nil(t, client)
+	assert.Error(t, err)
+	assert.True(t, client == nil)
 }
 
 func TestMakeRemoteClient(t *testing.T) {
@@ -122,7 +121,7 @@ func TestCLICommon(t *testing.T) {
 					return withConnection(ctx, c, func(client remote.Manager) error {
 						proc, err := client.CreateProcess(ctx, testutil.TrueCreateOpts())
 						assert.NotError(t, err)
-						require.NotNil(t, proc)
+						assert.True(t, proc != nil)
 						assert.NotZero(t, proc.Info(ctx).PID)
 						return nil
 					})

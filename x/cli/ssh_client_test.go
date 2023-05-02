@@ -9,7 +9,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper"
@@ -84,7 +83,7 @@ func TestSSHClient(t *testing.T) {
 			assert.EqualItems(t, opts.Args, inputChecker.Args)
 
 			sshProc, ok := proc.(*sshProcess)
-			require.True(t, ok)
+			assert.True(t, ok)
 
 			assert.Equal(t, info.ID, sshProc.info.ID)
 		},
@@ -119,7 +118,7 @@ func TestSSHClient(t *testing.T) {
 			cmd := []string{"echo", "foo"}
 			assert.NotError(t, client.CreateCommand(ctx).Add(cmd).Run(ctx))
 
-			require.Equal(t, len(inputChecker.Commands), 1)
+			assert.Equal(t, len(inputChecker.Commands), 1)
 			assert.EqualItems(t, cmd, inputChecker.Commands[0])
 		},
 		"RunCommandFailsIfBaseManagerCreateFails": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
@@ -168,7 +167,7 @@ func TestSSHClient(t *testing.T) {
 			successfulFound := false
 			for _, proc := range procs {
 				sshProc, ok := proc.(*sshProcess)
-				require.True(t, ok)
+				assert.True(t, ok)
 				if sshProc.info.ID == runningInfo.ID {
 					runningFound = true
 				}
@@ -215,9 +214,9 @@ func TestSSHClient(t *testing.T) {
 			assert.NotError(t, err)
 			assert.Equal(t, tag, inputChecker.Tag)
 
-			require.Equal(t, len(procs), 1)
+			assert.Equal(t, len(procs), 1)
 			sshProc, ok := procs[0].(*sshProcess)
-			require.True(t, ok)
+			assert.True(t, ok)
 			assert.Equal(t, info.ID, sshProc.info.ID)
 		},
 		"GroupFailsIfBaseManagerCreateFails": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
@@ -255,7 +254,7 @@ func TestSSHClient(t *testing.T) {
 			assert.Equal(t, id, inputChecker.ID)
 
 			sshProc, ok := proc.(*sshProcess)
-			require.True(t, ok)
+			assert.True(t, ok)
 			assert.Equal(t, info.ID, sshProc.info.ID)
 		},
 		"GetFailsIfBaseManagerCreateFails": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
@@ -435,7 +434,7 @@ func TestSSHClient(t *testing.T) {
 
 			sh, err := client.CreateScripting(ctx, opts)
 			assert.NotError(t, err)
-			require.NotNil(t, sh)
+			assert.True(t, sh != nil)
 			assert.Equal(t, env.ID(), sh.ID())
 		},
 		// "": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {},
@@ -444,7 +443,7 @@ func TestSSHClient(t *testing.T) {
 			client, err := NewSSHClient(mockRemoteOptions(), mockClientOptions(), false)
 			assert.NotError(t, err)
 			sshClient, ok := client.(*sshClient)
-			require.True(t, ok)
+			assert.True(t, ok)
 
 			mockManager := &mock.Manager{}
 			sshClient.manager = jasper.Manager(mockManager)
@@ -473,7 +472,7 @@ func makeCreateFunc(t *testing.T, client *sshClient, expectedClientSubcommand []
 
 		cliCommand := strings.Join(client.opts.buildCommand(expectedClientSubcommand...), " ")
 		assert.Equal(t, cliCommand, strings.Join(opts.Args, " "))
-		require.NotNil(t, expectedResponse)
+		assert.True(t, expectedResponse != nil)
 		assert.NotError(t, writeOutput(opts.Output.Output, expectedResponse))
 		return mock.Process{}
 	}

@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/fun/testt"
 )
@@ -94,10 +94,10 @@ func TestCreate(t *testing.T) {
 			stdinBytesStr := "foo"
 			opts.StandardInputBytes = []byte(stdinBytesStr)
 
-			require.NoError(t, opts.Validate())
+			assert.NotError(t, opts.Validate())
 
 			out, err := io.ReadAll(opts.StandardInput)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			check.Equal(t, stdinBytesStr, string(out))
 		},
 		"StandardInputBytesTakePrecedenceOverStandardInput": func(t *testing.T, opts *Create) {
@@ -107,10 +107,10 @@ func TestCreate(t *testing.T) {
 			stdinBytesStr := "bar"
 			opts.StandardInputBytes = []byte(stdinBytesStr)
 
-			require.NoError(t, opts.Validate())
+			assert.NotError(t, opts.Validate())
 
 			out, err := io.ReadAll(opts.StandardInput)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			check.Equal(t, stdinBytesStr, string(out))
 		},
 		"NonExistingWorkingDirectoryShouldNotValidate": func(t *testing.T, opts *Create) {
@@ -140,8 +140,8 @@ func TestCreate(t *testing.T) {
 		},
 		"WorkingDirectoryUnresolveableShouldNotError": func(t *testing.T, opts *Create) {
 			cmd, _, err := opts.Resolve(ctx)
-			require.NoError(t, err)
-			require.NotNil(t, cmd)
+			assert.NotError(t, err)
+			assert.True(t, cmd != nil)
 			check.NotZero(t, cmd.Dir())
 			check.Equal(t, opts.WorkingDirectory, cmd.Dir())
 		},
@@ -176,14 +176,14 @@ func TestCreate(t *testing.T) {
 			opts.Args = append(opts.Args, "-lha")
 			cmd, _, err := opts.Resolve(ctx)
 			check.NotError(t, err)
-			require.Equal(t, len(cmd.Args()), 2)
+			assert.Equal(t, len(cmd.Args()), 2)
 			check.Equal(t, cmd.Args()[0], "ls")
 			check.Equal(t, cmd.Args()[1], "-lha")
 		},
 		"WithOnlyCommandsArgsHasOneVal": func(t *testing.T, opts *Create) {
 			cmd, _, err := opts.Resolve(ctx)
 			check.NotError(t, err)
-			require.Equal(t, len(cmd.Args()), 1)
+			assert.Equal(t, len(cmd.Args()), 1)
 			check.Equal(t, "ls", cmd.Args()[0])
 		},
 		"WithTimeout": func(t *testing.T, opts *Create) {
@@ -191,7 +191,7 @@ func TestCreate(t *testing.T) {
 			opts.Args = []string{"sleep", "2"}
 
 			cmd, deadline, err := opts.Resolve(ctx)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			check.True(t, time.Now().Before(deadline))
 			check.NotError(t, cmd.Start())
 			check.Error(t, cmd.Wait())
@@ -204,7 +204,7 @@ func TestCreate(t *testing.T) {
 			defer tcancel()
 
 			cmd, deadline, err := opts.Resolve(ctx)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			check.NotError(t, cmd.Start())
 			check.Error(t, cmd.Wait())
 			check.ErrorIs(t, tctx.Err(), context.DeadlineExceeded)
@@ -218,7 +218,7 @@ func TestCreate(t *testing.T) {
 
 			start := time.Now()
 			cmd, deadline, err := opts.Resolve(ctx)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			check.NotError(t, cmd.Start())
 			check.Error(t, cmd.Wait())
 			elapsed := time.Since(start)
@@ -271,7 +271,7 @@ func TestFileLogging(t *testing.T) {
 	badFileName := "this_does_not_exist"
 	// Ensure bad file to cat doesn't exist so that command will write error message to standard error
 	_, err := os.Stat(badFileName)
-	require.True(t, os.IsNotExist(err))
+	assert.True(t, os.IsNotExist(err))
 
 	catOutputMessage := "foobar"
 	outputSize := int64(len(catOutputMessage) + 1)
@@ -280,7 +280,7 @@ func TestFileLogging(t *testing.T) {
 
 	// Ensure good file exists and has data
 	goodFile, err := os.CreateTemp("", "this_file_exists")
-	require.NoError(t, err)
+	assert.NotError(t, err)
 	defer func() {
 		check.NotError(t, goodFile.Close())
 		check.NotError(t, os.RemoveAll(goodFile.Name()))
@@ -288,8 +288,8 @@ func TestFileLogging(t *testing.T) {
 
 	goodFileName := goodFile.Name()
 	numBytes, err := goodFile.Write([]byte(catOutputMessage))
-	require.NoError(t, err)
-	require.NotZero(t, numBytes)
+	assert.NotError(t, err)
+	assert.NotZero(t, numBytes)
 
 	args := map[string][]string{
 		"Output":         {"cat", goodFileName},
@@ -372,13 +372,13 @@ func TestFileLogging(t *testing.T) {
 			files := []*os.File{}
 			for i := 0; i < testParams.numLogs; i++ {
 				file, err := os.CreateTemp("", "out.txt")
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				defer func() {
 					check.NotError(t, file.Close())
 					check.NotError(t, os.RemoveAll(file.Name()))
 				}()
 				info, err := file.Stat()
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				check.Zero(t, info.Size())
 				files = append(files, file)
 			}
@@ -400,8 +400,8 @@ func TestFileLogging(t *testing.T) {
 			opts.Args = testParams.command
 
 			cmd, _, err := opts.Resolve(ctx)
-			require.NoError(t, err)
-			require.NoError(t, cmd.Start())
+			assert.NotError(t, err)
+			assert.NotError(t, cmd.Start())
 
 			_ = cmd.Wait()
 			check.NotError(t, opts.Close())

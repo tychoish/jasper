@@ -9,7 +9,6 @@ import (
 	"syscall"
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper/options"
@@ -30,7 +29,7 @@ func TestBasicManagerWithTrackedProcesses(t *testing.T) {
 		t.Run(managerName, func(t *testing.T) {
 			for testName, testCase := range map[string]func(context.Context, *testing.T, *basicProcessManager, *windowsProcessTracker, *options.Create){
 				"ProcessTrackerCreatedEmpty": func(_ context.Context, t *testing.T, m *basicProcessManager, tracker *windowsProcessTracker, _ *options.Create) {
-					require.NotNil(t, tracker.job)
+					assert.True(t, tracker.job != nil)
 
 					info, err := QueryInformationJobObjectProcessIdList(tracker.job.handle)
 					check.NotError(t, err)
@@ -95,7 +94,7 @@ func TestBasicManagerWithTrackedProcesses(t *testing.T) {
 					defer cancel()
 					manager := makeManager(tctx, t)
 					tracker, ok := manager.tracker.(*windowsProcessTracker)
-					require.True(t, ok)
+					assert.True(t, ok)
 					testCase(tctx, t, manager, tracker, testutil.SleepCreateOpts(1))
 				})
 			}

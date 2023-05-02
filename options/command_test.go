@@ -5,7 +5,7 @@ import (
 
 	"errors"
 
-	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
@@ -34,15 +34,15 @@ func (t *testPostHook) hook(err error) error {
 func TestCommand(t *testing.T) {
 	t.Run("Validate", func(t *testing.T) {
 		t.Run("InvalidByDefault", func(t *testing.T) {
-			require.Error(t, (&Command{}).Validate())
+			assert.Error(t, (&Command{}).Validate())
 		})
 		t.Run("ValidatePopulatesProcessArgs", func(t *testing.T) {
 			opts := &Command{}
 			check.True(t, opts.Process.Args == nil)
-			require.Error(t, opts.Validate())
+			assert.Error(t, opts.Validate())
 			check.True(t, opts.Process.Args != nil)
-			require.Equal(t, len(opts.Process.Args), 1)
-			require.Equal(t, "", opts.Process.Args[0])
+			assert.Equal(t, len(opts.Process.Args), 1)
+			assert.Equal(t, "", opts.Process.Args[0])
 		})
 		t.Run("Valid", func(t *testing.T) {
 			opts := &Command{
@@ -62,10 +62,10 @@ func TestCommand(t *testing.T) {
 		cmd := &Command{ID: "TEST"}
 		check.True(t, !sender.HasMessage())
 		hook(cmd, &Create{})
-		require.True(t, sender.HasMessage())
+		assert.True(t, sender.HasMessage())
 		check.Equal(t, 1, sender.Len())
 		msg, ok := sender.GetMessage().Message.Raw().(message.Fields)
-		require.True(t, ok)
+		assert.True(t, ok)
 		check.Equal(t, cmd.ID, msg["id"].(string))
 	})
 	t.Run("PrehookConstrcutors", func(t *testing.T) {

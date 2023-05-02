@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/require"
 	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/grip"
@@ -202,7 +201,7 @@ func TestBlockingProcess(t *testing.T) {
 
 					go proc.reactor(ctx, deadline, cmd)
 					_, err = proc.Wait(cctx)
-					require.Error(t, err)
+					assert.Error(t, err)
 					check.Substring(t, err.Error(), "operation canceled")
 				},
 				"WaitShouldReturnNilForSuccessfulCommandsWithoutIDs": func(ctx context.Context, t *testing.T, proc *blockingProcess) {

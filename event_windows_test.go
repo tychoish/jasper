@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/require"
 	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper/options"
@@ -38,7 +37,7 @@ func TestMongodShutdownEvent(t *testing.T) {
 			optslist, dbPaths, err := setupMongods(1, mongodPath)
 			assert.NotError(t, err)
 			defer removeDBPaths(dbPaths)
-			require.Equal(t, 1, len(optslist))
+			assert.Equal(t, 1, len(optslist))
 
 			opts = optslist[0]
 			logger := &options.LoggerConfig{}

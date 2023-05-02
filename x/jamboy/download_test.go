@@ -12,7 +12,6 @@ import (
 	"testing"
 
 	"github.com/mholt/archiver"
-	"github.com/stretchr/testify/require"
 	"github.com/tychoish/amboy/queue"
 	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
@@ -24,7 +23,7 @@ import (
 
 func TestCreateValidDownloadJobs(t *testing.T) {
 	dir, err := os.MkdirTemp(testutil.BuildDirectory(), "out")
-	require.NoError(t, err)
+	assert.NotError(t, err)
 	defer os.RemoveAll(dir)
 
 	urls := make(chan string)
@@ -48,7 +47,7 @@ func TestCreateValidDownloadJobs(t *testing.T) {
 
 func TestCreateDownloadJobsWithInvalidPath(t *testing.T) {
 	_, dir, _, ok := runtime.Caller(0)
-	require.True(t, ok)
+	assert.True(t, ok)
 	urls := make(chan string)
 	testURL := "https://example.com"
 
@@ -63,7 +62,7 @@ func TestCreateDownloadJobsWithInvalidPath(t *testing.T) {
 		t.Error("should not create job for bad url")
 	}
 	err := catcher.Resolve()
-	require.Error(t, err)
+	assert.Error(t, err)
 	check.Substring(t, err.Error(), "problem creating download job for "+testURL)
 }
 
@@ -72,16 +71,16 @@ func TestProcessDownloadJobs(t *testing.T) {
 	defer cancel()
 
 	downloadDir, err := os.MkdirTemp(testutil.BuildDirectory(), "download_test")
-	require.NoError(t, err)
+	assert.NotError(t, err)
 	defer os.RemoveAll(downloadDir)
 
 	fileServerDir, err := os.MkdirTemp(testutil.BuildDirectory(), "download_test_server")
-	require.NoError(t, err)
+	assert.NotError(t, err)
 	defer os.RemoveAll(fileServerDir)
 
 	fileName := "foo.zip"
 	fileContents := "foo"
-	require.NoError(t, AddFileToDirectory(fileServerDir, fileName, fileContents))
+	assert.NotError(t, AddFileToDirectory(fileServerDir, fileName, fileContents))
 	port := testutil.GetPortNumber()
 	fileServerAddr := fmt.Sprintf("localhost:%d", port)
 	fileServer := &http.Server{Addr: fileServerAddr, Handler: http.FileServer(http.Dir(fileServerDir))}
@@ -89,23 +88,23 @@ func TestProcessDownloadJobs(t *testing.T) {
 		check.NotError(t, fileServer.Close())
 	}()
 	listener, err := net.Listen("tcp", fileServerAddr)
-	require.NoError(t, err)
+	assert.NotError(t, err)
 	go func() {
 		grip.Info(fileServer.Serve(listener))
 	}()
 
 	baseURL := fmt.Sprintf("http://%s", fileServerAddr)
-	require.NoError(t, testutil.WaitForRESTService(ctx, baseURL))
+	assert.NotError(t, testutil.WaitForRESTService(ctx, baseURL))
 
 	job, err := NewDownloadJob(fmt.Sprintf("%s/%s", baseURL, fileName), downloadDir, true)
-	require.NoError(t, err)
+	assert.NotError(t, err)
 
 	q := queue.NewLocalLimitedSize(&queue.FixedSizeQueueOptions{
 		Workers:  2,
 		Capacity: 1048,
 	})
-	require.NoError(t, q.Start(ctx))
-	require.NoError(t, q.Put(ctx, job))
+	assert.NotError(t, q.Start(ctx))
+	assert.NotError(t, q.Put(ctx, job))
 
 	checkFileNonempty := func(fileName string) error {
 		info, err := os.Stat(fileName)
@@ -162,26 +161,26 @@ func TestDoExtract(t *testing.T) {
 	} {
 		t.Run(testName, func(t *testing.T) {
 			tempDir, err := os.MkdirTemp(testutil.BuildDirectory(), "")
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			defer os.RemoveAll(tempDir)
 
 			file, err := os.Create(filepath.Join(tempDir, "out.txt"))
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			defer os.Remove(file.Name())
 
 			archiveFile, err := os.Create(filepath.Join(tempDir, "out"+testCase.fileExtension))
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			defer os.Remove(archiveFile.Name())
 			extractDir := filepath.Join(testutil.BuildDirectory(), "out")
-			require.NoError(t, os.MkdirAll(extractDir, 0755))
+			assert.NotError(t, os.MkdirAll(extractDir, 0755))
 			defer os.RemoveAll(extractDir)
 
 			err = testCase.archiveMaker.Archive([]string{file.Name()}, "second-"+archiveFile.Name())
 			if testCase.invalidCreate {
-				require.Error(t, err)
+				assert.Error(t, err)
 				return
 			}
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			opts := options.Download{
 				Path: "second-" + archiveFile.Name(),
@@ -198,11 +197,11 @@ func TestDoExtract(t *testing.T) {
 			check.NotError(t, opts.Extract())
 
 			fileInfo, err := os.Stat("second-" + archiveFile.Name())
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			assert.NotZero(t, fileInfo.Size())
 
 			dirEntry, err := os.ReadDir(extractDir)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			assert.Equal(t, 1, len(dirEntry))
 		})
 	}
@@ -210,7 +209,7 @@ func TestDoExtract(t *testing.T) {
 
 func TestDoExtractUnarchivedFile(t *testing.T) {
 	file, err := os.CreateTemp(testutil.BuildDirectory(), "out.txt")
-	require.NoError(t, err)
+	assert.NotError(t, err)
 	defer os.Remove(file.Name())
 
 	opts := options.Download{
@@ -223,7 +222,7 @@ func TestDoExtractUnarchivedFile(t *testing.T) {
 		},
 	}
 	err = opts.Extract()
-	require.Error(t, err)
+	assert.Error(t, err)
 	assert.Substring(t, err.Error(), "could not detect archive format")
 }
 

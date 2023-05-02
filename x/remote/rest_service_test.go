@@ -14,7 +14,6 @@ import (
 	"syscall"
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper"
@@ -142,7 +141,7 @@ func TestRestService(t *testing.T) {
 			proc.Tag("a")
 
 			out := proc.GetTags()
-			assert.Nil(t, out)
+			assert.True(t, out == nil)
 
 			proc.ResetTags()
 
@@ -170,7 +169,7 @@ func TestRestService(t *testing.T) {
 			proc.Tag("a")
 
 			out := proc.GetTags()
-			assert.Nil(t, out)
+			assert.True(t, out == nil)
 
 			proc.ResetTags()
 
@@ -187,7 +186,7 @@ func TestRestService(t *testing.T) {
 			proc.Tag("a")
 
 			out := proc.GetTags()
-			assert.Nil(t, out)
+			assert.True(t, out == nil)
 
 			proc.ResetTags()
 		},
@@ -251,7 +250,7 @@ func TestRestService(t *testing.T) {
 			srv.manager = &mock.Manager{FailCreate: true}
 			proc, err := client.CreateProcess(ctx, testutil.TrueCreateOpts())
 			assert.Error(t, err)
-			assert.Nil(t, proc)
+			assert.True(t, proc == nil)
 			assert.Contains(t, err.Error(), "problem submitting request")
 		},
 		"CreateFailsForTriggerReasons": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
@@ -259,8 +258,8 @@ func TestRestService(t *testing.T) {
 				CreateConfig: mock.Process{FailRegisterTrigger: true},
 			}
 			proc, err := client.CreateProcess(ctx, testutil.TrueCreateOpts())
-			require.Error(t, err)
-			assert.Nil(t, proc)
+			assert.Error(t, err)
+			assert.True(t, proc == nil)
 			assert.Contains(t, err.Error(), "problem registering trigger")
 		},
 		"MetricsPopulatedForValidProcess": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
@@ -340,7 +339,7 @@ func TestRestService(t *testing.T) {
 
 			proc, err := client.CreateProcess(ctx, opts)
 			assert.NotError(t, err)
-			require.NotNil(t, proc)
+			assert.True(t, proc != nil)
 
 			_, err = proc.Wait(ctx)
 			assert.NotError(t, err)
@@ -455,7 +454,7 @@ func TestRestService(t *testing.T) {
 
 			srv, port, err := startRESTService(ctx, httpClient)
 			assert.NotError(t, err)
-			require.NotNil(t, srv)
+			assert.True(t, srv != nil)
 
 			assert.NotError(t, err)
 			client := &restClient{

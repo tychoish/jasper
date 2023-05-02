@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper/options"
 )
@@ -37,7 +37,7 @@ func TestLogging(t *testing.T) {
 				check.NotError(t, cache.Put("id", &options.CachedLogger{ID: "id"}))
 				check.Equal(t, 1, cache.Len())
 				lg := cache.Get("id")
-				require.NotNil(t, lg)
+				assert.True(t, lg != nil)
 				check.Equal(t, "id", lg.ID)
 			},
 		},
@@ -64,19 +64,19 @@ func TestLogging(t *testing.T) {
 			Name: "CreateDuplicateProtection",
 			Case: func(t *testing.T, cache LoggingCache) {
 				cl, err := cache.Create("id", &options.Output{})
-				require.NoError(t, err)
-				require.NotNil(t, cl)
+				assert.NotError(t, err)
+				assert.True(t, cl != nil)
 
 				cl, err = cache.Create("id", &options.Output{})
-				require.Error(t, err)
-				require.Nil(t, cl)
+				assert.Error(t, err)
+				assert.True(t, cl == nil)
 			},
 		},
 		{
 			Name: "CreateAccessTime",
 			Case: func(t *testing.T, cache LoggingCache) {
 				cl, err := cache.Create("id", &options.Output{})
-				require.NoError(t, err)
+				assert.NotError(t, err)
 
 				check.True(t, time.Since(cl.Accessed) <= time.Millisecond)
 			},
@@ -87,22 +87,22 @@ func TestLogging(t *testing.T) {
 				ctx := context.TODO()
 				sender := options.NewMockSender("output")
 
-				require.NoError(t, cache.Put("id0", &options.CachedLogger{
+				assert.NotError(t, cache.Put("id0", &options.CachedLogger{
 					Output: sender,
 				}))
-				require.NoError(t, cache.Put("id1", &options.CachedLogger{}))
-				require.NotNil(t, cache.Get("id0"))
-				require.NoError(t, cache.CloseAndRemove(ctx, "id0"))
-				require.Nil(t, cache.Get("id0"))
+				assert.NotError(t, cache.Put("id1", &options.CachedLogger{}))
+				assert.True(t, cache.Get("id0") != nil)
+				assert.NotError(t, cache.CloseAndRemove(ctx, "id0"))
+				assert.True(t, cache.Get("id0") == nil)
 				check.NotZero(t, cache.Get("id1"))
-				require.True(t, sender.Closed)
+				assert.True(t, sender.Closed)
 
-				require.NoError(t, cache.Put("id0", &options.CachedLogger{
+				assert.NotError(t, cache.Put("id0", &options.CachedLogger{
 					Output: sender,
 				}))
-				require.NotNil(t, cache.Get("id0"))
+				assert.True(t, cache.Get("id0") != nil)
 				check.Error(t, cache.CloseAndRemove(ctx, "id0"))
-				require.Nil(t, cache.Get("id0"))
+				assert.True(t, cache.Get("id0") == nil)
 			},
 		},
 		{
@@ -112,28 +112,28 @@ func TestLogging(t *testing.T) {
 				sender0 := options.NewMockSender("output")
 				sender1 := options.NewMockSender("output")
 
-				require.NoError(t, cache.Put("id0", &options.CachedLogger{
+				assert.NotError(t, cache.Put("id0", &options.CachedLogger{
 					Output: sender0,
 				}))
-				require.NoError(t, cache.Put("id1", &options.CachedLogger{
+				assert.NotError(t, cache.Put("id1", &options.CachedLogger{
 					Output: sender1,
 				}))
-				require.NotNil(t, cache.Get("id0"))
-				require.NotNil(t, cache.Get("id1"))
-				require.NoError(t, cache.Clear(ctx))
-				require.Nil(t, cache.Get("id0"))
-				require.Nil(t, cache.Get("id1"))
-				require.True(t, sender0.Closed)
-				require.True(t, sender1.Closed)
+				assert.True(t, cache.Get("id0") != nil)
+				assert.True(t, cache.Get("id1") != nil)
+				assert.NotError(t, cache.Clear(ctx))
+				assert.True(t, cache.Get("id0") == nil)
+				assert.True(t, cache.Get("id1") == nil)
+				assert.True(t, sender0.Closed)
+				assert.True(t, sender1.Closed)
 
-				require.NoError(t, cache.Put("id0", &options.CachedLogger{
+				assert.NotError(t, cache.Put("id0", &options.CachedLogger{
 					Output: sender0,
 				}))
-				require.NoError(t, cache.Put("id1", &options.CachedLogger{
+				assert.NotError(t, cache.Put("id1", &options.CachedLogger{
 					Output: sender1,
 				}))
-				require.NotNil(t, cache.Get("id0"))
-				require.NotNil(t, cache.Get("id1"))
+				assert.True(t, cache.Get("id0") != nil)
+				assert.True(t, cache.Get("id1") != nil)
 				_ = cache.Clear(ctx)
 				check.Zero(t, cache.Get("id0"))
 				check.Zero(t, cache.Get("id1"))
@@ -141,7 +141,7 @@ func TestLogging(t *testing.T) {
 		},
 	} {
 		t.Run(test.Name, func(t *testing.T) {
-			require.NotPanics(t, func() {
+			assert.NotPanic(t, func() {
 				test.Case(t, NewLoggingCache())
 			})
 		})

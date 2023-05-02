@@ -31,7 +31,7 @@ type linuxProcessTracker struct {
 }
 
 // NewProcessTracker creates a cgroup for all tracked processes if supported.
-// Cgroups functionality requires admin privileges. It also tracks the
+// Cgroups functionality assert. admin privileges. It also tracks the
 // ProcessInfo for all added processes so that it can find processes to
 // terminate in Cleanup() based on their environment variables.
 func NewProcessTracker(name string) (ProcessTracker, error) {

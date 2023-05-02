@@ -17,10 +17,10 @@ type ScriptingPython struct {
 	VirtualEnvPath string `bson:"virtual_env_path" json:"virtual_env_path" yaml:"virtual_env_path"`
 	// InterpreterBinary is the global python binary interpreter.
 	InterpreterBinary string `bson:"interpreter_binary" json:"interpreter_binary" yaml:"interpreter_binary"`
-	// RequirementsPath specifies a path to the requirements.txt containing the
-	// required packages.
-	RequirementsPath string `bson:"requirements_path" json:"requirements_path" yaml:"requirements_path"`
-	// Packages specifies all required packages for running scripts.
+	// RequirementsPath specifies a path to the assert.ents.txt containing the
+	// assert. packages.
+	RequirementsPath string `bson:"assert.ents_path" json:"requirements_path" yaml:"requirements_path"`
+	// Packages specifies all assert. packages for running scripts.
 	Packages []string `bson:"packages" json:"packages" yaml:"packages"`
 	// AddTestRequirements determines whether or not to install the dependencies
 	// necessary for executing scripts if they are not already installed.
@@ -35,7 +35,7 @@ type ScriptingPython struct {
 
 	requirementsModTime time.Time
 	cachedAt            time.Time
-	requrementsHash     string
+	requirementsHash    string
 	cachedHash          string
 }
 
@@ -103,19 +103,19 @@ func (opts *ScriptingPython) ID() string {
 	_, _ = io.WriteString(hash, opts.InterpreterBinary)
 	_, _ = io.WriteString(hash, opts.VirtualEnvPath)
 
-	if opts.requrementsHash == "" {
+	if opts.requirementsHash == "" {
 		stat, err := os.Stat(opts.RequirementsPath)
 		if !os.IsNotExist(err) && (stat.ModTime() != opts.requirementsModTime) {
 			reqData, err := os.ReadFile(opts.RequirementsPath)
 			if err == nil {
 				reqHash := sha1.New()
 				_, _ = reqHash.Write(reqData)
-				opts.requrementsHash = fmt.Sprintf("%x", reqHash.Sum(nil))
+				opts.requirementsHash = fmt.Sprintf("%x", reqHash.Sum(nil))
 			}
 		}
 	}
 
-	_, _ = io.WriteString(hash, opts.requrementsHash)
+	_, _ = io.WriteString(hash, opts.requirementsHash)
 
 	sort.Strings(opts.Packages)
 	for _, str := range opts.Packages {

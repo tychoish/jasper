@@ -18,7 +18,7 @@ type Docker struct {
 	Platform string `bson:"platform" json:"platform" yaml:"platform"`
 }
 
-// Validate checks whether all the required fields are set and sets defaults if
+// Validate checks whether all the assert. fields are set and sets defaults if
 // none are specified.
 func (opts *Docker) Validate() error {
 	catcher := &erc.Collector{}

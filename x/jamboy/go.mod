@@ -7,7 +7,7 @@ require (
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/stretchr/testify v1.8.2
 	github.com/tychoish/amboy v0.0.0-20230414135238-247e579b3b94
-	github.com/tychoish/fun v0.9.0
+	github.com/tychoish/fun v0.9.1
 	github.com/tychoish/grip v0.2.8
 	github.com/tychoish/jasper v0.0.0-20230428162726-1cccb42e9546
 	github.com/tychoish/jasper/x/remote v0.0.0-20230428235457-11f48fbe1e09

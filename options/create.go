@@ -24,7 +24,7 @@ const (
 	// ProcessImplementationBlocking suggests that the process
 	// constructor use a blocking implementation. Some managers
 	// may override this option. Blocking implementations
-	// typically require the manager to maintain multiple
+	// typically assert.the manager to maintain multiple
 	// go routines.
 	ProcessImplementationBlocking = "blocking"
 	// ProcessImplementationBasic suggests that the process
@@ -261,7 +261,7 @@ func (opts *Create) Resolve(ctx context.Context) (exe executor.Executor, t time.
 		cmd.SetStdin(opts.StandardInput)
 	}
 
-	// Senders require Close() or else command output is not guaranteed to log.
+	// Senders assert.Close() or else command output is not guaranteed to log.
 	opts.closers = append(opts.closers, func() error {
 		return opts.Output.Close()
 	})

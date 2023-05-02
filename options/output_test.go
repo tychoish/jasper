@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/fun/testt"
 	"github.com/tychoish/grip/send"
@@ -201,7 +201,7 @@ func TestOutputOptions(t *testing.T) {
 				},
 			}
 			out, err := opts.GetOutput()
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			msg := "foo"
 			_, err = out.Write([]byte(msg))
@@ -211,13 +211,13 @@ func TestOutputOptions(t *testing.T) {
 			check.Equal(t, msg, stdout.String())
 
 			safeSender, ok := opts.Loggers[0].sender.(*SafeSender)
-			require.True(t, ok)
+			assert.True(t, ok)
 			sender, ok := safeSender.Sender.(*send.InMemorySender)
-			require.True(t, ok)
+			assert.True(t, ok)
 
 			logOut, err := sender.GetString()
-			require.NoError(t, err)
-			require.Equal(t, 1, len(logOut))
+			assert.NotError(t, err)
+			assert.Equal(t, 1, len(logOut))
 			check.Equal(t, msg, strings.Join(logOut, ""))
 		},
 		"GetErrorWithErrorAndLogger": func(t *testing.T, opts Output) {
@@ -235,7 +235,7 @@ func TestOutputOptions(t *testing.T) {
 				},
 			}
 			errOut, err := opts.GetError()
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			msg := "foo"
 			_, err = errOut.Write([]byte(msg))
@@ -245,13 +245,13 @@ func TestOutputOptions(t *testing.T) {
 			check.Equal(t, msg, stderr.String())
 
 			safeSender, ok := opts.Loggers[0].sender.(*SafeSender)
-			require.True(t, ok)
+			assert.True(t, ok)
 			sender, ok := safeSender.Sender.(*send.InMemorySender)
-			require.True(t, ok)
+			assert.True(t, ok)
 
 			logErr, err := sender.GetString()
-			require.NoError(t, err)
-			require.Equal(t, 1, len(logErr))
+			assert.NotError(t, err)
+			assert.Equal(t, 1, len(logErr))
 			check.Equal(t, msg, strings.Join(logErr, ""))
 		},
 		// "": func(t *testing.T, opts Output) {}

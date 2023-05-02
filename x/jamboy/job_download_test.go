@@ -9,17 +9,16 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"github.com/tychoish/amboy"
 	"github.com/tychoish/amboy/dependency"
 	"github.com/tychoish/amboy/registry"
+	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 )
 
 type DownloadJobSuite struct {
 	job     *downloadFileJob
-	require *require.Assertions
 	tempDir string
 	suite.Suite
 }
@@ -29,18 +28,17 @@ func TestDownloadJobSuite(t *testing.T) {
 }
 
 func (s *DownloadJobSuite) SetupSuite() {
-	s.require = s.Require()
 }
 
 func (s *DownloadJobSuite) TearDownTest() {
 	err := os.RemoveAll(s.tempDir)
-	s.require.NoError(err)
+	s.Require().NoError(err)
 }
 
 func (s *DownloadJobSuite) SetupTest() {
 	var err error
 	s.tempDir, err = os.MkdirTemp("", uuid.New().String())
-	s.require.NoError(err)
+	s.Require().NoError(err)
 
 	s.job = newDownloadJob()
 }
@@ -278,7 +276,7 @@ func TestJobRegistry(t *testing.T) {
 
 	jobType := downloadJobName
 	j, err := registry.GetJobFactory(jobType)
-	require.NoError(t, err)
+	assert.NotError(t, err)
 	job := j()
 	var _ amboy.Job = job
 	check.Equal(t, job.Type().Name, jobType)

@@ -2048,7 +2048,7 @@ func (m *ScriptingOptionsGolang) GetUpdatePackages() bool {
 
 type ScriptingOptionsPython struct {
 	VirtualEnvPath       string   `protobuf:"bytes,1,opt,name=virtual_env_path,json=virtualEnvPath,proto3" json:"virtual_env_path,omitempty"`
-	RequirementsPath     string   `protobuf:"bytes,2,opt,name=requirements_path,json=requirementsPath,proto3" json:"requirements_path,omitempty"`
+	RequirementsPath     string   `protobuf:"bytes,2,opt,name=assert.ents_path,json=requirementsPath,proto3" json:"requirements_path,omitempty"`
 	InterpreterBinary    string   `protobuf:"bytes,3,opt,name=interpreter_binary,json=interpreterBinary,proto3" json:"interpreter_binary,omitempty"`
 	Packages             []string `protobuf:"bytes,4,rep,name=packages,proto3" json:"packages,omitempty"`
 	LegacyPython         bool     `protobuf:"varint,5,opt,name=legacy_python,json=legacyPython,proto3" json:"legacy_python,omitempty"`

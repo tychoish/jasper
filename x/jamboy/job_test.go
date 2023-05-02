@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	"github.com/tychoish/amboy/registry"
+	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
@@ -60,45 +60,45 @@ func TestAmboyJob(t *testing.T) {
 		t.Run("Default", func(t *testing.T) {
 			job := NewJob(jasper.NewBasicProcess, "ls")
 			job.Run(ctx)
-			require.NoError(t, job.Error())
+			assert.NotError(t, job.Error())
 		})
 		t.Run("DefaultBasic", func(t *testing.T) {
 			job := NewJobBasic("ls")
 			job.Run(ctx)
-			require.NoError(t, job.Error())
+			assert.NotError(t, job.Error())
 		})
 		t.Run("Simple", func(t *testing.T) {
 			job := NewJobOptions(jasper.NewBasicProcess, &options.Create{Args: []string{"echo", "hi"}})
 			job.Run(ctx)
-			require.NoError(t, job.Error())
+			assert.NotError(t, job.Error())
 		})
 		t.Run("Foreground", func(t *testing.T) {
 			job := NewJobForeground(jasper.NewBasicProcess, &options.Create{Args: []string{"echo", "hi"}})
 			job.Run(ctx)
-			require.NoError(t, job.Error())
+			assert.NotError(t, job.Error())
 		})
 	})
 	t.Run("ReExecErrors", func(t *testing.T) {
 		t.Run("Default", func(t *testing.T) {
 			job := NewJob(jasper.NewBasicProcess, "ls")
 			job.Run(ctx)
-			require.NoError(t, job.Error())
+			assert.NotError(t, job.Error())
 			job.Run(ctx)
-			require.Error(t, job.Error())
+			assert.Error(t, job.Error())
 		})
 		t.Run("Simple", func(t *testing.T) {
 			job := NewJobOptions(jasper.NewBasicProcess, &options.Create{Args: []string{"echo", "hi"}})
 			job.Run(ctx)
-			require.NoError(t, job.Error())
+			assert.NotError(t, job.Error())
 			job.Run(ctx)
-			require.Error(t, job.Error())
+			assert.Error(t, job.Error())
 		})
 		t.Run("Foreground", func(t *testing.T) {
 			job := NewJobForeground(jasper.NewBasicProcess, &options.Create{Args: []string{"echo", "hi"}})
 			job.Run(ctx)
-			require.NoError(t, job.Error())
+			assert.NotError(t, job.Error())
 			job.Run(ctx)
-			require.Error(t, job.Error())
+			assert.Error(t, job.Error())
 		})
 	})
 

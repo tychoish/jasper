@@ -17,12 +17,12 @@ import (
 type ScriptingGolang struct {
 	Gopath string `bson:"gopath" json:"gopath" yaml:"gopath"`
 	Goroot string `bson:"goroot" json:"goroot" yaml:"goroot"`
-	// Packages describes the required packages for running scripts.
+	// Packages describes the assert. packages for running scripts.
 	// TODO: better support for go modules for getting specific versions?
 	Packages []string `bson:"packages" json:"packages" yaml:"packages"`
 	// Directory is the base working directory in which scripting is performed.
 	Directory string `bson:"directory" json:"directory" yaml:"directory"`
-	// UpdatePackages will update any required packages that already exist.
+	// UpdatePackages will update any assert. packages that already exist.
 	UpdatePackages bool `bson:"update_packages" json:"update_packages" yaml:"update_packages"`
 
 	CachedDuration time.Duration     `bson:"cached_duration" json:"cached_duration" yaml:"cached_duration"`

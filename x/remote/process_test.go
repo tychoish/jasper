@@ -9,7 +9,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/require"
 	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper"
@@ -39,8 +38,8 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 			Case: func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 				opts.Args = []string{}
 				proc, err := makep(ctx, opts)
-				require.Error(t, err)
-				assert.Nil(t, proc)
+				assert.Error(t, err)
+				assert.True(t, proc == nil)
 			},
 		},
 		{
@@ -49,8 +48,8 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 				pctx, pcancel := context.WithCancel(ctx)
 				pcancel()
 				proc, err := makep(pctx, opts)
-				require.Error(t, err)
-				assert.Nil(t, proc)
+				assert.Error(t, err)
+				assert.True(t, proc == nil)
 			},
 		},
 		{
@@ -62,7 +61,7 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 				opts := testutil.SleepCreateOpts(20)
 				proc, err := makep(pctx, opts)
 				assert.NotError(t, err)
-				require.NotNil(t, proc)
+				assert.True(t, proc != nil)
 
 				time.Sleep(5 * time.Millisecond) // let time pass...
 				assert.True(t, !proc.Info(ctx).Successful)
@@ -190,7 +189,7 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 			Case: func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 				proc, err := makep(ctx, opts)
 				assert.NotError(t, err)
-				require.NotNil(t, proc)
+				assert.True(t, proc != nil)
 				_, err = proc.Wait(ctx)
 				assert.NotError(t, err)
 
@@ -205,7 +204,7 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 			Case: func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 				proc, err := makep(ctx, opts)
 				assert.NotError(t, err)
-				require.NotNil(t, proc)
+				assert.True(t, proc != nil)
 
 				_, err = proc.Wait(ctx)
 				assert.NotError(t, err)
@@ -223,7 +222,7 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 			Case: func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 				proc, err := makep(ctx, opts)
 				assert.NotError(t, err)
-				require.NotNil(t, proc)
+				assert.True(t, proc != nil)
 				_, err = proc.Wait(ctx)
 				assert.NotError(t, err)
 
@@ -240,7 +239,7 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 				opts := testutil.SleepCreateOpts(2)
 				proc, err := makep(ctx, opts)
 				assert.NotError(t, err)
-				require.NotNil(t, proc)
+				assert.True(t, proc != nil)
 
 				newProc, err := proc.Respawn(ctx)
 				check.NotError(t, err)
@@ -255,7 +254,7 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 				opts := testutil.SleepCreateOpts(3)
 				proc, err := makep(ctx, opts)
 				assert.NotError(t, err)
-				require.NotNil(t, proc)
+				assert.True(t, proc != nil)
 				_, err = proc.Wait(ctx)
 				assert.NotError(t, err)
 
@@ -272,7 +271,7 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 			Case: func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 				proc, err := makep(ctx, testutil.TrueCreateOpts())
 				assert.NotError(t, err)
-				require.NotNil(t, proc)
+				assert.True(t, proc != nil)
 				exitCode, err := proc.Wait(ctx)
 				check.NotError(t, err)
 				assert.Equal(t, 0, exitCode)
@@ -283,9 +282,9 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 			Case: func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 				proc, err := makep(ctx, testutil.FalseCreateOpts())
 				assert.NotError(t, err)
-				require.NotNil(t, proc)
+				assert.True(t, proc != nil)
 				exitCode, err := proc.Wait(ctx)
-				require.Error(t, err)
+				assert.Error(t, err)
 				assert.Equal(t, 1, exitCode)
 			},
 		},
@@ -294,11 +293,11 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 			Case: func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 				proc, err := makep(ctx, testutil.SleepCreateOpts(100))
 				assert.NotError(t, err)
-				require.NotNil(t, proc)
+				assert.True(t, proc != nil)
 				sig := syscall.SIGTERM
 				assert.NotError(t, proc.Signal(ctx, sig))
 				exitCode, err := proc.Wait(ctx)
-				require.Error(t, err)
+				assert.Error(t, err)
 				if runtime.GOOS == "windows" {
 					assert.Equal(t, 1, exitCode)
 				} else {
@@ -311,7 +310,7 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 			Case: func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 				proc, err := makep(ctx, testutil.SleepCreateOpts(100))
 				assert.NotError(t, err)
-				require.NotNil(t, proc)
+				assert.True(t, proc != nil)
 
 				var exitCode int
 				waitFinished := make(chan bool)
@@ -323,7 +322,7 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 				}()
 				select {
 				case <-waitFinished:
-					require.Error(t, err)
+					assert.Error(t, err)
 					assert.Equal(t, -1, exitCode)
 				case <-ctx.Done():
 					t.Error("call to Wait() took too long to finish")
@@ -360,7 +359,7 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 				check.NotError(t, err)
 
 				err = proc.Signal(ctx, syscall.SIGTERM)
-				require.Error(t, err)
+				assert.Error(t, err)
 				check.True(t, strings.Contains(err.Error(), "cannot signal a process that has terminated"))
 			},
 		},
@@ -492,7 +491,7 @@ func TestProcessImplementations(t *testing.T) {
 								check.True(t, proc.Complete(ctx))
 								proc.(*rpcProcess).info.Id += "_foo"
 								proc.(*rpcProcess).info.Complete = false
-								require.NotEqual(t, firstID, proc.ID())
+								assert.NotEqual(t, firstID, proc.ID())
 								assert.True(t, !proc.Complete(ctx), proc.ID())
 							},
 						},
@@ -508,7 +507,7 @@ func TestProcessImplementations(t *testing.T) {
 								check.NotError(t, err)
 								proc.(*rpcProcess).info.Id += "_foo"
 								proc.(*rpcProcess).info.Complete = false
-								require.NotEqual(t, firstID, proc.ID())
+								assert.NotEqual(t, firstID, proc.ID())
 								assert.True(t, !proc.Running(ctx), proc.ID())
 							},
 						},

@@ -71,7 +71,7 @@ const (
 	LoggingPayloadFormatSTRING = "string"
 )
 
-// Validate checks that the required fields are populated for the payload and
+// Validate checks that the assert. fields are populated for the payload and
 // the format is valid.
 func (lp *LoggingPayload) Validate() error {
 	catcher := &erc.Collector{}

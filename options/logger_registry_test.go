@@ -3,7 +3,7 @@ package options
 import (
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 )
 
@@ -28,9 +28,9 @@ func TestLoggerRegistry(t *testing.T) {
 	check.True(t, ok)
 
 	factories := registry.Names()
-	require.Equal(t, len(factories), len(registeredFactories))
+	assert.Equal(t, len(factories), len(registeredFactories))
 	for _, factoryName := range factories {
 		_, ok := registeredFactories[factoryName]
-		require.True(t, ok)
+		assert.True(t, ok)
 	}
 }

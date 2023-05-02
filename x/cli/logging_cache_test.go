@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/require"
 	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper"
@@ -50,7 +49,7 @@ func TestCLILoggingCache(t *testing.T) {
 					assert.NotError(t, err)
 					resp := &CachedLoggerResponse{}
 					assert.NotError(t, execCLICommandInputOutput(t, c, loggingCacheGet(), input, resp))
-					require.True(t, resp.Successful())
+					assert.True(t, resp.Successful())
 					assert.Equal(t, logger.ID, resp.Logger.ID)
 					assert.NotZero(t, resp.Logger.Accessed)
 				},
@@ -79,7 +78,7 @@ func TestCLILoggingCache(t *testing.T) {
 					assert.NotError(t, err)
 					resp := &OutcomeResponse{}
 					assert.NotError(t, execCLICommandInputOutput(t, c, loggingCacheRemove(), input, resp))
-					require.True(t, resp.Successful())
+					assert.True(t, resp.Successful())
 
 					getResp := &CachedLoggerResponse{}
 					assert.NotError(t, execCLICommandInputOutput(t, c, loggingCacheGet(), input, getResp))
@@ -93,7 +92,7 @@ func TestCLILoggingCache(t *testing.T) {
 					assert.NotError(t, err)
 					resp := &OutcomeResponse{}
 					assert.NotError(t, execCLICommandInputOutput(t, c, loggingCacheCloseAndRemove(), input, resp))
-					require.True(t, resp.Successful())
+					assert.True(t, resp.Successful())
 
 					getResp := &CachedLoggerResponse{}
 					assert.NotError(t, execCLICommandInputOutput(t, c, loggingCacheGet(), input, getResp))
@@ -106,7 +105,7 @@ func TestCLILoggingCache(t *testing.T) {
 
 					resp := &OutcomeResponse{}
 					assert.NotError(t, execCLICommandOutput(t, c, loggingCacheClear(), resp))
-					require.True(t, resp.Successful())
+					assert.True(t, resp.Successful())
 
 					getResp := &LoggingCacheLenResponse{}
 					assert.NotError(t, execCLICommandOutput(t, c, loggingCacheLen(), getResp))
@@ -134,7 +133,7 @@ func TestCLILoggingCache(t *testing.T) {
 
 					resp := &LoggingCacheLenResponse{}
 					assert.NotError(t, execCLICommandOutput(t, c, loggingCacheLen(), resp))
-					require.True(t, resp.Successful())
+					assert.True(t, resp.Successful())
 					assert.Equal(t, 1, resp.Length)
 				},
 				"PruneSucceeds": func(ctx context.Context, t *testing.T, c *cli.Context) {
@@ -142,7 +141,7 @@ func TestCLILoggingCache(t *testing.T) {
 
 					lenResp := &LoggingCacheLenResponse{}
 					assert.NotError(t, execCLICommandOutput(t, c, loggingCacheLen(), lenResp))
-					require.True(t, lenResp.Successful())
+					assert.True(t, lenResp.Successful())
 					assert.Equal(t, 1, lenResp.Length)
 
 					input, err := json.Marshal(LoggingCachePruneInput{LastAccessed: time.Now().Add(time.Hour)})
@@ -153,7 +152,7 @@ func TestCLILoggingCache(t *testing.T) {
 
 					lenResp = &LoggingCacheLenResponse{}
 					assert.NotError(t, execCLICommandOutput(t, c, loggingCacheLen(), lenResp))
-					require.True(t, lenResp.Successful())
+					assert.True(t, lenResp.Successful())
 					assert.Zero(t, lenResp.Length)
 				},
 			} {
@@ -196,8 +195,8 @@ func createCachedLoggerFromCLI(t *testing.T, c *cli.Context, id string) options.
 	assert.NotError(t, err)
 	resp := &CachedLoggerResponse{}
 	assert.NotError(t, execCLICommandInputOutput(t, c, loggingCacheCreate(), input, resp))
-	require.True(t, resp.Successful())
-	require.Equal(t, id, resp.Logger.ID)
+	assert.True(t, resp.Successful())
+	assert.Equal(t, id, resp.Logger.ID)
 
 	return resp.Logger
 }

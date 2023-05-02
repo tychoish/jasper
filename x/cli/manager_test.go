@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper"
@@ -26,7 +25,7 @@ func TestCLIManager(t *testing.T) {
 				"IDReturnsNonempty": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
 					resp := &IDResponse{}
 					assert.NotError(t, execCLICommandOutput(t, c, managerID(), resp))
-					require.True(t, resp.Successful())
+					assert.True(t, resp.Successful())
 					assert.Equal(t, len(resp.ID), 0)
 				},
 				"CommandsWithInputFailWithInvalidInput": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
@@ -52,7 +51,7 @@ func TestCLIManager(t *testing.T) {
 					assert.NotError(t, err)
 					resp := &InfoResponse{}
 					assert.NotError(t, execCLICommandInputOutput(t, c, managerCreateProcess(), input, resp))
-					require.True(t, resp.Successful())
+					assert.True(t, resp.Successful())
 				},
 				"CreateCommandPasses": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
 					input, err := json.Marshal(options.Command{
@@ -61,14 +60,14 @@ func TestCLIManager(t *testing.T) {
 					assert.NotError(t, err)
 					resp := &OutcomeResponse{}
 					assert.NotError(t, execCLICommandInputOutput(t, c, managerCreateCommand(), input, resp))
-					require.True(t, resp.Successful())
+					assert.True(t, resp.Successful())
 				},
 				"GetExistingIDPasses": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
 					input, err := json.Marshal(IDInput{jasperProcID})
 					assert.NotError(t, err)
 					resp := &InfoResponse{}
 					assert.NotError(t, execCLICommandInputOutput(t, c, managerGet(), input, resp))
-					require.True(t, resp.Successful())
+					assert.True(t, resp.Successful())
 					assert.Equal(t, jasperProcID, resp.Info.ID)
 				},
 				"GetNonexistentIDFails": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
@@ -76,8 +75,8 @@ func TestCLIManager(t *testing.T) {
 					assert.NotError(t, err)
 					resp := &InfoResponse{}
 					assert.NotError(t, execCLICommandInputOutput(t, c, managerGet(), input, resp))
-					require.False(t, resp.Successful())
-					require.NotEmpty(t, resp.ErrorMessage())
+					assert.True(t, !resp.Successful())
+					assert.NotEmpty(t, resp.ErrorMessage())
 				},
 				"GetEmptyIDFails": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
 					input, err := json.Marshal(IDInput{""})
@@ -89,7 +88,7 @@ func TestCLIManager(t *testing.T) {
 					assert.NotError(t, err)
 					resp := &InfosResponse{}
 					assert.NotError(t, execCLICommandInputOutput(t, c, managerList(), input, resp))
-					require.True(t, resp.Successful())
+					assert.True(t, resp.Successful())
 					assert.Equal(t, len(resp.Infos), 1)
 					assert.Equal(t, jasperProcID, resp.Infos[0].ID)
 				},
@@ -100,13 +99,13 @@ func TestCLIManager(t *testing.T) {
 				},
 				"GroupFindsTaggedProcess": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
 					tag := "foo"
-					require.True(t, tagProcess(t, c, jasperProcID, tag).Successful())
+					assert.True(t, tagProcess(t, c, jasperProcID, tag).Successful())
 
 					input, err := json.Marshal(TagInput{Tag: tag})
 					assert.NotError(t, err)
 					resp := &InfosResponse{}
 					assert.NotError(t, execCLICommandInputOutput(t, c, managerGroup(), input, resp))
-					require.True(t, resp.Successful())
+					assert.True(t, resp.Successful())
 					assert.Equal(t, len(resp.Infos), 1)
 					assert.Equal(t, jasperProcID, resp.Infos[0].ID)
 				},
@@ -120,7 +119,7 @@ func TestCLIManager(t *testing.T) {
 					assert.NotError(t, err)
 					resp := &InfosResponse{}
 					assert.NotError(t, execCLICommandInputOutput(t, c, managerGroup(), input, resp))
-					require.True(t, resp.Successful())
+					assert.True(t, resp.Successful())
 					assert.Equal(t, len(resp.Infos), 0)
 				},
 				"ClearPasses": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
@@ -151,8 +150,8 @@ func TestCLIManager(t *testing.T) {
 					input, err := json.Marshal(testutil.TrueCreateOpts())
 					assert.NotError(t, err)
 					assert.NotError(t, execCLICommandInputOutput(t, c, managerCreateProcess(), input, resp))
-					require.True(t, resp.Successful())
-					require.NotZero(t, resp.Info.ID)
+					assert.True(t, resp.Successful())
+					assert.NotZero(t, resp.Info.ID)
 
 					testCase(ctx, t, c, resp.Info.ID)
 				})

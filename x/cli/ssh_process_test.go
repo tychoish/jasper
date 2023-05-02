@@ -6,7 +6,6 @@ import (
 	"syscall"
 	"testing"
 
-	"github.com/stretchr/testify/require"
 	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper"
@@ -167,7 +166,7 @@ func TestSSHProcess(t *testing.T) {
 			assert.Equal(t, proc.ID(), inputChecker.ID)
 
 			newSSHProc, ok := newProc.(*sshProcess)
-			require.True(t, ok)
+			assert.True(t, ok)
 			assert.NotError(t, err)
 			assert.Equal(t, info.ID, newSSHProc.info.ID)
 		},
@@ -229,7 +228,7 @@ func TestSSHProcess(t *testing.T) {
 
 			exitCode, err := proc.Wait(ctx)
 			assert.Equal(t, proc.ID(), inputChecker.ID)
-			require.Error(t, err)
+			assert.Error(t, err)
 			assert.Substring(t, err.Error(), expectedWaitErr)
 			assert.Equal(t, expectedExitCode, exitCode)
 		},
@@ -331,7 +330,7 @@ func TestSSHProcess(t *testing.T) {
 			client, err := NewSSHClient(mockRemoteOptions(), mockClientOptions(), false)
 			assert.NotError(t, err)
 			sshClient, ok := client.(*sshClient)
-			require.True(t, ok)
+			assert.True(t, ok)
 
 			mockManager := &mock.Manager{}
 			sshClient.manager = jasper.Manager(mockManager)
@@ -342,7 +341,7 @@ func TestSSHProcess(t *testing.T) {
 			proc, err := newSSHProcess(sshClient.runClientCommand, jasper.ProcessInfo{ID: "foo"})
 			assert.NotError(t, err)
 			sshProc, ok := proc.(*sshProcess)
-			require.True(t, ok)
+			assert.True(t, ok)
 
 			testCase(tctx, t, sshProc, sshClient, mockManager)
 		})

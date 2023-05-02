@@ -5,10 +5,9 @@ go 1.20
 require (
 	github.com/golang/protobuf v1.5.3
 	github.com/mholt/archiver v3.1.1+incompatible
-	github.com/stretchr/testify v1.8.2
 	github.com/tychoish/birch v0.2.3-0.20230413052020-46068f63d7bb
 	github.com/tychoish/birch/x/mrpc v0.0.0-20230413052020-46068f63d7bb
-	github.com/tychoish/fun v0.9.0
+	github.com/tychoish/fun v0.9.1
 	github.com/tychoish/gimlet v0.0.0-20230130001449-8987c96bb886
 	github.com/tychoish/grip v0.2.8
 	github.com/tychoish/grip/x/metrics v0.0.0-20230414135146-97625602a7ee
@@ -22,7 +21,6 @@ require (
 require (
 	github.com/containerd/cgroups/v3 v3.0.1 // indirect
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
-	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/fuyufjh/splunk-hec-go v0.4.0 // indirect
@@ -39,7 +37,6 @@ require (
 	github.com/phyber/negroni-gzip v1.0.0 // indirect
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rs/cors v1.8.3 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/tklauser/go-sysconf v0.3.11 // indirect
@@ -55,5 +52,4 @@ require (
 	golang.org/x/text v0.9.0 // indirect
 	google.golang.org/genproto v0.0.0-20230110181048-76db0878b65f // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
