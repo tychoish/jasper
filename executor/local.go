@@ -14,14 +14,14 @@ type local struct {
 }
 
 // NewLocal returns an Executor that creates processes locally.
-func NewLocal(ctx context.Context, args []string) Executor {
+func NewLocal(ctx context.Context, args []string) (Executor, error) {
 	executable := args[0]
 	var execArgs []string
 	if len(args) > 1 {
 		execArgs = args[1:]
 	}
 	cmd := exec.CommandContext(ctx, executable, execArgs...)
-	return &local{cmd: cmd}
+	return &local{cmd: cmd}, nil
 }
 
 // MakeLocal wraps an existing local process.

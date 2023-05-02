@@ -9,7 +9,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
-	"github.com/tychoish/jasper/executor"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/util"
 )
@@ -17,10 +16,11 @@ import (
 type ManagerOptions struct {
 	ID           string
 	Tracker      ProcessTracker
-	Remote       *options.Remote
 	MaxProcs     int
-	SSHLibrary   bool
 	Synchronized bool
+
+	Remote           *options.Remote
+	ExecutorResolver func(context.Context, *options.Create) options.ResolveExecutor
 }
 
 func NewManager(opts ManagerOptions) Manager {
@@ -30,11 +30,12 @@ func NewManager(opts ManagerOptions) Manager {
 
 	var mgr Manager
 	m := &basicProcessManager{
-		procs:         map[string]Process{},
-		id:            opts.ID,
-		useSSHLibrary: opts.SSHLibrary,
-		loggers:       NewLoggingCache(),
-		tracker:       opts.Tracker,
+		procs:    map[string]Process{},
+		id:       opts.ID,
+		loggers:  NewLoggingCache(),
+		tracker:  opts.Tracker,
+		remote:   opts.Remote,
+		executor: opts.ExecutorResolver,
 	}
 	mgr = m
 
@@ -57,11 +58,12 @@ func NewManager(opts ManagerOptions) Manager {
 }
 
 type basicProcessManager struct {
-	id            string
-	procs         map[string]Process
-	useSSHLibrary bool
-	tracker       ProcessTracker
-	loggers       LoggingCache
+	id       string
+	procs    map[string]Process
+	tracker  ProcessTracker
+	loggers  LoggingCache
+	remote   *options.Remote
+	executor func(context.Context, *options.Create) options.ResolveExecutor
 }
 
 func (m *basicProcessManager) ID() string { return m.id }
@@ -69,21 +71,12 @@ func (m *basicProcessManager) ID() string { return m.id }
 func (m *basicProcessManager) CreateProcess(ctx context.Context, opts *options.Create) (Process, error) {
 	opts.AddEnvVar(ManagerEnvironID, m.id)
 
-	if opts.Remote != nil {
-		if m.useSSHLibrary {
-			client, session, err := opts.Remote.Resolve()
-			if err != nil {
-				return nil, fmt.Errorf("could not resolve SSH client and session: %w", err)
-			}
-			opts.ResolveExecutor = func(ctx context.Context, args []string) executor.Executor {
-				return executor.NewSSH(ctx, client, session, args)
-			}
-			opts.Remote.UseSSHLibrary = true
-		} else {
-			opts.ResolveExecutor = func(ctx context.Context, args []string) executor.Executor {
-				return executor.NewSSHBinary(ctx, opts.Remote.String(), opts.Remote.Args, args)
-			}
-		}
+	if opts.Remote == nil && m.remote != nil {
+		opts.Remote = m.remote.Copy()
+	}
+
+	if m.executor != nil {
+		opts.ResolveExecutor = m.executor(ctx, opts)
 	}
 
 	proc, err := NewProcess(ctx, opts)

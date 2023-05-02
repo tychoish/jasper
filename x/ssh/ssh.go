@@ -1,4 +1,4 @@
-package executor
+package ssh
 
 import (
 	"context"
@@ -8,11 +8,13 @@ import (
 	"syscall"
 
 	"github.com/tychoish/fun/erc"
+	"github.com/tychoish/jasper/executor"
+	"github.com/tychoish/jasper/options"
 	cryptossh "golang.org/x/crypto/ssh"
 )
 
 // ssh runs processes on a remote machine via SSH.
-type ssh struct {
+type libssh struct {
 	session *cryptossh.Session
 	client  *cryptossh.Client
 	args    []string
@@ -23,10 +25,26 @@ type ssh struct {
 	ctx     context.Context
 }
 
+func ExecutorResolverLibrary(ctx context.Context, opts *options.Create) options.ResolveExecutor {
+	return func(ctx context.Context, args []string) (executor.Executor, error) {
+		if opts.Remote == nil {
+			return nil, executor.ErrNotConfigured
+		}
+
+		opts.Remote.UseSSHLibrary = true
+		client, session, err := resolveClient(opts.Remote)
+		if err != nil {
+			return nil, fmt.Errorf("could not resolve SSH client and session: %w", err)
+		}
+
+		return NewSSH(ctx, client, session, args), nil
+	}
+}
+
 // NewSSH returns an Executor that creates processes over SSH. Callers are
 // expected to clean up resources by explicitly calling Close.
-func NewSSH(ctx context.Context, client *cryptossh.Client, session *cryptossh.Session, args []string) Executor {
-	return &ssh{
+func NewSSH(ctx context.Context, client *cryptossh.Client, session *cryptossh.Session, args []string) executor.Executor {
+	return &libssh{
 		ctx:     ctx,
 		session: session,
 		client:  client,
@@ -35,53 +53,53 @@ func NewSSH(ctx context.Context, client *cryptossh.Client, session *cryptossh.Se
 }
 
 // Args returns the arguments to the process.
-func (e *ssh) Args() []string {
+func (e *libssh) Args() []string {
 	return e.args
 }
 
 // SetEnv sets the process environment.
-func (e *ssh) SetEnv(env []string) {
+func (e *libssh) SetEnv(env []string) {
 	e.env = env
 }
 
 // Env returns the process environment.
-func (e *ssh) Env() []string {
+func (e *libssh) Env() []string {
 	return e.env
 }
 
 // SetDir sets the process working directory.
-func (e *ssh) SetDir(dir string) {
+func (e *libssh) SetDir(dir string) {
 	e.dir = dir
 }
 
 // Dir returns the process working directory.
-func (e *ssh) Dir() string {
+func (e *libssh) Dir() string {
 	return e.dir
 }
 
 // SetStdin sets the process standard input.
-func (e *ssh) SetStdin(stdin io.Reader) {
+func (e *libssh) SetStdin(stdin io.Reader) {
 	e.session.Stdin = stdin
 }
 
 // SetStdout sets the process standard output.
-func (e *ssh) SetStdout(stdout io.Writer) {
+func (e *libssh) SetStdout(stdout io.Writer) {
 	e.session.Stdout = stdout
 }
 
 // Stdout returns the standard output of the process.
-func (e *ssh) Stdout() io.Writer { return e.session.Stdout }
+func (e *libssh) Stdout() io.Writer { return e.session.Stdout }
 
 // SetStderr sets the process standard error.
-func (e *ssh) SetStderr(stderr io.Writer) {
+func (e *libssh) SetStderr(stderr io.Writer) {
 	e.session.Stderr = stderr
 }
 
 // Stderr returns the standard error of the process.
-func (e *ssh) Stderr() io.Writer { return e.session.Stderr }
+func (e *libssh) Stderr() io.Writer { return e.session.Stderr }
 
 // Start begins running the process.
-func (e *ssh) Start() error {
+func (e *libssh) Start() error {
 	args := []string{}
 	for _, entry := range e.env {
 		args = append(args, fmt.Sprintf("export %s", entry))
@@ -94,7 +112,7 @@ func (e *ssh) Start() error {
 }
 
 // Wait returns the result of waiting for the remote process to finish.
-func (e *ssh) Wait() error {
+func (e *libssh) Wait() error {
 	catcher := &erc.Collector{}
 	e.exitErr = e.session.Wait()
 	catcher.Add(e.exitErr)
@@ -103,19 +121,19 @@ func (e *ssh) Wait() error {
 }
 
 // Signal sends a signal to the remote process.
-func (e *ssh) Signal(sig syscall.Signal) error {
+func (e *libssh) Signal(sig syscall.Signal) error {
 	return e.session.Signal(syscallToSSHSignal(sig))
 }
 
 // PID is not implemented since there is no simple way to get the remote
 // process's PID.
-func (e *ssh) PID() int {
+func (e *libssh) PID() int {
 	return -1
 }
 
 // ExitCode returns the exit code of the process, or -1 if the process is not
 // finished.
-func (e *ssh) ExitCode() int {
+func (e *libssh) ExitCode() int {
 	if !e.exited {
 		return -1
 	}
@@ -130,7 +148,7 @@ func (e *ssh) ExitCode() int {
 }
 
 // Success returns whether or not the process ran successfully.
-func (e *ssh) Success() bool {
+func (e *libssh) Success() bool {
 	if !e.exited {
 		return false
 	}
@@ -138,7 +156,7 @@ func (e *ssh) Success() bool {
 }
 
 // SignalInfo returns information about signals the process has received.
-func (e *ssh) SignalInfo() (sig syscall.Signal, signaled bool) {
+func (e *libssh) SignalInfo() (sig syscall.Signal, signaled bool) {
 	if e.exitErr == nil {
 		return syscall.Signal(-1), false
 	}
@@ -151,7 +169,7 @@ func (e *ssh) SignalInfo() (sig syscall.Signal, signaled bool) {
 }
 
 // Close closes the SSH connection resources.
-func (e *ssh) Close() error {
+func (e *libssh) Close() error {
 	catcher := &erc.Collector{}
 	if err := e.session.Close(); err != nil && err != io.EOF {
 		catcher.Add(fmt.Errorf("error closing SSH session: %w", err))

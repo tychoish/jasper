@@ -3,11 +3,9 @@ package options
 import (
 	"errors"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/tychoish/fun/erc"
-	"golang.org/x/crypto/ssh"
 )
 
 // RemoteConfig represents the arguments to connect to a remote host.
@@ -87,51 +85,6 @@ func (opts *RemoteConfig) validate() error {
 	return catcher.Resolve()
 }
 
-func (opts *RemoteConfig) resolve() (*ssh.ClientConfig, error) {
-	var auth []ssh.AuthMethod
-	if opts.Key != "" || opts.KeyFile != "" {
-		pubkey, err := opts.publicKeyAuth()
-		if err != nil {
-			return nil, fmt.Errorf("could not get public key: %w", err)
-		}
-		auth = append(auth, pubkey)
-	}
-	if opts.Password != "" {
-		auth = append(auth, ssh.Password(opts.Password))
-	}
-	return &ssh.ClientConfig{
-		Timeout:         opts.Timeout,
-		User:            opts.User,
-		Auth:            auth,
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-	}, nil
-}
-
-func (opts *RemoteConfig) publicKeyAuth() (ssh.AuthMethod, error) {
-	var key []byte
-	if opts.KeyFile != "" {
-		var err error
-		key, err = os.ReadFile(opts.KeyFile)
-		if err != nil {
-			return nil, fmt.Errorf("could not read key file: %w", err)
-		}
-	} else {
-		key = []byte(opts.Key)
-	}
-
-	var signer ssh.Signer
-	var err error
-	if opts.KeyPassphrase != "" {
-		signer, err = ssh.ParsePrivateKeyWithPassphrase(key, []byte(opts.KeyPassphrase))
-	} else {
-		signer, err = ssh.ParsePrivateKey(key)
-	}
-	if err != nil {
-		return nil, fmt.Errorf("could not get signer: %w", err)
-	}
-	return ssh.PublicKeys(signer), nil
-}
-
 // Validate ensures that enough information is provided to connect to a remote
 // host.
 func (opts *Remote) Validate() error {
@@ -152,67 +105,4 @@ func (opts *Remote) String() string {
 	}
 
 	return fmt.Sprintf("%s@%s", opts.User, opts.Host)
-}
-
-// Resolve returns the SSH client and session from the options.
-func (opts *Remote) Resolve() (*ssh.Client, *ssh.Session, error) {
-	if err := opts.Validate(); err != nil {
-		return nil, nil, fmt.Errorf("invalid remote options: %w", err)
-	}
-
-	var client *ssh.Client
-	if opts.Proxy != nil {
-		proxyConfig, err := opts.Proxy.resolve()
-		if err != nil {
-			return nil, nil, fmt.Errorf("could not create proxy config: %w", err)
-		}
-		proxyClient, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", opts.Proxy.Host, opts.Proxy.Port), proxyConfig)
-		if err != nil {
-			return nil, nil, fmt.Errorf("could not dial proxy: %w", err)
-		}
-
-		targetConn, err := proxyClient.Dial("tcp", fmt.Sprintf("%s:%d", opts.Host, opts.Port))
-		if err != nil {
-			catcher := &erc.Collector{}
-			catcher.Add(proxyClient.Close())
-			catcher.Add(fmt.Errorf("could not dial target host: %w", err))
-			return nil, nil, catcher.Resolve()
-		}
-
-		targetConfig, err := opts.resolve()
-		if err != nil {
-			catcher := &erc.Collector{}
-			catcher.Add(proxyClient.Close())
-			catcher.Add(fmt.Errorf("could not create target config: %w", err))
-			return nil, nil, catcher.Resolve()
-		}
-		gatewayConn, chans, reqs, err := ssh.NewClientConn(targetConn, fmt.Sprintf("%s:%d", opts.Host, opts.Port), targetConfig)
-		if err != nil {
-			catcher := &erc.Collector{}
-			catcher.Add(targetConn.Close())
-			catcher.Add(proxyClient.Close())
-			catcher.Add(fmt.Errorf("could not establish connection to target via proxy: %w", err))
-			return nil, nil, catcher.Resolve()
-		}
-		client = ssh.NewClient(gatewayConn, chans, reqs)
-	} else {
-		var err error
-		config, err := opts.resolve()
-		if err != nil {
-			return nil, nil, fmt.Errorf("could not create config: %w", err)
-		}
-		client, err = ssh.Dial("tcp", fmt.Sprintf("%s:%d", opts.Host, opts.Port), config)
-		if err != nil {
-			return nil, nil, fmt.Errorf("could not dial host: %w", err)
-		}
-	}
-
-	session, err := client.NewSession()
-	if err != nil {
-		catcher := &erc.Collector{}
-		catcher.Add(client.Close())
-		catcher.Add(err)
-		return nil, nil, fmt.Errorf("could not establish session: %w", catcher.Resolve())
-	}
-	return client, session, nil
 }

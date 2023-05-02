@@ -69,9 +69,11 @@ type Create struct {
 	StandardInput      io.Reader `bson:"-" json:"-" yaml:"-"`
 	StandardInputBytes []byte    `bson:"stdin_bytes" json:"stdin_bytes" yaml:"stdin_bytes"`
 
-	ResolveExecutor func(context.Context, []string) executor.Executor `bson:"-" json:"-" yaml:"-"`
+	ResolveExecutor ResolveExecutor `bson:"-" json:"-" yaml:"-"`
 	closers         []func() error
 }
+
+type ResolveExecutor func(context.Context, []string) (executor.Executor, error)
 
 // MakeCreation takes a command string and returns an equivalent
 // Create struct that would spawn a process corresponding to the given
@@ -270,31 +272,11 @@ func (opts *Create) Resolve(ctx context.Context) (exe executor.Executor, t time.
 }
 
 func (opts *Create) resolveExecutor(ctx context.Context) (executor.Executor, error) {
-	// if opts.Remote != nil {
-	// 	if opts.Remote.UseSSHLibrary {
-	// 		client, session, err := opts.Remote.Resolve()
-	// 		if err != nil {
-	// 			return nil, fmt.Errorf("could not resolve SSH client and session: %w", err)
-	// 		}
-	// 		return executor.NewSSH(ctx, client, session, opts.Args), nil
-	// 	}
-
-	// 	return executor.NewSSHBinary(ctx, opts.Remote.String(), opts.Remote.Args, opts.Args), nil
-	// }
-
-	// if opts.Docker != nil {
-	// 	client, err := opts.Docker.Resolve()
-	// 	if err != nil {
-	// 		return nil, fmt.Errorf("could not resolve Docker options: %w", err)
-	// 	}
-	// 	return executor.NewDocker(ctx, client, opts.Docker.Platform, opts.Docker.Image, opts.Args), nil
-	// }
-
 	if opts.ResolveExecutor == nil {
-		return executor.NewLocal(ctx, opts.Args), nil
+		return executor.NewLocal(ctx, opts.Args)
 	}
 
-	return opts.ResolveExecutor(ctx, opts.Args), nil
+	return opts.ResolveExecutor(ctx, opts.Args)
 }
 
 // ResolveEnvironment returns the (Create).Environment as a slice of environment

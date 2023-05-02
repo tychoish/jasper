@@ -30,7 +30,6 @@ func (m *dockerManager) CreateCommand(ctx context.Context) *jasper.Command {
 	cmd := m.Manager.CreateCommand(ctx)
 	cmd.WithOptions(func(opts *options.Command) {
 		opts.Process.Docker = m.opts
-
 	})
 	return cmd
 }

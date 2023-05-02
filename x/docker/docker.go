@@ -21,6 +21,7 @@ import (
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/jasper/executor"
+	"github.com/tychoish/jasper/options"
 )
 
 type docker struct {
@@ -45,6 +46,21 @@ type docker struct {
 	exitCode int
 	exitErr  error
 	signal   syscall.Signal
+}
+
+func ExecutorResolver(ctx context.Context, opts *options.Create) options.ResolveExecutor {
+	return func(ctx context.Context, args []string) (executor.Executor, error) {
+		if opts.Docker == nil {
+			return nil, executor.ErrNotConfigured
+		}
+
+		client, err := opts.Docker.Resolve()
+		if err != nil {
+			return nil, fmt.Errorf("could not resolve Docker options: %w", err)
+		}
+
+		return NewDocker(ctx, client, opts.Docker.Platform, opts.Docker.Image, args), nil
+	}
 }
 
 // NewDocker returns an Executor that creates a process within a Docker

@@ -7,5 +7,6 @@ use (
 	./x/jamboy
 	./x/remote
 	./x/splunk
+	./x/ssh
 	./x/track
 )

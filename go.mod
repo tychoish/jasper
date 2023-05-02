@@ -7,7 +7,4 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/tychoish/fun v0.9.1
 	github.com/tychoish/grip v0.2.8
-	golang.org/x/crypto v0.8.0
 )
-
-require golang.org/x/sys v0.7.0 // indirect

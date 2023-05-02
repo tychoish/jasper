@@ -1,9 +1,12 @@
 package executor
 
 import (
+	"errors"
 	"io"
 	"syscall"
 )
+
+var ErrNotConfigured = errors.New("executor is not configured")
 
 // Executor is an interface by which Jasper processes can manipulate and
 // introspect on processes. Implementations are not guaranteed to be

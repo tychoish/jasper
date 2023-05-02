@@ -1,4 +1,4 @@
-package executor
+package ssh
 
 import (
 	"context"
@@ -8,6 +8,9 @@ import (
 	"os/exec"
 	"strings"
 	"syscall"
+
+	"github.com/tychoish/jasper/executor"
+	"github.com/tychoish/jasper/options"
 )
 
 // execSSHBinary runs remote processes using the SSH binary.
@@ -20,8 +23,18 @@ type execSSHBinary struct {
 	env         []string
 }
 
+func ExecutorResolverBinary(ctx context.Context, opts *options.Create) options.ResolveExecutor {
+	return func(ctx context.Context, args []string) (executor.Executor, error) {
+		if opts.Remote == nil {
+			return nil, executor.ErrNotConfigured
+		}
+
+		return NewSSHBinary(ctx, opts.Remote.String(), opts.Remote.Args, args), nil
+	}
+}
+
 // NewSSHBinary returns an Executor that creates processes using the SSH binary.
-func NewSSHBinary(ctx context.Context, destination string, opts []string, args []string) Executor {
+func NewSSHBinary(ctx context.Context, destination string, opts []string, args []string) executor.Executor {
 	return &execSSHBinary{
 		destination: destination,
 		remoteOpts:  opts,
