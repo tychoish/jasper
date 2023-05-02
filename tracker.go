@@ -10,10 +10,3 @@ type ProcessTracker interface {
 	// Cleanup terminates this group of processes.
 	Cleanup() error
 }
-
-// processTrackerBase provides convenience no-op implementations of the
-// ProcessTracker interface.
-type processTrackerBase struct{ Name string }
-
-func (*processTrackerBase) Add(ProcessInfo) error { return nil }
-func (*processTrackerBase) Cleanup() error        { return nil }

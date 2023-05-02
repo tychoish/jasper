@@ -1,4 +1,4 @@
-package jasper
+package track
 
 import (
 	"errors"
@@ -10,6 +10,7 @@ import (
 	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
+	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/util"
 )
 
@@ -27,17 +28,17 @@ const (
 type linuxProcessTracker struct {
 	*processTrackerBase
 	cgroup cgroups.Cgroup
-	infos  []ProcessInfo
+	infos  []jasper.ProcessInfo
 }
 
-// NewProcessTracker creates a cgroup for all tracked processes if supported.
+// New creates a cgroup for all tracked processes if supported.
 // Cgroups functionality assert. admin privileges. It also tracks the
 // ProcessInfo for all added processes so that it can find processes to
 // terminate in Cleanup() based on their environment variables.
-func NewProcessTracker(name string) (ProcessTracker, error) {
+func New(name string) (jasper.ProcessTracker, error) {
 	tracker := &linuxProcessTracker{
 		processTrackerBase: &processTrackerBase{Name: name},
-		infos:              []ProcessInfo{},
+		infos:              []jasper.ProcessInfo{},
 	}
 	if err := tracker.setDefaultCgroupIfInvalid(); err != nil {
 		grip.Debug(message.WrapErrorf(err, "could not initialize process tracker named '%s' with cgroup", name))
@@ -70,7 +71,7 @@ func (t *linuxProcessTracker) setDefaultCgroupIfInvalid() error {
 
 // Add adds this PID to the cgroup if cgroups is available. It also keeps track
 // of this process' ProcessInfo.
-func (t *linuxProcessTracker) Add(info ProcessInfo) error {
+func (t *linuxProcessTracker) Add(info jasper.ProcessInfo) error {
 	t.infos = append(t.infos, info)
 
 	if err := t.setDefaultCgroupIfInvalid(); err != nil {
@@ -134,11 +135,11 @@ func (t *linuxProcessTracker) doCleanupByCgroup() error {
 func (t *linuxProcessTracker) doCleanupByEnvironmentVariable() error {
 	catcher := &erc.Collector{}
 	for _, info := range t.infos {
-		if value, ok := info.Options.Environment[ManagerEnvironID]; ok && value == t.Name {
+		if value, ok := info.Options.Environment[jasper.ManagerEnvironID]; ok && value == t.Name {
 			catcher.Add(cleanupProcess(info.PID))
 		}
 	}
-	t.infos = []ProcessInfo{}
+	t.infos = []jasper.ProcessInfo{}
 	return catcher.Resolve()
 }
 

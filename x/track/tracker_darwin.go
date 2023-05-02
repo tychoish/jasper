@@ -1,4 +1,4 @@
-package jasper
+package track
 
 // TODO
 
@@ -6,7 +6,7 @@ type darwinProcessTracker struct {
 	*processTrackerBase
 }
 
-// NewProcessTracker is unimplemented.
-func NewProcessTracker(name string) (ProcessTracker, error) {
+// NewProcessTracker.
+func New(name string) (ProcessTracker, error) {
 	return &darwinProcessTracker{processTrackerBase: &processTrackerBase{Name: name}}, nil
 }

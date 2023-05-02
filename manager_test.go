@@ -2,13 +2,37 @@ package jasper
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
+	"github.com/tychoish/fun/testt"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/testutil"
 )
+
+type mockProcessTracker struct {
+	FailAdd     bool
+	FailCleanup bool
+	Infos       []ProcessInfo
+}
+
+func (t *mockProcessTracker) Add(info ProcessInfo) error {
+	if t.FailAdd {
+		return errors.New("failed in Add")
+	}
+	t.Infos = append(t.Infos, info)
+	return nil
+}
+
+func (t *mockProcessTracker) Cleanup() error {
+	if t.FailCleanup {
+		return errors.New("failed in Cleanup")
+	}
+	t.Infos = []ProcessInfo{}
+	return nil
+}
 
 func TestTrackedManager(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
@@ -128,6 +152,65 @@ func TestTrackedManager(t *testing.T) {
 					opts := testutil.SleepCreateOpts(1)
 					opts.Implementation = options.ProcessImplementationBasic
 					test(tctx, t, makeManager(), opts)
+				})
+			}
+		})
+	}
+}
+
+func TestManagerSetsEnvironmentVariables(t *testing.T) {
+	t.Parallel()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	for managerName, makeManager := range map[string]func() *basicProcessManager{
+		"Basic": func() *basicProcessManager {
+			return &basicProcessManager{
+				procs:   map[string]Process{},
+				loggers: NewLoggingCache(),
+				tracker: &mockProcessTracker{
+					Infos: []ProcessInfo{},
+				},
+			}
+		},
+	} {
+		t.Run(managerName, func(t *testing.T) {
+			for testName, testCase := range map[string]func(context.Context, *testing.T, *basicProcessManager){
+				"CreateProcessSetsManagerEnvironmentVariables": func(ctx context.Context, t *testing.T, manager *basicProcessManager) {
+					proc, err := manager.CreateProcess(ctx, testutil.SleepCreateOpts(1))
+					assert.NotError(t, err)
+
+					env := proc.Info(ctx).Options.Environment
+					assert.True(t, env != nil)
+					value, ok := env[ManagerEnvironID]
+					assert.True(t, ok)
+					check.Equal(t, value, manager.id)
+					testt.Log(t, "process should have manager environment variable set")
+				},
+				"CreateCommandAddsEnvironmentVariables": func(ctx context.Context, t *testing.T, manager *basicProcessManager) {
+					envVar := ManagerEnvironID
+					value := manager.id
+
+					cmdArgs := []string{"yes"}
+					cmd := manager.CreateCommand(ctx).AddEnv(ManagerEnvironID, manager.id).Add(cmdArgs).Background(true)
+					assert.NotError(t, cmd.Run(ctx))
+
+					ids := cmd.GetProcIDs()
+					assert.Equal(t, len(ids), 1)
+					proc, err := manager.Get(ctx, ids[0])
+					assert.NotError(t, err)
+					env := proc.Info(ctx).Options.Environment
+					assert.True(t, env != nil)
+					actualValue, ok := env[envVar]
+					assert.True(t, ok)
+					check.Equal(t, value, actualValue)
+				},
+			} {
+				t.Run(testName, func(t *testing.T) {
+					tctx, cancel := context.WithTimeout(ctx, testutil.ManagerTestTimeout)
+					defer cancel()
+					testCase(tctx, t, makeManager())
 				})
 			}
 		})

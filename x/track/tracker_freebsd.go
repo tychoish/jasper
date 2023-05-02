@@ -1,12 +1,10 @@
-package jasper
-
-// TODO: implement
+package Tracker
 
 type freebsdProcessTracker struct {
 	*processTrackerBase
 }
 
-// NewProcessTracker is unimplemented.
-func NewProcessTracker(name string) (ProcessTracker, error) {
+// New is unimplemented.
+func New(name string) (ProcessTracker, error) {
 	return &freebsdProcessTracker{processTrackerBase: &processTrackerBase{Name: name}}, nil
 }

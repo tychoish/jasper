@@ -1,7 +1,7 @@
 //go:build linux
 // +build linux
 
-package jasper
+package track
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 
 	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
-	"github.com/tychoish/fun/testt"
+	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/testutil"
 )
@@ -20,40 +20,40 @@ func TestLinuxProcessTrackerWithCgroups(t *testing.T) {
 	if os.Geteuid() != 0 {
 		t.Skip("cannot run Linux process tracker tests with cgroups without admin privileges")
 	}
-	for procName, makeProc := range map[string]ProcessConstructor{
-		"Blocking": NewBlockingProcess,
-		"Basic":    NewBasicProcess,
+	for procName, makeProc := range map[string]jasper.ProcessConstructor{
+		"Blocking": jasper.NewBlockingProcess,
+		"Basic":    jasper.NewBasicProcess,
 	} {
 		t.Run(procName, func(t *testing.T) {
 
-			for name, testCase := range map[string]func(context.Context, *testing.T, *linuxProcessTracker, Process){
-				"VerifyInitialSetup": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc Process) {
+			for name, testCase := range map[string]func(context.Context, *testing.T, *linuxProcessTracker, jasper.Process){
+				"VerifyInitialSetup": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc jasper.Process) {
 					assert.True(t, tracker.cgroup != nil)
 					assert.True(t, tracker.validCgroup())
 					pids, err := tracker.listCgroupPIDs()
 					assert.NotError(t, err)
 					check.Equal(t, len(pids), 0)
 				},
-				"NilCgroupIsInvalid": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc Process) {
+				"NilCgroupIsInvalid": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc jasper.Process) {
 					tracker.cgroup = nil
 					check.True(t, !tracker.validCgroup())
 				},
-				"DeletedCgroupIsInvalid": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc Process) {
+				"DeletedCgroupIsInvalid": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc jasper.Process) {
 					assert.NotError(t, tracker.cgroup.Delete())
 					check.True(t, !tracker.validCgroup())
 				},
-				"SetDefaultCgroupIfInvalidNoopsIfCgroupIsValid": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc Process) {
+				"SetDefaultCgroupIfInvalidNoopsIfCgroupIsValid": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc jasper.Process) {
 					cgroup := tracker.cgroup
 					check.True(t, cgroup != nil)
 					check.NotError(t, tracker.setDefaultCgroupIfInvalid())
 					check.True(t, cgroup == tracker.cgroup)
 				},
-				"SetDefaultCgroupIfNilSetsIfCgroupIsInvalid": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc Process) {
+				"SetDefaultCgroupIfNilSetsIfCgroupIsInvalid": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc jasper.Process) {
 					tracker.cgroup = nil
 					check.NotError(t, tracker.setDefaultCgroupIfInvalid())
 					check.True(t, tracker.cgroup != nil)
 				},
-				"AddNewProcessSucceeds": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc Process) {
+				"AddNewProcessSucceeds": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc jasper.Process) {
 					check.NotError(t, tracker.Add(proc.Info(ctx)))
 
 					pids, err := tracker.listCgroupPIDs()
@@ -61,7 +61,7 @@ func TestLinuxProcessTrackerWithCgroups(t *testing.T) {
 					check.Equal(t, len(pids), 1)
 					check.Contains(t, pids, proc.Info(ctx).PID)
 				},
-				"DoubleAddProcessSucceedsButDoesNotDuplicateProcessInCgroup": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc Process) {
+				"DoubleAddProcessSucceedsButDoesNotDuplicateProcessInCgroup": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc jasper.Process) {
 					pid := proc.Info(ctx).PID
 					check.NotError(t, tracker.Add(proc.Info(ctx)))
 					check.NotError(t, tracker.Add(proc.Info(ctx)))
@@ -71,10 +71,10 @@ func TestLinuxProcessTrackerWithCgroups(t *testing.T) {
 					check.Equal(t, len(pids), 1)
 					check.Contains(t, pids, pid)
 				},
-				"ListCgroupPIDsDoesNotSeeTerminatedProcesses": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc Process) {
+				"ListCgroupPIDsDoesNotSeeTerminatedProcesses": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc jasper.Process) {
 					assert.NotError(t, tracker.Add(proc.Info(ctx)))
 
-					check.NotError(t, proc.RegisterSignalTriggerID(ctx, CleanTerminationSignalTrigger))
+					check.NotError(t, proc.RegisterSignalTriggerID(ctx, jasper.CleanTerminationSignalTrigger))
 					err := proc.Signal(ctx, syscall.SIGTERM)
 					check.NotError(t, err)
 					exitCode, err := proc.Wait(ctx)
@@ -85,19 +85,19 @@ func TestLinuxProcessTrackerWithCgroups(t *testing.T) {
 					assert.NotError(t, err)
 					check.Equal(t, len(pids), 0)
 				},
-				"ListCgroupPIDsDoesNotErrorIfCgroupDeleted": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc Process) {
+				"ListCgroupPIDsDoesNotErrorIfCgroupDeleted": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc jasper.Process) {
 					check.NotError(t, tracker.cgroup.Delete())
 					pids, err := tracker.listCgroupPIDs()
 					check.NotError(t, err)
 					check.Equal(t, len(pids), 0)
 				},
-				"CleanupNoProcsSucceeds": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc Process) {
+				"CleanupNoProcsSucceeds": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc jasper.Process) {
 					pids, err := tracker.listCgroupPIDs()
 					assert.NotError(t, err)
 					check.Equal(t, len(pids), 0)
 					check.NotError(t, tracker.Cleanup())
 				},
-				"CleanupTerminatesProcessInCgroup": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc Process) {
+				"CleanupTerminatesProcessInCgroup": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc jasper.Process) {
 					check.NotError(t, tracker.Add(proc.Info(ctx)))
 					check.NotError(t, tracker.Cleanup())
 
@@ -113,17 +113,17 @@ func TestLinuxProcessTrackerWithCgroups(t *testing.T) {
 						t.Error("context timed out before process was complete")
 					}
 				},
-				"CleanupAfterDoubleAddDoesNotError": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc Process) {
+				"CleanupAfterDoubleAddDoesNotError": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc jasper.Process) {
 					check.NotError(t, tracker.Add(proc.Info(ctx)))
 					check.NotError(t, tracker.Add(proc.Info(ctx)))
 					check.NotError(t, tracker.Cleanup())
 				},
-				"DoubleCleanupDoesNotError": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc Process) {
+				"DoubleCleanupDoesNotError": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc jasper.Process) {
 					check.NotError(t, tracker.Add(proc.Info(ctx)))
 					check.NotError(t, tracker.Cleanup())
 					check.NotError(t, tracker.Cleanup())
 				},
-				"AddProcessAfterCleanupSucceeds": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc Process) {
+				"AddProcessAfterCleanupSucceeds": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc jasper.Process) {
 					assert.NotError(t, tracker.Add(proc.Info(ctx)))
 					assert.NotError(t, tracker.Cleanup())
 
@@ -145,7 +145,7 @@ func TestLinuxProcessTrackerWithCgroups(t *testing.T) {
 					proc, err := makeProc(ctx, opts)
 					assert.NotError(t, err)
 
-					tracker, err := NewProcessTracker("test")
+					tracker, err := New("test")
 					assert.NotError(t, err)
 					assert.True(t, tracker != nil)
 					linuxTracker, ok := tracker.(*linuxProcessTracker)
@@ -163,9 +163,9 @@ func TestLinuxProcessTrackerWithCgroups(t *testing.T) {
 }
 
 func TestLinuxProcessTrackerWithEnvironmentVariables(t *testing.T) {
-	for procName, makeProc := range map[string]ProcessConstructor{
-		"Blocking": NewBlockingProcess,
-		"Basic":    NewBasicProcess,
+	for procName, makeProc := range map[string]jasper.ProcessConstructor{
+		"Blocking": jasper.NewBlockingProcess,
+		"Basic":    jasper.NewBasicProcess,
 	} {
 		t.Run(procName, func(t *testing.T) {
 			for testName, testCase := range map[string]func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, opts *options.Create, envVarName string, envVarValue string){
@@ -212,7 +212,7 @@ func TestLinuxProcessTrackerWithEnvironmentVariables(t *testing.T) {
 
 					envVarValue := "bar"
 
-					tracker, err := NewProcessTracker(envVarValue)
+					tracker, err := New(envVarValue)
 					assert.NotError(t, err)
 					assert.True(t, tracker != nil)
 					linuxTracker, ok := tracker.(*linuxProcessTracker)
@@ -224,66 +224,7 @@ func TestLinuxProcessTrackerWithEnvironmentVariables(t *testing.T) {
 					// Override default cgroup behavior.
 					linuxTracker.cgroup = nil
 
-					testCase(ctx, t, linuxTracker, testutil.SleepCreateOpts(1), ManagerEnvironID, envVarValue)
-				})
-			}
-		})
-	}
-}
-
-func TestManagerSetsEnvironmentVariables(t *testing.T) {
-	t.Parallel()
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	for managerName, makeManager := range map[string]func() *basicProcessManager{
-		"Basic": func() *basicProcessManager {
-			return &basicProcessManager{
-				procs:   map[string]Process{},
-				loggers: NewLoggingCache(),
-				tracker: &mockProcessTracker{
-					Infos: []ProcessInfo{},
-				},
-			}
-		},
-	} {
-		t.Run(managerName, func(t *testing.T) {
-			for testName, testCase := range map[string]func(context.Context, *testing.T, *basicProcessManager){
-				"CreateProcessSetsManagerEnvironmentVariables": func(ctx context.Context, t *testing.T, manager *basicProcessManager) {
-					proc, err := manager.CreateProcess(ctx, testutil.SleepCreateOpts(1))
-					assert.NotError(t, err)
-
-					env := proc.Info(ctx).Options.Environment
-					assert.True(t, env != nil)
-					value, ok := env[ManagerEnvironID]
-					assert.True(t, ok)
-					check.Equal(t, value, manager.id)
-					testt.Log(t, "process should have manager environment variable set")
-				},
-				"CreateCommandAddsEnvironmentVariables": func(ctx context.Context, t *testing.T, manager *basicProcessManager) {
-					envVar := ManagerEnvironID
-					value := manager.id
-
-					cmdArgs := []string{"yes"}
-					cmd := manager.CreateCommand(ctx).AddEnv(ManagerEnvironID, manager.id).Add(cmdArgs).Background(true)
-					assert.NotError(t, cmd.Run(ctx))
-
-					ids := cmd.GetProcIDs()
-					assert.Equal(t, len(ids), 1)
-					proc, err := manager.Get(ctx, ids[0])
-					assert.NotError(t, err)
-					env := proc.Info(ctx).Options.Environment
-					assert.True(t, env != nil)
-					actualValue, ok := env[envVar]
-					assert.True(t, ok)
-					check.Equal(t, value, actualValue)
-				},
-			} {
-				t.Run(testName, func(t *testing.T) {
-					tctx, cancel := context.WithTimeout(ctx, testutil.ManagerTestTimeout)
-					defer cancel()
-					testCase(tctx, t, makeManager())
+					testCase(ctx, t, linuxTracker, testutil.SleepCreateOpts(1), jasper.ManagerEnvironID, envVarValue)
 				})
 			}
 		})
