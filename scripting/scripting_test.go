@@ -36,8 +36,7 @@ func TestScriptingHarness(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	manager, err := jasper.NewSynchronizedManager(false)
-	assert.NotError(t, err)
+	manager := jasper.NewManager(jasper.ManagerOptions{Synchronized: true})
 	defer manager.Close(ctx)
 
 	tmpdir, err := os.MkdirTemp(testutil.BuildDirectory(), "scripting_tests")

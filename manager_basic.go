@@ -14,6 +14,48 @@ import (
 	"github.com/tychoish/jasper/util"
 )
 
+type ManagerOptions struct {
+	ID           string
+	Tracker      ProcessTracker
+	Remote       *options.Remote
+	MaxProcs     int
+	SSHLibrary   bool
+	Synchronized bool
+}
+
+func NewManager(opts ManagerOptions) Manager {
+	if opts.ID == "" {
+		opts.ID = uuid.New().String()
+	}
+
+	var mgr Manager
+	m := &basicProcessManager{
+		procs:         map[string]Process{},
+		id:            opts.ID,
+		useSSHLibrary: opts.SSHLibrary,
+		loggers:       NewLoggingCache(),
+		tracker:       opts.Tracker,
+	}
+	mgr = m
+
+	if opts.MaxProcs > 0 {
+		mgr = &selfClearingProcessManager{
+			basicProcessManager: m,
+			maxProcs:            opts.MaxProcs,
+		}
+	}
+
+	if opts.Remote != nil {
+		mgr = &remoteOverrideMgr{remote: opts.Remote, Manager: mgr}
+	}
+
+	if opts.Synchronized {
+		mgr = &synchronizedProcessManager{manager: m}
+	}
+
+	return mgr
+}
+
 type basicProcessManager struct {
 	id            string
 	procs         map[string]Process
@@ -22,31 +64,7 @@ type basicProcessManager struct {
 	loggers       LoggingCache
 }
 
-// NewBasicProcessManager returns a manager which is not thread safe for
-// creating arbitrary processes. By default, processes are basic processes
-// unless otherwise specified when creating the process.
-func NewBasicProcessManager(trackProcs bool, useSSHLibrary bool) (Manager, error) {
-	procs := map[string]Process{}
-
-	m := basicProcessManager{
-		procs:         procs,
-		id:            uuid.New().String(),
-		useSSHLibrary: useSSHLibrary,
-		loggers:       NewLoggingCache(),
-	}
-	if trackProcs {
-		tracker, err := NewProcessTracker(m.id)
-		if err != nil {
-			return nil, fmt.Errorf("failed to make process tracker: %w", err)
-		}
-		m.tracker = tracker
-	}
-	return &m, nil
-}
-
-func (m *basicProcessManager) ID() string {
-	return m.id
-}
+func (m *basicProcessManager) ID() string { return m.id }
 
 func (m *basicProcessManager) CreateProcess(ctx context.Context, opts *options.Create) (Process, error) {
 	opts.AddEnvVar(ManagerEnvironID, m.id)

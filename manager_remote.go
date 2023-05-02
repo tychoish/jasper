@@ -11,17 +11,6 @@ type remoteOverrideMgr struct {
 	remote *options.Remote
 }
 
-// NewRemoteManager builds a remote manager that wraps an existing
-// manager, but creates all commands with the specified remote
-// options. Commands and processes with non-nil remote options will
-// run over SSH.
-func NewRemoteManager(m Manager, remote *options.Remote) Manager {
-	return &remoteOverrideMgr{
-		Manager: m,
-		remote:  remote,
-	}
-}
-
 func (m *remoteOverrideMgr) CreateProcess(ctx context.Context, opts *options.Create) (Process, error) {
 	opts.Remote = m.remote
 	return m.Manager.CreateProcess(ctx, opts)

@@ -2,36 +2,10 @@ package jasper
 
 import (
 	"context"
-	"fmt"
 	"sync"
 
 	"github.com/tychoish/jasper/options"
 )
-
-// MakeSynchronizedManager wraps the given manager in a thread-safe Manager.
-func MakeSynchronizedManager(manager Manager) Manager {
-	return &synchronizedProcessManager{manager: manager}
-}
-
-// NewSynchronizedManager is a constructor for a thread-safe basic Manager.
-func NewSynchronizedManager(trackProcs bool) (Manager, error) {
-	basicManager, err := NewBasicProcessManager(trackProcs, false)
-	if err != nil {
-		return nil, err
-	}
-
-	return &synchronizedProcessManager{manager: basicManager}, nil
-}
-
-// NewSSHLibrarySynchronizedManager is the same as NewSynchronizedManager but
-// uses the SSH library instead of the SSH binary for remote processes.
-func NewSSHLibrarySynchronizedManager(trackProcs bool) (Manager, error) {
-	basicManager, err := NewBasicProcessManager(trackProcs, true)
-	if err != nil {
-		return nil, fmt.Errorf("problem constructing underlying manager: %w", err)
-	}
-	return &synchronizedProcessManager{manager: basicManager}, nil
-}
 
 type synchronizedProcessManager struct {
 	mu      sync.RWMutex

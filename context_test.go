@@ -4,7 +4,6 @@ import (
 	"context"
 	"testing"
 
-	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 )
 
@@ -12,8 +11,7 @@ func TestContext(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	mgr, err := NewSynchronizedManager(false)
-	assert.NotError(t, err)
+	mgr := NewManager(ManagerOptions{})
 
 	check.True(t, !HasManager(ctx))
 

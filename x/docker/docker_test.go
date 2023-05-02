@@ -5,7 +5,6 @@ import (
 	"os"
 	"testing"
 
-	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/testcases"
@@ -17,8 +16,8 @@ func TestManagerInterface(t *testing.T) {
 
 	for mname, makeMngr := range map[string]func(context.Context, *testing.T) jasper.Manager{
 		"Docker/NoLock": func(_ context.Context, t *testing.T) jasper.Manager {
-			m, err := jasper.NewBasicProcessManager(false, false)
-			assert.NotError(t, err)
+			m := jasper.NewManager(jasper.ManagerOptions{})
+
 			image := os.Getenv("DOCKER_IMAGE")
 			if image == "" {
 				image = testutil.DefaultDockerImage

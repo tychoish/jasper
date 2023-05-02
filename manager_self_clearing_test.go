@@ -89,9 +89,10 @@ func TestSelfClearingManager(t *testing.T) {
 						tctx, cancel := context.WithTimeout(ctx, testutil.ManagerTestTimeout)
 						defer cancel()
 
-						selfClearingManager, err := NewSelfClearingProcessManager(5, false)
+						selfClearingManager := NewManager(ManagerOptions{
+							MaxProcs: 5,
+						})
 
-						assert.NotError(t, err)
 						test(tctx, t, selfClearingManager.(*selfClearingProcessManager), func(o *options.Create) {
 							o.Implementation = options.ProcessImplementationBlocking
 						})
@@ -103,8 +104,10 @@ func TestSelfClearingManager(t *testing.T) {
 						tctx, cancel := context.WithTimeout(ctx, testutil.ManagerTestTimeout)
 						defer cancel()
 
-						selfClearingManager, err := NewSelfClearingProcessManager(5, false)
-						assert.NotError(t, err)
+						selfClearingManager := NewManager(ManagerOptions{
+							MaxProcs: 5,
+						})
+
 						test(tctx, t, selfClearingManager.(*selfClearingProcessManager), func(o *options.Create) {
 							o.Implementation = options.ProcessImplementationBasic
 						})
