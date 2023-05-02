@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper/options"
 )
@@ -35,13 +36,13 @@ func TestMongodShutdownEvent(t *testing.T) {
 			defer os.RemoveAll(dir)
 
 			optslist, dbPaths, err := setupMongods(1, mongodPath)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			defer removeDBPaths(dbPaths)
 			require.Equal(t, 1, len(optslist))
 
 			opts = optslist[0]
 			logger := &options.LoggerConfig{}
-			require.NoError(t, logger.Set(&options.DefaultLoggerOptions{
+			assert.NotError(t, logger.Set(&options.DefaultLoggerOptions{
 				Base: options.BaseOptions{
 					Format: options.LogFormatPlain,
 				},
@@ -49,7 +50,7 @@ func TestMongodShutdownEvent(t *testing.T) {
 			opts.Output.Loggers = []*options.LoggerConfig{logger}
 
 			proc, err := makeProc(ctx, &opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			// Give mongod time to start up its signal processing thread.
 			time.Sleep(mongodStartupTime)
@@ -57,7 +58,7 @@ func TestMongodShutdownEvent(t *testing.T) {
 			pid := proc.Info(ctx).PID
 			mongodShutdownEvent := mongodShutdownEventPrefix + strconv.Itoa(pid)
 
-			require.NoError(t, SignalEvent(ctx, mongodShutdownEvent))
+			assert.NotError(t, SignalEvent(ctx, mongodShutdownEvent))
 
 			exitCode, err := proc.Wait(ctx)
 			check.NotError(t, err)

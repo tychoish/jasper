@@ -9,12 +9,12 @@ import (
 	"os"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper"
-	"github.com/tychoish/jasper/x/remote"
 	"github.com/tychoish/jasper/testutil"
 	"github.com/tychoish/jasper/util"
+	"github.com/tychoish/jasper/x/remote"
 	"github.com/urfave/cli"
 )
 
@@ -59,15 +59,15 @@ func withMockStdin(t *testing.T, input string, operation func(*os.File) error) e
 		os.Stdin = stdin
 	}()
 	tmpFile, err := os.CreateTemp(testutil.BuildDirectory(), "mock_stdin.txt")
-	require.NoError(t, err)
+	assert.NotError(t, err)
 	defer func() {
 		check.NotError(t, tmpFile.Close())
 		check.NotError(t, os.RemoveAll(tmpFile.Name()))
 	}()
 	_, err = tmpFile.WriteString(input)
-	require.NoError(t, err)
+	assert.NotError(t, err)
 	_, err = tmpFile.Seek(0, 0)
-	require.NoError(t, err)
+	assert.NotError(t, err)
 	os.Stdin = tmpFile
 	return operation(os.Stdin)
 }
@@ -80,7 +80,7 @@ func withMockStdout(t *testing.T, operation func(*os.File) error) error {
 		os.Stdout = stdout
 	}()
 	tmpFile, err := os.CreateTemp(testutil.BuildDirectory(), "mock_stdout.txt")
-	require.NoError(t, err)
+	assert.NotError(t, err)
 	defer func() {
 		check.NotError(t, tmpFile.Close())
 		check.NotError(t, os.RemoveAll(tmpFile.Name()))
@@ -119,8 +119,8 @@ func execCLICommandOutput(t *testing.T, c *cli.Context, cmd cli.Command, output 
 // localhost.
 func makeTestRESTService(ctx context.Context, t *testing.T, port int, manager jasper.Manager) util.CloseFunc {
 	closeService, err := newRESTService(ctx, "localhost", port, manager)
-	require.NoError(t, err)
-	require.NoError(t, testutil.WaitForRESTService(ctx, fmt.Sprintf("http://localhost:%d/jasper/v1", port)))
+	assert.NotError(t, err)
+	assert.NotError(t, testutil.WaitForRESTService(ctx, fmt.Sprintf("http://localhost:%d/jasper/v1", port)))
 	return closeService
 }
 
@@ -129,7 +129,7 @@ func makeTestRESTService(ctx context.Context, t *testing.T, port int, manager ja
 func makeTestRESTServiceAndClient(ctx context.Context, t *testing.T, port int, manager jasper.Manager) (util.CloseFunc, remote.Manager) {
 	closeService := makeTestRESTService(ctx, t, port, manager)
 	client, err := newRemoteClient(ctx, RESTService, "localhost", port, "")
-	require.NoError(t, err)
+	assert.NotError(t, err)
 	return closeService, client
 }
 
@@ -137,7 +137,7 @@ func makeTestRESTServiceAndClient(ctx context.Context, t *testing.T, port int, m
 // localhost with no credentials.
 func makeTestRPCService(ctx context.Context, t *testing.T, port int, manager jasper.Manager) util.CloseFunc {
 	closeService, err := newRPCService(ctx, "localhost", port, manager, "")
-	require.NoError(t, err)
+	assert.NotError(t, err)
 	return closeService
 }
 
@@ -146,6 +146,6 @@ func makeTestRPCService(ctx context.Context, t *testing.T, port int, manager jas
 func makeTestRPCServiceAndClient(ctx context.Context, t *testing.T, port int, manager jasper.Manager) (util.CloseFunc, remote.Manager) {
 	closeService := makeTestRPCService(ctx, t, port, manager)
 	client, err := newRemoteClient(ctx, RPCService, "localhost", port, "")
-	require.NoError(t, err)
+	assert.NotError(t, err)
 	return closeService, client
 }

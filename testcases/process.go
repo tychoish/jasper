@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
@@ -31,9 +32,9 @@ type ProcessCase func(context.Context, *testing.T, *options.Create, jasper.Proce
 func ProcessCases() map[string]ProcessCase {
 	return map[string]ProcessCase{
 		"WithPopulatedArgsCommandCreationPasses": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
-			check.Equal(t, len(opts.Args), 0)
+			check.NotEqual(t, len(opts.Args), 0)
 			proc, err := makep(ctx, opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			check.True(t, proc != nil)
 		},
 		"ErrorToCreateWithInvalidArgs": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
@@ -55,7 +56,7 @@ func ProcessCases() map[string]ProcessCase {
 			startAt := time.Now()
 			opts := testutil.SleepCreateOpts(20)
 			proc, err := makep(pctx, opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			require.NotNil(t, proc)
 
 			time.Sleep(5 * time.Millisecond) // let time pass...
@@ -64,21 +65,21 @@ func ProcessCases() map[string]ProcessCase {
 		},
 		"ProcessLacksTagsByDefault": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			proc, err := makep(ctx, opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			tags := proc.GetTags()
 			check.Equal(t, len(tags), 0)
 		},
 		"ProcessTagsPersist": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			opts.Tags = []string{"foo"}
 			proc, err := makep(ctx, opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			tags := proc.GetTags()
 			check.Contains(t, tags, "foo")
 		},
 		"InfoTagsMatchGetTags": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			opts.Tags = []string{"foo"}
 			proc, err := makep(ctx, opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			tags := proc.GetTags()
 			check.Contains(t, tags, "foo")
 			check.EqualItems(t, tags, proc.Info(ctx).Options.Tags)
@@ -90,14 +91,14 @@ func ProcessCases() map[string]ProcessCase {
 		},
 		"InfoHasMatchingID": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			proc, err := makep(ctx, opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			_, err = proc.Wait(ctx)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			check.Equal(t, proc.ID(), proc.Info(ctx).ID)
 		},
 		"ResetTags": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			proc, err := makep(ctx, opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			proc.Tag("foo")
 			check.Contains(t, proc.GetTags(), "foo")
 			proc.ResetTags()
@@ -105,7 +106,7 @@ func ProcessCases() map[string]ProcessCase {
 		},
 		"TagsAreSetLike": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			proc, err := makep(ctx, opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			for i := 0; i < 10; i++ {
 				proc.Tag("foo")
@@ -117,7 +118,7 @@ func ProcessCases() map[string]ProcessCase {
 		},
 		"CompleteIsTrueAfterWait": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			proc, err := makep(ctx, opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			time.Sleep(10 * time.Millisecond) // give the process time to start background machinery
 			_, err = proc.Wait(ctx)
 			check.NotError(t, err)
@@ -127,7 +128,7 @@ func ProcessCases() map[string]ProcessCase {
 			opts.Args = []string{"sleep", "20"}
 			pctx, pcancel := context.WithCancel(ctx)
 			proc, err := makep(ctx, opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			check.True(t, proc.Running(ctx))
 			check.NotError(t, err)
 			pcancel()
@@ -136,24 +137,24 @@ func ProcessCases() map[string]ProcessCase {
 		},
 		"RegisterTriggerErrorsForNil": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			proc, err := makep(ctx, opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			check.Error(t, proc.RegisterTrigger(ctx, nil))
 		},
 		"RegisterSignalTriggerErrorsForNil": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			proc, err := makep(ctx, opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			check.Error(t, proc.RegisterSignalTrigger(ctx, nil))
 		},
 		"RegisterSignalTriggerErrorsForExitedProcess": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			proc, err := makep(ctx, opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			_, err = proc.Wait(ctx)
 			check.NotError(t, err)
 			check.Error(t, proc.RegisterSignalTrigger(ctx, func(_ jasper.ProcessInfo, _ syscall.Signal) bool { return false }))
 		},
 		"RegisterSignalTriggerIDErrorsForExitedProcess": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			proc, err := makep(ctx, opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			_, err = proc.Wait(ctx)
 			check.NotError(t, err)
 			check.Error(t, proc.RegisterSignalTriggerID(ctx, jasper.CleanTerminationSignalTrigger))
@@ -161,19 +162,19 @@ func ProcessCases() map[string]ProcessCase {
 		"RegisterSignalTriggerIDFailsWithInvalidTriggerID": func(ctx context.Context, t *testing.T, _ *options.Create, makep jasper.ProcessConstructor) {
 			opts := testutil.SleepCreateOpts(3)
 			proc, err := makep(ctx, opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			check.Error(t, proc.RegisterSignalTriggerID(ctx, jasper.SignalTriggerID("foo")))
 		},
 		"RegisterSignalTriggerIDPassesWithValidTriggerID": func(ctx context.Context, t *testing.T, _ *options.Create, makep jasper.ProcessConstructor) {
 			opts := testutil.SleepCreateOpts(3)
 			proc, err := makep(ctx, opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			check.NotError(t, proc.RegisterSignalTriggerID(ctx, jasper.CleanTerminationSignalTrigger))
 		},
 		"DefaultTriggerSucceeds": func(ctx context.Context, t *testing.T, _ *options.Create, makep jasper.ProcessConstructor) {
 			opts := testutil.SleepCreateOpts(3)
 			proc, err := makep(ctx, opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			check.NotError(t, proc.RegisterTrigger(ctx, jasper.MakeDefaultTrigger(ctx, nil, opts, "foo")))
 		},
 		"OptionsCloseTriggerRegisteredByDefault": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
@@ -187,10 +188,10 @@ func ProcessCases() map[string]ProcessCase {
 			})
 
 			proc, err := makep(ctx, opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			_, err = proc.Wait(ctx)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			select {
 			case <-ctx.Done():
@@ -201,7 +202,7 @@ func ProcessCases() map[string]ProcessCase {
 		},
 		"SignalTriggerRunsBeforeSignal": func(ctx context.Context, t *testing.T, _ *options.Create, makep jasper.ProcessConstructor) {
 			proc, err := makep(ctx, testutil.SleepCreateOpts(1))
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			expectedSig := syscall.SIGKILL
 			check.NotError(t, proc.RegisterSignalTrigger(ctx, func(info jasper.ProcessInfo, actualSig syscall.Signal) bool {
@@ -225,7 +226,7 @@ func ProcessCases() map[string]ProcessCase {
 		},
 		"SignalTriggerCanSkipSignal": func(ctx context.Context, t *testing.T, _ *options.Create, makep jasper.ProcessConstructor) {
 			proc, err := makep(ctx, testutil.SleepCreateOpts(1))
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			expectedSig := syscall.SIGKILL
 			shouldSkipNextTime := true
@@ -255,41 +256,41 @@ func ProcessCases() map[string]ProcessCase {
 		},
 		"ProcessLogDefault": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			file, err := os.CreateTemp(testutil.BuildDirectory(), "out.txt")
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			defer func() {
 				check.NotError(t, file.Close())
 				check.NotError(t, os.RemoveAll(file.Name()))
 			}()
 			info, err := file.Stat()
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			check.Zero(t, info.Size())
 
 			logger := &options.LoggerConfig{}
-			require.NoError(t, logger.Set(&options.DefaultLoggerOptions{
+			assert.NotError(t, logger.Set(&options.DefaultLoggerOptions{
 				Base: options.BaseOptions{Format: options.LogFormatPlain},
 			}))
 			opts.Output.Loggers = []*options.LoggerConfig{logger}
 			opts.Args = []string{"echo", "foobar"}
 
 			proc, err := makep(ctx, opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			_, err = proc.Wait(ctx)
 			check.NotError(t, err)
 		},
 		"ProcessWritesToLog": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			file, err := os.CreateTemp(testutil.BuildDirectory(), "out.txt")
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			defer func() {
 				check.NotError(t, file.Close())
 				check.NotError(t, os.RemoveAll(file.Name()))
 			}()
 			info, err := file.Stat()
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			check.Zero(t, info.Size())
 
 			logger := &options.LoggerConfig{}
-			require.NoError(t, logger.Set(&options.FileLoggerOptions{
+			assert.NotError(t, logger.Set(&options.FileLoggerOptions{
 				Filename: file.Name(),
 				Base:     options.BaseOptions{Format: options.LogFormatPlain},
 			}))
@@ -297,7 +298,7 @@ func ProcessCases() map[string]ProcessCase {
 			opts.Args = []string{"echo", "foobar"}
 
 			proc, err := makep(ctx, opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			_, err = proc.Wait(ctx)
 			check.NotError(t, err)
@@ -322,69 +323,69 @@ func ProcessCases() map[string]ProcessCase {
 				t.Error("file write took too long to complete")
 			case <-fileWrite:
 				info, err = file.Stat()
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				check.NotZero(t, info.Size())
 			}
 		},
 		"WaitOnRespawnedProcessDoesNotError": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			proc, err := makep(ctx, opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			require.NotNil(t, proc)
 			_, err = proc.Wait(ctx)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			newProc, err := proc.Respawn(ctx)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			_, err = newProc.Wait(ctx)
 			check.NotError(t, err)
 		},
 		"RespawnedProcessGivesSameResult": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			proc, err := makep(ctx, opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			require.NotNil(t, proc)
 
 			_, err = proc.Wait(ctx)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			procExitCode := proc.Info(ctx).ExitCode
 
 			newProc, err := proc.Respawn(ctx)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			_, err = newProc.Wait(ctx)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			check.Equal(t, procExitCode, proc.Info(ctx).ExitCode)
 		},
 		"RespawningFinishedProcessIsOK": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			proc, err := makep(ctx, opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			require.NotNil(t, proc)
 			_, err = proc.Wait(ctx)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			newProc, err := proc.Respawn(ctx)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			require.NotNil(t, newProc)
 			_, err = newProc.Wait(ctx)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			check.True(t, newProc.Info(ctx).Successful)
 		},
 		"RespawningRunningProcessIsOK": func(ctx context.Context, t *testing.T, _ *options.Create, makep jasper.ProcessConstructor) {
 			opts := testutil.SleepCreateOpts(2)
 			proc, err := makep(ctx, opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			require.NotNil(t, proc)
 
 			newProc, err := proc.Respawn(ctx)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			require.NotNil(t, newProc)
 			_, err = newProc.Wait(ctx)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			check.True(t, newProc.Info(ctx).Successful)
 		},
 		"TriggersFireOnRespawnedProcessExit": func(ctx context.Context, t *testing.T, _ *options.Create, makep jasper.ProcessConstructor) {
 			count := 0
 			opts := testutil.SleepCreateOpts(2)
 			proc, err := makep(ctx, opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			require.NotNil(t, proc)
 
 			countIncremented := make(chan bool)
@@ -402,7 +403,7 @@ func ProcessCases() map[string]ProcessCase {
 			}
 
 			newProc, err := proc.Respawn(ctx)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			require.NotNil(t, newProc)
 			check.NotError(t, newProc.RegisterTrigger(ctx, func(pIfno jasper.ProcessInfo) {
 				count++
@@ -420,21 +421,21 @@ func ProcessCases() map[string]ProcessCase {
 		"RespawnShowsConsistentStateValues": func(ctx context.Context, t *testing.T, _ *options.Create, makep jasper.ProcessConstructor) {
 			opts := testutil.SleepCreateOpts(2)
 			proc, err := makep(ctx, opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			require.NotNil(t, proc)
 			_, err = proc.Wait(ctx)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			newProc, err := proc.Respawn(ctx)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			check.True(t, newProc.Running(ctx))
 			_, err = newProc.Wait(ctx)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			check.True(t, newProc.Complete(ctx))
 		},
 		"WaitGivesSuccessfulExitCode": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			proc, err := makep(ctx, testutil.TrueCreateOpts())
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			require.NotNil(t, proc)
 			exitCode, err := proc.Wait(ctx)
 			check.NotError(t, err)
@@ -442,7 +443,7 @@ func ProcessCases() map[string]ProcessCase {
 		},
 		"WaitGivesFailureExitCode": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			proc, err := makep(ctx, testutil.FalseCreateOpts())
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			require.NotNil(t, proc)
 			exitCode, err := proc.Wait(ctx)
 			check.Error(t, err)
@@ -450,7 +451,7 @@ func ProcessCases() map[string]ProcessCase {
 		},
 		"WaitGivesProperExitCodeOnSignalDeath": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			proc, err := makep(ctx, testutil.SleepCreateOpts(100))
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			require.NotNil(t, proc)
 			sig := syscall.SIGTERM
 			check.NotError(t, proc.Signal(ctx, sig))
@@ -464,7 +465,7 @@ func ProcessCases() map[string]ProcessCase {
 		},
 		"WaitGivesProperExitCodeOnSignalAbort": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			proc, err := makep(ctx, testutil.SleepCreateOpts(100))
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			require.NotNil(t, proc)
 			sig := syscall.SIGABRT
 			check.NotError(t, proc.Signal(ctx, sig))
@@ -478,7 +479,7 @@ func ProcessCases() map[string]ProcessCase {
 		},
 		"WaitGivesNegativeOneOnAlternativeError": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			proc, err := makep(ctx, testutil.SleepCreateOpts(100))
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			require.NotNil(t, proc)
 
 			var exitCode int
@@ -502,7 +503,7 @@ func ProcessCases() map[string]ProcessCase {
 			opts.Timeout = time.Second
 			opts.TimeoutSecs = 1
 			proc, err := makep(ctx, opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			exitCode, err := proc.Wait(ctx)
 			check.Error(t, err)
@@ -515,7 +516,7 @@ func ProcessCases() map[string]ProcessCase {
 		},
 		"CallingSignalOnDeadProcessDoesError": func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 			proc, err := makep(ctx, opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			_, err = proc.Wait(ctx)
 			check.NotError(t, err)
@@ -530,10 +531,10 @@ func ProcessCases() map[string]ProcessCase {
 					opts.StandardInput = bytes.NewBuffer(stdin)
 
 					proc, err := makep(ctx, opts)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 
 					_, err = proc.Wait(ctx)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 
 					check.Equal(t, expectedOutput, strings.TrimSpace(output.String()))
 				},
@@ -541,10 +542,10 @@ func ProcessCases() map[string]ProcessCase {
 					opts.StandardInputBytes = stdin
 
 					proc, err := makep(ctx, opts)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 
 					_, err = proc.Wait(ctx)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 
 					check.Equal(t, expectedOutput, strings.TrimSpace(output.String()))
 				},
@@ -552,20 +553,20 @@ func ProcessCases() map[string]ProcessCase {
 					opts.StandardInput = bytes.NewBuffer(stdin)
 
 					proc, err := makep(ctx, opts)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 
 					_, err = proc.Wait(ctx)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 
 					check.Equal(t, expectedOutput, strings.TrimSpace(output.String()))
 
 					output.Reset()
 
 					newProc, err := proc.Respawn(ctx)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 
 					_, err = newProc.Wait(ctx)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 
 					check.Zero(t, len(output.String()))
 
@@ -575,20 +576,20 @@ func ProcessCases() map[string]ProcessCase {
 					opts.StandardInputBytes = stdin
 
 					proc, err := makep(ctx, opts)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 
 					_, err = proc.Wait(ctx)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 
 					check.Equal(t, expectedOutput, strings.TrimSpace(output.String()))
 
 					output.Reset()
 
 					newProc, err := proc.Respawn(ctx)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 
 					_, err = newProc.Wait(ctx)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 
 					check.Equal(t, expectedOutput, strings.TrimSpace(output.String()))
 				},

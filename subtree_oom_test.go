@@ -11,7 +11,7 @@ func TestGetPids(t *testing.T) {
 
 	dmesg := "[11686.043647] Killed process 2603 (flasherav) total-vm:1498536kB, anon-rss:721784kB, file-rss:4228kB"
 
-	check.True(dmesgContainsOOMKill(dmesg))
+	check.True(t, dmesgContainsOOMKill(dmesg))
 
 	pid, hasPid := getPidFromDmesg(dmesg)
 	check.True(t, hasPid)

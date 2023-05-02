@@ -14,8 +14,8 @@ import (
 	"syscall"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/mock"
@@ -35,15 +35,15 @@ func TestRestService(t *testing.T) {
 	defer testutil.PutHTTPClient(httpClient)
 
 	tempDir, err := os.MkdirTemp(testutil.BuildDirectory(), filepath.Base(t.Name()))
-	require.NoError(t, err)
+	assert.NotError(t, err)
 	defer func() { check.NotError(t, os.RemoveAll(tempDir)) }()
 
 	for name, test := range map[string]func(context.Context, *testing.T, *Service, *restClient){
 		"VerifyFixtures": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
-			assert.NotNil(t, srv)
-			assert.NotNil(t, client)
-			assert.NotNil(t, srv.manager)
-			assert.NotNil(t, client.client)
+			assert.True(t, srv != nil)
+			assert.True(t, client != nil)
+			assert.True(t, srv.manager != nil)
+			assert.True(t, client.client != nil)
 			assert.NotZero(t, client.prefix)
 
 			// similarly about helper functions
@@ -203,10 +203,10 @@ func TestRestService(t *testing.T) {
 		},
 		"CreateProcessEndpointErrorsWithMalformedData": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
 			body, err := makeBody(map[string]int{"tags": 42})
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			req, err := http.NewRequest(http.MethodPost, "", io.NopCloser(body))
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			rw := httptest.NewRecorder()
 			srv.createProcess(rw, req)
 			assert.Equal(t, http.StatusBadRequest, rw.Code)
@@ -230,16 +230,16 @@ func TestRestService(t *testing.T) {
 		},
 		"SignalErrorsWithInvalidSyscall": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
 			proc, err := client.CreateProcess(ctx, testutil.SleepCreateOpts(10))
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			assert.Error(t, proc.Signal(ctx, syscall.Signal(-1)))
 		},
 		"MetricsErrorForInvalidProcess": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
 			req, err := http.NewRequest(http.MethodGet, client.getURL("/process/%s/metrics", "foo"), nil)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			req = req.WithContext(ctx)
 			res, err := httpClient.Do(req)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			assert.Equal(t, http.StatusNotFound, res.StatusCode)
 		},
@@ -272,10 +272,10 @@ func TestRestService(t *testing.T) {
 			}
 
 			req, err := http.NewRequest(http.MethodGet, client.getURL("/process/%s/metrics", id), nil)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			req = req.WithContext(ctx)
 			res, err := httpClient.Do(req)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			assert.Equal(t, http.StatusOK, res.StatusCode)
 		},
@@ -288,10 +288,10 @@ func TestRestService(t *testing.T) {
 			}
 
 			req, err := http.NewRequest(http.MethodPost, client.getURL("/process/%s/tags", id), nil)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			req = req.WithContext(ctx)
 			res, err := httpClient.Do(req)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			assert.Equal(t, http.StatusBadRequest, res.StatusCode)
 
@@ -314,11 +314,11 @@ func TestRestService(t *testing.T) {
 		},
 		"SignalFailsToParsePID": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
 			req, err := http.NewRequest(http.MethodPatch, client.getURL("/process/%s/signal/f", "foo"), nil)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			req = req.WithContext(ctx)
 
 			resp, err := client.client.Do(req)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			defer resp.Body.Close()
 			assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 			assert.Contains(t, handleError(resp).Error(), "problem converting signal 'f'")
@@ -327,10 +327,10 @@ func TestRestService(t *testing.T) {
 			body, err := makeBody(struct {
 				URL int `json:"url"`
 			}{URL: 0})
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			req, err := http.NewRequest(http.MethodPost, client.getURL("/download"), body)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			rw := httptest.NewRecorder()
 			srv.downloadFile(rw, req)
 			assert.Equal(t, http.StatusBadRequest, rw.Code)
@@ -339,11 +339,11 @@ func TestRestService(t *testing.T) {
 			opts := &options.Create{Args: []string{"echo", "foo"}}
 
 			proc, err := client.CreateProcess(ctx, opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			require.NotNil(t, proc)
 
 			_, err = proc.Wait(ctx)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			stream, err := client.GetLogStream(ctx, proc.ID(), 1)
 			assert.Error(t, err)
@@ -351,20 +351,20 @@ func TestRestService(t *testing.T) {
 		},
 		"CreateWithMultipleLoggers": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
 			file, err := os.CreateTemp(tempDir, "out.txt")
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			defer func() {
 				check.NotError(t, file.Close())
 				check.NotError(t, os.RemoveAll(file.Name()))
 			}()
 
 			fileLogger := &options.LoggerConfig{}
-			require.NoError(t, fileLogger.Set(&options.FileLoggerOptions{
+			assert.NotError(t, fileLogger.Set(&options.FileLoggerOptions{
 				Filename: file.Name(),
 				Base:     options.BaseOptions{Format: options.LogFormatPlain},
 			}))
 
 			inMemoryLogger := &options.LoggerConfig{}
-			require.NoError(t, inMemoryLogger.Set(&options.InMemoryLoggerOptions{
+			assert.NotError(t, inMemoryLogger.Set(&options.InMemoryLoggerOptions{
 				InMemoryCap: 100,
 				Base:        options.BaseOptions{Format: options.LogFormatPlain},
 			}))
@@ -372,39 +372,39 @@ func TestRestService(t *testing.T) {
 			opts := &options.Create{Output: options.Output{Loggers: []*options.LoggerConfig{inMemoryLogger, fileLogger}}}
 			opts.Args = []string{"echo", "foobar"}
 			proc, err := client.CreateProcess(ctx, opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			_, err = proc.Wait(ctx)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			stream, err := client.GetLogStream(ctx, proc.ID(), 1)
-			require.NoError(t, err)
-			assert.NotEmpty(t, stream.Logs)
-			assert.False(t, stream.Done)
+			assert.NotError(t, err)
+			assert.Equal(t, len(stream.Logs), 0)
+			assert.True(t, !stream.Done)
 
 			info, err := os.Stat(file.Name())
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			assert.NotZero(t, info.Size())
 
 		},
 		"WriteFileSucceeds": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
 			tmpFile, err := os.CreateTemp(tempDir, filepath.Base(t.Name()))
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			defer func() {
 				check.NotError(t, tmpFile.Close())
 				check.NotError(t, os.RemoveAll(tmpFile.Name()))
 			}()
 
 			opts := options.WriteFile{Path: tmpFile.Name(), Content: []byte("foo")}
-			require.NoError(t, client.WriteFile(ctx, opts))
+			assert.NotError(t, client.WriteFile(ctx, opts))
 
 			content, err := os.ReadFile(tmpFile.Name())
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			assert.Equal(t, opts.Content, content)
 		},
 		"WriteFileAcceptsContentFromReader": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
 			tmpFile, err := os.CreateTemp(tempDir, filepath.Base(t.Name()))
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			defer func() {
 				check.NotError(t, tmpFile.Close())
 				check.NotError(t, os.RemoveAll(tmpFile.Name()))
@@ -412,16 +412,16 @@ func TestRestService(t *testing.T) {
 
 			buf := []byte("foo")
 			opts := options.WriteFile{Path: tmpFile.Name(), Reader: bytes.NewBuffer(buf)}
-			require.NoError(t, client.WriteFile(ctx, opts))
+			assert.NotError(t, client.WriteFile(ctx, opts))
 
 			content, err := os.ReadFile(tmpFile.Name())
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			assert.Equal(t, buf, content)
 		},
 		"WriteFileSucceedsWithLargeContentReader": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
 			tmpFile, err := os.CreateTemp(tempDir, filepath.Base(t.Name()))
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			defer func() {
 				check.NotError(t, tmpFile.Close())
 				check.NotError(t, os.RemoveAll(tmpFile.Name()))
@@ -430,19 +430,19 @@ func TestRestService(t *testing.T) {
 			const mb = 1024 * 1024
 			buf := bytes.Repeat([]byte("foo"), 2*mb)
 			opts := options.WriteFile{Path: tmpFile.Name(), Reader: bytes.NewBuffer(buf)}
-			require.NoError(t, client.WriteFile(ctx, opts))
+			assert.NotError(t, client.WriteFile(ctx, opts))
 
 			content, err := os.ReadFile(tmpFile.Name())
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			assert.Equal(t, buf, content)
 		},
 		"RegisterSignalTriggerIDChecksForExistingProcess": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
 			req, err := http.NewRequest(http.MethodPatch, client.getURL("/process/%s/trigger/signal/%s", "foo", jasper.CleanTerminationSignalTrigger), nil)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			resp, err := client.client.Do(req)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			defer resp.Body.Close()
 
 			assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
@@ -454,10 +454,10 @@ func TestRestService(t *testing.T) {
 			defer cancel()
 
 			srv, port, err := startRESTService(ctx, httpClient)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			require.NotNil(t, srv)
 
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			client := &restClient{
 				prefix: fmt.Sprintf("http://localhost:%d/jasper/v1", port),
 				client: httpClient,

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/testutil"
@@ -12,7 +13,7 @@ import (
 
 func registerBasedCreate(ctx context.Context, m *selfClearingProcessManager, t *testing.T, opts *options.Create) (Process, error) {
 	sleep, err := NewBlockingProcess(ctx, testutil.SleepCreateOpts(10))
-	require.NoError(t, err)
+	assert.NotError(t, err)
 	require.NotNil(t, sleep)
 	err = m.Register(ctx, sleep)
 	if err != nil {
@@ -29,7 +30,7 @@ func pureCreate(ctx context.Context, m *selfClearingProcessManager, t *testing.T
 
 func fillUp(ctx context.Context, t *testing.T, manager *selfClearingProcessManager, numProcs int) {
 	procs, err := createProcs(ctx, testutil.SleepCreateOpts(5), manager, numProcs)
-	require.NoError(t, err)
+	assert.NotError(t, err)
 	require.Equal(t, len(procs), numProcs)
 }
 
@@ -72,10 +73,10 @@ func TestSelfClearingManager(t *testing.T) {
 					check.Error(t, err)
 					check.True(t, sleepProc == nil)
 					otherSleepProcs, err := manager.List(ctx, options.All)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					for _, otherSleepProc := range otherSleepProcs {
 						_, err = otherSleepProc.Wait(ctx)
-						require.NoError(t, err)
+						assert.NotError(t, err)
 					}
 					sleepProc, err = createFunc(ctx, manager, t, sleepOpts)
 					check.NotError(t, err)
@@ -91,7 +92,7 @@ func TestSelfClearingManager(t *testing.T) {
 
 						selfClearingManager, err := NewSelfClearingProcessManager(5, false)
 
-						require.NoError(t, err)
+						assert.NotError(t, err)
 						test(tctx, t, selfClearingManager.(*selfClearingProcessManager), func(o *options.Create) {
 							o.Implementation = options.ProcessImplementationBlocking
 						})
@@ -104,7 +105,7 @@ func TestSelfClearingManager(t *testing.T) {
 						defer cancel()
 
 						selfClearingManager, err := NewSelfClearingProcessManager(5, false)
-						require.NoError(t, err)
+						assert.NotError(t, err)
 						test(tctx, t, selfClearingManager.(*selfClearingProcessManager), func(o *options.Create) {
 							o.Implementation = options.ProcessImplementationBasic
 						})

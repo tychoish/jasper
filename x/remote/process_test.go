@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
@@ -30,8 +30,8 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 			Case: func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 				assert.NotZero(t, opts.Args)
 				proc, err := makep(ctx, opts)
-				require.NoError(t, err)
-				assert.NotNil(t, proc)
+				assert.NotError(t, err)
+				assert.True(t, proc != nil)
 			},
 		},
 		{
@@ -61,11 +61,11 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 				startAt := time.Now()
 				opts := testutil.SleepCreateOpts(20)
 				proc, err := makep(pctx, opts)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				require.NotNil(t, proc)
 
 				time.Sleep(5 * time.Millisecond) // let time pass...
-				assert.False(t, proc.Info(ctx).Successful)
+				assert.True(t, !proc.Info(ctx).Successful)
 				check.True(t, time.Since(startAt) < 20*time.Second)
 			},
 		},
@@ -73,9 +73,9 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 			Name: "ProcessLacksTagsByDefault",
 			Case: func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 				proc, err := makep(ctx, opts)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				tags := proc.GetTags()
-				assert.Empty(t, tags)
+				assert.Equal(t, len(tags), 0)
 			},
 		},
 		{
@@ -83,7 +83,7 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 			Case: func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 				opts.Tags = []string{"foo"}
 				proc, err := makep(ctx, opts)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				tags := proc.GetTags()
 				assert.Contains(t, tags, "foo")
 			},
@@ -92,9 +92,9 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 			Name: "InfoHasMatchingID",
 			Case: func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 				proc, err := makep(ctx, opts)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				_, err = proc.Wait(ctx)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				assert.Equal(t, proc.ID(), proc.Info(ctx).ID)
 			},
 		},
@@ -102,33 +102,33 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 			Name: "ResetTags",
 			Case: func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 				proc, err := makep(ctx, opts)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				proc.Tag("foo")
 				assert.Contains(t, proc.GetTags(), "foo")
 				proc.ResetTags()
-				assert.Len(t, proc.GetTags(), 0)
+				assert.Equal(t, len(proc.GetTags()), 0)
 			},
 		},
 		{
 			Name: "TagsAreSetLike",
 			Case: func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 				proc, err := makep(ctx, opts)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 
 				for i := 0; i < 50; i++ {
 					proc.Tag("foo")
 				}
 
-				assert.Len(t, proc.GetTags(), 1)
+				assert.Equal(t, len(proc.GetTags()), 1)
 				proc.Tag("bar")
-				assert.Len(t, proc.GetTags(), 2)
+				assert.Equal(t, len(proc.GetTags()), 2)
 			},
 		},
 		{
 			Name: "CompleteIsTrueAfterWait",
 			Case: func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 				proc, err := makep(ctx, opts)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				time.Sleep(10 * time.Millisecond) // give the process time to start background machinery
 				_, err = proc.Wait(ctx)
 				check.NotError(t, err)
@@ -141,7 +141,7 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 				opts.Args = []string{"sleep", "10"}
 				pctx, pcancel := context.WithCancel(ctx)
 				proc, err := makep(ctx, opts)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				check.True(t, proc.Running(ctx))
 				check.NotError(t, err)
 				pcancel()
@@ -153,7 +153,7 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 			Name: "RegisterTriggerErrorsForNil",
 			Case: func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 				proc, err := makep(ctx, opts)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				assert.Error(t, proc.RegisterTrigger(ctx, nil))
 			},
 		},
@@ -161,7 +161,7 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 			Name: "RegisterSignalTriggerIDErrorsForExitedProcess",
 			Case: func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 				proc, err := makep(ctx, opts)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				_, err = proc.Wait(ctx)
 				check.NotError(t, err)
 				assert.Error(t, proc.RegisterSignalTriggerID(ctx, jasper.CleanTerminationSignalTrigger))
@@ -172,7 +172,7 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 			Case: func(ctx context.Context, t *testing.T, _ *options.Create, makep jasper.ProcessConstructor) {
 				opts := testutil.SleepCreateOpts(3)
 				proc, err := makep(ctx, opts)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				assert.Error(t, proc.RegisterSignalTriggerID(ctx, jasper.SignalTriggerID(fmt.Sprintln(-1))))
 			},
 		},
@@ -181,7 +181,7 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 			Case: func(ctx context.Context, t *testing.T, _ *options.Create, makep jasper.ProcessConstructor) {
 				opts := testutil.SleepCreateOpts(3)
 				proc, err := makep(ctx, opts)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				check.NotError(t, proc.RegisterSignalTriggerID(ctx, jasper.CleanTerminationSignalTrigger))
 			},
 		},
@@ -189,13 +189,13 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 			Name: "WaitOnRespawnedProcessDoesNotError",
 			Case: func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 				proc, err := makep(ctx, opts)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				require.NotNil(t, proc)
 				_, err = proc.Wait(ctx)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 
 				newProc, err := proc.Respawn(ctx)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				_, err = newProc.Wait(ctx)
 				check.NotError(t, err)
 			},
@@ -204,17 +204,17 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 			Name: "RespawnedProcessGivesSameResult",
 			Case: func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 				proc, err := makep(ctx, opts)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				require.NotNil(t, proc)
 
 				_, err = proc.Wait(ctx)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				procExitCode := proc.Info(ctx).ExitCode
 
 				newProc, err := proc.Respawn(ctx)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				_, err = newProc.Wait(ctx)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				assert.Equal(t, procExitCode, newProc.Info(ctx).ExitCode)
 			},
 		},
@@ -222,15 +222,15 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 			Name: "RespawningFinishedProcessIsOK",
 			Case: func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 				proc, err := makep(ctx, opts)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				require.NotNil(t, proc)
 				_, err = proc.Wait(ctx)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 
 				newProc, err := proc.Respawn(ctx)
 				check.NotError(t, err)
 				_, err = newProc.Wait(ctx)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				check.True(t, newProc.Info(ctx).Successful)
 			},
 		},
@@ -239,13 +239,13 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 			Case: func(ctx context.Context, t *testing.T, _ *options.Create, makep jasper.ProcessConstructor) {
 				opts := testutil.SleepCreateOpts(2)
 				proc, err := makep(ctx, opts)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				require.NotNil(t, proc)
 
 				newProc, err := proc.Respawn(ctx)
 				check.NotError(t, err)
 				_, err = newProc.Wait(ctx)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				check.True(t, newProc.Info(ctx).Successful)
 			},
 		},
@@ -254,16 +254,16 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 			Case: func(ctx context.Context, t *testing.T, _ *options.Create, makep jasper.ProcessConstructor) {
 				opts := testutil.SleepCreateOpts(3)
 				proc, err := makep(ctx, opts)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				require.NotNil(t, proc)
 				_, err = proc.Wait(ctx)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 
 				newProc, err := proc.Respawn(ctx)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				check.True(t, newProc.Running(ctx))
 				_, err = newProc.Wait(ctx)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				check.True(t, proc.Complete(ctx))
 			},
 		},
@@ -271,7 +271,7 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 			Name: "WaitGivesSuccessfulExitCode",
 			Case: func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 				proc, err := makep(ctx, testutil.TrueCreateOpts())
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				require.NotNil(t, proc)
 				exitCode, err := proc.Wait(ctx)
 				check.NotError(t, err)
@@ -282,7 +282,7 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 			Name: "WaitGivesFailureExitCode",
 			Case: func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 				proc, err := makep(ctx, testutil.FalseCreateOpts())
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				require.NotNil(t, proc)
 				exitCode, err := proc.Wait(ctx)
 				require.Error(t, err)
@@ -293,10 +293,10 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 			Name: "WaitGivesProperExitCodeOnSignalDeath",
 			Case: func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 				proc, err := makep(ctx, testutil.SleepCreateOpts(100))
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				require.NotNil(t, proc)
 				sig := syscall.SIGTERM
-				require.NoError(t, proc.Signal(ctx, sig))
+				assert.NotError(t, proc.Signal(ctx, sig))
 				exitCode, err := proc.Wait(ctx)
 				require.Error(t, err)
 				if runtime.GOOS == "windows" {
@@ -310,7 +310,7 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 			Name: "WaitGivesNegativeOneOnAlternativeError",
 			Case: func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 				proc, err := makep(ctx, testutil.SleepCreateOpts(100))
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				require.NotNil(t, proc)
 
 				var exitCode int
@@ -337,7 +337,7 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 				opts.Timeout = time.Second
 				opts.TimeoutSecs = 1
 				proc, err := makep(ctx, opts)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 
 				exitCode, err := proc.Wait(ctx)
 				assert.Error(t, err)
@@ -354,7 +354,7 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 			Name: "CallingSignalOnDeadProcessDoesError",
 			Case: func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 				proc, err := makep(ctx, opts)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 
 				_, err = proc.Wait(ctx)
 				check.NotError(t, err)
@@ -368,7 +368,7 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 			Name: "CompleteAlwaysReturnsTrueWhenProcessIsComplete",
 			Case: func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 				proc, err := makep(ctx, opts)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 
 				_, err = proc.Wait(ctx)
 				check.NotError(t, err)
@@ -381,7 +381,7 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 			Case: func(ctx context.Context, t *testing.T, _ *options.Create, makep jasper.ProcessConstructor) {
 				opts := testutil.SleepCreateOpts(3)
 				proc, err := makep(ctx, opts)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				assert.Error(t, proc.RegisterSignalTrigger(ctx, func(_ jasper.ProcessInfo, _ syscall.Signal) bool {
 					return false
 				}))
@@ -484,7 +484,7 @@ func TestProcessImplementations(t *testing.T) {
 							ShouldSkip: !strings.Contains(cname, "RPC"),
 							Case: func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 								proc, err := makep(ctx, opts)
-								require.NoError(t, err)
+								assert.NotError(t, err)
 
 								firstID := proc.ID()
 								_, err = proc.Wait(ctx)
@@ -493,7 +493,7 @@ func TestProcessImplementations(t *testing.T) {
 								proc.(*rpcProcess).info.Id += "_foo"
 								proc.(*rpcProcess).info.Complete = false
 								require.NotEqual(t, firstID, proc.ID())
-								assert.False(t, proc.Complete(ctx), proc.ID())
+								assert.True(t, !proc.Complete(ctx), proc.ID())
 							},
 						},
 						ProcessTestCase{
@@ -501,7 +501,7 @@ func TestProcessImplementations(t *testing.T) {
 							ShouldSkip: !strings.Contains(cname, "RPC"),
 							Case: func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
 								proc, err := makep(ctx, opts)
-								require.NoError(t, err)
+								assert.NotError(t, err)
 
 								firstID := proc.ID()
 								_, err = proc.Wait(ctx)
@@ -509,7 +509,7 @@ func TestProcessImplementations(t *testing.T) {
 								proc.(*rpcProcess).info.Id += "_foo"
 								proc.(*rpcProcess).info.Complete = false
 								require.NotEqual(t, firstID, proc.ID())
-								assert.False(t, proc.Running(ctx), proc.ID())
+								assert.True(t, !proc.Running(ctx), proc.ID())
 							},
 						},
 					) {

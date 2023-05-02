@@ -16,9 +16,8 @@ import (
 	"time"
 
 	"github.com/mholt/archiver"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/tychoish/birch"
+	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/grip"
@@ -28,24 +27,13 @@ import (
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/scripting"
 	"github.com/tychoish/jasper/testutil"
+	ropts "github.com/tychoish/jasper/x/remote/options"
 )
 
 func init() {
 	sender := grip.Sender()
 	sender.SetPriority(level.Info)
 	grip.SetGlobalLogger(grip.NewLogger(sender))
-
-	reg := options.GetGlobalLoggerRegistry()
-
-	reg.RegisterMarshaler(options.RawLoggerConfigFormatBSON,
-		func(val interface{}) ([]byte, error) {
-			return birch.DC.Interface(val).MarshalBSON()
-		})
-	reg.RegisterUnmarshaler(options.RawLoggerConfigFormatBSON,
-		func(data []byte, val interface{}) error {
-			doc := birch.DC.Reader(data)
-			return doc.Unmarshal(val)
-		})
 }
 
 type clientTestCase struct {
@@ -58,14 +46,14 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 		{
 			Name: "ValidateFixture",
 			Case: func(ctx context.Context, t *testing.T, client Manager) {
-				assert.NotNil(t, ctx)
-				assert.NotNil(t, client)
+				check.NotNil(t, ctx)
+				check.NotNil(t, client)
 			},
 		},
 		{
 			Name: "IDReturnsNonempty",
 			Case: func(ctx context.Context, t *testing.T, client Manager) {
-				assert.NotEmpty(t, client.ID())
+				check.NotZero(t, client.ID())
 			},
 		},
 		{
@@ -74,10 +62,10 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 				opts := testutil.TrueCreateOpts()
 				modify(opts)
 				proc, err := client.CreateProcess(ctx, opts)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				info := proc.Info(ctx)
 				require.NotEmpty(t, info.Options.Environment)
-				assert.Equal(t, client.ID(), info.Options.Environment[jasper.ManagerEnvironID])
+				check.Equal(t, client.ID(), info.Options.Environment[jasper.ManagerEnvironID])
 			},
 		},
 		{
@@ -87,7 +75,7 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 				modify(opts)
 				proc, err := client.CreateProcess(ctx, opts)
 				require.Error(t, err)
-				assert.Nil(t, proc)
+				check.Nil(t, proc)
 			},
 		},
 		{
@@ -96,36 +84,36 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 				opts := testutil.SleepCreateOpts(20)
 				modify(opts)
 				procs, err := createProcs(ctx, opts, client, 10)
-				require.NoError(t, err)
-				assert.Equal(t, len(procs), 10)
+				assert.NotError(t, err)
+				check.Equal(t, len(procs), 10)
 
 				procs, err = client.List(ctx, options.All)
-				require.NoError(t, err)
-				assert.Equal(t, len(procs), 10)
+				assert.NotError(t, err)
+				check.Equal(t, len(procs), 10)
 
 				procs, err = client.List(ctx, options.Running)
-				require.NoError(t, err)
-				assert.Equal(t, len(procs), 10)
+				assert.NotError(t, err)
+				check.Equal(t, len(procs), 10)
 
 				procs, err = client.List(ctx, options.Successful)
-				require.NoError(t, err)
-				assert.Equal(t, len(procs), 0)
+				assert.NotError(t, err)
+				check.Equal(t, len(procs), 0)
 			},
 		},
 		{
 			Name: "ListDoesNotErrorWhenEmptyResult",
 			Case: func(ctx context.Context, t *testing.T, client Manager) {
 				all, err := client.List(ctx, options.All)
-				require.NoError(t, err)
-				assert.Equal(t, len(all), 0)
+				assert.NotError(t, err)
+				check.Equal(t, len(all), 0)
 			},
 		},
 		{
 			Name: "ListErrorsWithInvalidFilter",
 			Case: func(ctx context.Context, t *testing.T, client Manager) {
 				procs, err := client.List(ctx, options.Filter("foo"))
-				assert.Error(t, err)
-				assert.Nil(t, procs)
+				check.Error(t, err)
+				check.Nil(t, procs)
 			},
 		},
 		{
@@ -135,12 +123,12 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 				opts := testutil.TrueCreateOpts()
 				modify(opts)
 				created, err := createProcs(ctx, opts, client, 10)
-				require.NoError(t, err)
-				assert.Equal(t, len(created), 10)
+				assert.NotError(t, err)
+				check.Equal(t, len(created), 10)
 				cancel()
 				output, err := client.List(cctx, options.All)
 				require.Error(t, err)
-				assert.Nil(t, output)
+				check.Nil(t, output)
 			},
 		},
 		{
@@ -149,28 +137,27 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 				opts := testutil.TrueCreateOpts()
 				modify(opts)
 				proc, err := client.CreateProcess(ctx, opts)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 
 				_, err = proc.Wait(ctx)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 
 				listOut, err := client.List(ctx, options.Successful)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 
-				if assert.Equal(t, len(listOut), 1) {
-					assert.Equal(t, listOut[0].ID(), proc.ID())
-				}
+				require.Equal(t, len(listOut), 1)
+				check.Equal(t, listOut[0].ID(), proc.ID())
 			},
 		},
 		{
 			Name: "RegisterAlwaysErrors",
 			Case: func(ctx context.Context, t *testing.T, client Manager) {
 				proc, err := client.CreateProcess(ctx, &options.Create{Args: []string{"ls"}})
-				assert.NotNil(t, proc)
-				require.NoError(t, err)
+				check.NotNil(t, proc)
+				assert.NotError(t, err)
 
-				assert.Error(t, client.Register(ctx, nil))
-				assert.Error(t, client.Register(ctx, proc))
+				check.Error(t, client.Register(ctx, nil))
+				check.Error(t, client.Register(ctx, proc))
 			},
 		},
 		{
@@ -178,7 +165,7 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 			Case: func(ctx context.Context, t *testing.T, client Manager) {
 				proc, err := client.Get(ctx, "foo")
 				require.Error(t, err)
-				assert.Nil(t, proc)
+				check.Nil(t, proc)
 			},
 		},
 		{
@@ -187,19 +174,19 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 				opts := testutil.TrueCreateOpts()
 				modify(opts)
 				proc, err := client.CreateProcess(ctx, opts)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 
 				ret, err := client.Get(ctx, proc.ID())
-				require.NoError(t, err)
-				assert.Equal(t, ret.ID(), proc.ID())
+				assert.NotError(t, err)
+				check.Equal(t, ret.ID(), proc.ID())
 			},
 		},
 		{
 			Name: "GroupDoesNotErrorWhenEmptyResult",
 			Case: func(ctx context.Context, t *testing.T, client Manager) {
 				procs, err := client.Group(ctx, "foo")
-				require.NoError(t, err)
-				assert.Equal(t, len(procs), 0)
+				assert.NotError(t, err)
+				check.Equal(t, len(procs), 0)
 			},
 		},
 		{
@@ -208,14 +195,14 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 				opts := testutil.TrueCreateOpts()
 				modify(opts)
 				_, err := client.CreateProcess(ctx, opts)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 
 				cctx, cancel := context.WithCancel(ctx)
 				cancel()
 				procs, err := client.Group(cctx, "foo")
 				require.Error(t, err)
-				assert.Equal(t, len(procs), 0)
-				assert.Contains(t, err.Error(), "canceled")
+				check.Equal(t, len(procs), 0)
+				check.Substring(t, err.Error(), "canceled")
 			},
 		},
 		{
@@ -225,20 +212,20 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 				modify(opts)
 
 				proc, err := client.CreateProcess(ctx, opts)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 
 				proc.Tag("foo")
 
 				procs, err := client.Group(ctx, "foo")
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				require.Equal(t, len(procs), 1)
-				assert.Equal(t, procs[0].ID(), proc.ID())
+				check.Equal(t, procs[0].ID(), proc.ID())
 			},
 		},
 		{
 			Name: "CloseEmptyManagerNoops",
 			Case: func(ctx context.Context, t *testing.T, client Manager) {
-				require.NoError(t, client.Close(ctx))
+				assert.NotError(t, client.Close(ctx))
 			},
 		},
 		{
@@ -251,7 +238,7 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 				modify(opts)
 
 				_, err := createProcs(ctx, opts, client, 10)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				check.NotError(t, client.Close(ctx))
 			},
 		},
@@ -262,14 +249,14 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 				modify(opts)
 
 				_, err := createProcs(ctx, opts, client, 10)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 
 				cctx, cancel := context.WithCancel(ctx)
 				cancel()
 
 				err = client.Close(cctx)
 				require.Error(t, err)
-				assert.Contains(t, err.Error(), "canceled")
+				check.Substring(t, err.Error(), "canceled")
 			},
 		},
 		{
@@ -278,10 +265,10 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 				procs, err := createProcs(ctx, testutil.TrueCreateOpts(), client, 10)
 				for _, p := range procs {
 					_, err = p.Wait(ctx)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 				}
 
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				check.NotError(t, client.Close(ctx))
 			},
 		},
@@ -292,18 +279,18 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 				modify(opts)
 
 				proc, err := client.CreateProcess(ctx, opts)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 
 				_, err = proc.Wait(ctx)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 
 				client.Clear(ctx)
 
 				_, err = proc.Wait(ctx)
 				require.Error(t, err)
 				procs, err := client.List(ctx, options.All)
-				require.NoError(t, err)
-				assert.Equal(t, len(procs), 0)
+				assert.NotError(t, err)
+				check.Equal(t, len(procs), 0)
 			},
 		},
 		{
@@ -312,16 +299,16 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 				opts := testutil.TrueCreateOpts()
 				modify(opts)
 				proc, err := client.CreateProcess(ctx, opts)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				sameProc, err := client.Get(ctx, proc.ID())
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				require.Equal(t, proc.ID(), sameProc.ID())
 				_, err = proc.Wait(ctx)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				client.Clear(ctx)
 				nilProc, err := client.Get(ctx, proc.ID())
 				require.Error(t, err)
-				assert.Nil(t, nilProc)
+				check.Nil(t, nilProc)
 			},
 		},
 		{
@@ -330,12 +317,12 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 				opts := testutil.SleepCreateOpts(20)
 				modify(opts)
 				proc, err := client.CreateProcess(ctx, opts)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				client.Clear(ctx)
 				sameProc, err := client.Get(ctx, proc.ID())
-				require.NoError(t, err)
-				assert.Equal(t, proc.ID(), sameProc.ID())
-				require.NoError(t, jasper.Terminate(ctx, proc)) // Clean up
+				assert.NotError(t, err)
+				check.Equal(t, proc.ID(), sameProc.ID())
+				assert.NotError(t, jasper.Terminate(ctx, proc)) // Clean up
 			},
 		},
 		{
@@ -344,26 +331,26 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 				trueOpts := testutil.TrueCreateOpts()
 				modify(trueOpts)
 				lsProc, err := client.CreateProcess(ctx, trueOpts)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 
 				sleepOpts := testutil.SleepCreateOpts(20)
 				modify(sleepOpts)
 				sleepProc, err := client.CreateProcess(ctx, sleepOpts)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 
 				_, err = lsProc.Wait(ctx)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 
 				client.Clear(ctx)
 
 				sameSleepProc, err := client.Get(ctx, sleepProc.ID())
-				require.NoError(t, err)
-				assert.Equal(t, sleepProc.ID(), sameSleepProc.ID())
+				assert.NotError(t, err)
+				check.Equal(t, sleepProc.ID(), sameSleepProc.ID())
 
 				nilProc, err := client.Get(ctx, lsProc.ID())
 				require.Error(t, err)
-				assert.Nil(t, nilProc)
-				require.NoError(t, jasper.Terminate(ctx, sleepProc)) // Clean up
+				check.Nil(t, nilProc)
+				assert.NotError(t, jasper.Terminate(ctx, sleepProc)) // Clean up
 			},
 		},
 		{
@@ -371,7 +358,7 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 			Case: func(ctx context.Context, t *testing.T, client Manager) {
 				err := client.Register(ctx, nil)
 				require.Error(t, err)
-				assert.Contains(t, err.Error(), "cannot register")
+				check.Substring(t, err.Error(), "cannot register")
 			},
 		},
 		{
@@ -380,14 +367,14 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 				opts := testutil.TrueCreateOpts()
 				modify(opts)
 				proc, err := client.CreateProcess(ctx, opts)
-				require.NoError(t, err)
-				assert.NotNil(t, proc)
-				assert.NotZero(t, proc.ID())
+				assert.NotError(t, err)
+				check.NotNil(t, proc)
+				check.NotZero(t, proc.ID())
 
 				fetched, err := client.Get(ctx, proc.ID())
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				require.NotNil(t, fetched)
-				assert.Equal(t, proc.ID(), fetched.ID())
+				check.Equal(t, proc.ID(), fetched.ID())
 			},
 		},
 		{
@@ -396,18 +383,18 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 				opts := testutil.SleepCreateOpts(100)
 				modify(opts)
 				proc, err := client.CreateProcess(ctx, opts)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				require.NotNil(t, proc)
 				require.NotZero(t, proc.ID())
 
-				require.NoError(t, proc.Signal(ctx, syscall.SIGKILL))
+				assert.NotError(t, proc.Signal(ctx, syscall.SIGKILL))
 
 				exitCode, err := proc.Wait(ctx)
 				require.Error(t, err)
 				if runtime.GOOS == "windows" {
-					assert.Equal(t, 1, exitCode)
+					check.Equal(t, 1, exitCode)
 				} else {
-					assert.Equal(t, 9, exitCode)
+					check.Equal(t, 9, exitCode)
 				}
 			},
 		},
@@ -415,7 +402,7 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 			Name: "WriteFileFailsWithInvalidPath",
 			Case: func(ctx context.Context, t *testing.T, client Manager) {
 				opts := options.WriteFile{Content: []byte("foo")}
-				assert.Error(t, client.WriteFile(ctx, opts))
+				check.Error(t, client.WriteFile(ctx, opts))
 			},
 		},
 	}, tests...)
@@ -434,10 +421,10 @@ func TestManager(t *testing.T) {
 			Constructor: func(ctx context.Context, t *testing.T) Manager {
 				t.SkipNow()
 				mngr, err := jasper.NewSynchronizedManager(false)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 
 				client, err := makeTestMDBServiceAndClient(ctx, mngr)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				return client
 			},
 		},
@@ -445,25 +432,25 @@ func TestManager(t *testing.T) {
 			Name: "RPC/TLS",
 			Constructor: func(ctx context.Context, t *testing.T) Manager {
 				mngr, err := jasper.NewSynchronizedManager(false)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 
 				client, err := makeTLSRPCServiceAndClient(ctx, mngr)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				return client
 			},
 		},
 		{
 			Name: "RPC/Insecure",
 			Constructor: func(ctx context.Context, t *testing.T) Manager {
-				assert.NotPanics(t, func() {
+				check.NotPanic(t, func() {
 					newRPCClient(nil)
 				})
 
 				mngr, err := jasper.NewSynchronizedManager(false)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 
 				client, err := makeInsecureRPCServiceAndClient(ctx, mngr)
-				require.NoError(t, err)
+				assert.NotError(t, err)
 				return client
 			},
 		},
@@ -500,61 +487,61 @@ func TestManager(t *testing.T) {
 										opts.StandardInput = bytes.NewBuffer(stdin)
 
 										proc, err := client.CreateProcess(ctx, opts)
-										require.NoError(t, err)
+										assert.NotError(t, err)
 
 										_, err = proc.Wait(ctx)
-										require.NoError(t, err)
+										assert.NotError(t, err)
 
 										logs, err := client.GetLogStream(ctx, proc.ID(), 1)
-										require.NoError(t, err)
-										assert.Empty(t, logs.Logs)
+										assert.NotError(t, err)
+										check.Empty(t, logs.Logs)
 									},
 									"BytesSetsStandardInput": func(ctx context.Context, t *testing.T, opts *options.Create, expectedOutput string, stdin []byte) {
 										opts.StandardInputBytes = stdin
 
 										proc, err := client.CreateProcess(ctx, opts)
-										require.NoError(t, err)
+										assert.NotError(t, err)
 
 										_, err = proc.Wait(ctx)
-										require.NoError(t, err)
+										assert.NotError(t, err)
 
 										logs, err := client.GetLogStream(ctx, proc.ID(), 1)
-										require.NoError(t, err)
+										assert.NotError(t, err)
 
 										require.Equal(t, len(logs.Logs), 1)
-										assert.Equal(t, expectedOutput, strings.TrimSpace(logs.Logs[0]))
+										check.Equal(t, expectedOutput, strings.TrimSpace(logs.Logs[0]))
 									},
 									"BytesCopiedByRespawnedProcess": func(ctx context.Context, t *testing.T, opts *options.Create, expectedOutput string, stdin []byte) {
 										opts.StandardInputBytes = stdin
 
 										proc, err := client.CreateProcess(ctx, opts)
-										require.NoError(t, err)
+										assert.NotError(t, err)
 
 										_, err = proc.Wait(ctx)
-										require.NoError(t, err)
+										assert.NotError(t, err)
 
 										logs, err := client.GetLogStream(ctx, proc.ID(), 1)
-										require.NoError(t, err)
+										assert.NotError(t, err)
 
 										require.Equal(t, len(logs.Logs), 1)
-										assert.Equal(t, expectedOutput, strings.TrimSpace(logs.Logs[0]))
+										check.Equal(t, expectedOutput, strings.TrimSpace(logs.Logs[0]))
 
 										newProc, err := proc.Respawn(ctx)
-										require.NoError(t, err)
+										assert.NotError(t, err)
 
 										_, err = newProc.Wait(ctx)
-										require.NoError(t, err)
+										assert.NotError(t, err)
 
 										logs, err = client.GetLogStream(ctx, newProc.ID(), 1)
-										require.NoError(t, err)
+										assert.NotError(t, err)
 
 										require.Equal(t, len(logs.Logs), 1)
-										assert.Equal(t, expectedOutput, strings.TrimSpace(logs.Logs[0]))
+										check.Equal(t, expectedOutput, strings.TrimSpace(logs.Logs[0]))
 									},
 								} {
 									t.Run(subTestName, func(t *testing.T) {
 										inMemLogger, err := jasper.NewInMemoryLogger(1)
-										require.NoError(t, err)
+										assert.NotError(t, err)
 
 										opts := &options.Create{
 											Args: []string{"bash", "-s"},
@@ -575,66 +562,66 @@ func TestManager(t *testing.T) {
 							Name: "WriteFileSucceeds",
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								tmpFile, err := os.CreateTemp(testutil.BuildDirectory(), filepath.Base(t.Name()))
-								require.NoError(t, err)
+								assert.NotError(t, err)
 								defer func() {
 									check.NotError(t, os.RemoveAll(tmpFile.Name()))
 								}()
-								require.NoError(t, tmpFile.Close())
+								assert.NotError(t, tmpFile.Close())
 
 								opts := options.WriteFile{Path: tmpFile.Name(), Content: []byte("foo")}
-								require.NoError(t, client.WriteFile(ctx, opts))
+								assert.NotError(t, client.WriteFile(ctx, opts))
 
 								content, err := os.ReadFile(tmpFile.Name())
-								require.NoError(t, err)
+								assert.NotError(t, err)
 
-								assert.Equal(t, opts.Content, content)
+								check.Equal(t, string(opts.Content), string(content))
 							},
 						},
 						clientTestCase{
 							Name: "WriteFileAcceptsContentFromReader",
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								tmpFile, err := os.CreateTemp(testutil.BuildDirectory(), filepath.Base(t.Name()))
-								require.NoError(t, err)
+								assert.NotError(t, err)
 								defer func() {
 									check.NotError(t, os.RemoveAll(tmpFile.Name()))
 								}()
-								require.NoError(t, tmpFile.Close())
+								assert.NotError(t, tmpFile.Close())
 
 								buf := []byte("foo")
 								opts := options.WriteFile{Path: tmpFile.Name(), Reader: bytes.NewBuffer(buf)}
-								require.NoError(t, client.WriteFile(ctx, opts))
+								assert.NotError(t, client.WriteFile(ctx, opts))
 
 								content, err := os.ReadFile(tmpFile.Name())
-								require.NoError(t, err)
+								assert.NotError(t, err)
 
-								assert.Equal(t, buf, content)
+								check.Equal(t, string(buf), string(content))
 							},
 						},
 						clientTestCase{
 							Name: "WriteFileSucceedsWithLargeContent",
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								tmpFile, err := os.CreateTemp(testutil.BuildDirectory(), filepath.Base(t.Name()))
-								require.NoError(t, err)
+								assert.NotError(t, err)
 								defer func() {
 									check.NotError(t, os.RemoveAll(tmpFile.Name()))
 								}()
-								require.NoError(t, tmpFile.Close())
+								assert.NotError(t, tmpFile.Close())
 
 								const mb = 1024 * 1024
 								opts := options.WriteFile{Path: tmpFile.Name(), Content: bytes.Repeat([]byte("foo"), mb)}
-								require.NoError(t, client.WriteFile(ctx, opts))
+								assert.NotError(t, client.WriteFile(ctx, opts))
 
 								content, err := os.ReadFile(tmpFile.Name())
-								require.NoError(t, err)
+								assert.NotError(t, err)
 
-								assert.Equal(t, opts.Content, content)
+								check.Equal(t, string(opts.Content), string(content))
 							},
 						},
 						clientTestCase{
 							Name: "WriteFileSucceedsWithLargeContentFromReader",
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								tmpFile, err := os.CreateTemp(testutil.BuildDirectory(), filepath.Base(t.Name()))
-								require.NoError(t, err)
+								assert.NotError(t, err)
 								defer func() {
 									check.NotError(t, tmpFile.Close())
 									check.NotError(t, os.RemoveAll(tmpFile.Name()))
@@ -643,38 +630,38 @@ func TestManager(t *testing.T) {
 								const mb = 1024 * 1024
 								buf := bytes.Repeat([]byte("foo"), 2*mb)
 								opts := options.WriteFile{Path: tmpFile.Name(), Reader: bytes.NewBuffer(buf)}
-								require.NoError(t, client.WriteFile(ctx, opts))
+								assert.NotError(t, client.WriteFile(ctx, opts))
 
 								content, err := os.ReadFile(tmpFile.Name())
-								require.NoError(t, err)
+								assert.NotError(t, err)
 
-								assert.Equal(t, buf, content)
+								check.Equal(t, string(buf), string(content))
 							},
 						},
 						clientTestCase{
 							Name: "WriteFileSucceedsWithNoContent",
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								path := filepath.Join(testutil.BuildDirectory(), filepath.Base(t.Name()))
-								require.NoError(t, os.RemoveAll(path))
+								assert.NotError(t, os.RemoveAll(path))
 								defer func() {
 									check.NotError(t, os.RemoveAll(path))
 								}()
 
 								opts := options.WriteFile{Path: path}
-								require.NoError(t, client.WriteFile(ctx, opts))
+								assert.NotError(t, client.WriteFile(ctx, opts))
 
 								stat, err := os.Stat(path)
-								require.NoError(t, err)
+								assert.NotError(t, err)
 
-								assert.Zero(t, stat.Size())
+								check.Zero(t, stat.Size())
 							},
 						},
 						clientTestCase{
 							Name: "GetLogStreamFromNonexistentProcessFails",
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								stream, err := client.GetLogStream(ctx, "foo", 1)
-								assert.Error(t, err)
-								assert.Zero(t, stream)
+								check.Error(t, err)
+								check.Zero(t, stream)
 							},
 						},
 						clientTestCase{
@@ -683,22 +670,22 @@ func TestManager(t *testing.T) {
 								opts := &options.Create{Args: []string{"echo", "foo"}}
 								modify.Options(opts)
 								proc, err := client.CreateProcess(ctx, opts)
-								require.NoError(t, err)
+								assert.NotError(t, err)
 								require.NotNil(t, proc)
 
 								_, err = proc.Wait(ctx)
-								require.NoError(t, err)
+								assert.NotError(t, err)
 
 								stream, err := client.GetLogStream(ctx, proc.ID(), 1)
-								assert.Error(t, err)
-								assert.Zero(t, stream)
+								check.Error(t, err)
+								check.Zero(t, stream)
 							},
 						},
 						clientTestCase{
 							Name: "WithInMemoryLogger",
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								inMemLogger, err := jasper.NewInMemoryLogger(100)
-								require.NoError(t, err)
+								assert.NotError(t, err)
 								output := "foo"
 								opts := &options.Create{
 									Args: []string{"echo", output},
@@ -711,26 +698,26 @@ func TestManager(t *testing.T) {
 								for testName, testCase := range map[string]func(ctx context.Context, t *testing.T, proc jasper.Process){
 									"GetLogStreamFailsForInvalidCount": func(ctx context.Context, t *testing.T, proc jasper.Process) {
 										stream, err := client.GetLogStream(ctx, proc.ID(), -1)
-										assert.Error(t, err)
-										assert.Zero(t, stream)
+										check.Error(t, err)
+										check.Zero(t, stream)
 									},
 									"GetLogStreamReturnsOutputOnSuccess": func(ctx context.Context, t *testing.T, proc jasper.Process) {
 										logs := []string{}
 										for stream, err := client.GetLogStream(ctx, proc.ID(), 1); !stream.Done; stream, err = client.GetLogStream(ctx, proc.ID(), 1) {
-											require.NoError(t, err)
+											assert.NotError(t, err)
 											require.NotEmpty(t, stream.Logs)
 											logs = append(logs, stream.Logs...)
 										}
-										assert.Contains(t, logs, output)
+										check.Contains(t, logs, output)
 									},
 								} {
 									t.Run(testName, func(t *testing.T) {
 										proc, err := client.CreateProcess(ctx, opts)
-										require.NoError(t, err)
+										assert.NotError(t, err)
 										require.NotNil(t, proc)
 
 										_, err = proc.Wait(ctx)
-										require.NoError(t, err)
+										assert.NotError(t, err)
 										testCase(ctx, t, proc)
 									})
 								}
@@ -741,59 +728,59 @@ func TestManager(t *testing.T) {
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								for testName, testCase := range map[string]func(ctx context.Context, t *testing.T, client Manager, tempDir string){
 									"CreatesFileIfNonexistent": func(ctx context.Context, t *testing.T, client Manager, tempDir string) {
-										opts := remote.Download{
+										opts := ropts.Download{
 											URL:  "https://example.com",
 											Path: filepath.Join(tempDir, filepath.Base(t.Name())),
 										}
-										require.NoError(t, client.DownloadFile(ctx, opts))
+										assert.NotError(t, client.DownloadFile(ctx, opts))
 										defer func() {
 											check.NotError(t, os.RemoveAll(opts.Path))
 										}()
 
 										fileInfo, err := os.Stat(opts.Path)
-										require.NoError(t, err)
-										assert.NotZero(t, fileInfo.Size())
+										assert.NotError(t, err)
+										check.NotZero(t, fileInfo.Size())
 									},
 									"WritesFileIfExists": func(ctx context.Context, t *testing.T, client Manager, tempDir string) {
 										file, err := os.CreateTemp(tempDir, "out.txt")
-										require.NoError(t, err)
+										assert.NotError(t, err)
 										defer func() {
 											check.NotError(t, os.RemoveAll(file.Name()))
 										}()
-										require.NoError(t, file.Close())
+										assert.NotError(t, file.Close())
 
-										opts := remote.Download{
+										opts := ropts.Download{
 											URL:  "https://example.com",
 											Path: file.Name(),
 										}
-										require.NoError(t, client.DownloadFile(ctx, opts))
+										assert.NotError(t, client.DownloadFile(ctx, opts))
 										defer func() {
 											check.NotError(t, os.RemoveAll(opts.Path))
 										}()
 
 										fileInfo, err := os.Stat(file.Name())
-										require.NoError(t, err)
-										assert.NotZero(t, fileInfo.Size())
+										assert.NotError(t, err)
+										check.NotZero(t, fileInfo.Size())
 									},
 									"CreatesFileAndExtracts": func(ctx context.Context, t *testing.T, client Manager, tempDir string) {
 										downloadDir, err := os.MkdirTemp(tempDir, "out")
-										require.NoError(t, err)
+										assert.NotError(t, err)
 										defer func() {
 											check.NotError(t, os.RemoveAll(downloadDir))
 										}()
 
 										fileServerDir, err := os.MkdirTemp(tempDir, "file_server")
-										require.NoError(t, err)
+										assert.NotError(t, err)
 										defer func() {
 											check.NotError(t, os.RemoveAll(fileServerDir))
 										}()
 
 										fileName := "foo.zip"
 										fileContents := "foo"
-										require.NoError(t, testutil.AddFileToDirectory(fileServerDir, fileName, fileContents))
+										assert.NotError(t, AddFileToDirectory(fileServerDir, fileName, fileContents))
 
 										absDownloadDir, err := filepath.Abs(downloadDir)
-										require.NoError(t, err)
+										assert.NotError(t, err)
 										destFilePath := filepath.Join(absDownloadDir, fileName)
 										destExtractDir := filepath.Join(absDownloadDir, "extracted")
 
@@ -804,96 +791,96 @@ func TestManager(t *testing.T) {
 											check.NotError(t, fileServer.Close())
 										}()
 										listener, err := net.Listen("tcp", fileServerAddr)
-										require.NoError(t, err)
+										assert.NotError(t, err)
 										go func() {
 											grip.Info(fileServer.Serve(listener))
 										}()
 
 										baseURL := fmt.Sprintf("http://%s", fileServerAddr)
-										require.NoError(t, testutil.WaitForRESTService(ctx, baseURL))
+										assert.NotError(t, testutil.WaitForRESTService(ctx, baseURL))
 
-										opts := remote.Download{
+										opts := ropts.Download{
 											URL:  fmt.Sprintf("%s/%s", baseURL, fileName),
 											Path: destFilePath,
-											ArchiveOpts: remote.Archive{
+											ArchiveOpts: ropts.Archive{
 												ShouldExtract: true,
-												Format:        remote.ArchiveZip,
+												Format:        ropts.ArchiveZip,
 												TargetPath:    destExtractDir,
 											},
 										}
-										require.NoError(t, client.DownloadFile(ctx, opts))
+										assert.NotError(t, client.DownloadFile(ctx, opts))
 
 										fileInfo, err := os.Stat(destFilePath)
-										require.NoError(t, err)
-										assert.NotZero(t, fileInfo.Size())
+										assert.NotError(t, err)
+										check.NotZero(t, fileInfo.Size())
 
 										dirContents, err := os.ReadDir(destExtractDir)
-										require.NoError(t, err)
+										assert.NotError(t, err)
 
-										assert.NotZero(t, len(dirContents))
+										check.NotZero(t, len(dirContents))
 									},
 									"FailsForInvalidArchiveFormat": func(ctx context.Context, t *testing.T, client Manager, tempDir string) {
 										file, err := os.CreateTemp(tempDir, filepath.Base(t.Name()))
-										require.NoError(t, err)
+										assert.NotError(t, err)
 										defer func() {
 											check.NotError(t, os.RemoveAll(file.Name()))
 										}()
-										require.NoError(t, file.Close())
+										assert.NotError(t, file.Close())
 										extractDir, err := os.MkdirTemp(tempDir, filepath.Base(t.Name())+"_extract")
-										require.NoError(t, err)
+										assert.NotError(t, err)
 										defer func() {
 											check.NotError(t, os.RemoveAll(file.Name()))
 										}()
 
-										opts := remote.Download{
+										opts := ropts.Download{
 											URL:  "https://example.com",
 											Path: file.Name(),
-											ArchiveOpts: remote.Archive{
+											ArchiveOpts: ropts.Archive{
 												ShouldExtract: true,
-												Format:        remote.ArchiveFormat("foo"),
+												Format:        ropts.ArchiveFormat("foo"),
 												TargetPath:    extractDir,
 											},
 										}
-										assert.Error(t, client.DownloadFile(ctx, opts))
+										check.Error(t, client.DownloadFile(ctx, opts))
 									},
 									"FailsForUnarchivedFile": func(ctx context.Context, t *testing.T, client Manager, tempDir string) {
 										extractDir, err := os.MkdirTemp(tempDir, filepath.Base(t.Name())+"_extract")
-										require.NoError(t, err)
+										assert.NotError(t, err)
 										defer func() {
 											check.NotError(t, os.RemoveAll(extractDir))
 										}()
-										opts := remote.Download{
+										opts := ropts.Download{
 											URL:  "https://example.com",
 											Path: filepath.Join(tempDir, filepath.Base(t.Name())),
-											ArchiveOpts: remote.Archive{
+											ArchiveOpts: ropts.Archive{
 												ShouldExtract: true,
-												Format:        remote.ArchiveAuto,
+												Format:        ropts.ArchiveAuto,
 												TargetPath:    extractDir,
 											},
 										}
-										assert.Error(t, client.DownloadFile(ctx, opts))
+										check.Error(t, client.DownloadFile(ctx, opts))
 
 										dirContents, err := os.ReadDir(extractDir)
-										require.NoError(t, err)
-										assert.Zero(t, len(dirContents))
+										assert.NotError(t, err)
+										check.Zero(t, len(dirContents))
 									},
 									"FailsForInvalidURL": func(ctx context.Context, t *testing.T, client Manager, tempDir string) {
 										file, err := os.CreateTemp(tempDir, filepath.Base(t.Name()))
-										require.NoError(t, err)
+										assert.NotError(t, err)
 										defer func() {
 											check.NotError(t, os.RemoveAll(file.Name()))
 										}()
-										require.NoError(t, file.Close())
-										assert.Error(t, client.DownloadFile(ctx, remote.Download{URL: "", Path: file.Name()}))
+										assert.NotError(t, file.Close())
+										check.Error(t, client.DownloadFile(ctx, ropts.Download{URL: "", Path: file.Name()}))
 									},
 									"FailsForNonexistentURL": func(ctx context.Context, t *testing.T, client Manager, tempDir string) {
 										file, err := os.CreateTemp(tempDir, "out.txt")
-										require.NoError(t, err)
+										assert.NotError(t, err)
 										defer func() {
 											check.NotError(t, os.RemoveAll(file.Name()))
 										}()
-										require.NoError(t, file.Close())
-										assert.Error(t, client.DownloadFile(ctx, remote.Download{URL: "https://example.com/foo", Path: file.Name()}))
+										assert.NotError(t, file.Close())
+										check.Error(t, client.DownloadFile(ctx, ropts.Download{URL: "https://example.com/foo", Path: file.Name()}))
 									},
 									"FailsForInsufficientPermissions": func(ctx context.Context, t *testing.T, client Manager, tempDir string) {
 										if os.Geteuid() == 0 {
@@ -901,12 +888,12 @@ func TestManager(t *testing.T) {
 										} else if runtime.GOOS == "windows" {
 											t.Skip("cannot test download permissions on windows")
 										}
-										assert.Error(t, client.DownloadFile(ctx, remote.Download{URL: "https://example.com", Path: "/foo/bar"}))
+										check.Error(t, client.DownloadFile(ctx, ropts.Download{URL: "https://example.com", Path: "/foo/bar"}))
 									},
 								} {
 									t.Run(testName, func(t *testing.T) {
 										tempDir, err := os.MkdirTemp(testutil.BuildDirectory(), filepath.Base(t.Name()))
-										require.NoError(t, err)
+										assert.NotError(t, err)
 										defer func() {
 											check.NotError(t, os.RemoveAll(tempDir))
 										}()
@@ -919,14 +906,14 @@ func TestManager(t *testing.T) {
 							Name: "CreateWithLogFile",
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								file, err := os.CreateTemp(testutil.BuildDirectory(), filepath.Base(t.Name()))
-								require.NoError(t, err)
+								assert.NotError(t, err)
 								defer func() {
 									check.NotError(t, os.RemoveAll(file.Name()))
 								}()
-								require.NoError(t, file.Close())
+								assert.NotError(t, file.Close())
 
 								logger := &options.LoggerConfig{}
-								require.NoError(t, logger.Set(&options.FileLoggerOptions{
+								assert.NotError(t, logger.Set(&options.FileLoggerOptions{
 									Filename: file.Name(),
 									Base:     options.BaseOptions{Format: options.LogFormatPlain},
 								}))
@@ -939,29 +926,29 @@ func TestManager(t *testing.T) {
 								}
 
 								proc, err := client.CreateProcess(ctx, opts)
-								require.NoError(t, err)
+								assert.NotError(t, err)
 
 								exitCode, err := proc.Wait(ctx)
-								require.NoError(t, err)
+								assert.NotError(t, err)
 								require.Zero(t, exitCode)
 
 								info, err := os.Stat(file.Name())
-								require.NoError(t, err)
-								assert.NotZero(t, info.Size())
+								assert.NotError(t, err)
+								check.NotZero(t, info.Size())
 
 								fileContents, err := os.ReadFile(file.Name())
-								require.NoError(t, err)
-								assert.Contains(t, string(fileContents), output)
+								assert.NotError(t, err)
+								check.Substring(t, string(fileContents), output)
 							},
 						},
 						clientTestCase{
 							Name: "RegisterSignalTriggerIDChecksForInvalidTriggerID",
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								proc, err := client.CreateProcess(ctx, testutil.SleepCreateOpts(1))
-								require.NoError(t, err)
+								assert.NotError(t, err)
 								check.True(t, proc.Running(ctx))
 
-								assert.Error(t, proc.RegisterSignalTriggerID(ctx, jasper.SignalTriggerID("foo")))
+								check.Error(t, proc.RegisterSignalTriggerID(ctx, jasper.SignalTriggerID("foo")))
 
 								check.NotError(t, proc.Signal(ctx, syscall.SIGTERM))
 							},
@@ -970,7 +957,7 @@ func TestManager(t *testing.T) {
 							Name: "RegisterSignalTriggerIDPassesWithValidArgs",
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								proc, err := client.CreateProcess(ctx, testutil.SleepCreateOpts(1))
-								require.NoError(t, err)
+								assert.NotError(t, err)
 								check.True(t, proc.Running(ctx))
 
 								check.NotError(t, proc.RegisterSignalTriggerID(ctx, jasper.CleanTerminationSignalTrigger))
@@ -983,19 +970,19 @@ func TestManager(t *testing.T) {
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								lc := client.LoggingCache(ctx)
 								logger, err := lc.Create("new_logger", &options.Output{})
-								require.NoError(t, err)
-								assert.Equal(t, "new_logger", logger.ID)
+								assert.NotError(t, err)
+								check.Equal(t, "new_logger", logger.ID)
 
 								// should fail with existing logger
 								_, err = lc.Create("new_logger", &options.Output{})
-								assert.Error(t, err)
+								check.Error(t, err)
 							},
 						},
 						clientTestCase{
 							Name: "LoggingCachePutNotImplemented",
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								lc := client.LoggingCache(ctx)
-								assert.Error(t, lc.Put("logger", &options.CachedLogger{ID: "logger"}))
+								check.Error(t, lc.Put("logger", &options.CachedLogger{ID: "logger"}))
 							},
 						},
 						clientTestCase{
@@ -1003,11 +990,11 @@ func TestManager(t *testing.T) {
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								lc := client.LoggingCache(ctx)
 								expectedLogger, err := lc.Create("new_logger", &options.Output{})
-								require.NoError(t, err)
+								assert.NotError(t, err)
 
 								logger := lc.Get(expectedLogger.ID)
 								require.NotNil(t, logger)
-								assert.Equal(t, expectedLogger.ID, logger.ID)
+								check.Equal(t, expectedLogger.ID, logger.ID)
 							},
 						},
 						clientTestCase{
@@ -1023,9 +1010,9 @@ func TestManager(t *testing.T) {
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								lc := client.LoggingCache(ctx)
 								logger1, err := lc.Create("logger1", &options.Output{})
-								require.NoError(t, err)
+								assert.NotError(t, err)
 								logger2, err := lc.Create("logger2", &options.Output{})
-								require.NoError(t, err)
+								assert.NotError(t, err)
 
 								require.NotNil(t, lc.Get(logger1.ID))
 								require.NotNil(t, lc.Get(logger2.ID))
@@ -1039,13 +1026,13 @@ func TestManager(t *testing.T) {
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								lc := client.LoggingCache(ctx)
 								logger1, err := lc.Create("logger1", &options.Output{})
-								require.NoError(t, err)
+								assert.NotError(t, err)
 								logger2, err := lc.Create("logger2", &options.Output{})
-								require.NoError(t, err)
+								assert.NotError(t, err)
 
 								require.NotNil(t, lc.Get(logger1.ID))
 								require.NotNil(t, lc.Get(logger2.ID))
-								require.NoError(t, lc.CloseAndRemove(ctx, logger2.ID))
+								assert.NotError(t, lc.CloseAndRemove(ctx, logger2.ID))
 								require.NotNil(t, lc.Get(logger1.ID))
 								require.Nil(t, lc.Get(logger2.ID))
 							},
@@ -1055,13 +1042,13 @@ func TestManager(t *testing.T) {
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								lc := client.LoggingCache(ctx)
 								logger1, err := lc.Create("logger1", &options.Output{})
-								require.NoError(t, err)
+								assert.NotError(t, err)
 								logger2, err := lc.Create("logger2", &options.Output{})
-								require.NoError(t, err)
+								assert.NotError(t, err)
 
 								require.NotNil(t, lc.Get(logger1.ID))
 								require.NotNil(t, lc.Get(logger2.ID))
-								require.NoError(t, lc.Clear(ctx))
+								assert.NotError(t, lc.Clear(ctx))
 								require.Nil(t, lc.Get(logger1.ID))
 								require.Nil(t, lc.Get(logger2.ID))
 							},
@@ -1071,12 +1058,12 @@ func TestManager(t *testing.T) {
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								lc := client.LoggingCache(ctx)
 								logger1, err := lc.Create("logger1", &options.Output{})
-								require.NoError(t, err)
+								assert.NotError(t, err)
 								require.NotNil(t, lc.Get(logger1.ID))
 								time.Sleep(2 * time.Second)
 
 								logger2, err := lc.Create("logger2", &options.Output{})
-								require.NoError(t, err)
+								assert.NotError(t, err)
 
 								lc.Prune(time.Now().Add(-time.Second))
 								require.Nil(t, lc.Get(logger1.ID))
@@ -1088,18 +1075,18 @@ func TestManager(t *testing.T) {
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								lc := client.LoggingCache(ctx)
 								_, err := lc.Create("logger1", &options.Output{})
-								require.NoError(t, err)
+								assert.NotError(t, err)
 								_, err = lc.Create("logger2", &options.Output{})
-								require.NoError(t, err)
+								assert.NotError(t, err)
 
-								assert.Equal(t, 2, lc.Len())
+								check.Equal(t, 2, lc.Len())
 							},
 						},
 						clientTestCase{
 							Name: "LoggingCacheLenNotEmpty",
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								lc := client.LoggingCache(ctx)
-								assert.Zero(t, lc.Len())
+								check.Zero(t, lc.Len())
 							},
 						},
 						clientTestCase{
@@ -1111,7 +1098,7 @@ func TestManager(t *testing.T) {
 									Priority: level.Warning,
 									Format:   options.LoggingPayloadFormatSTRING,
 								}
-								assert.Error(t, client.SendMessages(ctx, payload))
+								check.Error(t, client.SendMessages(ctx, payload))
 							},
 						},
 						clientTestCase{
@@ -1119,7 +1106,7 @@ func TestManager(t *testing.T) {
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								lc := client.LoggingCache(ctx)
 								logger1, err := lc.Create("logger1", &options.Output{})
-								require.NoError(t, err)
+								assert.NotError(t, err)
 								defer func() {
 									check.NotError(t, lc.Clear(ctx))
 								}()
@@ -1137,7 +1124,7 @@ func TestManager(t *testing.T) {
 							Name: "ScriptingGetDNE",
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								_, err := client.GetScripting(ctx, "DNE")
-								assert.Error(t, err)
+								check.Error(t, err)
 							},
 						},
 						clientTestCase{
@@ -1146,8 +1133,8 @@ func TestManager(t *testing.T) {
 								expectedHarness := createTestScriptingHarness(ctx, t, client, ".")
 
 								harness, err := client.GetScripting(ctx, expectedHarness.ID())
-								require.NoError(t, err)
-								assert.Equal(t, expectedHarness.ID(), harness.ID())
+								assert.NotError(t, err)
+								check.Equal(t, expectedHarness.ID(), harness.ID())
 							},
 						},
 						clientTestCase{
@@ -1168,15 +1155,15 @@ func TestManager(t *testing.T) {
 							Name: "ScriptingRunNoError",
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								tmpdir, err := os.MkdirTemp(testutil.BuildDirectory(), "scripting_tests")
-								require.NoError(t, err)
+								assert.NotError(t, err)
 								defer func() {
 									check.NotError(t, os.RemoveAll(tmpdir))
 								}()
 								harness := createTestScriptingHarness(ctx, t, client, tmpdir)
 
-								require.NoError(t, err)
+								assert.NotError(t, err)
 								tmpFile := filepath.Join(tmpdir, "fake_script.go")
-								require.NoError(t, os.WriteFile(tmpFile, []byte(`package main; import "os"; func main() { os.Exit(0) }`), 0755))
+								assert.NotError(t, os.WriteFile(tmpFile, []byte(`package main; import "os"; func main() { os.Exit(0) }`), 0755))
 								check.NotError(t, harness.Run(ctx, []string{tmpFile}))
 							},
 						},
@@ -1184,22 +1171,22 @@ func TestManager(t *testing.T) {
 							Name: "ScriptingRunError",
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								tmpdir, err := os.MkdirTemp(testutil.BuildDirectory(), "scripting_tests")
-								require.NoError(t, err)
+								assert.NotError(t, err)
 								defer func() {
 									check.NotError(t, os.RemoveAll(tmpdir))
 								}()
 								harness := createTestScriptingHarness(ctx, t, client, tmpdir)
 
 								tmpFile := filepath.Join(tmpdir, "fake_script.go")
-								require.NoError(t, os.WriteFile(tmpFile, []byte(`package main; import "os"; func main() { os.Exit(42) }`), 0755))
-								assert.Error(t, harness.Run(ctx, []string{tmpFile}))
+								assert.NotError(t, os.WriteFile(tmpFile, []byte(`package main; import "os"; func main() { os.Exit(42) }`), 0755))
+								check.Error(t, harness.Run(ctx, []string{tmpFile}))
 							},
 						},
 						clientTestCase{
 							Name: "ScriptingRunScriptNoError",
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								tmpdir, err := os.MkdirTemp(testutil.BuildDirectory(), "scripting_tests")
-								require.NoError(t, err)
+								assert.NotError(t, err)
 								defer func() {
 									check.NotError(t, os.RemoveAll(tmpdir))
 								}()
@@ -1212,7 +1199,7 @@ func TestManager(t *testing.T) {
 							Name: "ScriptingRunScriptError",
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								tmpdir, err := os.MkdirTemp(testutil.BuildDirectory(), "scripting_tests")
-								require.NoError(t, err)
+								assert.NotError(t, err)
 								defer func() {
 									check.NotError(t, os.RemoveAll(tmpdir))
 								}()
@@ -1225,38 +1212,38 @@ func TestManager(t *testing.T) {
 							Name: "ScriptingBuild",
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								tmpdir, err := os.MkdirTemp(testutil.BuildDirectory(), "scripting_tests")
-								require.NoError(t, err)
+								assert.NotError(t, err)
 								defer func() {
 									check.NotError(t, os.RemoveAll(tmpdir))
 								}()
 								harness := createTestScriptingHarness(ctx, t, client, tmpdir)
 
 								tmpFile := filepath.Join(tmpdir, "fake_script.go")
-								require.NoError(t, os.WriteFile(tmpFile, []byte(`package main; import "os"; func main() { os.Exit(0) }`), 0755))
+								assert.NotError(t, os.WriteFile(tmpFile, []byte(`package main; import "os"; func main() { os.Exit(0) }`), 0755))
 								_, err = harness.Build(ctx, tmpdir, []string{
 									"-o",
 									filepath.Join(tmpdir, "fake_script"),
 									tmpFile,
 								})
-								require.NoError(t, err)
+								assert.NotError(t, err)
 								_, err = os.Stat(filepath.Join(tmpFile))
-								require.NoError(t, err)
+								assert.NotError(t, err)
 							},
 						},
 						clientTestCase{
 							Name: "ScriptingTest",
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								tmpdir, err := os.MkdirTemp(testutil.BuildDirectory(), "scripting_tests")
-								require.NoError(t, err)
+								assert.NotError(t, err)
 								defer func() {
 									check.NotError(t, os.RemoveAll(tmpdir))
 								}()
 								harness := createTestScriptingHarness(ctx, t, client, tmpdir)
 
 								tmpFile := filepath.Join(tmpdir, "fake_script_test.go")
-								require.NoError(t, os.WriteFile(tmpFile, []byte(`package main; import "testing"; func TestMain(t *testing.T) { return }`), 0755))
+								assert.NotError(t, os.WriteFile(tmpFile, []byte(`package main; import "testing"; func TestMain(t *testing.T) { return }`), 0755))
 								results, err := harness.Test(ctx, tmpdir, scripting.TestOptions{Name: "dummy"})
-								require.NoError(t, err)
+								assert.NotError(t, err)
 								require.Equal(t, len(results), 1)
 							},
 						},
@@ -1280,7 +1267,7 @@ func createTestScriptingHarness(ctx context.Context, t *testing.T, client Manage
 	opts.Output.Output = send.MakeWriter(grip.Sender())
 
 	harness, err := client.CreateScripting(ctx, opts)
-	require.NoError(t, err)
+	assert.NotError(t, err)
 
 	return harness
 }

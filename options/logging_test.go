@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
@@ -281,8 +282,8 @@ func requireIsGroup(t *testing.T, size int, msg message.Composer) []message.Comp
 	t.Helper()
 	t.Logf("%T", msg)
 	gc, ok := msg.(*message.GroupComposer)
-	require.True(t, ok)
+	assert.True(t, ok)
 	msgs := gc.Messages()
-	require.Equal(t, len(msgs), size)
+	assert.Equal(t, len(msgs), size)
 	return msgs
 }

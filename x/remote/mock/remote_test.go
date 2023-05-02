@@ -3,10 +3,11 @@ package mock
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/jasper/x/remote"
 )
 
 func TestMockInterfaces(t *testing.T) {
-	assert.Implements(t, (*remote.Manager)(nil), &RemoteClient{})
+	_, ok := remote.Manager(&RemoteClient{}).(*RemoteClient)
+	assert.True(t, ok)
 }

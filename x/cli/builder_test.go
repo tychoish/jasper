@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/tychoish/fun/assert/check"
 )
 
 func TestBuildSubcommands(t *testing.T) {
@@ -56,7 +56,7 @@ func TestBuildSubcommands(t *testing.T) {
 		{subcommand: []string{binary, JasperCommand, ClientCommand, RemoteCommand, WriteFileCommand}, buildSubcommand: BuildRemoteWriteFileCommand},
 	} {
 		t.Run(strings.Join(testCase.subcommand, "/"), func(t *testing.T) {
-			assert.Equal(t, testCase.subcommand, testCase.buildSubcommand(binary))
+			check.EqualItems(t, testCase.subcommand, testCase.buildSubcommand(binary))
 		})
 	}
 }

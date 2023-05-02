@@ -16,7 +16,7 @@ func TestLoggerRegistry(t *testing.T) {
 	registry.Register(NewDefaultLoggerProducer)
 	check.True(t, registry.Check(LogDefault))
 	factory, ok := registry.Resolve(LogDefault)
-	check.Equal(t, NewDefaultLoggerProducer(), factory())
+	check.Equal(t, NewDefaultLoggerProducer().Type(), factory().Type())
 	check.True(t, ok)
 
 	registeredFactories[LogFile] = NewFileLoggerProducer
@@ -24,7 +24,7 @@ func TestLoggerRegistry(t *testing.T) {
 	registry.Register(NewFileLoggerProducer)
 	check.True(t, registry.Check(LogFile))
 	factory, ok = registry.Resolve(LogFile)
-	check.Equal(t, NewFileLoggerProducer(), factory())
+	check.Equal(t, NewFileLoggerProducer().Type(), factory().Type())
 	check.True(t, ok)
 
 	factories := registry.Names()

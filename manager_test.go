@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/testutil"
@@ -34,7 +35,7 @@ func TestTrackedManager(t *testing.T) {
 				},
 				"CreateProcessTracksProcess": func(ctx context.Context, t *testing.T, manager *basicProcessManager, opts *options.Create) {
 					proc, err := manager.CreateProcess(ctx, opts)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					check.Equal(t, len(manager.procs), 1)
 
 					mockTracker, ok := manager.tracker.(*mockProcessTracker)
@@ -44,7 +45,7 @@ func TestTrackedManager(t *testing.T) {
 				},
 				"CreateCommandTracksCommandAfterRun": func(ctx context.Context, t *testing.T, manager *basicProcessManager, opts *options.Create) {
 					err := manager.CreateCommand(ctx).Add(opts.Args).Background(true).Run(ctx)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					check.Equal(t, len(manager.procs), 1)
 
 					mockTracker, ok := manager.tracker.(*mockProcessTracker)
@@ -77,7 +78,7 @@ func TestTrackedManager(t *testing.T) {
 				"CloseCleansUpProcesses": func(ctx context.Context, t *testing.T, manager *basicProcessManager, opts *options.Create) {
 					cmd := manager.CreateCommand(ctx).Background(true).Add(opts.Args)
 					cmd.opts.Process = *opts
-					require.NoError(t, cmd.Run(ctx))
+					assert.NotError(t, cmd.Run(ctx))
 					check.Equal(t, len(manager.procs), 1)
 
 					mockTracker, ok := manager.tracker.(*mockProcessTracker)
@@ -85,24 +86,24 @@ func TestTrackedManager(t *testing.T) {
 					require.Equal(t, len(mockTracker.Infos), 1)
 					check.NotZero(t, mockTracker.Infos[0].ID)
 
-					require.NoError(t, manager.Close(ctx))
+					assert.NotError(t, manager.Close(ctx))
 					check.Equal(t, len(mockTracker.Infos), 0)
-					require.NoError(t, manager.Close(ctx))
+					assert.NotError(t, manager.Close(ctx))
 				},
 				"CloseWithNoProcessesIsNotError": func(ctx context.Context, t *testing.T, manager *basicProcessManager, opts *options.Create) {
 					mockTracker, ok := manager.tracker.(*mockProcessTracker)
 					require.True(t, ok)
 
-					require.NoError(t, manager.Close(ctx))
+					assert.NotError(t, manager.Close(ctx))
 					check.Equal(t, len(mockTracker.Infos), 0)
-					require.NoError(t, manager.Close(ctx))
+					assert.NotError(t, manager.Close(ctx))
 					check.Equal(t, len(mockTracker.Infos), 0)
 				},
 				"DoubleCloseIsNotError": func(ctx context.Context, t *testing.T, manager *basicProcessManager, opts *options.Create) {
 					cmd := manager.CreateCommand(ctx).Background(true).Add(opts.Args)
 					cmd.opts.Process = *opts
 
-					require.NoError(t, cmd.Run(ctx))
+					assert.NotError(t, cmd.Run(ctx))
 					check.Equal(t, len(manager.procs), 1)
 
 					mockTracker, ok := manager.tracker.(*mockProcessTracker)
@@ -110,9 +111,9 @@ func TestTrackedManager(t *testing.T) {
 					require.Equal(t, len(mockTracker.Infos), 1)
 					check.NotZero(t, mockTracker.Infos[0].ID)
 
-					require.NoError(t, manager.Close(ctx))
+					assert.NotError(t, manager.Close(ctx))
 					check.Equal(t, len(mockTracker.Infos), 0)
-					require.NoError(t, manager.Close(ctx))
+					assert.NotError(t, manager.Close(ctx))
 					check.Equal(t, len(mockTracker.Infos), 0)
 				},
 				// "": func(ctx context.Context, t *testing.T, manager Manager, mod testutil.OptsModify) {},

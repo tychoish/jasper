@@ -6,13 +6,13 @@ import (
 	"testing"
 
 	"github.com/evergreen-ci/service"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
-	"github.com/tychoish/jasper/x/remote"
 	"github.com/tychoish/jasper/testutil"
 	"github.com/tychoish/jasper/util"
+	"github.com/tychoish/jasper/x/remote"
 )
 
 func TestDaemon(t *testing.T) {
@@ -20,31 +20,31 @@ func TestDaemon(t *testing.T) {
 		"RPCService": func(ctx context.Context, t *testing.T, _ jasper.Manager) (util.CloseFunc, remote.Manager) {
 			port := testutil.GetPortNumber()
 			manager, err := jasper.NewSynchronizedManager(false)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			daemon := newRPCDaemon("localhost", port, manager, "", nil)
 			svc, err := service.New(daemon, &service.Config{Name: "foo"})
-			require.NoError(t, err)
-			require.NoError(t, daemon.Start(svc))
+			assert.NotError(t, err)
+			assert.NotError(t, daemon.Start(svc))
 
 			client, err := newRemoteClient(ctx, RPCService, "localhost", port, "")
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			return func() error { return daemon.Stop(svc) }, client
 		},
 		"RESTService": func(ctx context.Context, t *testing.T, _ jasper.Manager) (util.CloseFunc, remote.Manager) {
 			port := testutil.GetPortNumber()
 			manager, err := jasper.NewSynchronizedManager(false)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			daemon := newRESTDaemon("localhost", port, manager, nil)
 			svc, err := service.New(daemon, &service.Config{Name: "foo"})
-			require.NoError(t, err)
-			require.NoError(t, daemon.Start(svc))
-			require.NoError(t, testutil.WaitForRESTService(ctx, fmt.Sprintf("http://localhost:%d/jasper/v1", port)))
+			assert.NotError(t, err)
+			assert.NotError(t, daemon.Start(svc))
+			assert.NotError(t, testutil.WaitForRESTService(ctx, fmt.Sprintf("http://localhost:%d/jasper/v1", port)))
 
 			client, err := newRemoteClient(ctx, RESTService, "localhost", port, "")
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			return func() error { return daemon.Stop(svc) }, client
 		},
@@ -55,12 +55,12 @@ func TestDaemon(t *testing.T) {
 				newRPCDaemon("localhost", testutil.GetPortNumber(), manager, "", nil),
 			)
 			svc, err := service.New(daemon, &service.Config{Name: "foo"})
-			require.NoError(t, err)
-			require.NoError(t, daemon.Start(svc))
-			require.NoError(t, testutil.WaitForRESTService(ctx, fmt.Sprintf("http://localhost:%d/jasper/v1", restPort)))
+			assert.NotError(t, err)
+			assert.NotError(t, daemon.Start(svc))
+			assert.NotError(t, testutil.WaitForRESTService(ctx, fmt.Sprintf("http://localhost:%d/jasper/v1", restPort)))
 
 			client, err := newRemoteClient(ctx, RESTService, "localhost", restPort, "")
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			return func() error { return daemon.Stop(svc) }, client
 		},
@@ -71,11 +71,11 @@ func TestDaemon(t *testing.T) {
 				newRPCDaemon("localhost", rpcPort, manager, "", nil),
 			)
 			svc, err := service.New(daemon, &service.Config{Name: "foo"})
-			require.NoError(t, err)
-			require.NoError(t, daemon.Start(svc))
+			assert.NotError(t, err)
+			assert.NotError(t, daemon.Start(svc))
 
 			client, err := newRemoteClient(ctx, RPCService, "localhost", rpcPort, "")
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			return func() error { return daemon.Stop(svc) }, client
 		},
@@ -85,7 +85,7 @@ func TestDaemon(t *testing.T) {
 			defer cancel()
 
 			manager, err := jasper.NewSynchronizedManager(false)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			closeDaemon, client := makeDaemonAndClient(ctx, t, manager)
 			defer func() {
 				check.NotError(t, closeDaemon())
@@ -95,10 +95,10 @@ func TestDaemon(t *testing.T) {
 				Args: []string{"echo", "hello", "world"},
 			}
 			proc, err := client.CreateProcess(ctx, opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			exitCode, err := proc.Wait(ctx)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			assert.Zero(t, exitCode)
 		})
 	}

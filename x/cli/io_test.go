@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper"
 )
 
@@ -41,16 +41,16 @@ func TestExtractResponse(t *testing.T) {
 					extractAndCheck: func(t *testing.T, input []byte) {
 						resp, err := ExtractOutcomeResponse(input)
 						if outcome.Success {
-							require.NoError(t, err)
+							assert.NotError(t, err)
 							check.True(t, resp.Successful())
 						} else {
-							require.Error(t, err)
-							assert.False(t, resp.Successful())
+							assert.Error(t, err)
+							check.True(t, !resp.Successful())
 
 							if outcome.Message != "" {
-								assert.Contains(t, resp.ErrorMessage(), outcome.Message)
+								check.Substring(t, resp.ErrorMessage(), outcome.Message)
 							} else {
-								assert.Contains(t, resp.ErrorMessage(), unspecifiedRequestFailure)
+								check.Substring(t, resp.ErrorMessage(), unspecifiedRequestFailure)
 							}
 						}
 					},
@@ -68,20 +68,20 @@ func TestExtractResponse(t *testing.T) {
 					extractAndCheck: func(t *testing.T, input []byte) {
 						resp, err := ExtractInfoResponse(input)
 						if outcome.Success {
-							require.NoError(t, err)
+							assert.NotError(t, err)
 							check.True(t, resp.Successful())
 						} else {
-							require.Error(t, err)
-							assert.False(t, resp.Successful())
+							assert.Error(t, err)
+							check.True(t, !resp.Successful())
 
 							if outcome.Message != "" {
-								assert.Contains(t, resp.ErrorMessage(), outcome.Message)
+								check.Substring(t, resp.ErrorMessage(), outcome.Message)
 							} else {
-								assert.Contains(t, resp.ErrorMessage(), unspecifiedRequestFailure)
+								check.Substring(t, resp.ErrorMessage(), unspecifiedRequestFailure)
 							}
 						}
 
-						assert.Equal(t, s1, resp.Info.ID)
+						check.Equal(t, s1, resp.Info.ID)
 					},
 				},
 				"InfosResponse": {
@@ -99,16 +99,16 @@ func TestExtractResponse(t *testing.T) {
 					extractAndCheck: func(t *testing.T, input []byte) {
 						resp, err := ExtractInfosResponse(input)
 						if outcome.Success {
-							require.NoError(t, err)
+							assert.NotError(t, err)
 							check.True(t, resp.Successful())
 						} else {
-							require.Error(t, err)
-							assert.False(t, resp.Successful())
+							assert.Error(t, err)
+							check.True(t, !resp.Successful())
 
 							if outcome.Message != "" {
-								assert.Contains(t, resp.ErrorMessage(), outcome.Message)
+								check.Substring(t, resp.ErrorMessage(), outcome.Message)
 							} else {
-								assert.Contains(t, resp.ErrorMessage(), unspecifiedRequestFailure)
+								check.Substring(t, resp.ErrorMessage(), unspecifiedRequestFailure)
 							}
 						}
 
@@ -136,21 +136,21 @@ func TestExtractResponse(t *testing.T) {
 					extractAndCheck: func(t *testing.T, input []byte) {
 						resp, err := ExtractTagsResponse(input)
 						if outcome.Success {
-							require.NoError(t, err)
+							assert.NotError(t, err)
 							check.True(t, resp.Successful())
 						} else {
-							require.Error(t, err)
-							assert.False(t, resp.Successful())
+							assert.Error(t, err)
+							check.True(t, !resp.Successful())
 
 							if outcome.Message != "" {
-								assert.Contains(t, resp.ErrorMessage(), outcome.Message)
+								check.Substring(t, resp.ErrorMessage(), outcome.Message)
 							} else {
-								assert.Contains(t, resp.ErrorMessage(), unspecifiedRequestFailure)
+								check.Substring(t, resp.ErrorMessage(), unspecifiedRequestFailure)
 							}
 						}
 
-						assert.Contains(t, resp.Tags, s1)
-						assert.Contains(t, resp.Tags, s2)
+						check.Contains(t, resp.Tags, s1)
+						check.Contains(t, resp.Tags, s2)
 					},
 				},
 				"WaitResponse": {
@@ -165,18 +165,18 @@ func TestExtractResponse(t *testing.T) {
 					extractAndCheck: func(t *testing.T, input []byte) {
 						resp, err := ExtractWaitResponse(input)
 						if outcome.Success {
-							require.NoError(t, err)
+							assert.NotError(t, err)
 							check.True(t, resp.Successful())
-							assert.Equal(t, n1, resp.ExitCode)
-							assert.Contains(t, resp.Error, errMsg)
+							check.Equal(t, n1, resp.ExitCode)
+							check.Substring(t, resp.Error, errMsg)
 						} else {
-							require.Error(t, err)
-							assert.False(t, resp.Successful())
+							assert.Error(t, err)
+							check.True(t, !resp.Successful())
 
 							if outcome.Message != "" {
-								assert.Contains(t, resp.ErrorMessage(), outcome.Message)
+								check.Substring(t, resp.ErrorMessage(), outcome.Message)
 							} else {
-								assert.Contains(t, resp.ErrorMessage(), unspecifiedRequestFailure)
+								check.Substring(t, resp.ErrorMessage(), unspecifiedRequestFailure)
 							}
 						}
 					},
@@ -192,16 +192,16 @@ func TestExtractResponse(t *testing.T) {
 					extractAndCheck: func(t *testing.T, input []byte) {
 						resp, err := ExtractRunningResponse(input)
 						if outcome.Success {
-							require.NoError(t, err)
+							assert.NotError(t, err)
 							check.True(t, resp.Successful())
 						} else {
-							require.Error(t, err)
-							assert.False(t, resp.Successful())
+							assert.Error(t, err)
+							check.True(t, !resp.Successful())
 
 							if outcome.Message != "" {
-								assert.Contains(t, resp.ErrorMessage(), outcome.Message)
+								check.Substring(t, resp.ErrorMessage(), outcome.Message)
 							} else {
-								assert.Contains(t, resp.ErrorMessage(), unspecifiedRequestFailure)
+								check.Substring(t, resp.ErrorMessage(), unspecifiedRequestFailure)
 							}
 						}
 
@@ -219,16 +219,16 @@ func TestExtractResponse(t *testing.T) {
 					extractAndCheck: func(t *testing.T, input []byte) {
 						resp, err := ExtractCompleteResponse(input)
 						if outcome.Success {
-							require.NoError(t, err)
+							assert.NotError(t, err)
 							check.True(t, resp.Successful())
 						} else {
-							require.Error(t, err)
-							assert.False(t, resp.Successful())
+							assert.Error(t, err)
+							check.True(t, !resp.Successful())
 
 							if outcome.Message != "" {
-								assert.Contains(t, resp.ErrorMessage(), outcome.Message)
+								check.Substring(t, resp.ErrorMessage(), outcome.Message)
 							} else {
-								assert.Contains(t, resp.ErrorMessage(), unspecifiedRequestFailure)
+								check.Substring(t, resp.ErrorMessage(), unspecifiedRequestFailure)
 							}
 						}
 
@@ -246,20 +246,20 @@ func TestExtractResponse(t *testing.T) {
 					extractAndCheck: func(t *testing.T, input []byte) {
 						resp, err := ExtractServiceStatusResponse(input)
 						if outcome.Success {
-							require.NoError(t, err)
+							assert.NotError(t, err)
 							check.True(t, resp.Successful())
 						} else {
-							require.Error(t, err)
-							assert.False(t, resp.Successful())
+							assert.Error(t, err)
+							check.True(t, !resp.Successful())
 
 							if outcome.Message != "" {
-								assert.Contains(t, resp.ErrorMessage(), outcome.Message)
+								check.Substring(t, resp.ErrorMessage(), outcome.Message)
 							} else {
-								assert.Contains(t, resp.ErrorMessage(), unspecifiedRequestFailure)
+								check.Substring(t, resp.ErrorMessage(), unspecifiedRequestFailure)
 							}
 						}
 
-						assert.Equal(t, ServiceRunning, resp.Status)
+						check.Equal(t, ServiceRunning, resp.Status)
 					},
 				},
 				"LogStreamResponse": {
@@ -276,21 +276,21 @@ func TestExtractResponse(t *testing.T) {
 					extractAndCheck: func(t *testing.T, input []byte) {
 						resp, err := ExtractLogStreamResponse(input)
 						if outcome.Success {
-							require.NoError(t, err)
+							assert.NotError(t, err)
 							check.True(t, resp.Successful())
 						} else {
-							require.Error(t, err)
-							assert.False(t, resp.Successful())
+							assert.Error(t, err)
+							check.True(t, !resp.Successful())
 
 							if outcome.Message != "" {
-								assert.Contains(t, resp.ErrorMessage(), outcome.Message)
+								check.Substring(t, resp.ErrorMessage(), outcome.Message)
 							} else {
-								assert.Contains(t, resp.ErrorMessage(), unspecifiedRequestFailure)
+								check.Substring(t, resp.ErrorMessage(), unspecifiedRequestFailure)
 							}
 						}
 
-						require.Len(t, resp.LogStream.Logs, 1)
-						assert.Equal(t, "foo", resp.LogStream.Logs[0])
+						assert.Equal(t, len(resp.LogStream.Logs), 1)
+						check.Equal(t, "foo", resp.LogStream.Logs[0])
 						check.True(t, resp.LogStream.Done)
 					},
 				},
@@ -305,21 +305,21 @@ func TestExtractResponse(t *testing.T) {
 					extractAndCheck: func(t *testing.T, input []byte) {
 						resp, err := ExtractBuildloggerURLsResponse(input)
 						if outcome.Success {
-							require.NoError(t, err)
+							assert.NotError(t, err)
 							check.True(t, resp.Successful())
 						} else {
-							require.Error(t, err)
-							assert.False(t, resp.Successful())
+							assert.Error(t, err)
+							check.True(t, !resp.Successful())
 
 							if outcome.Message != "" {
-								assert.Contains(t, resp.ErrorMessage(), outcome.Message)
+								check.Substring(t, resp.ErrorMessage(), outcome.Message)
 							} else {
-								assert.Contains(t, resp.ErrorMessage(), unspecifiedRequestFailure)
+								check.Substring(t, resp.ErrorMessage(), unspecifiedRequestFailure)
 							}
 						}
 
-						require.Len(t, resp.URLs, 1)
-						assert.Equal(t, "foo", resp.URLs[0])
+						assert.Equal(t, len(resp.URLs), 1)
+						check.Equal(t, "foo", resp.URLs[0])
 					},
 				},
 			} {

@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/send"
@@ -51,7 +51,7 @@ type cmdRunFunc func(*Command, context.Context) error
 
 func TestCommandImplementation(t *testing.T) {
 	cwd, err := os.Getwd()
-	require.NoError(t, err)
+	assert.NotError(t, err)
 	for procType, makep := range map[string]ProcessConstructor{
 		"BlockingNoLock": NewBasicProcess,
 		"BlockingLock":   makeLockingProcess(NewBasicProcess),
@@ -92,7 +92,7 @@ func TestCommandImplementation(t *testing.T) {
 						},
 						"WaitOnBackgroundRunWaitsForProcessCompletion": func(ctx context.Context, t *testing.T, cmd Command) {
 							cmd.Append("sleep 1", "sleep 1").Background(true)
-							require.NoError(t, runFunc(&cmd, ctx))
+							assert.NotError(t, runFunc(&cmd, ctx))
 							exitCode, err := cmd.Wait(ctx)
 							check.NotError(t, err)
 							check.Zero(t, exitCode)
@@ -130,8 +130,8 @@ func TestCommandImplementation(t *testing.T) {
 											cmd.Append(cmd1)
 
 											allOpts, err := cmd.ExportCreateOptions()
-											require.NoError(t, err)
-											require.Equal(t, len(allOpts), 1)
+											assert.NotError(t, err)
+											assert.Equal(t, len(allOpts), 1)
 											args := strings.Join(allOpts[0].Args, " ")
 
 											check.NotSubstring(t, args, sudoCmd)
@@ -146,14 +146,14 @@ func TestCommandImplementation(t *testing.T) {
 											cmd.Sudo(true).Append(cmd1)
 
 											allOpts, err := cmd.ExportCreateOptions()
-											require.NoError(t, err)
-											require.Equal(t, len(allOpts), 1)
+											assert.NotError(t, err)
+											assert.Equal(t, len(allOpts), 1)
 											checkArgs(allOpts[0].Args, cmd1)
 
 											cmd.Append(cmd2)
 											allOpts, err = cmd.ExportCreateOptions()
-											require.NoError(t, err)
-											require.Equal(t, len(allOpts), 2)
+											assert.NotError(t, err)
+											assert.Equal(t, len(allOpts), 2)
 
 											checkArgs(allOpts[0].Args, cmd1)
 											checkArgs(allOpts[1].Args, cmd2)
@@ -167,14 +167,14 @@ func TestCommandImplementation(t *testing.T) {
 											}
 
 											allOpts, err := cmd.ExportCreateOptions()
-											require.NoError(t, err)
-											require.Equal(t, len(allOpts), 1)
+											assert.NotError(t, err)
+											assert.Equal(t, len(allOpts), 1)
 											checkArgs(allOpts[0].Args, cmd1)
 
 											cmd.Add([]string{echo, arg2})
 											allOpts, err = cmd.ExportCreateOptions()
-											require.NoError(t, err)
-											require.Equal(t, len(allOpts), 2)
+											assert.NotError(t, err)
+											assert.Equal(t, len(allOpts), 2)
 											checkArgs(allOpts[0].Args, cmd1)
 											checkArgs(allOpts[1].Args, cmd2)
 										},
@@ -285,19 +285,19 @@ func TestCommandImplementation(t *testing.T) {
 							for subName, subTestCase := range map[string]func(context.Context, *testing.T, Command, *util.LocalBuffer){
 								"StdOutOnly": func(ctx context.Context, t *testing.T, cmd Command, buf *util.LocalBuffer) {
 									cmd.SetOutputWriter(buf)
-									require.NoError(t, runFunc(&cmd, ctx))
+									assert.NotError(t, runFunc(&cmd, ctx))
 									checkOutput(t, true, buf.String(), arg1, arg2)
 									checkOutput(t, false, buf.String(), lsErrorMsg)
 								},
 								"StdErrOnly": func(ctx context.Context, t *testing.T, cmd Command, buf *util.LocalBuffer) {
 									cmd.SetErrorWriter(buf)
-									require.NoError(t, runFunc(&cmd, ctx))
+									assert.NotError(t, runFunc(&cmd, ctx))
 									checkOutput(t, true, buf.String(), lsErrorMsg)
 									checkOutput(t, false, buf.String(), arg1, arg2)
 								},
 								"StdOutAndStdErr": func(ctx context.Context, t *testing.T, cmd Command, buf *util.LocalBuffer) {
 									cmd.SetCombinedWriter(buf)
-									require.NoError(t, runFunc(&cmd, ctx))
+									assert.NotError(t, runFunc(&cmd, ctx))
 									checkOutput(t, true, buf.String(), arg1, arg2, lsErrorMsg)
 								},
 							} {
@@ -319,25 +319,25 @@ func TestCommandImplementation(t *testing.T) {
 							for subName, subTestCase := range map[string]func(context.Context, *testing.T, Command, *send.InMemorySender){
 								"StdOutOnly": func(ctx context.Context, t *testing.T, cmd Command, sender *send.InMemorySender) {
 									cmd.SetOutputSender(cmd.opts.Priority, sender)
-									require.NoError(t, runFunc(&cmd, ctx))
+									assert.NotError(t, runFunc(&cmd, ctx))
 									out, err := sender.GetString()
-									require.NoError(t, err)
+									assert.NotError(t, err)
 									checkOutput(t, true, strings.Join(out, "\n"), "[p=info]:", arg1, arg2)
 									checkOutput(t, false, strings.Join(out, "\n"), lsErrorMsg)
 								},
 								"StdErrOnly": func(ctx context.Context, t *testing.T, cmd Command, sender *send.InMemorySender) {
 									cmd.SetErrorSender(cmd.opts.Priority, sender)
-									require.NoError(t, runFunc(&cmd, ctx))
+									assert.NotError(t, runFunc(&cmd, ctx))
 									out, err := sender.GetString()
-									require.NoError(t, err)
+									assert.NotError(t, err)
 									checkOutput(t, true, strings.Join(out, "\n"), "[p=info]:", lsErrorMsg)
 									checkOutput(t, false, strings.Join(out, "\n"), arg1, arg2)
 								},
 								"StdOutAndStdErr": func(ctx context.Context, t *testing.T, cmd Command, sender *send.InMemorySender) {
 									cmd.SetCombinedSender(cmd.opts.Priority, sender)
-									require.NoError(t, runFunc(&cmd, ctx))
+									assert.NotError(t, runFunc(&cmd, ctx))
 									out, err := sender.GetString()
-									require.NoError(t, err)
+									assert.NotError(t, err)
 									checkOutput(t, true, strings.Join(out, "\n"), "[p=info]:", arg1, arg2, lsErrorMsg)
 								},
 							} {
@@ -349,7 +349,7 @@ func TestCommandImplementation(t *testing.T) {
 									}).ContinueOnError(true).IgnoreError(true).Priority(level.Info)
 
 									sender, err := send.NewInMemorySender(t.Name(), cmd.opts.Priority, 100)
-									require.NoError(t, err)
+									assert.NotError(t, err)
 
 									subTestCase(ctx, t, cmd, sender.(*send.InMemorySender))
 								})
@@ -384,15 +384,15 @@ func TestCommandImplementation(t *testing.T) {
 						"ApplyFromOptsOverridesExistingOptions": func(ctx context.Context, t *testing.T, cmd Command) {
 							_ = cmd.Add([]string{echo, arg1}).Directory("bar")
 							genOpts, err := cmd.ExportCreateOptions()
-							require.NoError(t, err)
-							require.Equal(t, len(genOpts), 1)
+							assert.NotError(t, err)
+							assert.Equal(t, len(genOpts), 1)
 							check.Equal(t, "bar", genOpts[0].WorkingDirectory)
 
 							opts := &options.Create{WorkingDirectory: "foo"}
 							_ = cmd.ApplyFromOpts(opts)
 							genOpts, err = cmd.ExportCreateOptions()
-							require.NoError(t, err)
-							require.Equal(t, len(genOpts), 1)
+							assert.NotError(t, err)
+							assert.Equal(t, len(genOpts), 1)
 							check.Equal(t, opts.WorkingDirectory, genOpts[0].WorkingDirectory)
 						},
 						"CreateOptionsAppliedInGetCreateOptionsForLocalCommand": func(ctx context.Context, t *testing.T, cmd Command) {
@@ -404,10 +404,12 @@ func TestCommandImplementation(t *testing.T) {
 							cmd.opts.Commands = [][]string{}
 							_ = cmd.ApplyFromOpts(opts).Add(args)
 							genOpts, err := cmd.ExportCreateOptions()
-							require.NoError(t, err)
-							require.Equal(t, len(genOpts), 1)
+							assert.NotError(t, err)
+							assert.Equal(t, len(genOpts), 1)
 							check.Equal(t, opts.WorkingDirectory, genOpts[0].WorkingDirectory)
-							require.Equal(t, opts.Environment, genOpts[0].Environment)
+							for k, v := range opts.Environment {
+								check.Equal(t, v, genOpts[0].Environment[k])
+							}
 						},
 						"TagFunctions": func(ctx context.Context, t *testing.T, cmd Command) {
 							tags := []string{"tag0", "tag1"}
@@ -419,7 +421,7 @@ func TestCommandImplementation(t *testing.T) {
 										cmd.Append(subCmd)
 									}
 									cmd.SetTags(tags)
-									require.NoError(t, cmd.Run(ctx))
+									assert.NotError(t, cmd.Run(ctx))
 
 									check.Equal(t, len(cmd.procs), len(subCmds))
 									for _, proc := range cmd.procs {
@@ -433,7 +435,7 @@ func TestCommandImplementation(t *testing.T) {
 										cmd.Append(subCmd)
 									}
 									cmd.AppendTags(tags...)
-									require.NoError(t, cmd.Run(ctx))
+									assert.NotError(t, cmd.Run(ctx))
 									check.Equal(t, len(cmd.procs), len(subCmds))
 
 									for _, proc := range cmd.procs {
@@ -447,7 +449,7 @@ func TestCommandImplementation(t *testing.T) {
 										cmd.Append(subCmd)
 									}
 									cmd.ExtendTags(tags)
-									require.NoError(t, cmd.Run(ctx))
+									assert.NotError(t, cmd.Run(ctx))
 									check.Equal(t, len(cmd.procs), len(subCmds))
 									for _, proc := range cmd.procs {
 										ptags := proc.GetTags()
@@ -470,12 +472,12 @@ func TestCommandImplementation(t *testing.T) {
 							})
 
 							optslist, err := cmd.Export()
-							require.NoError(t, err)
+							assert.NotError(t, err)
 
-							require.Equal(t, len(optslist), 3)
-							require.Equal(t, []string{"echo", "hello", "world"}, optslist[0].Args)
-							require.Equal(t, []string{"echo", "hello world"}, optslist[1].Args)
-							require.Equal(t, []string{"echo", "hello\"world\""}, optslist[2].Args)
+							assert.Equal(t, len(optslist), 3)
+							assert.EqualItems(t, []string{"echo", "hello", "world"}, optslist[0].Args)
+							assert.EqualItems(t, []string{"echo", "hello world"}, optslist[1].Args)
+							assert.EqualItems(t, []string{"echo", "hello\"world\""}, optslist[2].Args)
 						},
 						"RunFuncReceivesPopulatedOptions": func(ctx context.Context, t *testing.T, cmd Command) {
 							prio := level.Warning
@@ -495,7 +497,7 @@ func TestCommandImplementation(t *testing.T) {
 									check.Equal(t, prio, opts.Priority)
 									return nil
 								})
-							require.NoError(t, cmd.Run(ctx))
+							assert.NotError(t, cmd.Run(ctx))
 							check.True(t, runFuncCalled)
 						},
 						// "": func(ctx context.Context, t *testing.T, cmd Command) {},

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/grip/send"
 	"github.com/tychoish/grip/x/splunk"
@@ -39,7 +39,7 @@ func TestLogger(t *testing.T) {
 				},
 			})
 			fmt.Println(config)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			// opts.Output.Loggers = []*LoggerConfig{
 			// 	{
 			// 		info: loggerConfigInfo{
@@ -60,7 +60,7 @@ func TestLogger(t *testing.T) {
 				},
 			})
 			fmt.Println(config)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			// opts.Output.Loggers = []*options.LoggerConfig{
 			// 	{
 			// 		info: loggerConfigInfo{

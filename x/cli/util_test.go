@@ -11,12 +11,13 @@ import (
 	"time"
 
 	"github.com/evergreen-ci/service"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper"
-	"github.com/tychoish/jasper/x/remote"
 	"github.com/tychoish/jasper/testutil"
 	"github.com/tychoish/jasper/util"
+	"github.com/tychoish/jasper/x/remote"
 	"github.com/urfave/cli"
 )
 
@@ -27,10 +28,10 @@ func TestReadInputValidJSON(t *testing.T) {
 		Bat string `json:"bat"`
 		Qux []int  `json:"qux"`
 	}{}
-	require.NoError(t, readInput(input, &output))
+	assert.NotError(t, readInput(input, &output))
 	assert.Equal(t, "bar", output.Foo)
 	assert.Equal(t, "baz", output.Bat)
-	assert.Equal(t, []int{1, 2, 3, 4, 5}, output.Qux)
+	assert.EqualItems(t, []int{1, 2, 3, 4, 5}, output.Qux)
 }
 
 func TestReadInputInvalidInput(t *testing.T) {
@@ -66,7 +67,7 @@ func TestWriteOutput(t *testing.T) {
 	`)
 	inputString := inputBuf.String()
 	output := &bytes.Buffer{}
-	require.NoError(t, writeOutput(output, input))
+	assert.NotError(t, writeOutput(output, input))
 	assert.Equal(t, testutil.RemoveWhitespace(inputString), testutil.RemoveWhitespace(output.String()))
 }
 
@@ -80,9 +81,9 @@ func TestWriteOutputInvalidOutput(t *testing.T) {
 	input := bytes.NewBufferString(`{"foo":"bar"}`)
 
 	output, err := os.CreateTemp(testutil.BuildDirectory(), "write_output.txt")
-	require.NoError(t, err)
+	assert.NotError(t, err)
 	defer os.RemoveAll(output.Name())
-	require.NoError(t, output.Close())
+	assert.NotError(t, output.Close())
 	assert.Error(t, writeOutput(output, input))
 }
 
@@ -102,7 +103,7 @@ func TestMakeRemoteClient(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), testutil.TestTimeout)
 			defer cancel()
 			manager, err := jasper.NewSynchronizedManager(false)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			closeService, client := makeServiceAndClient(ctx, t, testutil.GetPortNumber(), manager)
 			check.NotError(t, closeService())
 			check.NotError(t, client.CloseConnection())
@@ -120,7 +121,7 @@ func TestCLICommon(t *testing.T) {
 				"CreateProcessWithConnection": func(ctx context.Context, t *testing.T, c *cli.Context, client remote.Manager) error {
 					return withConnection(ctx, c, func(client remote.Manager) error {
 						proc, err := client.CreateProcess(ctx, testutil.TrueCreateOpts())
-						require.NoError(t, err)
+						assert.NotError(t, err)
 						require.NotNil(t, proc)
 						assert.NotZero(t, proc.Info(ctx).PID)
 						return nil
@@ -130,10 +131,10 @@ func TestCLICommon(t *testing.T) {
 					return withMockStdin(t, `{"value":"foo"}`, func(stdin *os.File) error {
 						return withMockStdout(t, func(*os.File) error {
 							input := &mockInput{}
-							require.NoError(t, doPassthroughInputOutput(c, input, mockRequest("")))
+							assert.NotError(t, doPassthroughInputOutput(c, input, mockRequest("")))
 							output, err := io.ReadAll(stdin)
-							require.NoError(t, err)
-							assert.Len(t, output, 0)
+							assert.NotError(t, err)
+							assert.Equal(t, len(output), 0)
 							return nil
 						})
 					})
@@ -143,7 +144,7 @@ func TestCLICommon(t *testing.T) {
 					return withMockStdin(t, fmt.Sprintf(`{"value":"%s"}`, expectedInput), func(*os.File) error {
 						return withMockStdout(t, func(*os.File) error {
 							input := &mockInput{}
-							require.NoError(t, doPassthroughInputOutput(c, input, mockRequest("")))
+							assert.NotError(t, doPassthroughInputOutput(c, input, mockRequest("")))
 							assert.Equal(t, expectedInput, input.Value)
 							check.True(t, input.validated)
 							return nil
@@ -155,15 +156,15 @@ func TestCLICommon(t *testing.T) {
 						return withMockStdout(t, func(stdout *os.File) error {
 							input := &mockInput{}
 							outputVal := "bar"
-							require.NoError(t, doPassthroughInputOutput(c, input, mockRequest(outputVal)))
+							assert.NotError(t, doPassthroughInputOutput(c, input, mockRequest(outputVal)))
 							assert.Equal(t, "foo", input.Value)
 							check.True(t, input.validated)
 
 							expectedOutput := `{"value":"bar"}`
 							_, err := stdout.Seek(0, 0)
-							require.NoError(t, err)
+							assert.NotError(t, err)
 							output, err := io.ReadAll(stdout)
-							require.NoError(t, err)
+							assert.NotError(t, err)
 							assert.Equal(t, testutil.RemoveWhitespace(expectedOutput), testutil.RemoveWhitespace(string(output)))
 							return nil
 						})
@@ -173,10 +174,10 @@ func TestCLICommon(t *testing.T) {
 					input := "foo"
 					return withMockStdin(t, input, func(stdin *os.File) error {
 						return withMockStdout(t, func(*os.File) error {
-							require.NoError(t, doPassthroughOutput(c, mockRequest("")))
+							assert.NotError(t, doPassthroughOutput(c, mockRequest("")))
 							output, err := io.ReadAll(stdin)
-							require.NoError(t, err)
-							assert.Len(t, output, len(input))
+							assert.NotError(t, err)
+							assert.Equal(t, len(output), len(input))
 							return nil
 
 						})
@@ -185,13 +186,13 @@ func TestCLICommon(t *testing.T) {
 				"DoPassthroughOutputWritesResponseToStdout": func(ctx context.Context, t *testing.T, c *cli.Context, client remote.Manager) error {
 					return withMockStdout(t, func(stdout *os.File) error {
 						outputVal := "bar"
-						require.NoError(t, doPassthroughOutput(c, mockRequest(outputVal)))
+						assert.NotError(t, doPassthroughOutput(c, mockRequest(outputVal)))
 
 						expectedOutput := `{"value": "bar"}`
 						_, err := stdout.Seek(0, 0)
-						require.NoError(t, err)
+						assert.NotError(t, err)
 						output, err := io.ReadAll(stdout)
-						require.NoError(t, err)
+						assert.NotError(t, err)
 						assert.Equal(t, testutil.RemoveWhitespace(expectedOutput), testutil.RemoveWhitespace(string(output)))
 						return nil
 					})
@@ -204,7 +205,7 @@ func TestCLICommon(t *testing.T) {
 					port := testutil.GetPortNumber()
 					c := mockCLIContext(remoteType, port)
 					manager, err := jasper.NewSynchronizedManager(false)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					closeService, client := makeServiceAndClient(ctx, t, port, manager)
 					defer func() {
 						check.NotError(t, client.CloseConnection())
@@ -225,7 +226,7 @@ func TestWithService(t *testing.T) {
 		return nil
 	}
 	assert.Error(t, withService(&rpcDaemon{}, &service.Config{}, svcFunc))
-	assert.False(t, svcFuncRan)
+	assert.True(t, !svcFuncRan)
 
 	check.NotError(t, withService(&rpcDaemon{}, &service.Config{Name: "foo"}, svcFunc))
 	check.True(t, svcFuncRan)
@@ -263,7 +264,7 @@ func TestRunServices(t *testing.T) {
 	assert.Error(t, runServices(ctx, func(ctx context.Context) (util.CloseFunc, error) {
 		return closeFunc, errors.New("fail to make service")
 	}))
-	assert.False(t, closeFuncCalled)
+	assert.True(t, !closeFuncCalled)
 
 	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Millisecond)
 	defer cancel()
@@ -286,7 +287,7 @@ func TestRunServices(t *testing.T) {
 		return anotherCloseFunc, errors.New("fail to make another service")
 	}))
 	check.True(t, closeFuncCalled)
-	assert.False(t, anotherCloseFuncCalled)
+	assert.True(t, !anotherCloseFuncCalled)
 
 	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Millisecond)
 	defer cancel()

@@ -16,8 +16,8 @@ import (
 
 	"github.com/evergreen-ci/service"
 	"github.com/tychoish/fun/erc"
-	"github.com/tychoish/jasper/x/remote"
 	"github.com/tychoish/jasper/util"
+	"github.com/tychoish/jasper/x/remote"
 	"github.com/urfave/cli"
 )
 

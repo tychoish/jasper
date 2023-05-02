@@ -13,6 +13,7 @@ import (
 	"github.com/tychoish/amboy/registry"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/send"
+	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 )
 
@@ -38,7 +39,7 @@ type amboyJob struct {
 	} `bson:"output" json:"output" yaml:"output"`
 	*job.Base `bson:"metadata" json:"metadata" yaml:"metadata"`
 
-	makep ProcessConstructor
+	makep jasper.ProcessConstructor
 }
 
 const (
@@ -50,14 +51,14 @@ const (
 // RegisterJobs adds factories for the job types provided by these
 // packages to make it possible to dispatch these jobs to a
 // remote/distributed queue.
-func RegisterJobs(pc ProcessConstructor) {
+func RegisterJobs(pc jasper.ProcessConstructor) {
 	registry.AddJobType(amboyJobName, func() amboy.Job { return amboyJobFactory(pc) })
 	registry.AddJobType(amboySimpleCapturedOutputJobName, func() amboy.Job { return amboySimpleCapturedOutputJobFactory(pc) })
 	registry.AddJobType(amboyForegroundOutputJobName, func() amboy.Job { return amboyForegroundOutputJobFactory(pc) })
 	registry.AddJobType(downloadJobName, func() amboy.Job { return newDownloadJob() })
 }
 
-func amboyJobFactory(pc ProcessConstructor) *amboyJob {
+func amboyJobFactory(pc jasper.ProcessConstructor) *amboyJob {
 	j := &amboyJob{
 		makep:    pc,
 		ExitCode: -1,
@@ -80,7 +81,7 @@ func amboyJobFactory(pc ProcessConstructor) *amboyJob {
 //
 // Pass the process constructor to allow the amboy jobs to manipulate
 // processes in an existing Manager.
-func NewJob(pc ProcessConstructor, cmd string) amboy.Job {
+func NewJob(pc jasper.ProcessConstructor, cmd string) amboy.Job {
 	j := amboyJobFactory(pc)
 	j.CmdString = cmd
 	j.SetID(fmt.Sprintf("%s.%x", amboyJobName, sha1.Sum([]byte(cmd))))
@@ -92,7 +93,7 @@ func NewJob(pc ProcessConstructor, cmd string) amboy.Job {
 // the command, so running the same command repeatedly may result in
 // job collisions.
 func NewJobBasic(cmd string) amboy.Job {
-	j := amboyJobFactory(NewBasicProcess)
+	j := amboyJobFactory(jasper.NewBasicProcess)
 	j.CmdString = cmd
 	j.SetID(fmt.Sprintf("%s.basic.%x", amboyJobName, sha1.Sum([]byte(cmd))))
 	return j
@@ -105,7 +106,7 @@ func NewJobBasic(cmd string) amboy.Job {
 //
 // Pass the process constructor to allow the amboy jobs to manipulate
 // processes in an existing Manager.
-func NewJobExtended(pc ProcessConstructor, cmd string, env map[string]string, wd string) amboy.Job {
+func NewJobExtended(pc jasper.ProcessConstructor, cmd string, env map[string]string, wd string) amboy.Job {
 	j := amboyJobFactory(pc)
 	j.CmdString = cmd
 	j.Environment = env
@@ -119,7 +120,7 @@ func NewJobExtended(pc ProcessConstructor, cmd string, env map[string]string, wd
 // job includes a hash of the command, so running the same command
 // repeatedly may result in job collisions.
 func NewJobBasicExtended(cmd string, env map[string]string, wd string) Job {
-	j := amboyJobFactory(NewBasicProcess)
+	j := amboyJobFactory(jasper.NewBasicProcess)
 	j.CmdString = cmd
 	j.Environment = env
 	j.WorkingDirectory = wd
@@ -174,10 +175,10 @@ type amboySimpleCapturedOutputJob struct {
 	ExitCode  int `bson:"exit_code" json:"exit_code" yaml:"exit_code"`
 	*job.Base `bson:"metadata" json:"metadata" yaml:"metadata"`
 
-	makep ProcessConstructor
+	makep jasper.ProcessConstructor
 }
 
-func amboySimpleCapturedOutputJobFactory(pc ProcessConstructor) *amboySimpleCapturedOutputJob {
+func amboySimpleCapturedOutputJobFactory(pc jasper.ProcessConstructor) *amboySimpleCapturedOutputJob {
 	j := &amboySimpleCapturedOutputJob{
 		makep:    pc,
 		ExitCode: -1,
@@ -199,7 +200,7 @@ func amboySimpleCapturedOutputJobFactory(pc ProcessConstructor) *amboySimpleCapt
 //
 // Pass the process constructor to allow the amboy jobs to manipulate
 // processes in an existing Manager.
-func NewJobOptions(pc ProcessConstructor, opts *options.Create) Job {
+func NewJobOptions(pc jasper.ProcessConstructor, opts *options.Create) Job {
 	j := amboySimpleCapturedOutputJobFactory(pc)
 	j.Options = opts
 	j.SetID(fmt.Sprintf("%s.%x", j.Type().Name, opts.Hash()))
@@ -236,10 +237,10 @@ type amboyForegroundOutputJob struct {
 	ExitCode  int             `bson:"exit_code" json:"exit_code" yaml:"exit_code"`
 	*job.Base `bson:"metadata" json:"metadata" yaml:"metadata"`
 
-	makep ProcessConstructor
+	makep jasper.ProcessConstructor
 }
 
-func amboyForegroundOutputJobFactory(pc ProcessConstructor) *amboyForegroundOutputJob {
+func amboyForegroundOutputJobFactory(pc jasper.ProcessConstructor) *amboyForegroundOutputJob {
 	j := &amboyForegroundOutputJob{
 		ExitCode: -1,
 		makep:    pc,
@@ -260,7 +261,7 @@ func amboyForegroundOutputJobFactory(pc ProcessConstructor) *amboyForegroundOutp
 //
 // Pass the process constructor to allow the amboy jobs to manipulate
 // processes in an existing Manager.
-func NewJobForeground(pc ProcessConstructor, opts *options.Create) amboy.Job {
+func NewJobForeground(pc jasper.ProcessConstructor, opts *options.Create) amboy.Job {
 	j := amboyForegroundOutputJobFactory(pc)
 	j.SetID(fmt.Sprintf("%s.%x", j.Type().Name, opts.Hash()))
 	j.Options = opts
@@ -271,7 +272,7 @@ func NewJobForeground(pc ProcessConstructor, opts *options.Create) amboy.Job {
 // linewise to the current processes global grip logging instance with
 // error and output separated by level.
 func NewJobBasicForeground(opts *options.Create) amboy.Job {
-	j := amboyForegroundOutputJobFactory(NewBasicProcess)
+	j := amboyForegroundOutputJobFactory(jasper.NewBasicProcess)
 	j.SetID(fmt.Sprintf("%s.basic.%x", j.Type().Name, opts.Hash()))
 	j.Options = opts
 	return j

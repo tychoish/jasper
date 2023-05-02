@@ -11,6 +11,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/tychoish/fun/assert/check"
+	"github.com/tychoish/fun/testt"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/testutil"
 )
@@ -35,11 +36,11 @@ func TestLinuxProcessTrackerWithCgroups(t *testing.T) {
 				},
 				"NilCgroupIsInvalid": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc Process) {
 					tracker.cgroup = nil
-					check.False(t, tracker.validCgroup())
+					check.True(t, !tracker.validCgroup())
 				},
 				"DeletedCgroupIsInvalid": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc Process) {
 					require.NoError(t, tracker.cgroup.Delete())
-					check.False(t, tracker.validCgroup())
+					check.True(t, !tracker.validCgroup())
 				},
 				"SetDefaultCgroupIfInvalidNoopsIfCgroupIsValid": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc Process) {
 					cgroup := tracker.cgroup
@@ -257,7 +258,8 @@ func TestManagerSetsEnvironmentVariables(t *testing.T) {
 					require.NotNil(t, env)
 					value, ok := env[ManagerEnvironID]
 					require.True(t, ok)
-					check.Equal(t, value, manager.id, "process should have manager environment variable set")
+					check.Equal(t, value, manager.id)
+					testt.Log(t, "process should have manager environment variable set")
 				},
 				"CreateCommandAddsEnvironmentVariables": func(ctx context.Context, t *testing.T, manager *basicProcessManager) {
 					envVar := ManagerEnvironID

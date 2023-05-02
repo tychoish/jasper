@@ -71,9 +71,10 @@ func TestLoggerConfigSet(t *testing.T) {
 				Format: RawLoggerConfigFormatBSON,
 			},
 		}
-		require.NoError(t, config.Set(&DefaultLoggerOptions{}))
+		producer := &DefaultLoggerOptions{}
+		require.NoError(t, config.Set(producer))
 		check.Equal(t, LogDefault, config.info.Type)
-		check.True(t, &DefaultLoggerOptions{} == config.producer)
+		check.True(t, producer == config.producer)
 	})
 }
 
@@ -207,7 +208,7 @@ func TestLoggerConfigMarshalJSON(t *testing.T) {
 		check.Equal(t, RawLoggerConfigFormatJSON, unmarshalledConfig.info.Format)
 		_, err = unmarshalledConfig.Resolve()
 		require.NoError(t, err)
-		check.True(t, config.producer == unmarshalledConfig.producer)
+		check.True(t, config.producer.Type() == unmarshalledConfig.producer.Type())
 	})
 	t.Run("RoundTrip", func(t *testing.T) {
 		rawConfig, err := json.Marshal(&DefaultLoggerOptions{

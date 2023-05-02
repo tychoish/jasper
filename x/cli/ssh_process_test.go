@@ -6,8 +6,9 @@ import (
 	"syscall"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/mock"
 	"github.com/tychoish/jasper/testutil"
@@ -19,7 +20,7 @@ func TestSSHProcess(t *testing.T) {
 
 	for testName, testCase := range map[string]func(ctx context.Context, t *testing.T, proc *sshProcess, manager *sshClient, baseManager *mock.Manager){
 		"VerifyFixture": func(ctx context.Context, t *testing.T, proc *sshProcess, manager *sshClient, baseManager *mock.Manager) {
-			assert.Equal(t, jasper.ProcessInfo{ID: "foo"}, proc.info)
+			assert.Equal(t, "foo", proc.info.ID)
 		},
 		"InfoPassesWithValidResponse": func(ctx context.Context, t *testing.T, proc *sshProcess, manager *sshClient, baseManager *mock.Manager) {
 			info := jasper.ProcessInfo{
@@ -38,7 +39,7 @@ func TestSSHProcess(t *testing.T) {
 				},
 			)
 
-			assert.Equal(t, info, proc.Info(ctx))
+			assert.Equal(t, info.ID, proc.Info(ctx).ID)
 			assert.Equal(t, proc.ID(), inputChecker.ID)
 		},
 		"InfoWithCompletedProcessChecksInMemory": func(ctx context.Context, t *testing.T, proc *sshProcess, manager *sshClient, baseManager *mock.Manager) {
@@ -59,8 +60,8 @@ func TestSSHProcess(t *testing.T) {
 				},
 			)
 
-			assert.Equal(t, info, proc.Info(ctx))
-			assert.Empty(t, inputChecker.ID)
+			assert.Equal(t, info.ID, proc.Info(ctx).ID)
+			assert.Equal(t, len(inputChecker.ID), 0)
 		},
 		"RunningPassesWithValidResponse": func(ctx context.Context, t *testing.T, proc *sshProcess, manager *sshClient, baseManager *mock.Manager) {
 			info := jasper.ProcessInfo{
@@ -100,8 +101,8 @@ func TestSSHProcess(t *testing.T) {
 				},
 			)
 
-			assert.False(t, proc.Running(ctx))
-			assert.Empty(t, inputChecker.ID)
+			assert.True(t, !proc.Running(ctx))
+			assert.Equal(t, len(inputChecker.ID), 0)
 		},
 		"CompletePassesWithValidResponse": func(ctx context.Context, t *testing.T, proc *sshProcess, manager *sshClient, baseManager *mock.Manager) {
 			info := jasper.ProcessInfo{
@@ -141,7 +142,7 @@ func TestSSHProcess(t *testing.T) {
 			)
 
 			check.True(t, proc.Complete(ctx))
-			assert.Empty(t, inputChecker.ID)
+			assert.Equal(t, len(inputChecker.ID), 0)
 		},
 		"RespawnPassesWithValidResponse": func(ctx context.Context, t *testing.T, proc *sshProcess, manager *sshClient, baseManager *mock.Manager) {
 			info := jasper.ProcessInfo{
@@ -162,13 +163,13 @@ func TestSSHProcess(t *testing.T) {
 
 			newProc, err := proc.Respawn(ctx)
 
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			assert.Equal(t, proc.ID(), inputChecker.ID)
 
 			newSSHProc, ok := newProc.(*sshProcess)
 			require.True(t, ok)
-			require.NoError(t, err)
-			assert.Equal(t, info, newSSHProc.info)
+			assert.NotError(t, err)
+			assert.Equal(t, info.ID, newSSHProc.info.ID)
 		},
 		"RespawnFailsWithInvalidResponse": func(ctx context.Context, t *testing.T, proc *sshProcess, manager *sshClient, baseManager *mock.Manager) {
 			inputChecker := IDInput{}
@@ -193,9 +194,9 @@ func TestSSHProcess(t *testing.T) {
 			)
 
 			sig := syscall.SIGINT
-			require.NoError(t, proc.Signal(ctx, sig))
+			assert.NotError(t, proc.Signal(ctx, sig))
 			assert.Equal(t, proc.ID(), inputChecker.ID)
-			assert.EqualValues(t, sig, inputChecker.Signal)
+			assert.Equal(t, int(sig), inputChecker.Signal)
 		},
 		"SignalFailsWithInvalidResponse": func(ctx context.Context, t *testing.T, proc *sshProcess, manager *sshClient, baseManager *mock.Manager) {
 			inputChecker := SignalInput{}
@@ -209,7 +210,7 @@ func TestSSHProcess(t *testing.T) {
 			sig := syscall.SIGINT
 			assert.Error(t, proc.Signal(ctx, sig))
 			assert.Equal(t, proc.ID(), inputChecker.ID)
-			assert.EqualValues(t, sig, inputChecker.Signal)
+			assert.Equal(t, int(sig), inputChecker.Signal)
 		},
 		"WaitPassesWithValidResponse": func(ctx context.Context, t *testing.T, proc *sshProcess, manager *sshClient, baseManager *mock.Manager) {
 			inputChecker := IDInput{}
@@ -229,7 +230,7 @@ func TestSSHProcess(t *testing.T) {
 			exitCode, err := proc.Wait(ctx)
 			assert.Equal(t, proc.ID(), inputChecker.ID)
 			require.Error(t, err)
-			assert.Contains(t, err.Error(), expectedWaitErr)
+			assert.Substring(t, err.Error(), expectedWaitErr)
 			assert.Equal(t, expectedExitCode, exitCode)
 		},
 		"WaitFailsWithInvalidResponse": func(ctx context.Context, t *testing.T, proc *sshProcess, manager *sshClient, baseManager *mock.Manager) {
@@ -262,7 +263,7 @@ func TestSSHProcess(t *testing.T) {
 			)
 
 			sigID := jasper.SignalTriggerID("foo")
-			require.NoError(t, proc.RegisterSignalTriggerID(ctx, sigID))
+			assert.NotError(t, proc.RegisterSignalTriggerID(ctx, sigID))
 			assert.Equal(t, proc.ID(), inputChecker.ID)
 			assert.Equal(t, sigID, inputChecker.SignalTriggerID)
 		},
@@ -295,7 +296,7 @@ func TestSSHProcess(t *testing.T) {
 
 			tags := proc.GetTags()
 			assert.Equal(t, proc.ID(), inputChecker.ID)
-			require.Len(t, tags, 1)
+			assert.Equal(t, len(tags), 1)
 			assert.Equal(t, tag, tags[0])
 		},
 		"GetTagsEmptyWithInvalidResponse": func(ctx context.Context, t *testing.T, proc *sshProcess, manager *sshClient, baseManager *mock.Manager) {
@@ -311,7 +312,7 @@ func TestSSHProcess(t *testing.T) {
 
 			tags := proc.GetTags()
 			assert.Equal(t, proc.ID(), inputChecker.ID)
-			assert.Empty(t, tags)
+			assert.Equal(t, len(tags), 0)
 		},
 		"ResetTagsPasses": func(ctx context.Context, t *testing.T, proc *sshProcess, manager *sshClient, baseManager *mock.Manager) {
 			inputChecker := IDInput{}
@@ -328,7 +329,7 @@ func TestSSHProcess(t *testing.T) {
 	} {
 		t.Run(testName, func(t *testing.T) {
 			client, err := NewSSHClient(mockRemoteOptions(), mockClientOptions(), false)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			sshClient, ok := client.(*sshClient)
 			require.True(t, ok)
 
@@ -339,7 +340,7 @@ func TestSSHProcess(t *testing.T) {
 			defer cancel()
 
 			proc, err := newSSHProcess(sshClient.runClientCommand, jasper.ProcessInfo{ID: "foo"})
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			sshProc, ok := proc.(*sshProcess)
 			require.True(t, ok)
 

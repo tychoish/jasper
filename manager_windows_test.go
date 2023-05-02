@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/testutil"
@@ -22,7 +23,7 @@ func TestBasicManagerWithTrackedProcesses(t *testing.T) {
 	for managerName, makeManager := range map[string]func(ctx context.Context, t *testing.T) *basicProcessManager{
 		"Basic": func(ctx context.Context, t *testing.T) *basicProcessManager {
 			basicManager, err := newBasicProcessManager(map[string]Process{}, true, false)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			return basicManager.(*basicProcessManager)
 		},
 	} {
@@ -37,7 +38,7 @@ func TestBasicManagerWithTrackedProcesses(t *testing.T) {
 				},
 				"CreateAddsProcess": func(ctx context.Context, t *testing.T, m *basicProcessManager, tracker *windowsProcessTracker, opts *options.Create) {
 					proc, err := m.CreateProcess(ctx, opts)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 
 					info, err := QueryInformationJobObjectProcessIdList(tracker.job.handle)
 					check.NotError(t, err)
@@ -47,7 +48,7 @@ func TestBasicManagerWithTrackedProcesses(t *testing.T) {
 				},
 				"RegisterAddsProcess": func(ctx context.Context, t *testing.T, m *basicProcessManager, tracker *windowsProcessTracker, opts *options.Create) {
 					proc, err := newBasicProcess(ctx, opts)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					check.NotError(t, m.Register(ctx, proc))
 
 					info, err := QueryInformationJobObjectProcessIdList(tracker.job.handle)
@@ -58,7 +59,7 @@ func TestBasicManagerWithTrackedProcesses(t *testing.T) {
 				},
 				"ClosePerformsProcessTrackingCleanup": func(ctx context.Context, t *testing.T, m *basicProcessManager, tracker *windowsProcessTracker, opts *options.Create) {
 					proc, err := m.CreateProcess(ctx, opts)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 
 					info, err := QueryInformationJobObjectProcessIdList(tracker.job.handle)
 					check.NotError(t, err)
@@ -74,7 +75,7 @@ func TestBasicManagerWithTrackedProcesses(t *testing.T) {
 				},
 				"CloseOnTerminatedProcessSucceeds": func(ctx context.Context, t *testing.T, m *basicProcessManager, tracker *windowsProcessTracker, opts *options.Create) {
 					proc, err := m.CreateProcess(ctx, opts)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 
 					info, err := QueryInformationJobObjectProcessIdList(tracker.job.handle)
 					check.NotError(t, err)

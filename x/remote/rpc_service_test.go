@@ -6,11 +6,11 @@ import (
 	"net"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper"
-	"github.com/tychoish/jasper/x/remote/internal"
 	"github.com/tychoish/jasper/testutil"
+	"github.com/tychoish/jasper/x/remote/internal"
 	"google.golang.org/grpc"
 )
 
@@ -22,8 +22,8 @@ func TestRPCService(t *testing.T) {
 			for testName, testCase := range map[string]func(context.Context, *testing.T, internal.JasperProcessManagerClient){
 				"RegisterSignalTriggerIDChecksForExistingProcess": func(ctx context.Context, t *testing.T, client internal.JasperProcessManagerClient) {
 					outcome, err := client.RegisterSignalTriggerID(ctx, internal.ConvertSignalTriggerParams("foo", jasper.CleanTerminationSignalTrigger))
-					require.NoError(t, err)
-					assert.False(t, outcome.Success)
+					assert.NotError(t, err)
+					assert.True(t, !outcome.Success)
 				},
 				//"": func(ctx context.Context, t *testing.T, client internal.JasperProcessManagerClient) {},
 			} {
@@ -32,13 +32,13 @@ func TestRPCService(t *testing.T) {
 					defer cancel()
 
 					manager, err := makeManager()
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					addr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("localhost:%d", testutil.GetPortNumber()))
-					require.NoError(t, err)
-					require.NoError(t, startTestRPCService(ctx, manager, addr, nil))
+					assert.NotError(t, err)
+					assert.NotError(t, startTestRPCService(ctx, manager, addr, nil))
 
 					conn, err := grpc.DialContext(ctx, addr.String(), grpc.WithInsecure(), grpc.WithBlock())
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					client := internal.NewJasperProcessManagerClient(conn)
 
 					go func() {

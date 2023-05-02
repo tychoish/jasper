@@ -3,7 +3,8 @@ package cli
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/tychoish/fun/assert"
+	"github.com/tychoish/fun/assert/check"
 )
 
 func TestClientOptions(t *testing.T) {

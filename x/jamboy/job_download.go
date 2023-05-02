@@ -13,6 +13,7 @@ import (
 	"github.com/tychoish/amboy/job"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
+	"github.com/tychoish/jasper/x/remote/options"
 )
 
 const downloadJobName = "jasper-download-job"
@@ -90,11 +91,11 @@ func (j *downloadFileJob) Run(ctx context.Context) {
 		return
 	}
 
-	opts := remote.Download{
+	opts := options.Download{
 		URL:  j.URL,
 		Path: fn,
-		ArchiveOpts: remote.Archive{
-			Format:        remote.ArchiveAuto,
+		ArchiveOpts: options.Archive{
+			Format:        options.ArchiveAuto,
 			ShouldExtract: true,
 			TargetPath:    getTargetDirectory(fn),
 		},
@@ -157,8 +158,7 @@ func (j *downloadFileJob) setDirectory(path string) error {
 	if stat, err := os.Stat(path); !os.IsNotExist(err) && !stat.IsDir() {
 		// if the path exists and isn't a directory, then we
 		// won't be able to download into it:
-		return fmt.Errorf("%s is not a directory, cannot download files into it",
-			path)
+		return fmt.Errorf("%s is not a directory, cannot download files into it", path)
 	}
 
 	j.Directory = path

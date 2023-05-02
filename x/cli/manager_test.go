@@ -5,8 +5,9 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/mock"
 	"github.com/tychoish/jasper/options"
@@ -24,13 +25,13 @@ func TestCLIManager(t *testing.T) {
 			for testName, testCase := range map[string]func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string){
 				"IDReturnsNonempty": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
 					resp := &IDResponse{}
-					require.NoError(t, execCLICommandOutput(t, c, managerID(), resp))
+					assert.NotError(t, execCLICommandOutput(t, c, managerID(), resp))
 					require.True(t, resp.Successful())
-					assert.NotEmpty(t, resp.ID)
+					assert.Equal(t, len(resp.ID), 0)
 				},
 				"CommandsWithInputFailWithInvalidInput": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
 					input, err := json.Marshal(mock.Process{})
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					assert.Error(t, execCLICommandInputOutput(t, c, managerCreateProcess(), input, &InfoResponse{}))
 					assert.Error(t, execCLICommandInputOutput(t, c, managerCreateCommand(), input, &OutcomeResponse{}))
 					assert.Error(t, execCLICommandInputOutput(t, c, managerGet(), input, &InfoResponse{}))
@@ -39,7 +40,7 @@ func TestCLIManager(t *testing.T) {
 				},
 				"CommandsWithoutInputPassWithInvalidInput": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
 					input, err := json.Marshal(mock.Process{})
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					resp := &OutcomeResponse{}
 					check.NotError(t, execCLICommandInputOutput(t, c, managerClear(), input, resp))
 					check.NotError(t, execCLICommandInputOutput(t, c, managerClose(), input, resp))
@@ -48,53 +49,53 @@ func TestCLIManager(t *testing.T) {
 					input, err := json.Marshal(options.Create{
 						Args: []string{"echo", "hello", "world"},
 					})
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					resp := &InfoResponse{}
-					require.NoError(t, execCLICommandInputOutput(t, c, managerCreateProcess(), input, resp))
+					assert.NotError(t, execCLICommandInputOutput(t, c, managerCreateProcess(), input, resp))
 					require.True(t, resp.Successful())
 				},
 				"CreateCommandPasses": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
 					input, err := json.Marshal(options.Command{
 						Commands: [][]string{{"true"}},
 					})
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					resp := &OutcomeResponse{}
-					require.NoError(t, execCLICommandInputOutput(t, c, managerCreateCommand(), input, resp))
+					assert.NotError(t, execCLICommandInputOutput(t, c, managerCreateCommand(), input, resp))
 					require.True(t, resp.Successful())
 				},
 				"GetExistingIDPasses": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
 					input, err := json.Marshal(IDInput{jasperProcID})
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					resp := &InfoResponse{}
-					require.NoError(t, execCLICommandInputOutput(t, c, managerGet(), input, resp))
+					assert.NotError(t, execCLICommandInputOutput(t, c, managerGet(), input, resp))
 					require.True(t, resp.Successful())
 					assert.Equal(t, jasperProcID, resp.Info.ID)
 				},
 				"GetNonexistentIDFails": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
 					input, err := json.Marshal(IDInput{nonexistentID})
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					resp := &InfoResponse{}
-					require.NoError(t, execCLICommandInputOutput(t, c, managerGet(), input, resp))
+					assert.NotError(t, execCLICommandInputOutput(t, c, managerGet(), input, resp))
 					require.False(t, resp.Successful())
 					require.NotEmpty(t, resp.ErrorMessage())
 				},
 				"GetEmptyIDFails": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
 					input, err := json.Marshal(IDInput{""})
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					assert.Error(t, execCLICommandInputOutput(t, c, managerGet(), input, &InfoResponse{}))
 				},
 				"ListValidFilterPasses": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
 					input, err := json.Marshal(FilterInput{options.All})
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					resp := &InfosResponse{}
-					require.NoError(t, execCLICommandInputOutput(t, c, managerList(), input, resp))
+					assert.NotError(t, execCLICommandInputOutput(t, c, managerList(), input, resp))
 					require.True(t, resp.Successful())
-					assert.Len(t, resp.Infos, 1)
+					assert.Equal(t, len(resp.Infos), 1)
 					assert.Equal(t, jasperProcID, resp.Infos[0].ID)
 				},
 				"ListInvalidFilterFails": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
 					input, err := json.Marshal(FilterInput{options.Filter("foo")})
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					assert.Error(t, execCLICommandInputOutput(t, c, managerList(), input, &InfosResponse{}))
 				},
 				"GroupFindsTaggedProcess": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
@@ -102,34 +103,34 @@ func TestCLIManager(t *testing.T) {
 					require.True(t, tagProcess(t, c, jasperProcID, tag).Successful())
 
 					input, err := json.Marshal(TagInput{Tag: tag})
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					resp := &InfosResponse{}
-					require.NoError(t, execCLICommandInputOutput(t, c, managerGroup(), input, resp))
+					assert.NotError(t, execCLICommandInputOutput(t, c, managerGroup(), input, resp))
 					require.True(t, resp.Successful())
-					require.Len(t, resp.Infos, 1)
+					assert.Equal(t, len(resp.Infos), 1)
 					assert.Equal(t, jasperProcID, resp.Infos[0].ID)
 				},
 				"GroupEmptyTagFails": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
 					input, err := json.Marshal(TagInput{Tag: ""})
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					assert.Error(t, execCLICommandInputOutput(t, c, managerGroup(), input, &InfosResponse{}))
 				},
 				"GroupNoMatchingTaggedProcessesReturnsEmpty": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
 					input, err := json.Marshal(TagInput{Tag: "foo"})
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					resp := &InfosResponse{}
-					require.NoError(t, execCLICommandInputOutput(t, c, managerGroup(), input, resp))
+					assert.NotError(t, execCLICommandInputOutput(t, c, managerGroup(), input, resp))
 					require.True(t, resp.Successful())
-					assert.Len(t, resp.Infos, 0)
+					assert.Equal(t, len(resp.Infos), 0)
 				},
 				"ClearPasses": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
 					resp := &OutcomeResponse{}
-					require.NoError(t, execCLICommandOutput(t, c, managerClear(), resp))
+					assert.NotError(t, execCLICommandOutput(t, c, managerClear(), resp))
 					check.True(t, resp.Successful())
 				},
 				"ClosePasses": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
 					resp := &OutcomeResponse{}
-					require.NoError(t, execCLICommandOutput(t, c, managerClose(), resp))
+					assert.NotError(t, execCLICommandOutput(t, c, managerClose(), resp))
 					check.True(t, resp.Successful())
 				},
 			} {
@@ -139,17 +140,17 @@ func TestCLIManager(t *testing.T) {
 					port := testutil.GetPortNumber()
 					c := mockCLIContext(remoteType, port)
 					manager, err := jasper.NewSynchronizedManager(false)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					closeService := makeService(ctx, t, port, manager)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					defer func() {
 						check.NotError(t, closeService())
 					}()
 
 					resp := &InfoResponse{}
 					input, err := json.Marshal(testutil.TrueCreateOpts())
-					require.NoError(t, err)
-					require.NoError(t, execCLICommandInputOutput(t, c, managerCreateProcess(), input, resp))
+					assert.NotError(t, err)
+					assert.NotError(t, execCLICommandInputOutput(t, c, managerCreateProcess(), input, resp))
 					require.True(t, resp.Successful())
 					require.NotZero(t, resp.Info.ID)
 

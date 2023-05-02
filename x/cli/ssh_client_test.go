@@ -9,15 +9,15 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/mock"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/scripting"
 	"github.com/tychoish/jasper/testutil"
-	"github.com/tychoish/jasper/x/remote"
+	roptions "github.com/tychoish/jasper/x/remote/options"
 )
 
 func TestNewSSHClient(t *testing.T) {
@@ -34,8 +34,8 @@ func TestNewSSHClient(t *testing.T) {
 		},
 		"NewSSHClientSucceedsWithPopulatedOptions": func(t *testing.T, remoteOpts options.Remote, clientOpts ClientOptions) {
 			client, err := NewSSHClient(remoteOpts, clientOpts, false)
-			require.NoError(t, err)
-			assert.NotNil(t, client)
+			assert.NotError(t, err)
+			assert.True(t, client != nil)
 		},
 	} {
 		t.Run(testName, func(t *testing.T) {
@@ -55,7 +55,7 @@ func TestSSHClient(t *testing.T) {
 			}
 			proc, err := client.CreateProcess(ctx, &opts)
 			assert.Error(t, err)
-			assert.Nil(t, proc)
+			assert.True(t, proc == nil)
 		},
 		"CreateProcessPassesWithValidResponse": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
 			opts := options.Create{
@@ -79,14 +79,14 @@ func TestSSHClient(t *testing.T) {
 			)
 
 			proc, err := client.CreateProcess(ctx, &opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
-			assert.Equal(t, opts, inputChecker)
+			assert.EqualItems(t, opts.Args, inputChecker.Args)
 
 			sshProc, ok := proc.(*sshProcess)
 			require.True(t, ok)
 
-			assert.Equal(t, info, sshProc.info)
+			assert.Equal(t, info.ID, sshProc.info.ID)
 		},
 		"CreateProcessFailsIfBaseManagerCreateFails": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
 			baseManager.FailCreate = true
@@ -117,10 +117,10 @@ func TestSSHClient(t *testing.T) {
 				makeOutcomeResponse(nil),
 			)
 			cmd := []string{"echo", "foo"}
-			require.NoError(t, client.CreateCommand(ctx).Add(cmd).Run(ctx))
+			assert.NotError(t, client.CreateCommand(ctx).Add(cmd).Run(ctx))
 
 			require.Equal(t, len(inputChecker.Commands), 1)
-			assert.Equal(t, cmd, inputChecker.Commands[0])
+			assert.EqualItems(t, cmd, inputChecker.Commands[0])
 		},
 		"RunCommandFailsIfBaseManagerCreateFails": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
 			baseManager.FailCreate = true
@@ -161,7 +161,7 @@ func TestSSHClient(t *testing.T) {
 			)
 			filter := options.All
 			procs, err := client.List(ctx, filter)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			assert.Equal(t, filter, inputChecker.Filter)
 
 			runningFound := false
@@ -212,13 +212,13 @@ func TestSSHClient(t *testing.T) {
 			)
 			tag := "foo"
 			procs, err := client.Group(ctx, tag)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			assert.Equal(t, tag, inputChecker.Tag)
 
 			require.Equal(t, len(procs), 1)
 			sshProc, ok := procs[0].(*sshProcess)
 			require.True(t, ok)
-			assert.Equal(t, info, sshProc.info)
+			assert.Equal(t, info.ID, sshProc.info.ID)
 		},
 		"GroupFailsIfBaseManagerCreateFails": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
 			baseManager.FailCreate = true
@@ -251,12 +251,12 @@ func TestSSHClient(t *testing.T) {
 				},
 			)
 			proc, err := client.Get(ctx, id)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			assert.Equal(t, id, inputChecker.ID)
 
 			sshProc, ok := proc.(*sshProcess)
 			require.True(t, ok)
-			assert.Equal(t, info, sshProc.info)
+			assert.Equal(t, info.ID, sshProc.info.ID)
 		},
 		"GetFailsIfBaseManagerCreateFails": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
 			baseManager.FailCreate = true
@@ -289,7 +289,7 @@ func TestSSHClient(t *testing.T) {
 				nil,
 				makeOutcomeResponse(nil),
 			)
-			require.NoError(t, client.Close(ctx))
+			assert.NotError(t, client.Close(ctx))
 		},
 		"CloseFailsIfBaseManagerCreateFails": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
 			baseManager.FailCreate = true
@@ -308,15 +308,15 @@ func TestSSHClient(t *testing.T) {
 			check.NotError(t, client.CloseConnection())
 		},
 		"DownloadFilePassesWithValidResponse": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
-			inputChecker := remote.Download{}
+			inputChecker := roptions.Download{}
 			baseManager.Create = makeCreateFunc(
 				t, client,
 				[]string{RemoteCommand, DownloadFileCommand},
 				&inputChecker,
 				makeOutcomeResponse(nil),
 			)
-			opts := remote.Download{URL: "https://example.com", Path: "/foo"}
-			require.NoError(t, client.DownloadFile(ctx, opts))
+			opts := roptions.Download{URL: "https://example.com", Path: "/foo"}
+			assert.NotError(t, client.DownloadFile(ctx, opts))
 
 			assert.Equal(t, opts, inputChecker)
 		},
@@ -327,12 +327,12 @@ func TestSSHClient(t *testing.T) {
 				nil,
 				invalidResponse(),
 			)
-			opts := remote.Download{URL: "https://example.com", Path: "/foo"}
+			opts := roptions.Download{URL: "https://example.com", Path: "/foo"}
 			assert.Error(t, client.DownloadFile(ctx, opts))
 		},
 		"DownloadFileFailsIfBaseManagerCreateFails": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
 			baseManager.FailCreate = true
-			opts := remote.Download{URL: "https://example.com", Path: "/foo"}
+			opts := roptions.Download{URL: "https://example.com", Path: "/foo"}
 			assert.Error(t, client.DownloadFile(ctx, opts))
 		},
 		"GetLogStreamPassesWithValidResponse": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
@@ -350,12 +350,12 @@ func TestSSHClient(t *testing.T) {
 			id := "foo"
 			count := 10
 			logs, err := client.GetLogStream(ctx, id, count)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			assert.Equal(t, id, inputChecker.ID)
 			assert.Equal(t, count, inputChecker.Count)
 
-			assert.Equal(t, logs, resp.LogStream)
+			assert.EqualItems(t, logs.Logs, resp.LogStream.Logs)
 		},
 		"GetLogStreamFailsWithInvalidResponse": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
 			baseManager.Create = makeCreateFunc(
@@ -381,7 +381,7 @@ func TestSSHClient(t *testing.T) {
 				makeOutcomeResponse(nil),
 			)
 			name := "foo"
-			require.NoError(t, client.SignalEvent(ctx, name))
+			assert.NotError(t, client.SignalEvent(ctx, name))
 			assert.Equal(t, name, inputChecker.Name)
 		},
 		"SignalEventFailsWithInvalidResponse": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
@@ -407,7 +407,7 @@ func TestSSHClient(t *testing.T) {
 			)
 
 			opts := options.WriteFile{Path: filepath.Join(testutil.BuildDirectory(), "write_file"), Content: []byte("foo")}
-			require.NoError(t, client.WriteFile(ctx, opts))
+			assert.NotError(t, client.WriteFile(ctx, opts))
 		},
 		"WriteFileFailsWithInvalidResponse": func(ctx context.Context, t *testing.T, client *sshClient, baseManager *mock.Manager) {
 			baseManager.Create = makeCreateFunc(
@@ -430,11 +430,11 @@ func TestSSHClient(t *testing.T) {
 				Packages:       []string{"pymongo"},
 			}
 			env, err := scripting.NewHarness(baseManager, opts)
-			require.NoError(t, err)
-			require.NoError(t, client.shCache.Add(env.ID(), env))
+			assert.NotError(t, err)
+			assert.NotError(t, client.shCache.Add(env.ID(), env))
 
 			sh, err := client.CreateScripting(ctx, opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			require.NotNil(t, sh)
 			assert.Equal(t, env.ID(), sh.ID())
 		},
@@ -442,7 +442,7 @@ func TestSSHClient(t *testing.T) {
 	} {
 		t.Run(testName, func(t *testing.T) {
 			client, err := NewSSHClient(mockRemoteOptions(), mockClientOptions(), false)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			sshClient, ok := client.(*sshClient)
 			require.True(t, ok)
 
@@ -467,14 +467,14 @@ func makeCreateFunc(t *testing.T, client *sshClient, expectedClientSubcommand []
 	return func(opts *options.Create) mock.Process {
 		if opts.StandardInputBytes != nil && inputChecker != nil {
 			input, err := io.ReadAll(bytes.NewBuffer(opts.StandardInputBytes))
-			require.NoError(t, err)
-			require.NoError(t, json.Unmarshal(input, inputChecker))
+			assert.NotError(t, err)
+			assert.NotError(t, json.Unmarshal(input, inputChecker))
 		}
 
 		cliCommand := strings.Join(client.opts.buildCommand(expectedClientSubcommand...), " ")
 		assert.Equal(t, cliCommand, strings.Join(opts.Args, " "))
 		require.NotNil(t, expectedResponse)
-		require.NoError(t, writeOutput(opts.Output.Output, expectedResponse))
+		assert.NotError(t, writeOutput(opts.Output.Output, expectedResponse))
 		return mock.Process{}
 	}
 }

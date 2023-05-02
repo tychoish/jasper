@@ -8,8 +8,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/testutil"
 	"github.com/tychoish/jasper/util"
@@ -25,9 +25,9 @@ func TestCLIRemoteUnix(t *testing.T) {
 			for testName, testCase := range map[string]func(ctx context.Context, t *testing.T, c *cli.Context){
 				"SignalEventPasses": func(ctx context.Context, t *testing.T, c *cli.Context) {
 					input, err := json.Marshal(EventInput{Name: "id"})
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					resp := &OutcomeResponse{}
-					require.NoError(t, execCLICommandInputOutput(t, c, remoteSignalEvent(), input, resp))
+					assert.NotError(t, execCLICommandInputOutput(t, c, remoteSignalEvent(), input, resp))
 					check.True(t, resp.Successful())
 				},
 			} {
@@ -38,9 +38,9 @@ func TestCLIRemoteUnix(t *testing.T) {
 					port := testutil.GetPortNumber()
 					c := mockCLIContext(remoteType, port)
 					manager, err := jasper.NewSynchronizedManager(false)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					closeService := makeService(ctx, t, port, manager)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					defer func() {
 						check.NotError(t, closeService())
 					}()

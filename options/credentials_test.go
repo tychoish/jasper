@@ -114,9 +114,9 @@ EKTcWGekdmdDPsHloRNtsiCa697B2O9IFA==
 			creds, err := NewCredentialsFromFile(file.Name())
 			require.NoError(t, err)
 			require.NotNil(t, creds)
-			check.Equal(t, pemRootCert, creds.CACert)
-			check.Equal(t, pemCert, creds.Cert)
-			check.Equal(t, pemKey, creds.Key)
+			check.Equal(t, string(pemRootCert), string(creds.CACert))
+			check.Equal(t, string(pemCert), string(creds.Cert))
+			check.Equal(t, string(pemKey), string(creds.Key))
 		},
 		"Export": func(t *testing.T) {
 			creds := &CertificateCredentials{

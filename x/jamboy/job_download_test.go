@@ -9,12 +9,12 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"github.com/tychoish/amboy"
 	"github.com/tychoish/amboy/dependency"
 	"github.com/tychoish/amboy/registry"
+	"github.com/tychoish/fun/assert/check"
 )
 
 type DownloadJobSuite struct {
@@ -133,7 +133,7 @@ func (s *DownloadJobSuite) TestTarGzExtensionSpecialCase() {
 }
 
 func (s *DownloadJobSuite) TestSetDirectoryToFileReturnsError() {
-	path := "makefile"
+	path := "job_download_test.go"
 	s.Error(s.job.setDirectory(path))
 	s.Equal("", s.job.Directory)
 
@@ -158,7 +158,7 @@ func (s *DownloadJobSuite) TestSetDirectorySucceedsIfPathExistsAndIsDirectory() 
 
 func (s *DownloadJobSuite) TestConstructorSetsDependencyBasedOnForceParameter() {
 	url := "http://example.net/foo.tgz"
-	path := "../build"
+	path := "../../build"
 
 	j, err := NewDownloadJob(url, path, true)
 	s.NoError(err)
@@ -166,7 +166,7 @@ func (s *DownloadJobSuite) TestConstructorSetsDependencyBasedOnForceParameter() 
 
 	j, err = NewDownloadJob(url, path, false)
 	s.NoError(err)
-	s.Equal(dependency.NewCreatesFile("../build/foo.tgz").Type(), j.Dependency().Type())
+	s.Equal(dependency.NewCreatesFile("../../build/foo.tgz").Type(), j.Dependency().Type())
 }
 
 func (s *DownloadJobSuite) TestErrorHandler() {
@@ -274,12 +274,12 @@ func TestJobRegistry(t *testing.T) {
 		names = append(names, n)
 	}
 
-	assert.Equal(t, len(names), 1)
+	check.Equal(t, len(names), 1)
 
 	jobType := downloadJobName
 	j, err := registry.GetJobFactory(jobType)
 	require.NoError(t, err)
 	job := j()
-	assert.Implements(t, (*amboy.Job)(nil), job)
-	assert.Equal(t, job.Type().Name, jobType)
+	var _ amboy.Job = job
+	check.Equal(t, job.Type().Name, jobType)
 }

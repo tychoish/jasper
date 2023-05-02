@@ -1,4 +1,4 @@
-package jasper_test
+package docker_test
 
 import (
 	"context"
@@ -8,7 +8,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 
-	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/jasper/options"
@@ -40,9 +40,9 @@ func TestProcessImplementations(t *testing.T) {
 					// containers and replace with (Process).Close().
 					defer func() {
 						client, err := client.NewClientWithOpts(client.WithAPIVersionNegotiation())
-						require.NoError(t, err)
+						assert.NotError(t, err)
 						containers, err := client.ContainerList(ctx, types.ContainerListOptions{All: true})
-						require.NoError(t, err)
+						assert.NotError(t, err)
 						for _, container := range containers {
 							grip.Error(message.WrapError(client.ContainerRemove(ctx, container.ID, types.ContainerRemoveOptions{Force: true}), "problem cleaning up container"))
 						}

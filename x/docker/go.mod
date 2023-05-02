@@ -6,7 +6,6 @@ require (
 	github.com/docker/docker v23.0.3+incompatible
 	github.com/google/uuid v1.3.0
 	github.com/opencontainers/image-spec v1.1.0-rc2
-	github.com/stretchr/testify v1.8.2
 	github.com/tychoish/fun v0.9.0
 	github.com/tychoish/grip v0.2.8
 	github.com/tychoish/jasper v0.0.0-20230428162726-1cccb42e9546
@@ -30,6 +29,7 @@ require (
 	github.com/opencontainers/runtime-spec v1.0.3-0.20210326190908-1c3f411f0417 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/stretchr/testify v1.8.2 // indirect
 	golang.org/x/crypto v0.8.0 // indirect
 	golang.org/x/mod v0.8.0 // indirect
 	golang.org/x/net v0.9.0 // indirect

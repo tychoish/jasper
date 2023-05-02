@@ -11,6 +11,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/jasper/executor"
@@ -196,7 +197,7 @@ func TestBlockingProcess(t *testing.T) {
 					defer cancel()
 
 					cmd, deadline, err := proc.info.Options.Resolve(ctx)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					check.NotError(t, cmd.Start())
 
 					go proc.reactor(ctx, deadline, cmd)
@@ -318,7 +319,7 @@ func TestBlockingProcess(t *testing.T) {
 					}
 
 					process, err := NewBlockingProcess(ctx, opts)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 
 					opCompleted := make(chan struct{})
 
@@ -328,7 +329,7 @@ func TestBlockingProcess(t *testing.T) {
 					}()
 
 					_, err = process.Wait(ctx)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 
 					longCtx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 					defer cancel()
@@ -345,7 +346,7 @@ func TestBlockingProcess(t *testing.T) {
 					}
 
 					process, err := NewBlockingProcess(ctx, opts)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 
 					opCompleted := make(chan struct{})
 
@@ -355,7 +356,7 @@ func TestBlockingProcess(t *testing.T) {
 					}()
 
 					_, err = process.Wait(ctx)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 
 					longCtx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 					defer cancel()
@@ -372,7 +373,7 @@ func TestBlockingProcess(t *testing.T) {
 					}
 
 					process, err := NewBlockingProcess(ctx, opts)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 
 					opCompleted := make(chan struct{})
 

@@ -5,8 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/mock"
 	"github.com/tychoish/jasper/options"
@@ -37,7 +38,7 @@ func TestSSHLoggingCache(t *testing.T) {
 
 			opts := validLoggingCacheOptions(t)
 			logger, err := lc.Create(resp.Logger.ID, &opts)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			assert.Equal(t, resp.Logger.ID, logger.ID)
 			assert.Equal(t, resp.Logger.Manager, logger.Manager)
 		},
@@ -178,7 +179,7 @@ func TestSSHLoggingCache(t *testing.T) {
 	} {
 		t.Run(testName, func(t *testing.T) {
 			client, err := NewSSHClient(mockRemoteOptions(), mockClientOptions(), false)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			sshClient, ok := client.(*sshClient)
 			require.True(t, ok)
 

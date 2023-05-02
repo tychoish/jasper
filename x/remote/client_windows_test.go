@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert"
+	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/testutil"
 )
@@ -20,14 +20,14 @@ func TestWindowsEvents(t *testing.T) {
 	for clientName, makeClient := range map[string]func(ctx context.Context, t *testing.T) Manager{
 		"RPC": func(ctx context.Context, t *testing.T) Manager {
 			manager, err := jasper.NewSynchronizedManager(false)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			client, err := makeInsecureRPCServiceAndClient(ctx, manager)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 			return client
 		},
 		"REST": func(ctx context.Context, t *testing.T) Manager {
 			_, port, err := startRESTService(ctx, httpClient)
-			require.NoError(t, err)
+			assert.NotError(t, err)
 
 			client := &restClient{
 				prefix: fmt.Sprintf("http://localhost:%d/jasper/v1", port),
@@ -44,16 +44,16 @@ func TestWindowsEvents(t *testing.T) {
 				"SignalEventWithExistingEvent": func(ctx context.Context, t *testing.T, client Manager) {
 					eventName := "ThisIsARealEvent"
 					utf16EventName, err := syscall.UTF16PtrFromString(eventName)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 
 					event, err := jasper.CreateEvent(utf16EventName)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					defer jasper.CloseHandle(event)
 
-					require.NoError(t, client.SignalEvent(ctx, eventName))
+					assert.NotError(t, client.SignalEvent(ctx, eventName))
 
 					status, err := jasper.WaitForSingleObject(event, time.Second)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					assert.Equal(t, jasper.WAIT_OBJECT_0, status)
 				},
 				// "": func(ctx context.Context, t *testing.T, client internal.JasperProcessManagerClient) {},

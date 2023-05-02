@@ -12,13 +12,14 @@ import (
 	"testing"
 
 	"github.com/mholt/archiver"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tychoish/amboy/queue"
+	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/jasper/testutil"
+	"github.com/tychoish/jasper/x/remote/options"
 )
 
 func TestCreateValidDownloadJobs(t *testing.T) {
@@ -39,7 +40,7 @@ func TestCreateValidDownloadJobs(t *testing.T) {
 	for job := range jobs {
 		count++
 		assert.Equal(t, 1, count)
-		assert.NotNil(t, job)
+		assert.True(t, job != nil)
 	}
 
 	check.NotError(t, catcher.Resolve())
@@ -63,7 +64,7 @@ func TestCreateDownloadJobsWithInvalidPath(t *testing.T) {
 	}
 	err := catcher.Resolve()
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "problem creating download job for "+testURL)
+	check.Substring(t, err.Error(), "problem creating download job for "+testURL)
 }
 
 func TestProcessDownloadJobs(t *testing.T) {
@@ -80,8 +81,7 @@ func TestProcessDownloadJobs(t *testing.T) {
 
 	fileName := "foo.zip"
 	fileContents := "foo"
-	require.NoError(t, testutil.AddFileToDirectory(fileServerDir, fileName, fileContents))
-
+	require.NoError(t, AddFileToDirectory(fileServerDir, fileName, fileContents))
 	port := testutil.GetPortNumber()
 	fileServerAddr := fmt.Sprintf("localhost:%d", port)
 	fileServer := &http.Server{Addr: fileServerAddr, Handler: http.FileServer(http.Dir(fileServerDir))}
@@ -126,38 +126,38 @@ func TestDoExtract(t *testing.T) {
 		expectSuccess bool
 		invalidCreate bool
 		fileExtension string
-		format        remote.ArchiveFormat
+		format        options.ArchiveFormat
 	}{
 		"Auto": {
 			archiveMaker:  archiver.NewTarGz(),
 			expectSuccess: true,
 			fileExtension: ".tar.gz",
-			format:        remote.ArchiveAuto,
+			format:        options.ArchiveAuto,
 		},
 		"TarGz": {
 			archiveMaker:  archiver.NewTarGz(),
 			expectSuccess: true,
 			fileExtension: ".tar.gz",
-			format:        remote.ArchiveTarGz,
+			format:        options.ArchiveTarGz,
 		},
 		"Zip": {
 			archiveMaker:  archiver.NewZip(),
 			expectSuccess: true,
 			fileExtension: ".zip",
-			format:        remote.ArchiveZip,
+			format:        options.ArchiveZip,
 		},
 		"InvalidArchiveFormat": {
 			archiveMaker:  archiver.NewTarGz(),
 			expectSuccess: false,
 			invalidCreate: true,
 			fileExtension: ".foo",
-			format:        remote.ArchiveFormat("foo"),
+			format:        options.ArchiveFormat("foo"),
 		},
 		"MismatchedArchiveFileAndFormat": {
 			archiveMaker:  archiver.NewTarGz(),
 			expectSuccess: false,
 			fileExtension: ".tar.gz",
-			format:        remote.ArchiveZip,
+			format:        options.ArchiveZip,
 		},
 	} {
 		t.Run(testName, func(t *testing.T) {
@@ -183,16 +183,16 @@ func TestDoExtract(t *testing.T) {
 			}
 			require.NoError(t, err)
 
-			opts := remote.Download{
+			opts := options.Download{
 				Path: "second-" + archiveFile.Name(),
-				ArchiveOpts: remote.Archive{
+				ArchiveOpts: options.Archive{
 					ShouldExtract: true,
 					Format:        testCase.format,
 					TargetPath:    extractDir,
 				},
 			}
 			if !testCase.expectSuccess {
-				assert.Error(t, opts.Extract())
+				check.Error(t, opts.Extract())
 				return
 			}
 			check.NotError(t, opts.Extract())
@@ -213,18 +213,18 @@ func TestDoExtractUnarchivedFile(t *testing.T) {
 	require.NoError(t, err)
 	defer os.Remove(file.Name())
 
-	opts := remote.Download{
+	opts := options.Download{
 		URL:  "https://example.com",
 		Path: file.Name(),
-		ArchiveOpts: remote.Archive{
+		ArchiveOpts: options.Archive{
 			ShouldExtract: true,
-			Format:        remote.ArchiveAuto,
+			Format:        options.ArchiveAuto,
 			TargetPath:    "build",
 		},
 	}
 	err = opts.Extract()
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "could not detect archive format")
+	assert.Substring(t, err.Error(), "could not detect archive format")
 }
 
 // AddFileToDirectory adds an archive file given by fileName with the given

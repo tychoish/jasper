@@ -4,10 +4,10 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tychoish/amboy/registry"
 	"github.com/tychoish/fun/assert/check"
+	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 )
 
@@ -26,39 +26,39 @@ func TestAmboyJob(t *testing.T) {
 			return count
 		}
 
-		RegisterJobs(NewBasicProcess)
-		assert.Equal(t, 4, numJobs())
+		RegisterJobs(jasper.NewBasicProcess)
+		check.Equal(t, 4, numJobs())
 	})
 	t.Run("TypeCheck", func(t *testing.T) {
 		t.Run("Default", func(t *testing.T) {
-			job, ok := NewJob(NewBasicProcess, "ls").(*amboyJob)
+			job, ok := NewJob(jasper.NewBasicProcess, "ls").(*amboyJob)
 			check.True(t, ok)
-			assert.NotNil(t, job)
+			check.NotZero(t, job)
 		})
 		t.Run("DefaultBasic", func(t *testing.T) {
 			job, ok := NewJobBasic("ls").(*amboyJob)
 			check.True(t, ok)
-			assert.NotNil(t, job)
+			check.NotZero(t, job)
 		})
 		t.Run("Simple", func(t *testing.T) {
-			job, ok := NewJobOptions(NewBasicProcess, &options.Create{}).(*amboySimpleCapturedOutputJob)
+			job, ok := NewJobOptions(jasper.NewBasicProcess, &options.Create{}).(*amboySimpleCapturedOutputJob)
 			check.True(t, ok)
-			assert.NotNil(t, job)
+			check.NotZero(t, job)
 		})
 		t.Run("Foreground", func(t *testing.T) {
-			job, ok := NewJobForeground(NewBasicProcess, &options.Create{}).(*amboyForegroundOutputJob)
+			job, ok := NewJobForeground(jasper.NewBasicProcess, &options.Create{}).(*amboyForegroundOutputJob)
 			check.True(t, ok)
-			assert.NotNil(t, job)
+			check.NotZero(t, job)
 		})
 		t.Run("ForegroundBasic", func(t *testing.T) {
 			job, ok := NewJobBasicForeground(&options.Create{}).(*amboyForegroundOutputJob)
 			check.True(t, ok)
-			assert.NotNil(t, job)
+			check.NotZero(t, job)
 		})
 	})
 	t.Run("BasicExec", func(t *testing.T) {
 		t.Run("Default", func(t *testing.T) {
-			job := NewJob(NewBasicProcess, "ls")
+			job := NewJob(jasper.NewBasicProcess, "ls")
 			job.Run(ctx)
 			require.NoError(t, job.Error())
 		})
@@ -68,33 +68,33 @@ func TestAmboyJob(t *testing.T) {
 			require.NoError(t, job.Error())
 		})
 		t.Run("Simple", func(t *testing.T) {
-			job := NewJobOptions(NewBasicProcess, &options.Create{Args: []string{"echo", "hi"}})
+			job := NewJobOptions(jasper.NewBasicProcess, &options.Create{Args: []string{"echo", "hi"}})
 			job.Run(ctx)
 			require.NoError(t, job.Error())
 		})
 		t.Run("Foreground", func(t *testing.T) {
-			job := NewJobForeground(NewBasicProcess, &options.Create{Args: []string{"echo", "hi"}})
+			job := NewJobForeground(jasper.NewBasicProcess, &options.Create{Args: []string{"echo", "hi"}})
 			job.Run(ctx)
 			require.NoError(t, job.Error())
 		})
 	})
 	t.Run("ReExecErrors", func(t *testing.T) {
 		t.Run("Default", func(t *testing.T) {
-			job := NewJob(NewBasicProcess, "ls")
+			job := NewJob(jasper.NewBasicProcess, "ls")
 			job.Run(ctx)
 			require.NoError(t, job.Error())
 			job.Run(ctx)
 			require.Error(t, job.Error())
 		})
 		t.Run("Simple", func(t *testing.T) {
-			job := NewJobOptions(NewBasicProcess, &options.Create{Args: []string{"echo", "hi"}})
+			job := NewJobOptions(jasper.NewBasicProcess, &options.Create{Args: []string{"echo", "hi"}})
 			job.Run(ctx)
 			require.NoError(t, job.Error())
 			job.Run(ctx)
 			require.Error(t, job.Error())
 		})
 		t.Run("Foreground", func(t *testing.T) {
-			job := NewJobForeground(NewBasicProcess, &options.Create{Args: []string{"echo", "hi"}})
+			job := NewJobForeground(jasper.NewBasicProcess, &options.Create{Args: []string{"echo", "hi"}})
 			job.Run(ctx)
 			require.NoError(t, job.Error())
 			job.Run(ctx)

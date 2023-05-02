@@ -11,6 +11,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/tychoish/fun/assert/check"
+	"github.com/tychoish/fun/testt"
 )
 
 func TestCreateConstructor(t *testing.T) {
@@ -153,7 +154,7 @@ func TestCreate(t *testing.T) {
 		"WithoutOverrideEnvironmentEnvIsPopulated": func(t *testing.T, opts *Create) {
 			cmd, _, err := opts.Resolve(ctx)
 			check.NotError(t, err)
-			check.Equal(t, len(cmd.Env()), 0)
+			check.True(t, len(cmd.Env()) != 0)
 		},
 		"WithOverrideEnvironmentEnvIsEmpty": func(t *testing.T, opts *Create) {
 			opts.OverrideEnviron = true
@@ -404,8 +405,7 @@ func TestFileLogging(t *testing.T) {
 
 			_ = cmd.Wait()
 			check.NotError(t, opts.Close())
-
-			t.Log("number of files:", len(files))
+			testt.Log(t, "number of files:", len(files))
 
 			for _, file := range files {
 				info, err := file.Stat()

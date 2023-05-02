@@ -5,7 +5,7 @@ import (
 	"syscall"
 	"testing"
 
-	"github.com/stretchr/testify/require"
+	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/testutil"
@@ -20,7 +20,7 @@ func TestCleanTerminationSignalTrigger(t *testing.T) {
 			for testName, testCase := range map[string]func(context.Context, *options.Create, ProcessConstructor){
 				"CleanTerminationRunsForSIGTERM": func(ctx context.Context, opts *options.Create, makep ProcessConstructor) {
 					proc, err := makep(ctx, opts)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					trigger := makeCleanTerminationSignalTrigger()
 					check.True(t, trigger(proc.Info(ctx), syscall.SIGTERM))
 
@@ -34,7 +34,7 @@ func TestCleanTerminationSignalTrigger(t *testing.T) {
 				},
 				"CleanTerminationIgnoresNonSIGTERM": func(ctx context.Context, opts *options.Create, makep ProcessConstructor) {
 					proc, err := makep(ctx, opts)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 					trigger := makeCleanTerminationSignalTrigger()
 					check.True(t, !trigger(proc.Info(ctx), syscall.SIGHUP))
 
@@ -45,7 +45,7 @@ func TestCleanTerminationSignalTrigger(t *testing.T) {
 				"CleanTerminationFailsForExitedProcess": func(ctx context.Context, opts *options.Create, makep ProcessConstructor) {
 					opts = testutil.TrueCreateOpts()
 					proc, err := makep(ctx, opts)
-					require.NoError(t, err)
+					assert.NotError(t, err)
 
 					exitCode, err := proc.Wait(ctx)
 					check.NotError(t, err)

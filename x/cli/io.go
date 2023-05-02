@@ -460,6 +460,10 @@ type CachedLoggerResponse struct {
 	Logger          options.CachedLogger `json:"logger"`
 }
 
+func (clr CachedLoggerResponse) IsZero() bool {
+	return (!clr.OutcomeResponse.Success && clr.OutcomeResponse.Message == "") && clr.Logger.Error == nil && clr.Logger.Output == nil && clr.Logger.Accessed.IsZero() && clr.Logger.ID == ""
+}
+
 // ExtractCachedLoggerResponse unmarshals the input bytes into a
 // CachedLoggerResponse and checks if the request was successful.
 func ExtractCachedLoggerResponse(input json.RawMessage) (CachedLoggerResponse, error) {
