@@ -20,6 +20,7 @@ import (
 	"github.com/tychoish/jasper/mock"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/testutil"
+	roptions "github.com/tychoish/jasper/x/remote/options"
 )
 
 type neverJSON struct{}
@@ -57,70 +58,70 @@ func TestRestService(t *testing.T) {
 
 			_, err := client.List(ctx, options.All)
 			assert.Error(t, err)
-			assert.Contains(t, err.Error(), "problem building request")
+			assert.Substring(t, err.Error(), "problem building request")
 
 			_, err = client.CreateProcess(ctx, nil)
 			assert.Error(t, err)
-			assert.Contains(t, err.Error(), "problem building request")
+			assert.Substring(t, err.Error(), "problem building request")
 
 			_, err = client.Group(ctx, "foo")
 			assert.Error(t, err)
-			assert.Contains(t, err.Error(), "problem building request")
+			assert.Substring(t, err.Error(), "problem building request")
 
 			_, err = client.Get(ctx, "foo")
 			assert.Error(t, err)
-			assert.Contains(t, err.Error(), "problem building request")
+			assert.Substring(t, err.Error(), "problem building request")
 
 			err = client.Close(ctx)
 			assert.Error(t, err)
-			assert.Contains(t, err.Error(), "problem building request")
+			assert.Substring(t, err.Error(), "problem building request")
 
 			_, err = client.getProcessInfo(ctx, "foo")
 			assert.Error(t, err)
-			assert.Contains(t, err.Error(), "problem building request")
+			assert.Substring(t, err.Error(), "problem building request")
 
 			_, err = client.GetLogStream(ctx, "foo", 1)
 			assert.Error(t, err)
-			assert.Contains(t, err.Error(), "problem building request")
+			assert.Substring(t, err.Error(), "problem building request")
 
-			err = client.DownloadFile(ctx, remote.Download{URL: "foo", Path: "bar"})
+			err = client.DownloadFile(ctx, roptions.Download{URL: "foo", Path: "bar"})
 			assert.Error(t, err)
-			assert.Contains(t, err.Error(), "problem building request")
+			assert.Substring(t, err.Error(), "problem building request")
 		},
 		"ClientRequestsFailWithMalformedURL": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
 			client.prefix = strings.Replace(client.prefix, "http://", "http;//", 1)
 
 			_, err := client.List(ctx, options.All)
 			assert.Error(t, err)
-			assert.Contains(t, err.Error(), "problem making request")
+			assert.Substring(t, err.Error(), "problem making request")
 
 			_, err = client.Group(ctx, "foo")
 			assert.Error(t, err)
-			assert.Contains(t, err.Error(), "problem making request")
+			assert.Substring(t, err.Error(), "problem making request")
 
 			_, err = client.CreateProcess(ctx, nil)
 			assert.Error(t, err)
-			assert.Contains(t, err.Error(), "problem making request")
+			assert.Substring(t, err.Error(), "problem making request")
 
 			_, err = client.Get(ctx, "foo")
 			assert.Error(t, err)
-			assert.Contains(t, err.Error(), "problem making request")
+			assert.Substring(t, err.Error(), "problem making request")
 
 			err = client.Close(ctx)
 			assert.Error(t, err)
-			assert.Contains(t, err.Error(), "problem making request")
+			assert.Substring(t, err.Error(), "problem making request")
 
 			_, err = client.getProcessInfo(ctx, "foo")
 			assert.Error(t, err)
-			assert.Contains(t, err.Error(), "problem making request")
+			assert.Substring(t, err.Error(), "problem making request")
 
 			_, err = client.GetLogStream(ctx, "foo", 1)
 			assert.Error(t, err)
-			assert.Contains(t, err.Error(), "problem making request")
+			assert.Substring(t, err.Error(), "problem making request")
 
-			err = client.DownloadFile(ctx, remote.Download{URL: "foo", Path: "bar"})
+			err = client.DownloadFile(ctx, roptions.Download{URL: "foo", Path: "bar"})
 			assert.Error(t, err)
-			assert.Contains(t, err.Error(), "problem making request")
+			assert.Substring(t, err.Error(), "problem making request")
 		},
 		"ProcessMethodsWithBadURL": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
 			client.prefix = strings.Replace(client.prefix, "http://", "://", 1)
@@ -132,11 +133,11 @@ func TestRestService(t *testing.T) {
 
 			err := proc.Signal(ctx, syscall.SIGTERM)
 			assert.Error(t, err)
-			assert.Contains(t, err.Error(), "problem building request")
+			assert.Substring(t, err.Error(), "problem building request")
 
 			_, err = proc.Wait(ctx)
 			assert.Error(t, err)
-			assert.Contains(t, err.Error(), "problem building request")
+			assert.Substring(t, err.Error(), "problem building request")
 
 			proc.Tag("a")
 
@@ -147,7 +148,7 @@ func TestRestService(t *testing.T) {
 
 			err = proc.RegisterSignalTriggerID(ctx, jasper.CleanTerminationSignalTrigger)
 			assert.Error(t, err)
-			assert.Contains(t, err.Error(), "problem building request")
+			assert.Substring(t, err.Error(), "problem building request")
 		},
 		"ProcessRequestsFailWithBadURL": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
 
@@ -160,11 +161,11 @@ func TestRestService(t *testing.T) {
 
 			err := proc.Signal(ctx, syscall.SIGTERM)
 			assert.Error(t, err)
-			assert.Contains(t, err.Error(), "problem making request")
+			assert.Substring(t, err.Error(), "problem making request")
 
 			_, err = proc.Wait(ctx)
 			assert.Error(t, err)
-			assert.Contains(t, err.Error(), "problem making request")
+			assert.Substring(t, err.Error(), "problem making request")
 
 			proc.Tag("a")
 
@@ -175,7 +176,7 @@ func TestRestService(t *testing.T) {
 
 			err = proc.RegisterSignalTriggerID(ctx, jasper.CleanTerminationSignalTrigger)
 			assert.Error(t, err)
-			assert.Contains(t, err.Error(), "problem making request")
+			assert.Substring(t, err.Error(), "problem making request")
 		},
 		"CheckSafetyOfTagMethodsForBrokenTasks": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
 			proc := &restProcess{
@@ -198,7 +199,7 @@ func TestRestService(t *testing.T) {
 
 			err := proc.Signal(ctx, syscall.SIGTERM)
 			assert.Error(t, err)
-			assert.Contains(t, err.Error(), "no process")
+			assert.Substring(t, err.Error(), "no process")
 		},
 		"CreateProcessEndpointErrorsWithMalformedData": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
 			body, err := makeBody(map[string]int{"tags": 42})
@@ -251,7 +252,7 @@ func TestRestService(t *testing.T) {
 			proc, err := client.CreateProcess(ctx, testutil.TrueCreateOpts())
 			assert.Error(t, err)
 			assert.True(t, proc == nil)
-			assert.Contains(t, err.Error(), "problem submitting request")
+			assert.Substring(t, err.Error(), "problem submitting request")
 		},
 		"CreateFailsForTriggerReasons": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
 			srv.manager = &mock.Manager{
@@ -260,7 +261,7 @@ func TestRestService(t *testing.T) {
 			proc, err := client.CreateProcess(ctx, testutil.TrueCreateOpts())
 			assert.Error(t, err)
 			assert.True(t, proc == nil)
-			assert.Contains(t, err.Error(), "problem registering trigger")
+			assert.Substring(t, err.Error(), "problem registering trigger")
 		},
 		"MetricsPopulatedForValidProcess": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
 			id := "foo"
@@ -320,7 +321,7 @@ func TestRestService(t *testing.T) {
 			assert.NotError(t, err)
 			defer resp.Body.Close()
 			assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
-			assert.Contains(t, handleError(resp).Error(), "problem converting signal 'f'")
+			assert.Substring(t, handleError(resp).Error(), "problem converting signal 'f'")
 		},
 		"ServiceDownloadFileFailsWithInvalidOptions": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
 			body, err := makeBody(struct {
@@ -344,9 +345,8 @@ func TestRestService(t *testing.T) {
 			_, err = proc.Wait(ctx)
 			assert.NotError(t, err)
 
-			stream, err := client.GetLogStream(ctx, proc.ID(), 1)
+			_, err = client.GetLogStream(ctx, proc.ID(), 1)
 			assert.Error(t, err)
-			assert.Zero(t, stream)
 		},
 		"CreateWithMultipleLoggers": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
 			file, err := os.CreateTemp(tempDir, "out.txt")
@@ -399,7 +399,7 @@ func TestRestService(t *testing.T) {
 			content, err := os.ReadFile(tmpFile.Name())
 			assert.NotError(t, err)
 
-			assert.Equal(t, opts.Content, content)
+			assert.Equal(t, string(opts.Content), string(content))
 		},
 		"WriteFileAcceptsContentFromReader": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
 			tmpFile, err := os.CreateTemp(tempDir, filepath.Base(t.Name()))
@@ -416,7 +416,7 @@ func TestRestService(t *testing.T) {
 			content, err := os.ReadFile(tmpFile.Name())
 			assert.NotError(t, err)
 
-			assert.Equal(t, buf, content)
+			assert.Equal(t, string(buf), string(content))
 		},
 		"WriteFileSucceedsWithLargeContentReader": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
 			tmpFile, err := os.CreateTemp(tempDir, filepath.Base(t.Name()))
@@ -434,7 +434,7 @@ func TestRestService(t *testing.T) {
 			content, err := os.ReadFile(tmpFile.Name())
 			assert.NotError(t, err)
 
-			assert.Equal(t, buf, content)
+			assert.Equal(t, string(buf), string(content))
 		},
 		"RegisterSignalTriggerIDChecksForExistingProcess": func(ctx context.Context, t *testing.T, srv *Service, client *restClient) {
 			req, err := http.NewRequest(http.MethodPatch, client.getURL("/process/%s/trigger/signal/%s", "foo", jasper.CleanTerminationSignalTrigger), nil)
@@ -445,7 +445,7 @@ func TestRestService(t *testing.T) {
 			defer resp.Body.Close()
 
 			assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
-			assert.Contains(t, handleError(resp).Error(), "no process 'foo' found")
+			assert.Substring(t, handleError(resp).Error(), "no process 'foo' found")
 		},
 	} {
 		t.Run(name, func(t *testing.T) {

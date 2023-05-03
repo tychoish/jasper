@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/tychoish/fun v0.9.1
-	github.com/tychoish/jasper v0.0.0-20230428235457-11f48fbe1e09
+	github.com/tychoish/jasper v0.1.0
 	golang.org/x/crypto v0.8.0
 )
 

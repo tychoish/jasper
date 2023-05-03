@@ -452,7 +452,7 @@ func ConvertSplunkInfo(opts splunk.ConnectionInfo) *SplunkInfo {
 // Export takes a protobuf RPC SplunkLoggerOptions struct and returns the
 // analogous Jasper options.LoggerProducer.
 func (opts SplunkLoggerOptions) Export() options.LoggerProducer {
-	return &jsplunk.SplunkLoggerOptions{
+	return &jsplunk.LoggerOptions{
 		Splunk: opts.Splunk.Export(),
 		Base:   opts.Base.Export(),
 	}

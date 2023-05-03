@@ -16,7 +16,9 @@ import (
 
 func TestRPCService(t *testing.T) {
 	for managerName, makeManager := range map[string]func() (jasper.Manager, error){
-		"Basic": func() (jasper.Manager, error) { return jasper.NewSynchronizedManager(false) },
+		"Basic": func() (jasper.Manager, error) {
+			return jasper.NewManager(jasper.ManagerOptions{Synchronized: true}), nil
+		},
 	} {
 		t.Run(managerName, func(t *testing.T) {
 			for testName, testCase := range map[string]func(context.Context, *testing.T, internal.JasperProcessManagerClient){

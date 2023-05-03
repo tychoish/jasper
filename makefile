@@ -1,3 +1,4 @@
+VERSION?=main
 
 # Docker-related
 docker_image := $(DOCKER_IMAGE)
@@ -24,6 +25,14 @@ go-mod-tidy:
 upgrade-fun:
 	go get github.com/tychoish/fun@$(VERSION)
 	for i in $(shell find . -name "go.mod"); do pushd $$(dirname $$i); echo $(dirname $i); go get github.com/tychoish/fun@$(VERSION); go mod tidy; go build ./... ; popd; done
+
+upgrade-grip:
+	go get github.com/tychoish/grip@$(VERSION)
+	for i in $(shell find . -name "go.mod"); do pushd $$(dirname $$i); echo $(dirname $i); go get github.com/tychoish/grip@$(VERSION); go mod tidy; go build ./... ; popd; done
+
+upgrade-jasper:
+	git push --tags
+	for i in $(shell find . -name "go.mod"); do pushd $$(dirname $$i); echo $(dirname $i); go get github.com/tychoish/jasper@$(VERSION); go mod tidy; go build ./...; popd; done
 
 clean:
 	rm -rf $(lintDeps) *.pb.go

@@ -161,10 +161,8 @@ func TestCLILoggingCache(t *testing.T) {
 					defer cancel()
 					port := testutil.GetPortNumber()
 					c := mockCLIContext(remoteType, port)
-					manager, err := jasper.NewSynchronizedManager(false)
-					assert.NotError(t, err)
+					manager := jasper.NewManager(jasper.ManagerOptions{Synchronized: true})
 					closeService := makeService(ctx, t, port, manager)
-					assert.NotError(t, err)
 					defer func() {
 						check.NotError(t, closeService())
 					}()

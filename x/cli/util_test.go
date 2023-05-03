@@ -101,8 +101,7 @@ func TestMakeRemoteClient(t *testing.T) {
 		t.Run(remoteType, func(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), testutil.TestTimeout)
 			defer cancel()
-			manager, err := jasper.NewSynchronizedManager(false)
-			assert.NotError(t, err)
+			manager := jasper.NewManager(jasper.ManagerOptions{Synchronized: true})
 			closeService, client := makeServiceAndClient(ctx, t, testutil.GetPortNumber(), manager)
 			check.NotError(t, closeService())
 			check.NotError(t, client.CloseConnection())
@@ -203,8 +202,7 @@ func TestCLICommon(t *testing.T) {
 					defer cancel()
 					port := testutil.GetPortNumber()
 					c := mockCLIContext(remoteType, port)
-					manager, err := jasper.NewSynchronizedManager(false)
-					assert.NotError(t, err)
+					manager := jasper.NewManager(jasper.ManagerOptions{Synchronized: true})
 					closeService, client := makeServiceAndClient(ctx, t, port, manager)
 					defer func() {
 						check.NotError(t, client.CloseConnection())

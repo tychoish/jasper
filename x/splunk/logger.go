@@ -15,22 +15,22 @@ import (
 
 func init() {
 	reg := options.GetGlobalLoggerRegistry()
-	reg.Register(NewSplunkLoggerProducer)
+	reg.Register(NewLoggerProducer)
 }
 
 // LogType is the type name for the splunk logger.
 const LogType = "splunk"
 
-// SplunkLoggerOptions packages the options for creating a splunk logger.
-type SplunkLoggerOptions struct {
+// LoggerOptions packages the options for creating a splunk logger.
+type LoggerOptions struct {
 	Splunk splunk.ConnectionInfo `json:"splunk" bson:"splunk"`
 	Base   options.BaseOptions   `json:"base" bson:"base"`
 }
 
 // SplunkLoggerProducer returns a LoggerProducer backed by SplunkLoggerOptions.
-func NewSplunkLoggerProducer() options.LoggerProducer { return &SplunkLoggerOptions{} }
+func NewLoggerProducer() options.LoggerProducer { return &LoggerOptions{} }
 
-func (opts *SplunkLoggerOptions) Validate() error {
+func (opts *LoggerOptions) Validate() error {
 	catcher := &erc.Collector{}
 
 	erc.When(catcher, opts.Splunk.Populated(), "missing connection info for output type splunk")
@@ -38,8 +38,8 @@ func (opts *SplunkLoggerOptions) Validate() error {
 	return catcher.Resolve()
 }
 
-func (*SplunkLoggerOptions) Type() string { return LogType }
-func (opts *SplunkLoggerOptions) Configure() (send.Sender, error) {
+func (*LoggerOptions) Type() string { return LogType }
+func (opts *LoggerOptions) Configure() (send.Sender, error) {
 	if err := opts.Validate(); err != nil {
 		return nil, fmt.Errorf("invalid config: %w", err)
 	}

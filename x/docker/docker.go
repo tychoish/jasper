@@ -54,7 +54,7 @@ func ExecutorResolver(ctx context.Context, opts *options.Create) options.Resolve
 			return nil, executor.ErrNotConfigured
 		}
 
-		client, err := opts.Docker.Resolve()
+		client, err := ResolveOptions(opts.Docker)
 		if err != nil {
 			return nil, fmt.Errorf("could not resolve Docker options: %w", err)
 		}

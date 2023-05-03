@@ -10,7 +10,7 @@ import (
 
 // syscallToDockerSignal converts the syscall.Signal to the equivalent Docker
 // signal.
-func syscallToDockerSignal(sig syscall.Signal, platform string) (string, error) {
+func syscallToDockerSignal(sig syscall.Signal, platform string) (string, error) { //nolint:unused
 	switch platform {
 	case "darwin":
 		if dsig, ok := syscallToDockerDarwin()[sig]; ok {
@@ -32,7 +32,7 @@ func syscallToDockerSignal(sig syscall.Signal, platform string) (string, error) 
 
 // dockerToSyscallSignal converts the Docker signal to the equivalent
 // syscall.Signal.
-func dockerToSyscallSignal(dsig string, platform string) (syscall.Signal, error) { //nolint: deadcode
+func dockerToSyscallSignal(dsig string, platform string) (syscall.Signal, error) { //nolint:unused
 	switch platform {
 	case "darwin":
 		if sig, ok := dockerToSyscallDarwin()[dsig]; ok {
@@ -96,7 +96,7 @@ const (
 	sigrtmax = 64
 )
 
-func dockerToSyscallLinux() map[string]syscall.Signal {
+func dockerToSyscallLinux() map[string]syscall.Signal { //nolint:unused
 	return map[string]syscall.Signal{
 		"ABRT":     linuxSIGABRT,
 		"ALRM":     linuxSIGALRM,
@@ -273,7 +273,7 @@ const (
 	darwinSIGXFSZ   = syscall.Signal(0x19)
 )
 
-func dockerToSyscallDarwin() map[string]syscall.Signal {
+func dockerToSyscallDarwin() map[string]syscall.Signal { //nolint:unused
 	return map[string]syscall.Signal{
 		"ABRT":   darwinSIGABRT,
 		"ALRM":   darwinSIGALRM,
@@ -354,7 +354,7 @@ const (
 	windowsSIGKILL = syscall.Signal(0xf)
 )
 
-func dockerToSyscallWindows() map[string]syscall.Signal {
+func dockerToSyscallWindows() map[string]syscall.Signal { //nolint:unused
 	return map[string]syscall.Signal{
 		"KILL": windowsSIGKILL,
 		"TERM": windowsSIGTERM,

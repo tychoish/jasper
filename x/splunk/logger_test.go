@@ -33,7 +33,7 @@ func TestLogger(t *testing.T) {
 	defer cancel()
 	for name, test := range map[string]func(t *testing.T, opts *options.Create){
 		"ResolveFailsWithMismatchingLoggerConfiguration": func(t *testing.T, opts *options.Create) {
-			config, err := json.Marshal(&SplunkLoggerOptions{
+			config, err := json.Marshal(&LoggerOptions{
 				Splunk: splunk.ConnectionInfo{
 					ServerURL: "https://example.com/",
 				},
@@ -54,7 +54,7 @@ func TestLogger(t *testing.T) {
 			check.True(t, cmd == nil)
 		},
 		"ResolveFailsWithInvalidErrorLoggingConfiguration": func(t *testing.T, opts *options.Create) {
-			config, err := json.Marshal(&SplunkLoggerOptions{
+			config, err := json.Marshal(&LoggerOptions{
 				Splunk: splunk.ConnectionInfo{
 					ServerURL: "https://example.com/",
 				},

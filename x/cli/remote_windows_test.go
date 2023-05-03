@@ -44,7 +44,7 @@ func TestCLIRemoteWindows(t *testing.T) {
 
 					port := testutil.GetPortNumber()
 					c := mockCLIContext(remoteType, port)
-					manager, err := jasper.NewSynchronizedManager(false)
+					manager := jasper.NewManager(jasper.ManagerOptions{Synchronized: true})
 					assert.NotError(t, err)
 					closeService := makeService(ctx, t, port, manager)
 					assert.NotError(t, err)

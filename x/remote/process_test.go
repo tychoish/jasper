@@ -27,7 +27,7 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 		{
 			Name: "WithPopulatedArgsCommandCreationPasses",
 			Case: func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
-				assert.NotZero(t, opts.Args)
+				assert.True(t, opts.Args == nil)
 				proc, err := makep(ctx, opts)
 				assert.NotError(t, err)
 				assert.True(t, proc != nil)
@@ -412,10 +412,7 @@ func TestProcessImplementations(t *testing.T) {
 			return client.CreateProcess(ctx, opts)
 		},
 		"MDB": func(ctx context.Context, opts *options.Create) (jasper.Process, error) {
-			mngr, err := jasper.NewSynchronizedManager(false)
-			if err != nil {
-				return nil, err
-			}
+			mngr := jasper.NewManager(jasper.ManagerOptions{Synchronized: true})
 
 			client, err := makeTestMDBServiceAndClient(ctx, mngr)
 			if err != nil {
@@ -425,10 +422,7 @@ func TestProcessImplementations(t *testing.T) {
 			return client.CreateProcess(ctx, opts)
 		},
 		"RPC/TLS": func(ctx context.Context, opts *options.Create) (jasper.Process, error) {
-			mngr, err := jasper.NewSynchronizedManager(false)
-			if err != nil {
-				return nil, err
-			}
+			mngr := jasper.NewManager(jasper.ManagerOptions{Synchronized: true})
 
 			client, err := makeTLSRPCServiceAndClient(ctx, mngr)
 			if err != nil {
@@ -438,10 +432,7 @@ func TestProcessImplementations(t *testing.T) {
 			return client.CreateProcess(ctx, opts)
 		},
 		"RPC/Insecure": func(ctx context.Context, opts *options.Create) (jasper.Process, error) {
-			mngr, err := jasper.NewSynchronizedManager(false)
-			if err != nil {
-				return nil, err
-			}
+			mngr := jasper.NewManager(jasper.ManagerOptions{Synchronized: true})
 
 			client, err := makeInsecureRPCServiceAndClient(ctx, mngr)
 			if err != nil {
@@ -492,7 +483,7 @@ func TestProcessImplementations(t *testing.T) {
 								proc.(*rpcProcess).info.Id += "_foo"
 								proc.(*rpcProcess).info.Complete = false
 								assert.NotEqual(t, firstID, proc.ID())
-								assert.True(t, !proc.Complete(ctx), proc.ID())
+								assert.True(t, !proc.Complete(ctx))
 							},
 						},
 						ProcessTestCase{
@@ -508,7 +499,7 @@ func TestProcessImplementations(t *testing.T) {
 								proc.(*rpcProcess).info.Id += "_foo"
 								proc.(*rpcProcess).info.Complete = false
 								assert.NotEqual(t, firstID, proc.ID())
-								assert.True(t, !proc.Running(ctx), proc.ID())
+								assert.True(t, !proc.Running(ctx))
 							},
 						},
 					) {

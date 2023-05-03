@@ -48,10 +48,7 @@ func serviceCommandREST(cmd string, operation serviceOperation) cli.Command {
 			validateLimits(limitNumFilesFlagName, limitNumProcsFlagName, limitLockedMemoryFlagName, limitVirtualMemoryFlagName),
 		),
 		Action: func(c *cli.Context) error {
-			manager, err := jasper.NewSynchronizedManager(false)
-			if err != nil {
-				return fmt.Errorf("error creating REST manager: %w", err)
-			}
+			manager := jasper.NewManager(jasper.ManagerOptions{Synchronized: true})
 
 			daemon := newRESTDaemon(c.String(hostFlagName), c.Int(portFlagName), manager, makeLogger(c))
 
@@ -92,10 +89,7 @@ func (d *restDaemon) Start(s service.Service) error {
 
 	d.exit = make(chan struct{})
 	if d.Manager == nil {
-		var err error
-		if d.Manager, err = jasper.NewSynchronizedManager(false); err != nil {
-			return fmt.Errorf("failed to construct REST manager: %w", err)
-		}
+		d.Manager = jasper.NewManager(jasper.ManagerOptions{Synchronized: true})
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())

@@ -9,11 +9,13 @@ import (
 	"io"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/scripting"
 	"github.com/tychoish/jasper/x/remote"
 	roptions "github.com/tychoish/jasper/x/remote/options"
+	"github.com/tychoish/jasper/x/track"
 )
 
 // sshClient uses SSH to access a remote machine's Jasper CLI, which has access
@@ -47,10 +49,17 @@ func NewSSHClient(remoteOpts options.Remote, clientOpts ClientOptions, trackProc
 		return nil, fmt.Errorf("problem validating client options: %w", err)
 	}
 
-	manager, err := jasper.NewSynchronizedManager(trackProcs)
-	if err != nil {
-		return nil, fmt.Errorf("problem creating underlying manager: %w", err)
+	id := uuid.New().String()
+	var tracker jasper.ProcessTracker
+	var err error
+	if trackProcs {
+		tracker, err = track.New(id)
+		if err != nil {
+			return nil, err
+		}
 	}
+
+	manager := jasper.NewManager(jasper.ManagerOptions{ID: id, Tracker: tracker})
 
 	client := &sshClient{
 		opts: sshClientOptions{

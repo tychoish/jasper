@@ -45,8 +45,8 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 		{
 			Name: "ValidateFixture",
 			Case: func(ctx context.Context, t *testing.T, client Manager) {
-				check.NotNil(t, ctx)
-				check.NotNil(t, client)
+				check.True(t, ctx != nil)
+				check.True(t, client != nil)
 			},
 		},
 		{
@@ -63,7 +63,7 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 				proc, err := client.CreateProcess(ctx, opts)
 				assert.NotError(t, err)
 				info := proc.Info(ctx)
-				assert.NotEmpty(t, info.Options.Environment)
+				assert.NotEqual(t, len(info.Options.Environment), 0)
 				check.Equal(t, client.ID(), info.Options.Environment[jasper.ManagerEnvironID])
 			},
 		},
@@ -74,7 +74,7 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 				modify(opts)
 				proc, err := client.CreateProcess(ctx, opts)
 				assert.Error(t, err)
-				check.Nil(t, proc)
+				check.True(t, proc == nil)
 			},
 		},
 		{
@@ -112,7 +112,7 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 			Case: func(ctx context.Context, t *testing.T, client Manager) {
 				procs, err := client.List(ctx, options.Filter("foo"))
 				check.Error(t, err)
-				check.Nil(t, procs)
+				check.True(t, procs == nil)
 			},
 		},
 		{
@@ -127,7 +127,7 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 				cancel()
 				output, err := client.List(cctx, options.All)
 				assert.Error(t, err)
-				check.Nil(t, output)
+				check.True(t, output == nil)
 			},
 		},
 		{
@@ -152,7 +152,7 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 			Name: "RegisterAlwaysErrors",
 			Case: func(ctx context.Context, t *testing.T, client Manager) {
 				proc, err := client.CreateProcess(ctx, &options.Create{Args: []string{"ls"}})
-				check.NotNil(t, proc)
+				check.True(t, proc != nil)
 				assert.NotError(t, err)
 
 				check.Error(t, client.Register(ctx, nil))
@@ -164,7 +164,7 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 			Case: func(ctx context.Context, t *testing.T, client Manager) {
 				proc, err := client.Get(ctx, "foo")
 				assert.Error(t, err)
-				check.Nil(t, proc)
+				check.True(t, proc == nil)
 			},
 		},
 		{
@@ -307,7 +307,7 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 				client.Clear(ctx)
 				nilProc, err := client.Get(ctx, proc.ID())
 				assert.Error(t, err)
-				check.Nil(t, nilProc)
+				check.True(t, nilProc == nil)
 			},
 		},
 		{
@@ -348,7 +348,7 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 
 				nilProc, err := client.Get(ctx, lsProc.ID())
 				assert.Error(t, err)
-				check.Nil(t, nilProc)
+				check.True(t, nilProc == nil)
 				assert.NotError(t, jasper.Terminate(ctx, sleepProc)) // Clean up
 			},
 		},
@@ -367,7 +367,7 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 				modify(opts)
 				proc, err := client.CreateProcess(ctx, opts)
 				assert.NotError(t, err)
-				check.NotNil(t, proc)
+				check.True(t, proc != nil)
 				check.NotZero(t, proc.ID())
 
 				fetched, err := client.Get(ctx, proc.ID())
@@ -419,8 +419,7 @@ func TestManager(t *testing.T) {
 			Name: "MDB",
 			Constructor: func(ctx context.Context, t *testing.T) Manager {
 				t.SkipNow()
-				mngr, err := jasper.NewSynchronizedManager(false)
-				assert.NotError(t, err)
+				mngr := jasper.NewManager(jasper.ManagerOptions{Synchronized: true})
 
 				client, err := makeTestMDBServiceAndClient(ctx, mngr)
 				assert.NotError(t, err)
@@ -430,8 +429,7 @@ func TestManager(t *testing.T) {
 		{
 			Name: "RPC/TLS",
 			Constructor: func(ctx context.Context, t *testing.T) Manager {
-				mngr, err := jasper.NewSynchronizedManager(false)
-				assert.NotError(t, err)
+				mngr := jasper.NewManager(jasper.ManagerOptions{Synchronized: true})
 
 				client, err := makeTLSRPCServiceAndClient(ctx, mngr)
 				assert.NotError(t, err)
@@ -445,8 +443,7 @@ func TestManager(t *testing.T) {
 					newRPCClient(nil)
 				})
 
-				mngr, err := jasper.NewSynchronizedManager(false)
-				assert.NotError(t, err)
+				mngr := jasper.NewManager(jasper.ManagerOptions{Synchronized: true})
 
 				client, err := makeInsecureRPCServiceAndClient(ctx, mngr)
 				assert.NotError(t, err)
@@ -493,7 +490,7 @@ func TestManager(t *testing.T) {
 
 										logs, err := client.GetLogStream(ctx, proc.ID(), 1)
 										assert.NotError(t, err)
-										check.Empty(t, logs.Logs)
+										check.Equal(t, 0, len(logs.Logs))
 									},
 									"BytesSetsStandardInput": func(ctx context.Context, t *testing.T, opts *options.Create, expectedOutput string, stdin []byte) {
 										opts.StandardInputBytes = stdin
@@ -660,7 +657,7 @@ func TestManager(t *testing.T) {
 							Case: func(ctx context.Context, t *testing.T, client Manager) {
 								stream, err := client.GetLogStream(ctx, "foo", 1)
 								check.Error(t, err)
-								check.Zero(t, stream)
+								check.True(t, !stream.Done && stream.Logs == nil)
 							},
 						},
 						clientTestCase{
@@ -675,9 +672,8 @@ func TestManager(t *testing.T) {
 								_, err = proc.Wait(ctx)
 								assert.NotError(t, err)
 
-								stream, err := client.GetLogStream(ctx, proc.ID(), 1)
+								_, err = client.GetLogStream(ctx, proc.ID(), 1)
 								check.Error(t, err)
-								check.Zero(t, stream)
 							},
 						},
 						clientTestCase{
@@ -696,15 +692,14 @@ func TestManager(t *testing.T) {
 
 								for testName, testCase := range map[string]func(ctx context.Context, t *testing.T, proc jasper.Process){
 									"GetLogStreamFailsForInvalidCount": func(ctx context.Context, t *testing.T, proc jasper.Process) {
-										stream, err := client.GetLogStream(ctx, proc.ID(), -1)
+										_, err := client.GetLogStream(ctx, proc.ID(), -1)
 										check.Error(t, err)
-										check.Zero(t, stream)
 									},
 									"GetLogStreamReturnsOutputOnSuccess": func(ctx context.Context, t *testing.T, proc jasper.Process) {
 										logs := []string{}
 										for stream, err := client.GetLogStream(ctx, proc.ID(), 1); !stream.Done; stream, err = client.GetLogStream(ctx, proc.ID(), 1) {
 											assert.NotError(t, err)
-											assert.NotEmpty(t, stream.Logs)
+											assert.NotEqual(t, len(stream.Logs), 0)
 											logs = append(logs, stream.Logs...)
 										}
 										check.Contains(t, logs, output)

@@ -76,7 +76,7 @@ func TestCLIManager(t *testing.T) {
 					resp := &InfoResponse{}
 					assert.NotError(t, execCLICommandInputOutput(t, c, managerGet(), input, resp))
 					assert.True(t, !resp.Successful())
-					assert.NotEmpty(t, resp.ErrorMessage())
+					assert.NotEqual(t, len(resp.ErrorMessage()), 0)
 				},
 				"GetEmptyIDFails": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
 					input, err := json.Marshal(IDInput{""})
@@ -138,10 +138,8 @@ func TestCLIManager(t *testing.T) {
 					defer cancel()
 					port := testutil.GetPortNumber()
 					c := mockCLIContext(remoteType, port)
-					manager, err := jasper.NewSynchronizedManager(false)
-					assert.NotError(t, err)
+					manager := jasper.NewManager(jasper.ManagerOptions{Synchronized: true})
 					closeService := makeService(ctx, t, port, manager)
-					assert.NotError(t, err)
 					defer func() {
 						check.NotError(t, closeService())
 					}()

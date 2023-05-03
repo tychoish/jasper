@@ -223,7 +223,7 @@ func makeLogger(c *cli.Context) *options.LoggerConfig {
 	priority := level.FromString(l)
 
 	logger := &options.LoggerConfig{}
-	producer := &jsplunk.SplunkLoggerOptions{
+	producer := &jsplunk.LoggerOptions{
 		Splunk: info,
 		Base: options.BaseOptions{
 			Format: options.LogFormatDefault,

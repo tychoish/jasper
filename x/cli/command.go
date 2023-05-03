@@ -435,6 +435,7 @@ func DownloadCMD() cli.Command {
 			}),
 		Before: mergeBeforeFuncs(
 			clientBefore(),
+
 			requireStringFlag(pathFlagName),
 			func(c *cli.Context) error {
 				if c.String(urlFlagName) == "" {
