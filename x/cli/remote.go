@@ -6,7 +6,7 @@ import (
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/x/remote"
 	roptions "github.com/tychoish/jasper/x/remote/options"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 // Constants representing the Jasper RemoteClient interface as CLI commands.
@@ -22,10 +22,10 @@ const (
 // Remote creates a cli.Command that allows the remote-specific methods in the
 // RemoteClient interface except for CloseClient, for which there is no CLI
 // equivalent.
-func Remote() cli.Command {
-	return cli.Command{
+func Remote() *cli.Command {
+	return &cli.Command{
 		Name: RemoteCommand,
-		Subcommands: []cli.Command{
+		Subcommands: []*cli.Command{
 			remoteDownloadFile(),
 			remoteGetLogStream(),
 			remoteSignalEvent(),
@@ -35,8 +35,8 @@ func Remote() cli.Command {
 	}
 }
 
-func remoteWriteFile() cli.Command {
-	return cli.Command{
+func remoteWriteFile() *cli.Command {
+	return &cli.Command{
 		Name:   WriteFileCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
@@ -49,8 +49,8 @@ func remoteWriteFile() cli.Command {
 	}
 }
 
-func remoteDownloadFile() cli.Command {
-	return cli.Command{
+func remoteDownloadFile() *cli.Command {
+	return &cli.Command{
 		Name:   DownloadFileCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
@@ -63,8 +63,8 @@ func remoteDownloadFile() cli.Command {
 	}
 }
 
-func remoteGetLogStream() cli.Command {
-	return cli.Command{
+func remoteGetLogStream() *cli.Command {
+	return &cli.Command{
 		Name:   GetLogStreamCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
@@ -81,8 +81,8 @@ func remoteGetLogStream() cli.Command {
 	}
 }
 
-func remoteSignalEvent() cli.Command {
-	return cli.Command{
+func remoteSignalEvent() *cli.Command {
+	return &cli.Command{
 		Name:   SignalEventCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
@@ -98,8 +98,8 @@ func remoteSignalEvent() cli.Command {
 	}
 }
 
-func remoteSendMessages() cli.Command {
-	return cli.Command{
+func remoteSendMessages() *cli.Command {
+	return &cli.Command{
 		Name:   SendMessagesCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),

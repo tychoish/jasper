@@ -13,7 +13,7 @@ import (
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/util"
 	"github.com/tychoish/jasper/x/remote"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 const (
@@ -22,22 +22,22 @@ const (
 	defaultWirePort = 2488
 )
 
-func serviceCommandWire(cmd string, operation serviceOperation) cli.Command {
-	return cli.Command{
+func serviceCommandWire(cmd string, operation serviceOperation) *cli.Command {
+	return &cli.Command{
 		Name:  WireService,
 		Usage: fmt.Sprintf("%s a MongoDB wire protocol service", cmd),
 		Flags: append(serviceFlags(),
-			cli.StringFlag{
-				Name:   hostFlagName,
-				EnvVar: wireHostEnvVar,
-				Usage:  "the host running the wire service",
-				Value:  defaultLocalHostName,
+			&cli.StringFlag{
+				Name:    hostFlagName,
+				EnvVars: []string{wireHostEnvVar},
+				Usage:   "the host running the wire service",
+				Value:   defaultLocalHostName,
 			},
-			cli.IntFlag{
-				Name:   portFlagName,
-				EnvVar: wirePortEnvVar,
-				Usage:  "the port running the wire service",
-				Value:  defaultWirePort,
+			&cli.IntFlag{
+				Name:    portFlagName,
+				EnvVars: []string{wirePortEnvVar},
+				Usage:   "the port running the wire service",
+				Value:   defaultWirePort,
 			},
 		),
 		Before: mergeBeforeFuncs(

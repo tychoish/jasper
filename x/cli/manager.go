@@ -7,7 +7,7 @@ import (
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/x/remote"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 // Constants representing the Jasper Manager interface as CLI commands.
@@ -28,10 +28,10 @@ const (
 // subcommand optionally reads the arguments as JSON from stdin if any are
 // assert., calls the jasper.Manager function corresponding to that subcommand,
 // and writes the response as JSON to stdout.
-func Manager() cli.Command {
-	return cli.Command{
+func Manager() *cli.Command {
+	return &cli.Command{
 		Name: ManagerCommand,
-		Subcommands: []cli.Command{
+		Subcommands: []*cli.Command{
 			managerID(),
 			managerCreateProcess(),
 			managerCreateCommand(),
@@ -45,8 +45,8 @@ func Manager() cli.Command {
 	}
 }
 
-func managerID() cli.Command {
-	return cli.Command{
+func managerID() *cli.Command {
+	return &cli.Command{
 		Name:   IDCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
@@ -59,8 +59,8 @@ func managerID() cli.Command {
 	}
 }
 
-func managerCreateProcess() cli.Command {
-	return cli.Command{
+func managerCreateProcess() *cli.Command {
+	return &cli.Command{
 		Name:   CreateProcessCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
@@ -77,8 +77,8 @@ func managerCreateProcess() cli.Command {
 	}
 }
 
-func managerCreateScripting() cli.Command {
-	return cli.Command{
+func managerCreateScripting() *cli.Command {
+	return &cli.Command{
 		Name:   CreateScriptingCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
@@ -100,8 +100,8 @@ func managerCreateScripting() cli.Command {
 	}
 }
 
-func managerCreateCommand() cli.Command {
-	return cli.Command{
+func managerCreateCommand() *cli.Command {
+	return &cli.Command{
 		Name:   CreateCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
@@ -124,8 +124,8 @@ func managerCreateCommand() cli.Command {
 	}
 }
 
-func managerGet() cli.Command {
-	return cli.Command{
+func managerGet() *cli.Command {
+	return &cli.Command{
 		Name:   GetCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
@@ -142,8 +142,8 @@ func managerGet() cli.Command {
 	}
 }
 
-func managerList() cli.Command {
-	return cli.Command{
+func managerList() *cli.Command {
+	return &cli.Command{
 		Name:   ListCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
@@ -164,8 +164,8 @@ func managerList() cli.Command {
 	}
 }
 
-func managerGroup() cli.Command {
-	return cli.Command{
+func managerGroup() *cli.Command {
+	return &cli.Command{
 		Name:   GroupCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
@@ -186,8 +186,8 @@ func managerGroup() cli.Command {
 	}
 }
 
-func managerClear() cli.Command {
-	return cli.Command{
+func managerClear() *cli.Command {
+	return &cli.Command{
 		Name:   ClearCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
@@ -200,8 +200,8 @@ func managerClear() cli.Command {
 	}
 }
 
-func managerClose() cli.Command {
-	return cli.Command{
+func managerClose() *cli.Command {
+	return &cli.Command{
 		Name:   CloseCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),

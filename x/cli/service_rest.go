@@ -15,7 +15,7 @@ import (
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/util"
 	"github.com/tychoish/jasper/x/remote"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 const (
@@ -24,22 +24,22 @@ const (
 	defaultRESTPort = 2487
 )
 
-func serviceCommandREST(cmd string, operation serviceOperation) cli.Command {
-	return cli.Command{
+func serviceCommandREST(cmd string, operation serviceOperation) *cli.Command {
+	return &cli.Command{
 		Name:  RESTService,
 		Usage: fmt.Sprintf("%s a REST service", cmd),
 		Flags: append(serviceFlags(),
-			cli.StringFlag{
-				Name:   hostFlagName,
-				EnvVar: restHostEnvVar,
-				Usage:  "the host running the REST service",
-				Value:  defaultLocalHostName,
+			&cli.StringFlag{
+				Name:    hostFlagName,
+				EnvVars: []string{restHostEnvVar},
+				Usage:   "the host running the REST service",
+				Value:   defaultLocalHostName,
 			},
-			cli.IntFlag{
-				Name:   portFlagName,
-				EnvVar: restPortEnvVar,
-				Usage:  "the port running the REST service",
-				Value:  defaultRESTPort,
+			&cli.IntFlag{
+				Name:    portFlagName,
+				EnvVars: []string{restPortEnvVar},
+				Usage:   "the port running the REST service",
+				Value:   defaultRESTPort,
 			},
 		),
 		Before: mergeBeforeFuncs(

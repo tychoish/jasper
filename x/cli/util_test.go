@@ -17,7 +17,7 @@ import (
 	"github.com/tychoish/jasper/testutil"
 	"github.com/tychoish/jasper/util"
 	"github.com/tychoish/jasper/x/remote"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 func TestReadInputValidJSON(t *testing.T) {

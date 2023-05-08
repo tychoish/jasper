@@ -13,7 +13,7 @@ require (
 	github.com/tychoish/jasper/x/remote v0.0.0-20230502230321-07d6256076b2
 	github.com/tychoish/jasper/x/splunk v0.0.0-20230502230321-07d6256076b2
 	github.com/tychoish/jasper/x/track v0.0.0-20230502230321-07d6256076b2
-	github.com/urfave/cli v1.22.12
+	github.com/urfave/cli/v2 v2.25.3
 )
 
 require (
@@ -50,6 +50,7 @@ require (
 	github.com/ulikunitz/xz v0.5.11 // indirect
 	github.com/urfave/negroni v1.0.0 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
+	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	golang.org/x/net v0.9.0 // indirect
 	golang.org/x/sys v0.7.0 // indirect

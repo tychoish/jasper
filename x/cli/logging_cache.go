@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/tychoish/jasper/x/remote"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 // Constants representing the jasper.LoggingCache interface as CLI commands.
@@ -24,10 +24,10 @@ const (
 // LoggingCache creates a cli.Command that supports the jasper.LoggingCache
 // interface. (jasper.LoggingCache).Put is not supported as there is no CLI
 // equivalent.
-func LoggingCache() cli.Command {
-	return cli.Command{
+func LoggingCache() *cli.Command {
+	return &cli.Command{
 		Name: LoggingCacheCommand,
-		Subcommands: []cli.Command{
+		Subcommands: []*cli.Command{
 			loggingCacheCreate(),
 			loggingCacheGet(),
 			loggingCacheRemove(),
@@ -39,8 +39,8 @@ func LoggingCache() cli.Command {
 	}
 }
 
-func loggingCacheCreate() cli.Command {
-	return cli.Command{
+func loggingCacheCreate() *cli.Command {
+	return &cli.Command{
 		Name:   LoggingCacheCreateCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
@@ -61,8 +61,8 @@ func loggingCacheCreate() cli.Command {
 	}
 }
 
-func loggingCacheGet() cli.Command {
-	return cli.Command{
+func loggingCacheGet() *cli.Command {
+	return &cli.Command{
 		Name:   LoggingCacheGetCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
@@ -83,8 +83,8 @@ func loggingCacheGet() cli.Command {
 	}
 }
 
-func loggingCacheRemove() cli.Command {
-	return cli.Command{
+func loggingCacheRemove() *cli.Command {
+	return &cli.Command{
 		Name:   LoggingCacheRemoveCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
@@ -102,8 +102,8 @@ func loggingCacheRemove() cli.Command {
 	}
 }
 
-func loggingCacheCloseAndRemove() cli.Command {
-	return cli.Command{
+func loggingCacheCloseAndRemove() *cli.Command {
+	return &cli.Command{
 		Name:   LoggingCacheCloseAndRemoveCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
@@ -121,8 +121,8 @@ func loggingCacheCloseAndRemove() cli.Command {
 	}
 }
 
-func loggingCacheClear() cli.Command {
-	return cli.Command{
+func loggingCacheClear() *cli.Command {
+	return &cli.Command{
 		Name:   LoggingCacheClearCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
@@ -139,8 +139,8 @@ func loggingCacheClear() cli.Command {
 	}
 }
 
-func loggingCachePrune() cli.Command {
-	return cli.Command{
+func loggingCachePrune() *cli.Command {
+	return &cli.Command{
 		Name:   LoggingCachePruneCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
@@ -158,8 +158,8 @@ func loggingCachePrune() cli.Command {
 	}
 }
 
-func loggingCacheLen() cli.Command {
-	return cli.Command{
+func loggingCacheLen() *cli.Command {
+	return &cli.Command{
 		Name:   LoggingCacheLenCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),

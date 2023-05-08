@@ -19,7 +19,7 @@ import (
 	"github.com/tychoish/grip/x/splunk"
 	"github.com/tychoish/jasper/options"
 	jsplunk "github.com/tychoish/jasper/x/splunk"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 // Constants representing the Jasper service interface as a CLI command.
@@ -69,11 +69,11 @@ const (
 // Service encapsulates the functionality to set up Jasper services.
 // Except for run, the subcommands will generally assert.elevated privileges to
 // execute.
-func Service() cli.Command {
-	return cli.Command{
+func Service() *cli.Command {
+	return &cli.Command{
 		Name:  ServiceCommand,
 		Usage: "tools for running Jasper services",
-		Subcommands: []cli.Command{
+		Subcommands: []*cli.Command{
 			serviceCommand(ForceReinstallCommand, forceReinstall),
 			serviceCommand(InstallCommand, install),
 			serviceCommand(UninstallCommand, uninstall),
@@ -107,65 +107,65 @@ func handleDaemonSignals(ctx context.Context, cancel context.CancelFunc, exit ch
 
 func serviceFlags() []cli.Flag {
 	return []cli.Flag{
-		cli.BoolFlag{
+		&cli.BoolFlag{
 			Name:  quietFlagName,
 			Usage: "quiet mode - suppress errors when running the command",
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  userFlagName,
 			Usage: "the user who running the service",
 		},
-		cli.StringFlag{
-			Name:   passwordFlagName,
-			Usage:  "the password for the user running the service",
-			EnvVar: "JASPER_USER_PASSWORD",
+		&cli.StringFlag{
+			Name:    passwordFlagName,
+			Usage:   "the password for the user running the service",
+			EnvVars: []string{"JASPER_USER_PASSWORD"},
 		},
-		cli.StringSliceFlag{
+		&cli.StringSliceFlag{
 			Name:  envFlagName,
 			Usage: "the service environment variables (format: key=value)",
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  logNameFlagName,
 			Usage: "the name of the logger",
 			Value: defaultLogName,
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  logLevelFlagName,
 			Usage: "the threshold visible logging level",
 			Value: level.Error.String(),
 		},
-		cli.StringFlag{
-			Name:   splunkURLFlagName,
-			Usage:  "the URL of the splunk server",
-			EnvVar: "GRIP_SPLUNK_SERVER_URL",
+		&cli.StringFlag{
+			Name:    splunkURLFlagName,
+			Usage:   "the URL of the splunk server",
+			EnvVars: []string{"GRIP_SPLUNK_SERVER_URL"},
 		},
-		cli.StringFlag{
-			Name:   splunkTokenFlagName,
-			Usage:  "the splunk token",
-			EnvVar: "GRIP_SPLUNK_CLIENT_TOKEN",
+		&cli.StringFlag{
+			Name:    splunkTokenFlagName,
+			Usage:   "the splunk token",
+			EnvVars: []string{"GRIP_SPLUNK_CLIENT_TOKEN"},
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  splunkTokenFilePathFlagName,
 			Usage: "the path to the file containing the splunk token",
 		},
-		cli.StringFlag{
-			Name:   splunkChannelFlagName,
-			Usage:  "the splunk channel",
-			EnvVar: "GRIP_SPLUNK_CHANNEL",
+		&cli.StringFlag{
+			Name:    splunkChannelFlagName,
+			Usage:   "the splunk channel",
+			EnvVars: []string{"GRIP_SPLUNK_CHANNEL"},
 		},
-		cli.IntFlag{
+		&cli.IntFlag{
 			Name:  limitNumFilesFlagName,
 			Usage: "the maximum number of open file descriptors. Specify -1 for no limit",
 		},
-		cli.IntFlag{
+		&cli.IntFlag{
 			Name:  limitNumProcsFlagName,
 			Usage: "the maximum number of processes. Specify -1 for no limit",
 		},
-		cli.IntFlag{
+		&cli.IntFlag{
 			Name:  limitLockedMemoryFlagName,
 			Usage: "the maximum size that may be locked into memory (kB). Specify -1 for no limit",
 		},
-		cli.IntFlag{
+		&cli.IntFlag{
 			Name:  limitVirtualMemoryFlagName,
 			Usage: "the maximum available virtual memory (kB). Specify -1 for no limit",
 		},
@@ -380,11 +380,11 @@ type serviceOperation func(daemon service.Interface, config *service.Config) err
 
 // serviceCommand creates a cli.Command from a service operation supported by
 // REST, RPC, and combined services.
-func serviceCommand(cmd string, operation serviceOperation) cli.Command {
-	return cli.Command{
+func serviceCommand(cmd string, operation serviceOperation) *cli.Command {
+	return &cli.Command{
 		Name:  cmd,
 		Usage: fmt.Sprintf("%s a daemon service", cmd),
-		Subcommands: []cli.Command{
+		Subcommands: []*cli.Command{
 			serviceCommandREST(cmd, operation),
 			serviceCommandRPC(cmd, operation),
 			serviceCommandCombined(cmd, operation),

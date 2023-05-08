@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 const (
@@ -22,11 +22,11 @@ const (
 // Client encapsulates the client-side interface to a Jasper service.
 // Operations read from standard input (if necessary) and write the result to
 // standard output.
-func Client() cli.Command {
-	return cli.Command{
+func Client() *cli.Command {
+	return &cli.Command{
 		Name:  ClientCommand,
 		Usage: "tools for making requests to Jasper services, oriented for machine use",
-		Subcommands: []cli.Command{
+		Subcommands: []*cli.Command{
 			Manager(),
 			Process(),
 			Remote(),
@@ -37,20 +37,20 @@ func Client() cli.Command {
 // clientFlags returns flags used by all client commands.
 func clientFlags() []cli.Flag {
 	return []cli.Flag{
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  hostFlagName,
 			Usage: "the host running the Jasper service",
 			Value: defaultLocalHostName,
 		},
-		cli.IntFlag{
+		&cli.IntFlag{
 			Name:  portFlagName,
 			Usage: fmt.Sprintf("the port running the Jasper service (if service is '%s', default port is %d; if service is '%s', default port is %d)", RESTService, defaultRESTPort, RPCService, defaultRPCPort),
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  joinFlagNames(serviceFlagName, "s"),
 			Usage: fmt.Sprintf("the type of Jasper service ('%s' or '%s')", RESTService, RPCService),
 		},
-		cli.StringFlag{
+		&cli.StringFlag{
 			Name:  credsFilePathFlagName,
 			Usage: "the path to the file containing the credentials",
 		},

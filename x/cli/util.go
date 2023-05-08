@@ -18,7 +18,7 @@ import (
 	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/jasper/util"
 	"github.com/tychoish/jasper/x/remote"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 // mergeBeforeFuncs returns a cli.BeforeFunc that runs all funcs and accumulates

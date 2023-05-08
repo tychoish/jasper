@@ -14,7 +14,7 @@ import (
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/util"
 	"github.com/tychoish/jasper/x/remote"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 const (
@@ -23,24 +23,24 @@ const (
 	defaultRPCPort = 2486
 )
 
-func serviceCommandRPC(cmd string, operation serviceOperation) cli.Command {
-	return cli.Command{
+func serviceCommandRPC(cmd string, operation serviceOperation) *cli.Command {
+	return &cli.Command{
 		Name:  RPCService,
 		Usage: fmt.Sprintf("%s an RPC service", cmd),
 		Flags: append(serviceFlags(),
-			cli.StringFlag{
-				Name:   hostFlagName,
-				EnvVar: rpcHostEnvVar,
-				Usage:  "the host running the RPC service",
-				Value:  defaultLocalHostName,
+			&cli.StringFlag{
+				Name:    hostFlagName,
+				EnvVars: []string{rpcHostEnvVar},
+				Usage:   "the host running the RPC service",
+				Value:   defaultLocalHostName,
 			},
-			cli.IntFlag{
-				Name:   portFlagName,
-				EnvVar: rpcPortEnvVar,
-				Usage:  "the port running the RPC service",
-				Value:  defaultRPCPort,
+			&cli.IntFlag{
+				Name:    portFlagName,
+				EnvVars: []string{rpcPortEnvVar},
+				Usage:   "the port running the RPC service",
+				Value:   defaultRPCPort,
 			},
-			cli.StringFlag{
+			&cli.StringFlag{
 				Name:  credsFilePathFlagName,
 				Usage: "the path to the file containing the RPC service credentials",
 			},

@@ -15,7 +15,7 @@ import (
 	"github.com/tychoish/jasper/testutil"
 	"github.com/tychoish/jasper/util"
 	"github.com/tychoish/jasper/x/remote"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 // mockCLIContext creates a *cli.Context on localhost with the given service
@@ -91,7 +91,7 @@ func withMockStdout(t *testing.T, operation func(*os.File) error) error {
 
 // execCLICommandInputOutput runs the CLI command with the given input to stdin
 // and writes the result from stdout to output.
-func execCLICommandInputOutput(t *testing.T, c *cli.Context, cmd cli.Command, input []byte, output interface{}) error {
+func execCLICommandInputOutput(t *testing.T, c *cli.Context, cmd *cli.Command, input []byte, output interface{}) error {
 	return withMockStdin(t, string(input), func(*os.File) error {
 		return execCLICommandOutput(t, c, cmd, output)
 	})
@@ -99,7 +99,7 @@ func execCLICommandInputOutput(t *testing.T, c *cli.Context, cmd cli.Command, in
 
 // execCLICommandInputOutput runs the CLI command and writes the result from
 // stdout to output.
-func execCLICommandOutput(t *testing.T, c *cli.Context, cmd cli.Command, output interface{}) error {
+func execCLICommandOutput(t *testing.T, c *cli.Context, cmd *cli.Command, output interface{}) error {
 	return withMockStdout(t, func(stdout *os.File) error {
 		if err := cli.HandleAction(cmd.Action, c); err != nil {
 			return err

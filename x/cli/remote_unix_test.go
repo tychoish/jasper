@@ -13,7 +13,7 @@ import (
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/testutil"
 	"github.com/tychoish/jasper/util"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 func TestCLIRemoteUnix(t *testing.T) {

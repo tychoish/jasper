@@ -7,7 +7,7 @@ import (
 
 	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/jasper"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 const (
@@ -19,36 +19,36 @@ const (
 	rpcCredsFilePathFlagName = "rpc_creds_path"
 )
 
-func serviceCommandCombined(cmd string, operation serviceOperation) cli.Command {
-	return cli.Command{
+func serviceCommandCombined(cmd string, operation serviceOperation) *cli.Command {
+	return &cli.Command{
 		Name:  CombinedService,
 		Usage: fmt.Sprintf("%s a combined service", cmd),
 		Flags: append(serviceFlags(),
-			cli.StringFlag{
-				Name:   restHostFlagName,
-				EnvVar: restHostEnvVar,
-				Usage:  "the host running the REST service ",
-				Value:  defaultLocalHostName,
+			&cli.StringFlag{
+				Name:    restHostFlagName,
+				EnvVars: []string{restHostEnvVar},
+				Usage:   "the host running the REST service ",
+				Value:   defaultLocalHostName,
 			},
-			cli.IntFlag{
-				Name:   restPortFlagName,
-				EnvVar: restPortEnvVar,
-				Usage:  "the port running the REST service ",
-				Value:  defaultRESTPort,
+			&cli.IntFlag{
+				Name:    restPortFlagName,
+				EnvVars: []string{restPortEnvVar},
+				Usage:   "the port running the REST service ",
+				Value:   defaultRESTPort,
 			},
-			cli.StringFlag{
-				Name:   rpcHostFlagName,
-				EnvVar: rpcHostEnvVar,
-				Usage:  "the host running the RPC service ",
-				Value:  defaultLocalHostName,
+			&cli.StringFlag{
+				Name:    rpcHostFlagName,
+				EnvVars: []string{rpcHostEnvVar},
+				Usage:   "the host running the RPC service ",
+				Value:   defaultLocalHostName,
 			},
-			cli.IntFlag{
-				Name:   rpcPortFlagName,
-				EnvVar: rpcPortEnvVar,
-				Usage:  "the port running the RPC service",
-				Value:  defaultRPCPort,
+			&cli.IntFlag{
+				Name:    rpcPortFlagName,
+				EnvVars: []string{rpcPortEnvVar},
+				Usage:   "the port running the RPC service",
+				Value:   defaultRPCPort,
 			},
-			cli.StringFlag{
+			&cli.StringFlag{
 				Name:  rpcCredsFilePathFlagName,
 				Usage: "the path to the RPC service credentials file",
 			},

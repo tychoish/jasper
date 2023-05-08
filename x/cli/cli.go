@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 const (
@@ -19,11 +19,11 @@ const (
 // jasper.Manager implementations that manage processes remotely via
 // commands via command executions. The interface is designed for
 // machine interaction.
-func Jasper() cli.Command {
-	return cli.Command{
+func Jasper() *cli.Command {
+	return &cli.Command{
 		Name:  JasperCommand,
 		Usage: "Jasper CLI to interact with Jasper services",
-		Subcommands: []cli.Command{
+		Subcommands: []*cli.Command{
 			Client(),
 			Service(),
 			RunCMD(),

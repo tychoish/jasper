@@ -6,7 +6,7 @@ import (
 	"syscall"
 
 	"github.com/tychoish/jasper/x/remote"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 // Constants representing the Jasper Process interface as CLI commands.
@@ -27,10 +27,10 @@ const (
 // Process creates a cli.Command that interfaces with a Jasper process. Due to
 // it being a remote process, there is no CLI equivalent of of RegisterTrigger
 // or RegisterSignalTrigger.
-func Process() cli.Command {
-	return cli.Command{
+func Process() *cli.Command {
+	return &cli.Command{
 		Name: ProcessCommand,
-		Subcommands: []cli.Command{
+		Subcommands: []*cli.Command{
 			processInfo(),
 			processRunning(),
 			processComplete(),
@@ -45,8 +45,8 @@ func Process() cli.Command {
 	}
 }
 
-func processInfo() cli.Command {
-	return cli.Command{
+func processInfo() *cli.Command {
+	return &cli.Command{
 		Name:   InfoCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
@@ -63,8 +63,8 @@ func processInfo() cli.Command {
 	}
 }
 
-func processRunning() cli.Command {
-	return cli.Command{
+func processRunning() *cli.Command {
+	return &cli.Command{
 		Name:   RunningCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
@@ -81,8 +81,8 @@ func processRunning() cli.Command {
 	}
 }
 
-func processComplete() cli.Command {
-	return cli.Command{
+func processComplete() *cli.Command {
+	return &cli.Command{
 		Name:   CompleteCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
@@ -99,8 +99,8 @@ func processComplete() cli.Command {
 	}
 }
 
-func processSignal() cli.Command {
-	return cli.Command{
+func processSignal() *cli.Command {
+	return &cli.Command{
 		Name:   SignalCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
@@ -117,8 +117,8 @@ func processSignal() cli.Command {
 	}
 }
 
-func processWait() cli.Command {
-	return cli.Command{
+func processWait() *cli.Command {
+	return &cli.Command{
 		Name:   WaitCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
@@ -139,8 +139,8 @@ func processWait() cli.Command {
 	}
 }
 
-func processRespawn() cli.Command {
-	return cli.Command{
+func processRespawn() *cli.Command {
+	return &cli.Command{
 		Name:   RespawnCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
@@ -161,8 +161,8 @@ func processRespawn() cli.Command {
 	}
 }
 
-func processRegisterSignalTriggerID() cli.Command {
-	return cli.Command{
+func processRegisterSignalTriggerID() *cli.Command {
+	return &cli.Command{
 		Name:   RegisterSignalTriggerIDCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
@@ -182,8 +182,8 @@ func processRegisterSignalTriggerID() cli.Command {
 	}
 }
 
-func processTag() cli.Command {
-	return cli.Command{
+func processTag() *cli.Command {
+	return &cli.Command{
 		Name:   TagCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
@@ -201,8 +201,8 @@ func processTag() cli.Command {
 	}
 }
 
-func processGetTags() cli.Command {
-	return cli.Command{
+func processGetTags() *cli.Command {
+	return &cli.Command{
 		Name:   GetTagsCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
@@ -219,8 +219,8 @@ func processGetTags() cli.Command {
 	}
 }
 
-func processResetTags() cli.Command {
-	return cli.Command{
+func processResetTags() *cli.Command {
+	return &cli.Command{
 		Name:   ResetTagsCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),

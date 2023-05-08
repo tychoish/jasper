@@ -17,12 +17,12 @@ import (
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/x/remote"
 	roptions "github.com/tychoish/jasper/x/remote/options"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 // RunCMD provides a simple user-centered command-line interface for
 // running commands on a remote instance.
-func RunCMD() cli.Command { //nolint: gocognit
+func RunCMD() *cli.Command { //nolint: gocognit
 	const (
 		commandFlagName = "command"
 		envFlagName     = "env"
@@ -36,39 +36,39 @@ func RunCMD() cli.Command { //nolint: gocognit
 
 	defaultID := uuid.New()
 
-	return cli.Command{
+	return &cli.Command{
 		Name:  "run",
 		Usage: "run a command with Jasper service",
 		Flags: append(clientFlags(),
-			cli.StringSliceFlag{
+			&cli.StringSliceFlag{
 				Name:  joinFlagNames(commandFlagName, "c"),
 				Usage: "specify command(s) to run on a remote Jasper service. may specify more than once",
 			},
-			cli.StringSliceFlag{
+			&cli.StringSliceFlag{
 				Name:  envFlagName,
 				Usage: "specify environment variables, in '<key>=<val>' forms. may specify more than once",
 			},
-			cli.BoolFlag{
+			&cli.BoolFlag{
 				Name:  sudoFlagName,
 				Usage: "run the command with sudo",
 			},
-			cli.StringFlag{
+			&cli.StringFlag{
 				Name:  sudoAsFlagName,
 				Usage: "run commands as another user as in 'sudo -u <user>'",
 			},
-			cli.StringFlag{
+			&cli.StringFlag{
 				Name:  idFlagName,
 				Usage: "specify an ID for this command (optional). note: this ID cannot be used to track the subcommands.",
 			},
-			cli.BoolFlag{
+			&cli.BoolFlag{
 				Name:  execFlagName,
 				Usage: "execute commands directly without shell",
 			},
-			cli.StringSliceFlag{
+			&cli.StringSliceFlag{
 				Name:  tagFlagName,
 				Usage: "specify one or more tag names for the process",
 			},
-			cli.BoolFlag{
+			&cli.BoolFlag{
 				Name:  waitFlagName,
 				Usage: "block until the process returns (subject to service timeouts), propagating the exit code from the process. if set, writes the output of each command to stdout; otherwise, prints the process IDs.",
 			},
@@ -79,7 +79,7 @@ func RunCMD() cli.Command { //nolint: gocognit
 					if c.NArg() == 0 {
 						return errors.New("must specify at least one command")
 					}
-					return c.Set(commandFlagName, strings.Join(c.Args(), " "))
+					return c.Set(commandFlagName, strings.Join(c.Args().Slice(), " "))
 				}
 				return nil
 			},
@@ -219,20 +219,20 @@ func printLogs(ctx context.Context, client remote.Manager, cmd *jasper.Command, 
 // ListCMD provides a user interface to inspect processes managed by a
 // jasper instance and their state. The output of the command is a
 // human-readable table.
-func ListCMD() cli.Command {
+func ListCMD() *cli.Command {
 	const (
 		filterFlagName = "filter"
 		groupFlagName  = "group"
 	)
-	return cli.Command{
+	return &cli.Command{
 		Name:  "list",
 		Usage: "list Jasper managed processes with human readable output",
 		Flags: append(clientFlags(),
-			cli.StringFlag{
+			&cli.StringFlag{
 				Name:  filterFlagName,
 				Usage: "filter processes by status (all, running, successful, failed, terminated)",
 			},
-			cli.StringFlag{
+			&cli.StringFlag{
 				Name:  groupFlagName,
 				Usage: "return a list of processes with a tag",
 			},
@@ -290,20 +290,20 @@ func ListCMD() cli.Command {
 }
 
 // KillCMD terminates a single process by id, sending either TERM or KILL.
-func KillCMD() cli.Command {
+func KillCMD() *cli.Command {
 	const (
 		idFlagName   = "id"
 		killFlagName = "kill"
 	)
-	return cli.Command{
+	return &cli.Command{
 		Name:  "kill",
 		Usage: "terminate a process",
 		Flags: append(clientFlags(),
-			cli.StringFlag{
+			&cli.StringFlag{
 				Name:  joinFlagNames(idFlagName, "i"),
 				Usage: "specify the id of the process to kill",
 			},
-			cli.BoolFlag{
+			&cli.BoolFlag{
 				Name:  killFlagName,
 				Usage: "send KILL (9) rather than TERM (15)",
 			},
@@ -341,8 +341,8 @@ func KillCMD() cli.Command {
 }
 
 // ClearCMD removes all terminated/exited processes from Jasper Manager.
-func ClearCMD() cli.Command {
-	return cli.Command{
+func ClearCMD() *cli.Command {
+	return &cli.Command{
 		Name:   "clear",
 		Usage:  "clean up terminated processes",
 		Flags:  clientFlags(),
@@ -361,21 +361,21 @@ func ClearCMD() cli.Command {
 
 // KillAllCMD terminates all processes with a given tag, sending either TERM or
 // KILL.
-func KillAllCMD() cli.Command {
+func KillAllCMD() *cli.Command {
 	const (
 		groupFlagName = "group"
 		killFlagName  = "kill"
 	)
 
-	return cli.Command{
+	return &cli.Command{
 		Name:  "kill-all",
 		Usage: "terminate a group of tagged processes",
 		Flags: append(clientFlags(),
-			cli.StringFlag{
+			&cli.StringFlag{
 				Name:  groupFlagName,
 				Usage: "specify the group of process to kill",
 			},
-			cli.BoolFlag{
+			&cli.BoolFlag{
 				Name:  killFlagName,
 				Usage: "send KILL (9) rather than TERM (15)",
 			},
@@ -411,25 +411,25 @@ func KillAllCMD() cli.Command {
 
 // DownloadCMD exposes a simple interface for using jasper to download
 // files on the remote jasper.Manager.
-func DownloadCMD() cli.Command {
+func DownloadCMD() *cli.Command {
 	const (
 		urlFlagName         = "url"
 		pathFlagName        = "path"
 		extractPathFlagName = "extract_to"
 	)
 
-	return cli.Command{
+	return &cli.Command{
 		Name: "download",
 		Flags: append(clientFlags(),
-			cli.StringFlag{
+			&cli.StringFlag{
 				Name:  joinFlagNames(urlFlagName, "p"),
 				Usage: "specify the url of the file to download on the remote.",
 			},
-			cli.StringFlag{
+			&cli.StringFlag{
 				Name:  extractPathFlagName,
 				Usage: "if specified, attempt to extract the downloaded artifact to the given path.",
 			},
-			cli.StringFlag{
+			&cli.StringFlag{
 				Name:  pathFlagName,
 				Usage: "specify the remote path to download the file to on the managed system. Required.",
 			}),
