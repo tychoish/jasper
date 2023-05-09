@@ -16,7 +16,6 @@ import (
 	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
-	"github.com/tychoish/grip/send"
 	"github.com/tychoish/jasper/executor"
 )
 
@@ -90,12 +89,6 @@ func MakeCreation(cmdStr string) (*Create, error) {
 
 	return &Create{
 		Args: args,
-		Output: Output{
-			// TODO: make so senders send at different
-			// levels for error and output
-			Output: send.MakeWriter(grip.Sender()),
-			Error:  send.MakeWriter(grip.Sender()),
-		},
 	}, nil
 }
 
