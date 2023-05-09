@@ -5,9 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 	"strings"
 
 	"github.com/google/shlex"
+	"github.com/tychoish/fun"
 	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
@@ -542,7 +544,7 @@ func (c *Command) Run(ctx context.Context) error {
 		return catcher.Resolve()
 	}
 
-	for idx, opt := range opts {
+	for _, opt := range opts {
 		if err := ctx.Err(); err != nil {
 			catcher.Add(fmt.Errorf("operation canceled: %w", err))
 			catcher.Add(c.Close())
@@ -553,7 +555,7 @@ func (c *Command) Run(ctx context.Context) error {
 			c.opts.PreHook(&c.opts, opt)
 		}
 
-		err := c.exec(ctx, opt, idx)
+		err := c.exec(ctx, opt)
 
 		if !c.opts.IgnoreError {
 			if c.opts.PostHook != nil {
@@ -770,33 +772,43 @@ func (c *Command) ExportCreateOptions() ([]*options.Create, error) {
 	return out, nil
 }
 
-func (c *Command) exec(ctx context.Context, opts *options.Create, idx int) error {
-	msg := message.Fields{
-		"id":         c.opts.ID,
-		"cmd":        strings.Join(opts.Args, " "),
-		"index":      idx,
-		"len":        len(c.opts.Commands),
-		"background": c.opts.RunBackground,
-		"tags":       c.opts.Process.Tags,
-	}
-
+func (c *Command) exec(ctx context.Context, opts *options.Create) error {
 	writeOutput := getMsgOutput(opts.Output)
 	proc, err := c.makeProc(ctx, opts)
 	if err != nil {
 		return fmt.Errorf("problem starting command: %w", err)
 	}
 	c.procs = append(c.procs, proc)
+	msg := message.Fields{
+		"id":   c.opts.ID,
+		"proc": proc.ID(),
+	}
+	if len(c.opts.Process.Tags) > 0 {
+		msg["tags"] = c.opts.Process.Tags
+	}
+
+	cstr := strings.Join(opts.Args, " ")
+	if len(cstr) > 72 {
+		cstr = strings.Trim(cstr[:72], "- \t")
+	}
+	msg["cmd"] = fmt.Sprintf("<%s>...", cstr)
+	if opts.WorkingDirectory != fun.Must(os.Getwd()) {
+		msg["path"] = opts.WorkingDirectory
+	}
 
 	if !c.opts.RunBackground {
 		waitCatcher := &erc.Collector{}
 		for _, proc := range c.procs {
 			_, err = proc.Wait(ctx)
 			if err != nil {
-				waitCatcher.Add(fmt.Errorf("error waiting on process '%s': %w", proc.ID(), err))
+				waitCatcher.Add(fmt.Errorf("process<%s> group<%s>: %w", proc.ID(), c.opts.ID, err))
 			}
 		}
 		err = waitCatcher.Resolve()
-		msg["err"] = err
+		if err != nil {
+			msg["err"] = err
+		}
+
 		grip.Log(c.opts.Priority, writeOutput(msg))
 	}
 
@@ -836,7 +848,6 @@ func getMsgOutput(opts options.Output) func(msg message.Fields) message.Fields {
 	return func(msg message.Fields) message.Fields {
 		inMemorySender, ok := sender.(*send.InMemorySender)
 		if !ok {
-			msg["log_err"] = err
 			return msg
 		}
 		logs, err := inMemorySender.GetString()
