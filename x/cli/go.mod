@@ -6,8 +6,8 @@ require (
 	github.com/cheynewallace/tabby v1.1.1
 	github.com/evergreen-ci/service v1.0.1-0.20200225230430-d9382e39d768
 	github.com/google/uuid v1.3.0
-	github.com/tychoish/fun v0.9.1
-	github.com/tychoish/grip v0.2.8
+	github.com/tychoish/fun v0.9.2
+	github.com/tychoish/grip v0.2.10
 	github.com/tychoish/grip/x/splunk v0.0.0-20230430204648-ccdad1e4b419
 	github.com/tychoish/jasper v0.1.0
 	github.com/tychoish/jasper/x/remote v0.0.0-20230502230321-07d6256076b2

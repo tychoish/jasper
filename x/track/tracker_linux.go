@@ -11,7 +11,6 @@ import (
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/jasper"
-	"github.com/tychoish/jasper/util"
 )
 
 const (
@@ -148,12 +147,10 @@ func (t *linuxProcessTracker) doCleanupByEnvironmentVariable() error {
 func cleanupProcess(pid int) error {
 	// A process returns syscall.ESRCH if it already terminated.
 	if err := syscall.Kill(pid, syscall.SIGTERM); err != nil && err != syscall.ESRCH {
-		catcher := &erc.Collector{}
-		catcher.Add(fmt.Errorf("sending sigterm to process with PID '%d': %w", pid, err))
-		util.CheckCall(catcher, func() error { return syscall.Kill(pid, syscall.SIGKILL) },
-			fmt.Sprintf("sending sigkill to process with PID '%d'", pid),
-		)
-		return catcher.Resolve()
+		ec := &erc.Collector{}
+		ec.Add(fmt.Errorf("sending sigterm to process with PID '%d': %w", pid, err))
+		ec.Add(erc.Wrapf(syscall.Kill(pid, syscall.SIGKILL), "sending sigkill to process with PID '%d'", pid))
+		return ec.Resolve()
 	}
 	return nil
 }
@@ -166,11 +163,11 @@ func cleanupProcess(pid int) error {
 func (t *linuxProcessTracker) Cleanup() error {
 	catcher := &erc.Collector{}
 	if t.validCgroup() {
-		util.CheckCall(catcher, t.doCleanupByCgroup,
-			"error occurred while cleaning up processes tracked by cgroup")
+		catcher.Add(erc.Wrap(t.doCleanupByCgroup(),
+			"error occurred while cleaning up processes tracked by cgroup"))
 	}
-	util.CheckCall(catcher, t.doCleanupByEnvironmentVariable,
-		"error occurred while cleaning up processes tracked by environment variable")
+	catcher.Add(erc.Wrap(t.doCleanupByEnvironmentVariable(),
+		"error occurred while cleaning up processes tracked by environment variable"))
 
 	return catcher.Resolve()
 }

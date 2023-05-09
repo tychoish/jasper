@@ -2,13 +2,17 @@ package util
 
 import (
 	"bytes"
-	"fmt"
 	"io"
+	"os"
 	"sync"
 
-	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/grip/send"
 )
+
+func FileExists(path string) bool {
+	_, err := os.Stat(path)
+	return !os.IsNotExist(err)
+}
 
 // CloseFunc is a function used to close a service or close the client
 // connection to a service.
@@ -41,23 +45,9 @@ func (b *LocalBuffer) String() string {
 func (b *LocalBuffer) Close() error { return nil }
 
 func ConvertWriter(wr io.Writer, err error) send.Sender {
-	if err != nil {
+	if err != nil || wr == nil {
 		return nil
 	}
 
-	if wr == nil {
-		return nil
-	}
-
-	sender := send.WrapWriter(wr)
-	sender.SetName(sender.Name())
-	return sender
-
-}
-
-func CheckCall(catcher *erc.Collector, fn func() error, msg string) {
-	if err := fn(); err != nil {
-		catcher.Add(fmt.Errorf("%s: %w", msg, err))
-	}
-
+	return send.WrapWriter(wr)
 }

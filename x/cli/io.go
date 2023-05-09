@@ -9,7 +9,6 @@ import (
 	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
-	"github.com/tychoish/jasper/util"
 )
 
 const (
@@ -447,10 +446,10 @@ type LoggingCacheCreateInput struct {
 // Validate checks that a cached logger ID has been given and the logger options
 // are valid.
 func (in *LoggingCacheCreateInput) Validate() error {
-	catcher := &erc.Collector{}
-	erc.When(catcher, in.ID == "", "ID must not be empty")
-	util.CheckCall(catcher, in.Output.Validate, "invalid output options")
-	return catcher.Resolve()
+	ec := &erc.Collector{}
+	erc.When(ec, in.ID == "", "ID must not be empty")
+	ec.Add(erc.Wrap(in.Output.Validate(), "invalid output options"))
+	return ec.Resolve()
 }
 
 // CachedLoggerResponse represents CLI-specific output describing the logger
