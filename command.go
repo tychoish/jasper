@@ -718,9 +718,9 @@ func (c *Command) getCmd() string {
 		}
 		var formattedCmd string
 		if len(env) != 0 {
-			formattedCmd += fmt.Sprintf("%s ", env)
+			formattedCmd = fmt.Sprintf("%s%s ", formattedCmd, env)
 		}
-		formattedCmd += strings.Join(cmd, " ")
+		formattedCmd = strings.Join(append([]string{formattedCmd}, cmd...), " ")
 		out = append(out, formattedCmd)
 	}
 	return strings.Join(out, "\n")
@@ -797,21 +797,20 @@ func (c *Command) exec(ctx context.Context, opts *options.Create) error {
 	}
 
 	if !c.opts.RunBackground {
-		waitCatcher := &erc.Collector{}
+		ec := &erc.Collector{}
 		for _, proc := range c.procs {
 			_, err = proc.Wait(ctx)
 			if err != nil {
-				waitCatcher.Add(fmt.Errorf("process<%s> group<%s>: %w", proc.ID(), c.opts.ID, err))
+				ec.Add(fmt.Errorf("process<%s> group<%s>: %w", proc.ID(), c.opts.ID, err))
 			}
 		}
-		err = waitCatcher.Resolve()
+		err = ec.Resolve()
 		if err != nil {
 			msg["err"] = err
 		}
 
 		grip.Log(c.opts.Priority, writeOutput(msg))
 	}
-
 	return err
 }
 
