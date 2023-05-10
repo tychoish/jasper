@@ -791,7 +791,7 @@ func (c *Command) exec(ctx context.Context, opts *options.Create) error {
 	if len(cstr) > 72 {
 		cstr = strings.Trim(cstr[:72], "- \t")
 	}
-	msg["cmd"] = fmt.Sprintf("<%s>...", cstr)
+	msg["cmd"] = fmt.Sprintf("(%s)...", cstr)
 	if opts.WorkingDirectory != fun.Must(os.Getwd()) {
 		msg["path"] = opts.WorkingDirectory
 	}
@@ -801,7 +801,7 @@ func (c *Command) exec(ctx context.Context, opts *options.Create) error {
 		for _, proc := range c.procs {
 			_, err = proc.Wait(ctx)
 			if err != nil {
-				ec.Add(fmt.Errorf("process<%s> group<%s>: %w", proc.ID(), c.opts.ID, err))
+				ec.Add(fmt.Errorf("process(%s) group(%s): %w", proc.ID(), c.opts.ID, err))
 			}
 		}
 		err = ec.Resolve()
