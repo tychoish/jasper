@@ -9,7 +9,7 @@ require (
 	github.com/tychoish/fun v0.9.2
 	github.com/tychoish/grip v0.3.1
 	github.com/tychoish/grip/x/splunk v0.0.0-20230510192207-dc2e7390e835
-	github.com/tychoish/jasper v0.1.0
+	github.com/tychoish/jasper v0.1.1
 	github.com/tychoish/jasper/x/remote v0.0.0-20230510193640-652d1100c1b7
 	github.com/tychoish/jasper/x/splunk v0.0.0-20230510193424-429e4caa8e98
 	github.com/tychoish/jasper/x/track v0.0.0-20230502230321-07d6256076b2
@@ -30,13 +30,14 @@ require (
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
-	github.com/kr/text v0.2.0 // indirect
+	github.com/kr/pretty v0.3.1 // indirect
 	github.com/mholt/archiver v3.1.1+incompatible // indirect
 	github.com/nwaples/rardecode v1.1.3 // indirect
 	github.com/opencontainers/runtime-spec v1.0.3-0.20210326190908-1c3f411f0417 // indirect
 	github.com/phyber/negroni-gzip v1.0.0 // indirect
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/rogpeppe/go-internal v1.10.0 // indirect
 	github.com/rs/cors v1.8.3 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect

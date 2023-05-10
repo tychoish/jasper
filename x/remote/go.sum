@@ -138,8 +138,9 @@ github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZN
 github.com/rogpeppe/go-internal v1.1.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/rogpeppe/go-internal v1.2.2/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
-github.com/rogpeppe/go-internal v1.9.0 h1:73kH8U+JUqXU8lRuOHeVHaa/SZPifC7BkcraZVejAe8=
 github.com/rogpeppe/go-internal v1.9.0/go.mod h1:WtVeX8xhTBvf0smdhujwtBcq4Qrzq/fJaraNFVN+nFs=
+github.com/rogpeppe/go-internal v1.10.0 h1:TMyTOH3F/DB16zRVcYyreMH6GnZZrwQVAoYjRBZyWFQ=
+github.com/rogpeppe/go-internal v1.10.0/go.mod h1:UQnix2H7Ngw/k4C5ijL5+65zddjncjaFoBhdsK/akog=
 github.com/rs/cors v1.7.0/go.mod h1:gFx+x8UowdsKA9AchylcLynDq+nNFfI8FkUZdN/jGCU=
 github.com/rs/cors v1.8.3 h1:O+qNyWn7Z+F9M0ILBHgMVPuB1xTOucVd5gtaYyXBpRo=
 github.com/rs/cors v1.8.3/go.mod h1:XyqrcTp5zjWr1wsJ8PIRZssZ8b/WMcMf71DJnit4EMU=
@@ -186,8 +187,8 @@ github.com/tychoish/grip/x/metrics v0.0.0-20230510192207-dc2e7390e835 h1:+DvuBry
 github.com/tychoish/grip/x/metrics v0.0.0-20230510192207-dc2e7390e835/go.mod h1:XvqL+mRl32cnGOUPN8T+DWu95zWCrX86qBgK4rsO0pk=
 github.com/tychoish/grip/x/splunk v0.0.0-20230510192207-dc2e7390e835 h1:52fuXJJIfSRXzyaVpR0F2nkiKnsvYhTBbHzGbD8/QcI=
 github.com/tychoish/grip/x/splunk v0.0.0-20230510192207-dc2e7390e835/go.mod h1:yGyJLDKPs7ZJ/i28ZfBX2tsLCpePRepm00rwc04zadw=
-github.com/tychoish/jasper v0.1.0 h1:MoRHCfVO2H3zGENz7GBxS1qcmGyfnMCBD8Grc2v57kk=
-github.com/tychoish/jasper v0.1.0/go.mod h1:YXpCcEy7uDsDXiyBka3nTdG808FTpq/T0qdIqrQkXz8=
+github.com/tychoish/jasper v0.1.1 h1:7Z9pT87BoYqzq/aCssuz4VakKQWnjngaKJGcxqi3kg8=
+github.com/tychoish/jasper v0.1.1/go.mod h1:2EZstU5babAvZN6PFUvc9Phtyed00lxfB+zbxIOaeoY=
 github.com/tychoish/jasper/x/splunk v0.0.0-20230510193424-429e4caa8e98 h1:8ky7PNS2+cKslNRUr0nsbukxzkO0mEDPI0IE9kqn/Hg=
 github.com/tychoish/jasper/x/splunk v0.0.0-20230510193424-429e4caa8e98/go.mod h1:/MGZSRz3zTit2Wj7djqhvIyq6yNYb3hSRRW7yjQHJNo=
 github.com/ulikunitz/xz v0.5.6/go.mod h1:2bypXElzHzzJZwzH67Y6wb67pO62Rzfn7BSiF4ABRW8=

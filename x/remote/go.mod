@@ -12,7 +12,7 @@ require (
 	github.com/tychoish/grip v0.3.1
 	github.com/tychoish/grip/x/metrics v0.0.0-20230510192207-dc2e7390e835
 	github.com/tychoish/grip/x/splunk v0.0.0-20230510192207-dc2e7390e835
-	github.com/tychoish/jasper v0.1.0
+	github.com/tychoish/jasper v0.1.1
 	github.com/tychoish/jasper/x/splunk v0.0.0-20230510193424-429e4caa8e98
 	google.golang.org/grpc v1.54.0
 	google.golang.org/protobuf v1.30.0
@@ -32,6 +32,7 @@ require (
 	github.com/phyber/negroni-gzip v1.0.0 // indirect
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/rogpeppe/go-internal v1.10.0 // indirect
 	github.com/rs/cors v1.8.3 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/tklauser/go-sysconf v0.3.11 // indirect

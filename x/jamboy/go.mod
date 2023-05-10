@@ -6,10 +6,10 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/stretchr/testify v1.8.2
-	github.com/tychoish/amboy v0.0.0-20230427195856-ce072e5c3017
+	github.com/tychoish/amboy v0.0.0-20230510194436-098c36e98bc1
 	github.com/tychoish/fun v0.9.2
 	github.com/tychoish/grip v0.3.1
-	github.com/tychoish/jasper v0.1.0
+	github.com/tychoish/jasper v0.1.1
 	github.com/tychoish/jasper/x/remote v0.0.0-20230502230321-07d6256076b2
 )
 

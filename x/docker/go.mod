@@ -8,7 +8,7 @@ require (
 	github.com/opencontainers/image-spec v1.1.0-rc2
 	github.com/tychoish/fun v0.9.2
 	github.com/tychoish/grip v0.3.1
-	github.com/tychoish/jasper v0.1.0
+	github.com/tychoish/jasper v0.1.1
 )
 
 require (
