@@ -165,22 +165,26 @@ func (lp *LoggingPayload) produceMessage(data []byte) (message.Composer, error) 
 			return nil, fmt.Errorf("problem parsing json from message body: %w", err)
 		}
 
-		if lp.AddMetadata {
-			return message.MakeFields(payload), nil
+		m := message.MakeFields(payload)
+		if !lp.AddMetadata {
+			m.SetOption(message.OptionSkipAllMetadata)
 		}
 
-		return message.MakeSimpleFields(payload), nil
+		return m, nil
 	case LoggingPayloadFormatSTRING:
-		if lp.AddMetadata {
-			return message.MakeString(string(data)), nil
+		m := message.MakeString(string(data))
+		if !lp.AddMetadata {
+			m.SetOption(message.OptionSkipAllMetadata)
 		}
 
-		return message.MakeSimpleString(string(data)), nil
+		return m, nil
 	default:
-		if lp.AddMetadata {
-			return message.MakeBytes(data), nil
+		m := message.MakeBytes(data)
+
+		if !lp.AddMetadata {
+			m.SetOption(message.OptionSkipAllMetadata)
 		}
 
-		return message.MakeSimpleBytes(data), nil
+		return m, nil
 	}
 }
