@@ -9,17 +9,18 @@ require (
 	github.com/tychoish/birch/x/mrpc v0.0.0-20230413052020-46068f63d7bb
 	github.com/tychoish/fun v0.9.2
 	github.com/tychoish/gimlet v0.0.0-20230130001449-8987c96bb886
-	github.com/tychoish/grip v0.2.10
-	github.com/tychoish/grip/x/metrics v0.0.0-20230430204648-ccdad1e4b419
-	github.com/tychoish/grip/x/splunk v0.0.0-20230430204648-ccdad1e4b419
+	github.com/tychoish/grip v0.3.1
+	github.com/tychoish/grip/x/metrics v0.0.0-20230510192207-dc2e7390e835
+	github.com/tychoish/grip/x/splunk v0.0.0-20230510192207-dc2e7390e835
 	github.com/tychoish/jasper v0.1.0
-	github.com/tychoish/jasper/x/splunk v0.0.0-20230502230321-07d6256076b2
+	github.com/tychoish/jasper/x/splunk v0.0.0-20230510193424-429e4caa8e98
 	google.golang.org/grpc v1.54.0
 	google.golang.org/protobuf v1.30.0
 )
 
 require (
 	github.com/dsnet/compress v0.0.1 // indirect
+	github.com/frankban/quicktest v1.14.5 // indirect
 	github.com/fuyufjh/splunk-hec-go v0.4.0 // indirect
 	github.com/go-chi/chi v4.1.2+incompatible // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
@@ -27,7 +28,6 @@ require (
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
-	github.com/kr/pretty v0.3.1 // indirect
 	github.com/nwaples/rardecode v1.1.3 // indirect
 	github.com/phyber/negroni-gzip v1.0.0 // indirect
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
