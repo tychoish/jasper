@@ -788,10 +788,11 @@ func (c *Command) exec(ctx context.Context, opts *options.Create) error {
 	}
 
 	cstr := strings.Join(opts.Args, " ")
-	if len(cstr) > 72 {
-		cstr = strings.Trim(cstr[:72], "- \t")
+	if len(cstr) > 36 {
+		cstr = fmt.Sprintf("(%s)...", strings.Trim(cstr[:36], "- \t"))
 	}
-	msg["cmd"] = fmt.Sprintf("(%s)...", cstr)
+	msg["cmd"] = cstr
+
 	if opts.WorkingDirectory != fun.Must(os.Getwd()) {
 		msg["path"] = opts.WorkingDirectory
 	}

@@ -11,8 +11,8 @@ import (
 	"github.com/tychoish/jasper/util"
 )
 
-// Output provides a common way to define and represent the
-// output behavior of a evergreen/subprocess.Command operation.
+// Output provides a common way to define and represent the output
+// behavior of a Command operation.
 type Output struct {
 	Output            io.Writer `bson:"-" json:"-" yaml:"-"`
 	Error             io.Writer `bson:"-" json:"-" yaml:"-"`
