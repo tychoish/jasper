@@ -16,10 +16,8 @@ github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO+kdMU+MU=
 github.com/stretchr/testify v1.8.2 h1:+h33VjcLVPDHtOdpUCuF+7gSuG3yGIftsP1YvFihtJ8=
 github.com/stretchr/testify v1.8.2/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
-github.com/tychoish/fun v0.9.2 h1:OUGA+jHThZ/IxWATw61EJJRGRpF00IMzqQ8EhKH9HtI=
-github.com/tychoish/fun v0.9.2/go.mod h1:84A+BwGecz23UotmbB4mtvVS5ZcsZpspecduxpwF/XM=
-github.com/tychoish/grip v0.3.1 h1:+nfk1pjBFWOh27nfAcQI7mMh70dp0talc+i7D0mBy0E=
-github.com/tychoish/grip v0.3.1/go.mod h1:LPwWh6pCL3SreDklGT6wcoILH88sfH1deQvBGZg6/4M=
+github.com/tychoish/fun v0.9.3 h1:bWYo4ZrVOLx0Z0Hai3hdck9JnpYu5HppQKgrVwwPdzg=
+github.com/tychoish/grip v0.3.2 h1:AYNMAMF8wI6RleeBNoWre1UTVcHDbSpsRSyvpctgTZY=
 github.com/tychoish/grip/x/splunk v0.0.0-20230510192207-dc2e7390e835 h1:52fuXJJIfSRXzyaVpR0F2nkiKnsvYhTBbHzGbD8/QcI=
 github.com/tychoish/grip/x/splunk v0.0.0-20230510192207-dc2e7390e835/go.mod h1:yGyJLDKPs7ZJ/i28ZfBX2tsLCpePRepm00rwc04zadw=
 github.com/tychoish/jasper v0.1.1 h1:7Z9pT87BoYqzq/aCssuz4VakKQWnjngaKJGcxqi3kg8=
