@@ -102,6 +102,7 @@ func TestProcessDownloadJobs(t *testing.T) {
 	q := queue.NewLocalLimitedSize(&queue.FixedSizeQueueOptions{
 		Workers:  2,
 		Capacity: 1048,
+		Logger:   grip.Clone(),
 	})
 	assert.NotError(t, q.Start(ctx))
 	assert.NotError(t, q.Put(ctx, job))

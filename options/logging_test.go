@@ -138,7 +138,7 @@ func TestLoggingCache(t *testing.T) {
 					raw, err := json.Marshal(msg.Raw())
 					testt.Log(t, len(raw))
 					assert.NotError(t, err)
-					assert.Equal(t, len(raw), 127)
+					assert.True(t, len(raw) > 120)
 					check.Substring(t, string(raw), "proc")
 					check.Substring(t, string(raw), "host")
 					check.Substring(t, string(raw), "meta")

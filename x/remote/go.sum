@@ -177,10 +177,12 @@ github.com/tychoish/emt v0.0.0-20220306153139-74b97c67f209/go.mod h1:KMhVWIsL98Q
 github.com/tychoish/fun v0.1.0/go.mod h1:84A+BwGecz23UotmbB4mtvVS5ZcsZpspecduxpwF/XM=
 github.com/tychoish/fun v0.3.3/go.mod h1:84A+BwGecz23UotmbB4mtvVS5ZcsZpspecduxpwF/XM=
 github.com/tychoish/fun v0.9.3 h1:bWYo4ZrVOLx0Z0Hai3hdck9JnpYu5HppQKgrVwwPdzg=
+github.com/tychoish/fun v0.9.3/go.mod h1:84A+BwGecz23UotmbB4mtvVS5ZcsZpspecduxpwF/XM=
 github.com/tychoish/gimlet v0.0.0-20230130001449-8987c96bb886 h1:IFXT3WhVVHQf2dvMoS/DvV+HbKnfSYjnsNkPbyduLWQ=
 github.com/tychoish/gimlet v0.0.0-20230130001449-8987c96bb886/go.mod h1:aASKQIwBm4fuab/YfyM1du1JYt4ehlFU48WkNA8LvvY=
 github.com/tychoish/grip v0.1.1/go.mod h1:Vxl3fsRs/5aAsnS3ff7/OT3C+A/kEWf08FgA2xSJfMY=
 github.com/tychoish/grip v0.3.2 h1:AYNMAMF8wI6RleeBNoWre1UTVcHDbSpsRSyvpctgTZY=
+github.com/tychoish/grip v0.3.2/go.mod h1:1gJ0fx9LXmuhxQMf47Qli1rJXjsWZPezau14CGvq6Hs=
 github.com/tychoish/grip/x/metrics v0.0.0-20230510192207-dc2e7390e835 h1:+DvuBry3/iym1NhMpLPTgmmxZPko99QBrZT4zfaMGtc=
 github.com/tychoish/grip/x/metrics v0.0.0-20230510192207-dc2e7390e835/go.mod h1:XvqL+mRl32cnGOUPN8T+DWu95zWCrX86qBgK4rsO0pk=
 github.com/tychoish/grip/x/splunk v0.0.0-20230510192207-dc2e7390e835 h1:52fuXJJIfSRXzyaVpR0F2nkiKnsvYhTBbHzGbD8/QcI=

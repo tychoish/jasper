@@ -243,7 +243,7 @@ func setupLogger(opts *options.LoggerConfig) error {
 	if err != nil {
 		return fmt.Errorf("could not configure logging: %w", err)
 	}
-	grip.SetGlobalLogger(grip.NewLogger(sender))
+	grip.SetSender(sender)
 	return nil
 }
 

@@ -7,6 +7,7 @@ import (
 
 	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
+	"github.com/tychoish/fun/testt"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/mock"
 	"github.com/tychoish/jasper/options"
@@ -26,6 +27,7 @@ func TestCLIManager(t *testing.T) {
 					resp := &IDResponse{}
 					assert.NotError(t, execCLICommandOutput(t, c, managerID(), resp))
 					assert.True(t, resp.Successful())
+					testt.Log(t, resp)
 					assert.Equal(t, len(resp.ID), 0)
 				},
 				"CommandsWithInputFailWithInvalidInput": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {

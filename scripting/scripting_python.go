@@ -91,9 +91,14 @@ func (e *pythonEnvironment) RunScript(ctx context.Context, script string) error 
 func (e *pythonEnvironment) Build(ctx context.Context, dir string, args []string) (string, error) {
 	output := &util.LocalBuffer{}
 
-	err := e.manager.CreateCommand(ctx).Directory(dir).RedirectErrorToOutput(true).Environment(e.opts.Environment).
+	err := e.manager.CreateCommand(ctx).
+		Directory(dir).
+		RedirectErrorToOutput(true).
+		Environment(e.opts.Environment).
 		Add(append([]string{e.opts.Interpreter(), "setup.py", "bdist_wheel"}, args...)).
-		SetOutputWriter(output).SetOutputOptions(e.opts.Output).Run(ctx)
+		SetOutputWriter(output).
+		SetOutputOptions(e.opts.Output).
+		Run(ctx)
 	if err != nil {
 		return "", err
 	}

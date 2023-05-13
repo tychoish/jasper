@@ -8,6 +8,7 @@ import (
 
 	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
+	"github.com/tychoish/fun/testt"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/testutil"
@@ -82,6 +83,7 @@ func TestCLILoggingCache(t *testing.T) {
 
 					getResp := &CachedLoggerResponse{}
 					assert.NotError(t, execCLICommandInputOutput(t, c, loggingCacheGet(), input, getResp))
+					testt.Log(t, getResp.Message)
 					assert.True(t, getResp.IsZero())
 					assert.True(t, !getResp.Successful())
 				},
@@ -96,6 +98,7 @@ func TestCLILoggingCache(t *testing.T) {
 
 					getResp := &CachedLoggerResponse{}
 					assert.NotError(t, execCLICommandInputOutput(t, c, loggingCacheGet(), input, getResp))
+					testt.Log(t, getResp.Message)
 					assert.True(t, !getResp.Successful())
 					assert.True(t, getResp.IsZero())
 				},

@@ -7,7 +7,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"strings"
 
 	"github.com/tychoish/fun/adt"
 )
@@ -68,21 +67,6 @@ func GetHomedir() string {
 
 		return string(out)
 	})
-}
-
-func CollapseHomedir(in string) string {
-	dir := GetHomedir()
-
-	if !strings.Contains(in, dir) {
-		return in
-	}
-
-	in = strings.Replace(in, dir, "~", 1)
-	if strings.HasSuffix(in, "~") {
-		in = fmt.Sprint(in, string(filepath.Separator))
-	}
-
-	return in
 }
 
 func TryExpandHomedir(in string) string {
