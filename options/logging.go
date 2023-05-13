@@ -153,7 +153,11 @@ func (lp *LoggingPayload) convertMessage(value interface{}) (message.Composer, e
 	case string:
 		return lp.produceMessage([]byte(data))
 	default:
-		return message.Convert(value), nil
+		m := message.Convert(value)
+		if !lp.AddMetadata {
+			m.SetOption(message.OptionSkipAllMetadata)
+		}
+		return m, nil
 	}
 }
 
