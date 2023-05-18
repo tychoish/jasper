@@ -32,7 +32,7 @@ import (
 func init() {
 	sender := grip.Sender()
 	sender.SetPriority(level.Info)
-	grip.SetGlobalLogger(grip.NewLogger(sender))
+	grip.SetSender(sender)
 }
 
 type clientTestCase struct {

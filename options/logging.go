@@ -154,8 +154,8 @@ func (lp *LoggingPayload) convertMessage(value interface{}) (message.Composer, e
 		return lp.produceMessage([]byte(data))
 	default:
 		m := message.Convert(value)
-		if !lp.AddMetadata {
-			m.SetOption(message.OptionSkipAllMetadata)
+		if lp.AddMetadata {
+			m.SetOption(message.OptionIncludeMetadata)
 		}
 		return m, nil
 	}
@@ -170,23 +170,23 @@ func (lp *LoggingPayload) produceMessage(data []byte) (message.Composer, error) 
 		}
 
 		m := message.MakeFields(payload)
-		if !lp.AddMetadata {
-			m.SetOption(message.OptionSkipAllMetadata)
+		if lp.AddMetadata {
+			m.SetOption(message.OptionIncludeMetadata)
 		}
 
 		return m, nil
 	case LoggingPayloadFormatSTRING:
 		m := message.MakeString(string(data))
-		if !lp.AddMetadata {
-			m.SetOption(message.OptionSkipAllMetadata)
+		if lp.AddMetadata {
+			m.SetOption(message.OptionIncludeMetadata)
 		}
 
 		return m, nil
 	default:
 		m := message.MakeBytes(data)
 
-		if !lp.AddMetadata {
-			m.SetOption(message.OptionSkipAllMetadata)
+		if lp.AddMetadata {
+			m.SetOption(message.OptionIncludeMetadata)
 		}
 
 		return m, nil

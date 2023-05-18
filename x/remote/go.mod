@@ -10,7 +10,7 @@ require (
 	github.com/tychoish/fun v0.9.4
 	github.com/tychoish/gimlet v0.0.0-20230130001449-8987c96bb886
 	github.com/tychoish/grip v0.3.3
-	github.com/tychoish/grip/x/metrics v0.0.0-20230510192207-dc2e7390e835
+	github.com/tychoish/grip/x/metrics v0.0.0-20230518040011-315ea039b765
 	github.com/tychoish/grip/x/splunk v0.0.0-20230510192207-dc2e7390e835
 	github.com/tychoish/jasper v0.1.1
 	github.com/tychoish/jasper/x/splunk v0.0.0-20230510193424-429e4caa8e98
