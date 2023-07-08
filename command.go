@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/google/shlex"
-	"github.com/tychoish/fun"
 	"github.com/tychoish/fun/erc"
+	"github.com/tychoish/fun/ft"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
@@ -793,7 +793,7 @@ func (c *Command) exec(ctx context.Context, opts *options.Create) error {
 	}
 	msg["cmd"] = cstr
 
-	if opts.WorkingDirectory != fun.Must(os.Getwd()) {
+	if opts.WorkingDirectory != ft.Must(os.Getwd()) {
 		msg["path"] = opts.WorkingDirectory
 	}
 

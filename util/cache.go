@@ -19,20 +19,16 @@ var (
 func init() {
 	hostNameCache = &adt.Once[string]{}
 	homeDirCache = &adt.Once[string]{}
-}
 
-func GetHostname() string {
-	return hostNameCache.Do(func() string {
+	hostNameCache.Set(func() string {
 		name, err := os.Hostname()
 		if err != nil {
 			return "UNKNOWN_HOSTNAME"
 		}
 		return name
 	})
-}
 
-func GetHomedir() string {
-	return homeDirCache.Do(func() string {
+	homeDirCache.Do(func() string {
 		if runtime.GOOS == "windows" {
 			if dir := os.Getenv("HOME"); dir != "" {
 				return dir
@@ -68,6 +64,9 @@ func GetHomedir() string {
 		return string(out)
 	})
 }
+
+func GetHostname() string { return hostNameCache.Resolve() }
+func GetHomedir() string  { return homeDirCache.Resolve() }
 
 func TryExpandHomedir(in string) string {
 	if len(in) == 0 {
