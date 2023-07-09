@@ -171,8 +171,6 @@ github.com/tychoish/birch v0.2.3-0.20230708040754-3580810793c8 h1:mvMLqEgRGHhlqF
 github.com/tychoish/birch v0.2.3-0.20230708040754-3580810793c8/go.mod h1:ky++M4bZOdtDBSWv0Z4uQv42EPD1FmFLYp2aBDjhHPM=
 github.com/tychoish/birch/x/ftdc v0.0.0-20230413052020-46068f63d7bb h1:JR4j9XakBckXBH9DB1lE8BZ1gKb7y4f8Gw8g3TtPHtM=
 github.com/tychoish/birch/x/ftdc v0.0.0-20230413052020-46068f63d7bb/go.mod h1:SRDvs3W1BrVdppcRAjFRAJ04WHz49dGmJTy08BP2UuU=
-github.com/tychoish/birch/x/mrpc v0.0.0-20230413052020-46068f63d7bb h1:l6yzSrJbtMY0J55C3bp2knBnVmiEEINiKsvGnZ67OeA=
-github.com/tychoish/birch/x/mrpc v0.0.0-20230413052020-46068f63d7bb/go.mod h1:SyMVnkunrAoJF8VRylz3OpeTS6IxJ2kgQW3dfzoF+O4=
 github.com/tychoish/birch/x/mrpc v0.0.0-20230708040754-3580810793c8 h1:K44AqnGKVlwq2kXOqPs6Ud7K518lG8e7u+vcAcGSOc0=
 github.com/tychoish/birch/x/mrpc v0.0.0-20230708040754-3580810793c8/go.mod h1:zNyQP0dTnrxxtpOnTdzclw/1GSnhOiaKrcR5ibEnzBE=
 github.com/tychoish/emt v0.0.0-20220306153139-74b97c67f209/go.mod h1:KMhVWIsL98Q8AoorphjsOQWabcNOoYqMSpODR/rtRb4=
