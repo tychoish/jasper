@@ -25,7 +25,7 @@ func TestManagerInterface(t *testing.T) {
 		}
 
 		t.Run(mname, func(t *testing.T) {
-			testcases.RunManagerSuite(t, testcases.GenerateManagerSuite(t), makeMngr)
+			testcases.RunManagerSuite(t, testcases.GenerateManagerSuite(), makeMngr)
 		})
 	}
 }

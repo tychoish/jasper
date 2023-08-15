@@ -2,10 +2,9 @@ package mock
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
-
-	"errors"
 
 	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/jasper/options"

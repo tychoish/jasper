@@ -196,6 +196,7 @@ func createCachedLoggerFromCLI(t *testing.T, c *cli.Context, id string) options.
 	assert.NotError(t, err)
 	resp := &CachedLoggerResponse{}
 	assert.NotError(t, execCLICommandInputOutput(t, c, loggingCacheCreate(), input, resp))
+	testt.Log(t, resp)
 	assert.True(t, resp.Successful())
 	assert.Equal(t, id, resp.Logger.ID)
 

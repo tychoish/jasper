@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/jasper/options"
@@ -114,7 +115,7 @@ func (m *basicProcessManager) CreateProcess(ctx context.Context, opts *options.C
 
 func (m *basicProcessManager) LoggingCache(_ context.Context) LoggingCache { return m.loggers }
 
-func (m *basicProcessManager) CreateCommand(ctx context.Context) *Command {
+func (m *basicProcessManager) CreateCommand(_ context.Context) *Command {
 	return NewCommand().ProcConstructor(m.CreateProcess)
 }
 
@@ -188,7 +189,7 @@ func (m *basicProcessManager) List(ctx context.Context, f options.Filter) ([]Pro
 	return out, nil
 }
 
-func (m *basicProcessManager) Get(ctx context.Context, id string) (Process, error) {
+func (m *basicProcessManager) Get(_ context.Context, id string) (Process, error) {
 	proc, ok := m.procs[id]
 	if !ok {
 		return nil, fmt.Errorf("process '%s' does not exist", id)
@@ -254,7 +255,7 @@ func (m *basicProcessManager) Group(ctx context.Context, name string) ([]Process
 	return out, nil
 }
 
-func (m *basicProcessManager) WriteFile(ctx context.Context, opts options.WriteFile) error {
+func (m *basicProcessManager) WriteFile(_ context.Context, opts options.WriteFile) error {
 	if err := opts.Validate(); err != nil {
 		return fmt.Errorf("invalid write options: %w", err)
 	}

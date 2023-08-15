@@ -522,8 +522,7 @@ func TestRunParallelRunsInParallel(t *testing.T) {
 		{"sleep", "3"},
 		{"sleep", "3"},
 	})
-	threePointFiveSeconds := time.Second*3 + time.Millisecond*500
-	maxRunTimeAllowed := threePointFiveSeconds
+	maxRunTimeAllowed := 3500 * time.Millisecond // 3.5m
 	cctx, cancel := context.WithTimeout(context.Background(), maxRunTimeAllowed)
 	defer cancel()
 	// If this does not run in parallel, the context will timeout and we will

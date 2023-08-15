@@ -5,11 +5,11 @@ go 1.20
 require (
 	github.com/golang/protobuf v1.5.3
 	github.com/mholt/archiver v3.1.1+incompatible
-	github.com/tychoish/birch v0.2.3-0.20230708040754-3580810793c8
+	github.com/tychoish/birch v0.2.3-0.20230815160103-70c52db1b271
 	github.com/tychoish/birch/x/mrpc v0.0.0-20230708040754-3580810793c8
-	github.com/tychoish/fun v0.10.0
+	github.com/tychoish/fun v0.10.3
 	github.com/tychoish/gimlet v0.0.0-20230130001449-8987c96bb886
-	github.com/tychoish/grip v0.3.4
+	github.com/tychoish/grip v0.3.5
 	github.com/tychoish/grip/x/metrics v0.0.0-20230518040011-315ea039b765
 	github.com/tychoish/grip/x/splunk v0.0.0-20230510192207-dc2e7390e835
 	github.com/tychoish/jasper v0.1.1
@@ -37,7 +37,7 @@ require (
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/tklauser/go-sysconf v0.3.11 // indirect
 	github.com/tklauser/numcpus v0.6.0 // indirect
-	github.com/tychoish/birch/x/ftdc v0.0.0-20230413052020-46068f63d7bb // indirect
+	github.com/tychoish/birch/x/ftdc v0.0.0-20230815160103-70c52db1b271 // indirect
 	github.com/ulikunitz/xz v0.5.11 // indirect
 	github.com/urfave/negroni v1.0.0 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect

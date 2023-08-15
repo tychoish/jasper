@@ -32,17 +32,17 @@ func (p *Process) ID() string {
 }
 
 // Info returns the ProcInfo set by the user.
-func (p *Process) Info(ctx context.Context) jasper.ProcessInfo {
+func (p *Process) Info(_ context.Context) jasper.ProcessInfo {
 	return p.ProcInfo
 }
 
 // Running returns the IsRunning field set by the user.
-func (p *Process) Running(ctx context.Context) bool {
+func (p *Process) Running(_ context.Context) bool {
 	return p.ProcInfo.IsRunning
 }
 
 // Complete returns the Complete field set by the user.
-func (p *Process) Complete(ctx context.Context) bool {
+func (p *Process) Complete(_ context.Context) bool {
 	return p.ProcInfo.Complete
 }
 
@@ -63,7 +63,7 @@ func (p *Process) ResetTags() {
 
 // Signal records the signals sent to the process in Signals. If FailSignal is
 // set, it returns an error.
-func (p *Process) Signal(ctx context.Context, sig syscall.Signal) error {
+func (p *Process) Signal(_ context.Context, sig syscall.Signal) error {
 	if p.FailSignal {
 		return mockFail()
 	}
@@ -75,7 +75,7 @@ func (p *Process) Signal(ctx context.Context, sig syscall.Signal) error {
 
 // Wait returns the ExitCode set by the user in ProcInfo. If FailWait is set, it
 // returns exit code -1 and an error.
-func (p *Process) Wait(ctx context.Context) (int, error) {
+func (p *Process) Wait(_ context.Context) (int, error) {
 	if p.FailWait {
 		return -1, mockFail()
 	}
@@ -85,7 +85,7 @@ func (p *Process) Wait(ctx context.Context) (int, error) {
 
 // Respawn creates a new Process, which has a copy of all the fields in the
 // current Process. If FailRespawn is set, it returns an error.
-func (p *Process) Respawn(ctx context.Context) (jasper.Process, error) {
+func (p *Process) Respawn(_ context.Context) (jasper.Process, error) {
 	if p.FailRespawn {
 		return nil, mockFail()
 	}

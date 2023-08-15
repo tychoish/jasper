@@ -10,7 +10,7 @@ import (
 	"github.com/tychoish/jasper/testutil"
 )
 
-func registerBasedCreate(ctx context.Context, m *selfClearingProcessManager, t *testing.T, opts *options.Create) (Process, error) {
+func registerBasedCreate(ctx context.Context, m *selfClearingProcessManager, t *testing.T, _ *options.Create) (Process, error) {
 	sleep, err := NewBlockingProcess(ctx, testutil.SleepCreateOpts(10))
 	assert.NotError(t, err)
 	assert.True(t, sleep != nil)
@@ -23,7 +23,7 @@ func registerBasedCreate(ctx context.Context, m *selfClearingProcessManager, t *
 	return sleep, err
 }
 
-func pureCreate(ctx context.Context, m *selfClearingProcessManager, t *testing.T, opts *options.Create) (Process, error) {
+func pureCreate(ctx context.Context, m *selfClearingProcessManager, _ *testing.T, opts *options.Create) (Process, error) {
 	return m.CreateProcess(ctx, opts)
 }
 

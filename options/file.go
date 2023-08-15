@@ -3,12 +3,11 @@ package options
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
-
-	"errors"
 
 	"github.com/tychoish/fun/erc"
 )

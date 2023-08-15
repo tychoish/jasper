@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
 	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/jasper/executor"
 	"github.com/tychoish/jasper/options"
@@ -82,7 +83,7 @@ func NewBasicProcess(ctx context.Context, opts *options.Create) (Process, error)
 	return p, nil
 }
 
-func (p *basicProcess) transition(ctx context.Context, deadline time.Time) {
+func (p *basicProcess) transition(_ context.Context, deadline time.Time) {
 	defer p.exec.Close()
 
 	waitFinished := make(chan error)

@@ -19,7 +19,7 @@ type ManagerTest func(context.Context, *testing.T, jasper.Manager, testutil.Opts
 
 type ManagerSuite map[string]ManagerTest
 
-func GenerateManagerSuite(t *testing.T) ManagerSuite {
+func GenerateManagerSuite() ManagerSuite {
 	return map[string]ManagerTest{
 		"ValidateFixture": func(ctx context.Context, t *testing.T, manager jasper.Manager, mod testutil.OptsModify) {
 			check.True(t, ctx != nil)

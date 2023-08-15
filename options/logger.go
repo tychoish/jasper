@@ -66,7 +66,7 @@ const (
 
 // Validate ensures that RawLoggerConfigFormat is valid.
 func (f RawLoggerConfigFormat) Validate() error {
-	switch f {
+	switch f { //nolint:exhaustive
 	case RawLoggerConfigFormatJSON:
 		return nil
 	case RawLoggerConfigFormatInvalid:

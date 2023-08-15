@@ -28,7 +28,7 @@ func (m *synchronizedProcessManager) CreateProcess(ctx context.Context, opts *op
 	return &synchronizedProcess{proc: proc}, nil
 }
 
-func (m *synchronizedProcessManager) CreateCommand(ctx context.Context) *Command {
+func (m *synchronizedProcessManager) CreateCommand(_ context.Context) *Command {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 

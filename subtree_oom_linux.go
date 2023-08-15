@@ -64,7 +64,7 @@ func analyzeDmesg(ctx context.Context) (bool, []int, error) {
 
 	scanner := bufio.NewScanner(cmdReader)
 	if err = cmd.Start(); err != nil {
-		return false, nil, fmt.Errorf("Error starting dmesg command: %w", err)
+		return false, nil, fmt.Errorf("starting dmesg command: %w", err)
 	}
 
 	go func() {
@@ -92,6 +92,6 @@ func analyzeDmesg(ctx context.Context) (bool, []int, error) {
 	case <-ctx.Done():
 		return false, nil, errors.New("request cancelled")
 	case err = <-errs:
-		return wasOOMKilled, pids, fmt.Errorf("Error waiting for dmesg command: %w", err)
+		return wasOOMKilled, pids, fmt.Errorf("waiting for dmesg command: %w", err)
 	}
 }

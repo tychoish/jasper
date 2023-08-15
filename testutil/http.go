@@ -55,6 +55,7 @@ func WaitForRESTService(ctx context.Context, url string) error {
 				timer.Reset(timeoutInterval)
 				continue
 			}
+			defer resp.Body.Close()
 			if resp.StatusCode != http.StatusOK {
 				timer.Reset(timeoutInterval)
 				continue

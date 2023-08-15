@@ -4,10 +4,9 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
-
-	"errors"
 
 	"github.com/tychoish/fun/erc"
 )

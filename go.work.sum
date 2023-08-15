@@ -146,10 +146,13 @@ github.com/tychoish/fun v0.8.6/go.mod h1:84A+BwGecz23UotmbB4mtvVS5ZcsZpspecduxpw
 github.com/tychoish/fun v0.9.0 h1:HVDvKrJUB66AenwxyAIqVj9elySwbW45XC7YTuhtzHQ=
 github.com/tychoish/fun v0.9.0/go.mod h1:84A+BwGecz23UotmbB4mtvVS5ZcsZpspecduxpwF/XM=
 github.com/tychoish/fun v0.9.4/go.mod h1:84A+BwGecz23UotmbB4mtvVS5ZcsZpspecduxpwF/XM=
+github.com/tychoish/fun v0.10.0/go.mod h1:ZZfrwtsnHHV81ecZCBPp57DjjYY9Io39JH2QSXNpKn4=
 github.com/tychoish/grip v0.2.5 h1:U9yrOmgu0VzZ3ywdmewIzdNJGkfV/pzdbuPMAaMelJo=
 github.com/tychoish/grip v0.2.5/go.mod h1:jQlzC/krYSoYf2HF5FSYBwc1ABVkWz+DKyvmff36PGc=
 github.com/tychoish/grip v0.3.0/go.mod h1:LPwWh6pCL3SreDklGT6wcoILH88sfH1deQvBGZg6/4M=
 github.com/tychoish/grip v0.3.3/go.mod h1:G54kSTvvUnYksPYrrrep+yXI/a0O2yGk4ia1/V6iSo4=
+github.com/tychoish/grip v0.3.4/go.mod h1:uIWUQlfPGQXpvXVuZUsXFtqLNcudOGiflUOYOcg6hCY=
+github.com/tychoish/grip v0.3.5-0.20230814212257-3ad44e121b2d/go.mod h1:yUxPpU6c/Z40pyHGlmdUXQyOIW9QooUsw9qB3y0NmBA=
 github.com/tychoish/grip/x/metrics v0.0.0-20230408192639-ef555fcdf0fd/go.mod h1:iBxZSvfe+m4BDoxf55hzKLB7/zPhly4Mj7WY/Xfymz0=
 github.com/tychoish/jasper v0.0.0-20230415083349-ed64615c7d7e h1:TrjqIuiBPYg2Sx/2wwxrwQ364r3SRTHyp6PRALSLtSs=
 github.com/tychoish/jasper v0.0.0-20230415083349-ed64615c7d7e/go.mod h1:+ystOmC7qqkLm7vWVMfdcrNWsEd7PDA1pa4A629ZfhE=

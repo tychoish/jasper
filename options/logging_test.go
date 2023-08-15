@@ -85,7 +85,7 @@ func TestLoggingCache(t *testing.T) {
 	})
 	t.Run("OutputTargeting", func(t *testing.T) {
 		output := send.MakeInternal()
-		error := send.MakeInternal()
+		err := send.MakeInternal()
 		lp := &LoggingPayload{Data: "hello world!", Priority: level.Info}
 		t.Run("Output", func(t *testing.T) {
 			check.Equal(t, 0, output.Len())
@@ -96,20 +96,20 @@ func TestLoggingCache(t *testing.T) {
 			check.Equal(t, "hello world!", msg.Message.String())
 		})
 		t.Run("Error", func(t *testing.T) {
-			check.Equal(t, 0, error.Len())
-			cl := &CachedLogger{Error: error}
+			check.Equal(t, 0, err.Len())
+			cl := &CachedLogger{Error: err}
 			assert.NotError(t, cl.Send(lp))
-			assert.Equal(t, 1, error.Len())
-			msg := error.GetMessage()
+			assert.Equal(t, 1, err.Len())
+			msg := err.GetMessage()
 			check.Equal(t, "hello world!", msg.Message.String())
 		})
 		t.Run("ErrorForce", func(t *testing.T) {
 			lp.PreferSendToError = true
-			check.Equal(t, 0, error.Len())
-			cl := &CachedLogger{Error: error, Output: output}
+			check.Equal(t, 0, err.Len())
+			cl := &CachedLogger{Error: err, Output: output}
 			assert.NotError(t, cl.Send(lp))
-			assert.Equal(t, 1, error.Len())
-			msg := error.GetMessage()
+			assert.Equal(t, 1, err.Len())
+			msg := err.GetMessage()
 			check.Equal(t, "hello world!", msg.Message.String())
 		})
 	})

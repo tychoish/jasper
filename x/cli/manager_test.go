@@ -27,7 +27,7 @@ func TestCLIManager(t *testing.T) {
 					resp := &IDResponse{}
 					assert.NotError(t, execCLICommandOutput(t, c, managerID(), resp))
 					assert.True(t, resp.Successful())
-					testt.Log(t, resp)
+					testt.Log(t, resp.ID)
 					assert.Equal(t, len(resp.ID), 0)
 				},
 				"CommandsWithInputFailWithInvalidInput": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {

@@ -1,9 +1,8 @@
 package options
 
 import (
-	"testing"
-
 	"errors"
+	"testing"
 
 	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
