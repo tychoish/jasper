@@ -27,7 +27,7 @@ func AddBasicProcessTests(tests ...ProcessTestCase) []ProcessTestCase {
 		{
 			Name: "WithPopulatedArgsCommandCreationPasses",
 			Case: func(ctx context.Context, t *testing.T, opts *options.Create, makep jasper.ProcessConstructor) {
-				assert.True(t, opts.Args == nil)
+				assert.True(t, opts.Args != nil)
 				proc, err := makep(ctx, opts)
 				assert.NotError(t, err)
 				assert.True(t, proc != nil)

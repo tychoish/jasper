@@ -13,6 +13,7 @@ import (
 	"github.com/evergreen-ci/service"
 	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
+	"github.com/tychoish/fun/testt"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/testutil"
 	"github.com/tychoish/jasper/util"
@@ -142,7 +143,9 @@ func TestCLICommon(t *testing.T) {
 					return withMockStdin(t, fmt.Sprintf(`{"value":"%s"}`, expectedInput), func(*os.File) error {
 						return withMockStdout(t, func(*os.File) error {
 							input := &mockInput{}
+							testt.Log(t, expectedInput, "=>", input.Value)
 							assert.NotError(t, doPassthroughInputOutput(c, input, mockRequest("")))
+							testt.Log(t, expectedInput, "=>", input.Value)
 							assert.Equal(t, expectedInput, input.Value)
 							check.True(t, input.validated)
 							return nil

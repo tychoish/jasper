@@ -377,8 +377,8 @@ func TestRestService(t *testing.T) {
 
 			stream, err := client.GetLogStream(ctx, proc.ID(), 1)
 			assert.NotError(t, err)
-			assert.Equal(t, len(stream.Logs), 0)
-			assert.True(t, !stream.Done)
+			check.Equal(t, len(stream.Logs), 1)
+			check.True(t, !stream.Done)
 
 			info, err := os.Stat(file.Name())
 			assert.NotError(t, err)

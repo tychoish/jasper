@@ -28,7 +28,7 @@ func TestCLIManager(t *testing.T) {
 					assert.NotError(t, execCLICommandOutput(t, c, managerID(), resp))
 					assert.True(t, resp.Successful())
 					testt.Log(t, resp.ID)
-					assert.Equal(t, len(resp.ID), 0)
+					assert.NotEqual(t, len(resp.ID), 0)
 				},
 				"CommandsWithInputFailWithInvalidInput": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
 					input, err := json.Marshal(mock.Process{})
