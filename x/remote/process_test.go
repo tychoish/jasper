@@ -412,7 +412,7 @@ func TestProcessImplementations(t *testing.T) {
 			return client.CreateProcess(ctx, opts)
 		},
 		"MDB": func(ctx context.Context, opts *options.Create) (jasper.Process, error) {
-			mngr := jasper.NewManager(jasper.ManagerOptions{Synchronized: true})
+			mngr := jasper.NewManager(jasper.ManagerOptionSet(jasper.ManagerOptions{Synchronized: true}))
 
 			client, err := makeTestMDBServiceAndClient(ctx, mngr)
 			if err != nil {
@@ -422,7 +422,7 @@ func TestProcessImplementations(t *testing.T) {
 			return client.CreateProcess(ctx, opts)
 		},
 		"RPC/TLS": func(ctx context.Context, opts *options.Create) (jasper.Process, error) {
-			mngr := jasper.NewManager(jasper.ManagerOptions{Synchronized: true})
+			mngr := jasper.NewManager(jasper.ManagerOptionSet(jasper.ManagerOptions{Synchronized: true}))
 
 			client, err := makeTLSRPCServiceAndClient(ctx, mngr)
 			if err != nil {
@@ -432,7 +432,7 @@ func TestProcessImplementations(t *testing.T) {
 			return client.CreateProcess(ctx, opts)
 		},
 		"RPC/Insecure": func(ctx context.Context, opts *options.Create) (jasper.Process, error) {
-			mngr := jasper.NewManager(jasper.ManagerOptions{Synchronized: true})
+			mngr := jasper.NewManager(jasper.ManagerOptionSet(jasper.ManagerOptions{Synchronized: true}))
 
 			client, err := makeInsecureRPCServiceAndClient(ctx, mngr)
 			if err != nil {

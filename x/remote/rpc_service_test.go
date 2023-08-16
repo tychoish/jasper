@@ -17,7 +17,7 @@ import (
 func TestRPCService(t *testing.T) {
 	for managerName, makeManager := range map[string]func() (jasper.Manager, error){
 		"Basic": func() (jasper.Manager, error) {
-			return jasper.NewManager(jasper.ManagerOptions{Synchronized: true}), nil
+			return jasper.NewManager(jasper.ManagerOptionSet(jasper.ManagerOptions{Synchronized: true})), nil
 		},
 	} {
 		t.Run(managerName, func(t *testing.T) {

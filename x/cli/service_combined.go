@@ -60,7 +60,7 @@ func serviceCommandCombined(cmd string, operation serviceOperation) *cli.Command
 			validateLimits(limitNumFilesFlagName, limitNumProcsFlagName, limitLockedMemoryFlagName, limitVirtualMemoryFlagName),
 		),
 		Action: func(c *cli.Context) error {
-			manager := jasper.NewManager(jasper.ManagerOptions{Synchronized: true})
+			manager := jasper.NewManager(jasper.ManagerOptionSet(jasper.ManagerOptions{Synchronized: true}))
 
 			daemon := newCombinedDaemon(
 				newRESTDaemon(c.String(restHostFlagName), c.Int(restPortFlagName), manager, makeLogger(c)),

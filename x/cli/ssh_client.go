@@ -59,7 +59,7 @@ func NewSSHClient(remoteOpts options.Remote, clientOpts ClientOptions, trackProc
 		}
 	}
 
-	manager := jasper.NewManager(jasper.ManagerOptions{ID: id, Tracker: tracker})
+	manager := jasper.NewManager(jasper.ManagerOptionSet(jasper.ManagerOptions{ID: id, Tracker: tracker}))
 
 	client := &sshClient{
 		opts: sshClientOptions{

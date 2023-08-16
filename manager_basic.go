@@ -8,50 +8,44 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/tychoish/fun"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/util"
 )
 
-type ManagerOptions struct {
-	ID           string
-	Tracker      ProcessTracker
-	MaxProcs     int
-	Synchronized bool
+func NewManager(opts ...ManagerOptionProvider) Manager {
+	conf := &ManagerOptions{}
+	fun.Invariant.Must(fun.JoinOptionProviders(opts...).Apply(conf))
 
-	Remote           *options.Remote
-	ExecutorResolver func(context.Context, *options.Create) options.ResolveExecutor
-}
-
-func NewManager(opts ManagerOptions) Manager {
-	if opts.ID == "" {
-		opts.ID = uuid.New().String()
+	if conf.ID == "" {
+		conf.ID = uuid.New().String()
 	}
 
 	var mgr Manager
 	m := &basicProcessManager{
 		procs:    map[string]Process{},
-		id:       opts.ID,
+		id:       conf.ID,
 		loggers:  NewLoggingCache(),
-		tracker:  opts.Tracker,
-		remote:   opts.Remote,
-		executor: opts.ExecutorResolver,
+		tracker:  conf.Tracker,
+		remote:   conf.Remote,
+		executor: conf.ExecutorResolver,
 	}
 	mgr = m
 
-	if opts.MaxProcs > 0 {
+	if conf.MaxProcs > 0 {
 		mgr = &selfClearingProcessManager{
 			basicProcessManager: m,
-			maxProcs:            opts.MaxProcs,
+			maxProcs:            conf.MaxProcs,
 		}
 	}
 
-	if opts.Remote != nil {
-		mgr = &remoteOverrideMgr{remote: opts.Remote, Manager: mgr}
+	if conf.Remote != nil {
+		mgr = &remoteOverrideMgr{remote: conf.Remote, Manager: mgr}
 	}
 
-	if opts.Synchronized {
+	if conf.Synchronized {
 		mgr = &synchronizedProcessManager{manager: m}
 	}
 

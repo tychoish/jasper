@@ -19,7 +19,7 @@ func TestWindowsEvents(t *testing.T) {
 
 	for clientName, makeClient := range map[string]func(ctx context.Context, t *testing.T) Manager{
 		"RPC": func(ctx context.Context, t *testing.T) Manager {
-			manager := jasper.NewManager(jasper.ManagerOptions{Synchronized: true})
+			manager := jasper.NewManager(jasper.ManagerOptionSet(jasper.ManagerOptions{Synchronized: true}))
 			assert.NotError(t, err)
 			client, err := makeInsecureRPCServiceAndClient(ctx, manager)
 			assert.NotError(t, err)

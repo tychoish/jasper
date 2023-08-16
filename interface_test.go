@@ -14,10 +14,10 @@ func TestManagerInterface(t *testing.T) {
 
 	for mname, makeMngr := range map[string]func(context.Context, *testing.T) jasper.Manager{
 		"Basic/Lock": func(_ context.Context, t *testing.T) jasper.Manager {
-			return jasper.NewManager(jasper.ManagerOptions{Synchronized: true})
+			return jasper.NewManager(jasper.ManagerOptionSet(jasper.ManagerOptions{Synchronized: true}))
 		},
 		"SelfClearing/NoLock": func(_ context.Context, t *testing.T) jasper.Manager {
-			return jasper.NewManager(jasper.ManagerOptions{MaxProcs: 10})
+			return jasper.NewManager(jasper.ManagerOptionSet(jasper.ManagerOptions{MaxProcs: 10}))
 		},
 	} {
 		if testutil.IsDockerCase(mname) {

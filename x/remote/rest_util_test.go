@@ -19,7 +19,7 @@ tryStartService:
 			grip.Warning("timed out starting test service")
 			return nil, -1, ctx.Err()
 		default:
-			synchronizedManager := jasper.NewManager(jasper.ManagerOptions{Synchronized: true})
+			synchronizedManager := jasper.NewManager(jasper.ManagerOptionSet(jasper.ManagerOptions{Synchronized: true}))
 
 			srv := NewRestService(synchronizedManager)
 			app := srv.App(ctx)

@@ -419,7 +419,7 @@ func TestManager(t *testing.T) {
 			Name: "MDB",
 			Constructor: func(ctx context.Context, t *testing.T) Manager {
 				t.SkipNow()
-				mngr := jasper.NewManager(jasper.ManagerOptions{Synchronized: true})
+				mngr := jasper.NewManager(jasper.ManagerOptionSet(jasper.ManagerOptions{Synchronized: true}))
 
 				client, err := makeTestMDBServiceAndClient(ctx, mngr)
 				assert.NotError(t, err)
@@ -429,7 +429,7 @@ func TestManager(t *testing.T) {
 		{
 			Name: "RPC/TLS",
 			Constructor: func(ctx context.Context, t *testing.T) Manager {
-				mngr := jasper.NewManager(jasper.ManagerOptions{Synchronized: true})
+				mngr := jasper.NewManager(jasper.ManagerOptionSet(jasper.ManagerOptions{Synchronized: true}))
 
 				client, err := makeTLSRPCServiceAndClient(ctx, mngr)
 				assert.NotError(t, err)
@@ -443,7 +443,7 @@ func TestManager(t *testing.T) {
 					newRPCClient(nil)
 				})
 
-				mngr := jasper.NewManager(jasper.ManagerOptions{Synchronized: true})
+				mngr := jasper.NewManager(jasper.ManagerOptionSet(jasper.ManagerOptions{Synchronized: true}))
 
 				client, err := makeInsecureRPCServiceAndClient(ctx, mngr)
 				assert.NotError(t, err)

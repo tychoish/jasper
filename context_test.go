@@ -11,7 +11,7 @@ func TestContext(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	mgr := NewManager(ManagerOptions{})
+	mgr := NewManager()
 
 	check.True(t, !HasManager(ctx))
 

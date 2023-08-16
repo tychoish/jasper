@@ -19,7 +19,7 @@ func TestDaemon(t *testing.T) {
 	for daemonAndClientName, makeDaemonAndClient := range map[string]func(ctx context.Context, t *testing.T, manager jasper.Manager) (util.CloseFunc, remote.Manager){
 		"RPCService": func(ctx context.Context, t *testing.T, _ jasper.Manager) (util.CloseFunc, remote.Manager) {
 			port := testutil.GetPortNumber()
-			manager := jasper.NewManager(jasper.ManagerOptions{Synchronized: true})
+			manager := jasper.NewManager(jasper.ManagerOptionSet(jasper.ManagerOptions{Synchronized: true}))
 
 			daemon := newRPCDaemon("localhost", port, manager, "", nil)
 			svc, err := service.New(daemon, &service.Config{Name: "foo"})
@@ -33,7 +33,7 @@ func TestDaemon(t *testing.T) {
 		},
 		"RESTService": func(ctx context.Context, t *testing.T, _ jasper.Manager) (util.CloseFunc, remote.Manager) {
 			port := testutil.GetPortNumber()
-			manager := jasper.NewManager(jasper.ManagerOptions{Synchronized: true})
+			manager := jasper.NewManager(jasper.ManagerOptionSet(jasper.ManagerOptions{Synchronized: true}))
 
 			daemon := newRESTDaemon("localhost", port, manager, nil)
 			svc, err := service.New(daemon, &service.Config{Name: "foo"})
@@ -82,7 +82,7 @@ func TestDaemon(t *testing.T) {
 			ctx, cancel := context.WithTimeout(context.Background(), testutil.TestTimeout)
 			defer cancel()
 
-			manager := jasper.NewManager(jasper.ManagerOptions{Synchronized: true})
+			manager := jasper.NewManager(jasper.ManagerOptionSet(jasper.ManagerOptions{Synchronized: true}))
 			closeDaemon, client := makeDaemonAndClient(ctx, t, manager)
 			defer func() {
 				check.NotError(t, closeDaemon())

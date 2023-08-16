@@ -46,7 +46,7 @@ func serviceCommandWire(cmd string, operation serviceOperation) *cli.Command {
 			validateLimits(limitNumFilesFlagName, limitNumProcsFlagName, limitLockedMemoryFlagName, limitVirtualMemoryFlagName),
 		),
 		Action: func(c *cli.Context) error {
-			manager := jasper.NewManager(jasper.ManagerOptions{Synchronized: true})
+			manager := jasper.NewManager(jasper.ManagerOptionSet(jasper.ManagerOptions{Synchronized: true}))
 
 			daemon := newWireDaemon(c.String(hostFlagName), c.Int(portFlagName), manager, makeLogger(c))
 
@@ -87,7 +87,7 @@ func (d *wireDaemon) Start(s service.Service) error {
 
 	d.exit = make(chan struct{})
 	if d.Manager == nil {
-		d.Manager = jasper.NewManager(jasper.ManagerOptions{Synchronized: true})
+		d.Manager = jasper.NewManager(jasper.ManagerOptionSet(jasper.ManagerOptions{Synchronized: true}))
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())

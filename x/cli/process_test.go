@@ -177,7 +177,7 @@ func TestCLIProcess(t *testing.T) {
 					defer cancel()
 					port := testutil.GetPortNumber()
 					c := mockCLIContext(remoteType, port)
-					manager := jasper.NewManager(jasper.ManagerOptions{Synchronized: true})
+					manager := jasper.NewManager(jasper.ManagerOptionSet(jasper.ManagerOptions{Synchronized: true}))
 					closeService := makeService(ctx, t, port, manager)
 					defer func() {
 						check.NotError(t, closeService())

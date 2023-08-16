@@ -16,7 +16,7 @@ func TestManagerInterface(t *testing.T) {
 
 	for mname, makeMngr := range map[string]func(context.Context, *testing.T) jasper.Manager{
 		"Docker/NoLock": func(_ context.Context, t *testing.T) jasper.Manager {
-			m := jasper.NewManager(jasper.ManagerOptions{})
+			m := jasper.NewManager(jasper.ManagerOptionSet(jasper.ManagerOptions{}))
 
 			image := os.Getenv("DOCKER_IMAGE")
 			if image == "" {
