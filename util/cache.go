@@ -28,7 +28,7 @@ func init() {
 		return name
 	})
 
-	homeDirCache.Do(func() string {
+	homeDirCache.Set(func() string {
 		if runtime.GOOS == "windows" {
 			if dir := os.Getenv("HOME"); dir != "" {
 				return dir
