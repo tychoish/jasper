@@ -142,6 +142,7 @@ github.com/tychoish/amboy v0.0.0-20230408193931-6ba4e429a638 h1:VJfQfBv2EOLiow47
 github.com/tychoish/birch v0.2.0/go.mod h1:hGLJLT0ZMUw17FmaYsnLu6dn1rd4sluGuhFIjVtcSvI=
 github.com/tychoish/birch v0.2.1/go.mod h1:pxfPHWUyvLf7fkcjQeDYup2c5HwDyOjdOt/7dA9Zq7s=
 github.com/tychoish/birch v0.2.3-0.20230413052020-46068f63d7bb/go.mod h1:wWvJb+OqSUWmW44XSUUxAw77Qq87uFAtGgcue+Ex9Zs=
+github.com/tychoish/birch v0.2.3-0.20230815160103-70c52db1b271/go.mod h1:6VXjKviYBKvDKj5pADE1Ecw79+4AQMQ2PJTkfLXd3Vg=
 github.com/tychoish/fun v0.8.6/go.mod h1:84A+BwGecz23UotmbB4mtvVS5ZcsZpspecduxpwF/XM=
 github.com/tychoish/fun v0.9.0 h1:HVDvKrJUB66AenwxyAIqVj9elySwbW45XC7YTuhtzHQ=
 github.com/tychoish/fun v0.9.0/go.mod h1:84A+BwGecz23UotmbB4mtvVS5ZcsZpspecduxpwF/XM=
