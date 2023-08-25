@@ -5,14 +5,14 @@ go 1.20
 require (
 	github.com/cheynewallace/tabby v1.1.1
 	github.com/evergreen-ci/service v1.0.1-0.20200225230430-d9382e39d768
-	github.com/google/uuid v1.3.0
+	github.com/google/uuid v1.3.1
 	github.com/tychoish/fun v0.10.4
 	github.com/tychoish/grip v0.3.6
-	github.com/tychoish/grip/x/splunk v0.0.0-20230815172847-a642e6ca055e
-	github.com/tychoish/jasper v0.1.1
-	github.com/tychoish/jasper/x/remote v0.0.0-20230510193640-652d1100c1b7
-	github.com/tychoish/jasper/x/splunk v0.0.0-20230510193424-429e4caa8e98
-	github.com/tychoish/jasper/x/track v0.0.0-20230502230321-07d6256076b2
+	github.com/tychoish/grip/x/splunk v0.0.0-20230824232221-fd39190c3be1
+	github.com/tychoish/jasper v0.1.2-0.20230825020900-7d32edd66d81
+	github.com/tychoish/jasper/x/remote v0.0.0-20230825152828-7bf0c66efca5
+	github.com/tychoish/jasper/x/splunk v0.0.0-20230825152828-7bf0c66efca5
+	github.com/tychoish/jasper/x/track v0.0.0-20230825152828-7bf0c66efca5
 	github.com/urfave/cli/v2 v2.25.3
 )
 
@@ -37,15 +37,14 @@ require (
 	github.com/phyber/negroni-gzip v1.0.0 // indirect
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/rogpeppe/go-internal v1.10.0 // indirect
 	github.com/rs/cors v1.8.3 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/tklauser/go-sysconf v0.3.11 // indirect
 	github.com/tklauser/numcpus v0.6.0 // indirect
-	github.com/tychoish/birch v0.2.3-0.20230815163402-467fbef7acab // indirect
-	github.com/tychoish/birch/x/ftdc v0.0.0-20230824231239-7522c174b74b // indirect
-	github.com/tychoish/birch/x/mrpc v0.0.0-20230708044500-bd86569eda49 // indirect
+	github.com/tychoish/birch v0.2.3-0.20230825054610-65271000a3aa // indirect
+	github.com/tychoish/birch/x/ftdc v0.0.0-20230825153023-79636ce03829 // indirect
+	github.com/tychoish/birch/x/mrpc v0.0.0-20230825054610-65271000a3aa // indirect
 	github.com/tychoish/gimlet v0.0.0-20230130001449-8987c96bb886 // indirect
 	github.com/tychoish/grip/x/metrics v0.0.0-20230824232221-fd39190c3be1 // indirect
 	github.com/ulikunitz/xz v0.5.11 // indirect

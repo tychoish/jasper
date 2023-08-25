@@ -3,7 +3,7 @@ module github.com/tychoish/jasper/x/jamboy
 go 1.20
 
 require (
-	github.com/google/uuid v1.3.0
+	github.com/google/uuid v1.3.1
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/stretchr/testify v1.8.2
 	github.com/tychoish/amboy v0.0.0-20230510194436-098c36e98bc1

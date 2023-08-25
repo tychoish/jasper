@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/docker/docker v23.0.3+incompatible
-	github.com/google/uuid v1.3.0
+	github.com/google/uuid v1.3.1
 	github.com/opencontainers/image-spec v1.1.0-rc2
 	github.com/tychoish/fun v0.10.4
 	github.com/tychoish/grip v0.3.6
