@@ -200,8 +200,6 @@ github.com/tychoish/gimlet v0.0.0-20230130001449-8987c96bb886/go.mod h1:aASKQIwB
 github.com/tychoish/grip v0.1.1/go.mod h1:Vxl3fsRs/5aAsnS3ff7/OT3C+A/kEWf08FgA2xSJfMY=
 github.com/tychoish/grip v0.3.6-0.20230824232221-fd39190c3be1 h1:by4xWnfTk0ZkdbRt1+Vw1NWA25E3TXSItOddvrFNw6k=
 github.com/tychoish/grip v0.3.6-0.20230824232221-fd39190c3be1/go.mod h1:KNReR43GI+rvv3BiBvlQ0KH8uJ2jHl4bg9gZPtm2g6U=
-github.com/tychoish/grip/x/metrics v0.0.0-20230815172847-a642e6ca055e h1:Mq/TnIX0TdEwWbV3j1lZz1eijzOyWSt/6WSktS8v5Qo=
-github.com/tychoish/grip/x/metrics v0.0.0-20230815172847-a642e6ca055e/go.mod h1:Ih7tIVHj5jP5qg10pfrS0fV2IflUXQXJK5Pzge9djOQ=
 github.com/tychoish/grip/x/metrics v0.0.0-20230824232221-fd39190c3be1 h1:Z3h1yWHeIVPN33/NH1z5DqQZ87+KXew+Ptj+Mc/u2rg=
 github.com/tychoish/grip/x/metrics v0.0.0-20230824232221-fd39190c3be1/go.mod h1:8i4bYls3dOaYpjFOlB4FfxINNYMelnUH2Y0czX5QE00=
 github.com/tychoish/grip/x/splunk v0.0.0-20230815172847-a642e6ca055e h1:5RAOtOFZbxX+KPNX71k7mMqsOvt0AZGBLrF93X3peWI=
