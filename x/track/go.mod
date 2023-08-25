@@ -7,7 +7,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/opencontainers/runtime-spec v1.0.3-0.20210326190908-1c3f411f0417
 	github.com/tychoish/fun v0.10.4
-	github.com/tychoish/grip v0.3.6-0.20230824232221-fd39190c3be1
+	github.com/tychoish/grip v0.3.6
 	github.com/tychoish/jasper v0.1.1
 )
 

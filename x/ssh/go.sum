@@ -3,7 +3,7 @@ github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510/go.mod h1:pupxD2MaaD3
 github.com/google/uuid v1.3.0 h1:t6JiXgmwXMjEs8VusXIJk2BXHsn+wx8BZdTaoZ5fu7I=
 github.com/google/uuid v1.3.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/tychoish/fun v0.10.4 h1:ZV//9hmGCKt5QDdEhEYLVWWjkjJkzhpIwXiHeTjUAOo=
-github.com/tychoish/grip v0.3.6-0.20230824232221-fd39190c3be1 h1:by4xWnfTk0ZkdbRt1+Vw1NWA25E3TXSItOddvrFNw6k=
+github.com/tychoish/grip v0.3.6 h1:DnraGQGg8f7rVgZZirLWnZjBSYMsMvruwtmGurXH6fc=
 github.com/tychoish/jasper v0.1.1 h1:7Z9pT87BoYqzq/aCssuz4VakKQWnjngaKJGcxqi3kg8=
 github.com/tychoish/jasper v0.1.1/go.mod h1:2EZstU5babAvZN6PFUvc9Phtyed00lxfB+zbxIOaeoY=
 golang.org/x/crypto v0.8.0 h1:pd9TJtTueMTVQXzk8E2XESSMQDj/U7OUu0PqJqPXQjQ=

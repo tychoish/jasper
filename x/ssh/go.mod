@@ -11,6 +11,6 @@ require (
 require (
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/google/uuid v1.3.0 // indirect
-	github.com/tychoish/grip v0.3.6-0.20230824232221-fd39190c3be1 // indirect
+	github.com/tychoish/grip v0.3.6 // indirect
 	golang.org/x/sys v0.7.0 // indirect
 )
