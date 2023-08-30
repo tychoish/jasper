@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/shlex"
 
+	"github.com/tychoish/fun"
 	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/fun/ft"
 	"github.com/tychoish/grip"
@@ -520,6 +521,8 @@ func (c *Command) setupEnv() {
 		c.opts.Process.Environment = map[string]string{}
 	}
 }
+
+func (c *Command) Worker() fun.Worker { return c.Run }
 
 // Run starts and then waits on the Command's execution.
 func (c *Command) Run(ctx context.Context) error {
