@@ -6,8 +6,8 @@ require (
 	github.com/containerd/cgroups/v3 v3.0.1
 	github.com/google/uuid v1.3.1
 	github.com/opencontainers/runtime-spec v1.0.3-0.20210326190908-1c3f411f0417
-	github.com/tychoish/fun v0.10.6
-	github.com/tychoish/grip v0.3.7-0.20230830203959-0c04e83ea624
+	github.com/tychoish/fun v0.10.8
+	github.com/tychoish/grip v0.3.7
 	github.com/tychoish/jasper v0.1.1
 )
 

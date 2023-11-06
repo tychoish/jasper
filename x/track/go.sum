@@ -16,8 +16,8 @@ github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510/go.mod h1:pupxD2MaaD3
 github.com/google/uuid v1.3.1 h1:KjJaJ9iWZ3jOFZIf1Lqf4laDRCasjl0BCmnEGxkdLb4=
 github.com/opencontainers/runtime-spec v1.0.3-0.20210326190908-1c3f411f0417 h1:3snG66yBm59tKhhSPQrQ/0bCrv1LQbKt40LnUPiUxdc=
 github.com/opencontainers/runtime-spec v1.0.3-0.20210326190908-1c3f411f0417/go.mod h1:jwyrGlmzljRJv/Fgzds9SsS/C5hL+LL3ko9hs6T5lQ0=
-github.com/tychoish/fun v0.10.6 h1:UqJZY8I9hPsXGcuS1XdX5gNZKIcJRywjy+jD9oHRR+s=
-github.com/tychoish/grip v0.3.7-0.20230830203959-0c04e83ea624 h1:s+WxGk9aDiVCUrdkpkbUbAUZHc9Zlj1LhJ8MOSouos8=
+github.com/tychoish/fun v0.10.8 h1:NBC8ug2cRYGKzlD70+r/tz4lkwfKAshFv9aaxHoYNwQ=
+github.com/tychoish/grip v0.3.7 h1:buYuRYNWC0szZtmz74QtyhPldysPYzxgCF6wqDO49XE=
 github.com/tychoish/jasper v0.1.1 h1:7Z9pT87BoYqzq/aCssuz4VakKQWnjngaKJGcxqi3kg8=
 github.com/tychoish/jasper v0.1.1/go.mod h1:2EZstU5babAvZN6PFUvc9Phtyed00lxfB+zbxIOaeoY=
 golang.org/x/sys v0.7.0 h1:3jlCCIQZPdOYu1h8BkNvLz8Kgwtae2cagcG/VamtZRU=
