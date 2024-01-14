@@ -47,10 +47,10 @@ func WithNewContextManager(ctx context.Context, name string, fn func() Manager) 
 // is returned.
 func ContextManager(ctx context.Context, name string) Manager {
 	val := ctx.Value(ctxKey(name))
-	fun.Invariant.OK(val != nil, "jasper", name, "manager must be stored")
+	fun.Invariant.Ok(val != nil, "jasper", name, "manager must be stored")
 
 	mgr, ok := val.(Manager)
-	fun.Invariant.OK(ok, "stored jasper manager", name, "must be of the correct type")
+	fun.Invariant.Ok(ok, "stored jasper manager", name, "must be of the correct type")
 
 	return mgr
 }
