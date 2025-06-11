@@ -11,7 +11,7 @@ require (
 	github.com/tychoish/fun v0.12.0
 	github.com/tychoish/grip v0.4.0
 	github.com/tychoish/grip/x/splunk v0.0.0-20250608160243-37fab929fbd2
-	github.com/tychoish/jasper v0.1.2-0.20230825020900-7d32edd66d81
+	github.com/tychoish/jasper v0.1.2
 	github.com/tychoish/jasper/x/remote v0.0.0-20230825152828-7bf0c66efca5
 	github.com/tychoish/jasper/x/splunk v0.0.0-20230825152828-7bf0c66efca5
 	github.com/tychoish/jasper/x/track v0.0.0-20230825152828-7bf0c66efca5
@@ -47,7 +47,7 @@ require (
 	github.com/tychoish/birch v0.3.0 // indirect
 	github.com/tychoish/birch/x/ftdc v0.0.0-20250610225000-f5dba0d9b062 // indirect
 	github.com/tychoish/birch/x/mrpc v0.0.0-20250610225000-f5dba0d9b062 // indirect
-	github.com/tychoish/gimlet v0.0.0-20230130001449-8987c96bb886 // indirect
+	github.com/tychoish/gimlet v0.0.0-20250611125935-c7dc51701c88 // indirect
 	github.com/tychoish/grip/x/metrics v0.0.0-20250608160243-37fab929fbd2 // indirect
 	github.com/ulikunitz/xz v0.5.11 // indirect
 	github.com/urfave/negroni v1.0.0 // indirect

@@ -11,7 +11,7 @@ require (
 	github.com/tychoish/amboy v0.0.0-20250611015353-d75fbb494948
 	github.com/tychoish/fun v0.12.0
 	github.com/tychoish/grip v0.4.0
-	github.com/tychoish/jasper v0.1.1
+	github.com/tychoish/jasper v0.1.2
 	github.com/tychoish/jasper/x/remote v0.0.0-20230502230321-07d6256076b2
 )
 

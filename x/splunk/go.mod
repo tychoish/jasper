@@ -8,7 +8,7 @@ require (
 	github.com/tychoish/fun v0.12.0
 	github.com/tychoish/grip v0.4.0
 	github.com/tychoish/grip/x/splunk v0.0.0-20250608160243-37fab929fbd2
-	github.com/tychoish/jasper v0.1.1
+	github.com/tychoish/jasper v0.1.2
 )
 
 require (
