@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/tychoish/fun/erc"
+	"github.com/tychoish/fun/ers"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 )
@@ -271,8 +272,8 @@ type ScriptingOptions struct {
 // validated.
 func (opts *ScriptingOptions) Validate() error {
 	catcher := &erc.Collector{}
-	erc.When(catcher, opts.ImplementationType == "", "implementation type must be defined")
-	erc.When(catcher, opts.Payload == nil, "implementation type must be defined")
+	catcher.When(opts.ImplementationType == "", ers.Error("implementation type must be defined"))
+	catcher.When(opts.Payload == nil, ers.Error("implementation type must be defined"))
 
 	return catcher.Resolve()
 }
@@ -447,8 +448,8 @@ type LoggingCacheCreateInput struct {
 // are valid.
 func (in *LoggingCacheCreateInput) Validate() error {
 	ec := &erc.Collector{}
-	erc.When(ec, in.ID == "", "ID must not be empty")
-	ec.Add(erc.Wrap(in.Output.Validate(), "invalid output options"))
+	ec.When(in.ID == "", ers.Error("ID must not be empty"))
+	ec.Wrap(in.Output.Validate(), "invalid output options")
 	return ec.Resolve()
 }
 

@@ -413,7 +413,7 @@ func forceReinstall(daemon service.Interface, config *service.Config) error {
 		catcher := &erc.Collector{}
 		catcher.Add(svc.Install())
 		catcher.Add(svc.Start())
-		if catcher.HasErrors() {
+		if !catcher.Ok() {
 			grip.Debug(stopErr)
 			grip.Debug(uninstallErr)
 			return fmt.Errorf("force reinstall: %w", catcher.Resolve())
