@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/tychoish/fun/erc"
+	"github.com/tychoish/fun/ers"
 	"github.com/tychoish/grip/send"
 	"github.com/tychoish/grip/x/splunk"
 	"github.com/tychoish/jasper/options"
@@ -33,7 +34,7 @@ func NewLoggerProducer() options.LoggerProducer { return &LoggerOptions{} }
 func (opts *LoggerOptions) Validate() error {
 	catcher := &erc.Collector{}
 
-	erc.When(catcher, opts.Splunk.Populated(), "missing connection info for output type splunk")
+	catcher.When(opts.Splunk.Populated(), ers.Error("missing connection info for output type splunk"))
 	catcher.Add(opts.Base.Validate())
 	return catcher.Resolve()
 }

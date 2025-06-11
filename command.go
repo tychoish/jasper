@@ -769,7 +769,7 @@ func (c *Command) ExportCreateOptions() ([]*options.Create, error) {
 		out = append(out, cmd)
 	}
 
-	if catcher.HasErrors() {
+	if !catcher.Ok() {
 		return nil, catcher.Resolve()
 	}
 

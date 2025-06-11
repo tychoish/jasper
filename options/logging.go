@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/tychoish/fun/erc"
+	"github.com/tychoish/fun/ers"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/grip/send"
@@ -42,11 +43,11 @@ func (cl *CachedLogger) getSender(preferError bool) (send.Sender, error) {
 func (cl *CachedLogger) Close() error {
 	catcher := &erc.Collector{}
 	if cl.Output != nil {
-		erc.Check(catcher, cl.Output.Close)
+		catcher.Check(cl.Output.Close)
 	}
 
 	if cl.Error != nil && cl.Output != cl.Error {
-		erc.Check(catcher, cl.Error.Close)
+		catcher.Check(cl.Error.Close)
 	}
 	return catcher.Resolve()
 }
@@ -75,7 +76,7 @@ const (
 // the format is valid.
 func (lp *LoggingPayload) Validate() error {
 	catcher := &erc.Collector{}
-	erc.When(catcher, lp.Data == nil, "data cannot be empty")
+	catcher.When(lp.Data == nil, ers.Error("data cannot be empty"))
 	switch lp.Format {
 	case "", LoggingPayloadFormatJSON, LoggingPayloadFormatSTRING:
 	default:

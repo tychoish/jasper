@@ -1,11 +1,13 @@
 module github.com/tychoish/jasper/x/splunk
 
-go 1.20
+go 1.24
+
+toolchain go1.24.3
 
 require (
-	github.com/tychoish/fun v0.10.9
-	github.com/tychoish/grip v0.3.8-0.20240114232258-7eae5cf3a031
-	github.com/tychoish/grip/x/splunk v0.0.0-20230824232221-fd39190c3be1
+	github.com/tychoish/fun v0.12.0
+	github.com/tychoish/grip v0.4.0
+	github.com/tychoish/grip/x/splunk v0.0.0-20250608160243-37fab929fbd2
 	github.com/tychoish/jasper v0.1.1
 )
 

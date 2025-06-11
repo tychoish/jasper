@@ -5,6 +5,7 @@ import (
 	"runtime"
 
 	"github.com/tychoish/fun/erc"
+	"github.com/tychoish/fun/ers"
 )
 
 // Docker encapsulates options related to connecting to a Docker daemon.
@@ -22,8 +23,8 @@ type Docker struct {
 // none are specified.
 func (opts *Docker) Validate() error {
 	catcher := &erc.Collector{}
-	erc.When(catcher, opts.Port < 0, "port must be positive value")
-	erc.When(catcher, opts.Image == "", "Docker image must be specified")
+	catcher.When(opts.Port < 0, ers.Error("port must be positive value"))
+	catcher.When(opts.Image == "", ers.Error("Docker image must be specified"))
 	if opts.Platform == "" {
 		if PlatformSupportsDocker(runtime.GOOS) {
 			opts.Platform = runtime.GOOS

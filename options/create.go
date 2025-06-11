@@ -15,6 +15,7 @@ import (
 	"github.com/google/shlex"
 
 	"github.com/tychoish/fun/erc"
+	"github.com/tychoish/fun/ers"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/jasper/executor"
@@ -96,11 +97,12 @@ func MakeCreation(cmdStr string) (*Create, error) {
 // Validate ensures that Create is valid for non-remote interfaces.
 func (opts *Create) Validate() error {
 	catcher := &erc.Collector{}
-	erc.When(catcher, len(opts.Args) == 0, "invalid process, must specify at least one argument")
 
-	erc.When(catcher, opts.Timeout < 0, "when specifying a timeout, it must be non-negative")
-	erc.When(catcher, opts.Timeout > 0 && opts.Timeout < time.Second, "when specifying a timeout, it must be greater than one second")
-	erc.When(catcher, opts.TimeoutSecs < 0, "when specifying timeout in seconds, it must be non-negative")
+	catcher.When(len(opts.Args) == 0, ers.Error("invalid process, must specify at least one argument"))
+
+	catcher.When(opts.Timeout < 0, ers.Error("when specifying a timeout, it must be non-negative"))
+	catcher.When(opts.Timeout > 0 && opts.Timeout < time.Second, ers.Error("when specifying a timeout, it must be greater than one second"))
+	catcher.When(opts.TimeoutSecs < 0, ers.Error("when specifying timeout in seconds, it must be non-negative"))
 
 	if opts.Timeout > 0 && opts.TimeoutSecs > 0 && time.Duration(opts.TimeoutSecs)*time.Second != opts.Timeout {
 		catcher.Add(fmt.Errorf("cannot specify different timeout (in nanos) (%s) and timeout seconds (%d)",
@@ -121,7 +123,7 @@ func (opts *Create) Validate() error {
 		}
 	}
 
-	erc.When(catcher, opts.Docker != nil && opts.Remote != nil, "cannot specify both Docker and SSH options")
+	catcher.When(opts.Docker != nil && opts.Remote != nil, ers.Error("cannot specify both Docker and SSH options"))
 	if opts.Remote != nil {
 		if err := opts.Remote.Validate(); err != nil {
 			catcher.Add(fmt.Errorf("invalid SSH options: %w", err))
@@ -133,7 +135,7 @@ func (opts *Create) Validate() error {
 		}
 	}
 
-	if catcher.HasErrors() {
+	if !catcher.Ok() {
 		return catcher.Resolve()
 	}
 

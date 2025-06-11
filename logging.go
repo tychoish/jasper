@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/tychoish/fun/erc"
+	"github.com/tychoish/fun/ers"
 	"github.com/tychoish/jasper/options"
 )
 
@@ -141,8 +142,5 @@ func (c *loggingCacheImpl) Clear(_ context.Context) error {
 	}
 	c.cache = map[string]*options.CachedLogger{}
 
-	if catcher.HasErrors() {
-		return fmt.Errorf("problem clearing logger cache: %w", catcher.Resolve())
-	}
-	return nil
+	return ers.Wrap(catcher.Resolve(), "problem clearing logger cache")
 }

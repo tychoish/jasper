@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/tychoish/fun/erc"
+	"github.com/tychoish/fun/ers"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/send"
 )
@@ -74,7 +75,7 @@ func NewFileLoggerProducer() LoggerProducer { return &FileLoggerOptions{} }
 func (opts *FileLoggerOptions) Validate() error {
 	catcher := &erc.Collector{}
 
-	erc.When(catcher, opts.Filename == "", "must specify a filename")
+	catcher.When(opts.Filename == "", ers.Error("must specify a filename"))
 	catcher.Add(opts.Base.Validate())
 	return catcher.Resolve()
 }
@@ -156,7 +157,7 @@ func NewInMemoryLoggerProducer() LoggerProducer { return &InMemoryLoggerOptions{
 func (opts *InMemoryLoggerOptions) Validate() error {
 	catcher := &erc.Collector{}
 
-	erc.When(catcher, opts.InMemoryCap <= 0, "invalid in-memory capacity")
+	catcher.When(opts.InMemoryCap <= 0, ers.Error("invalid in-memory capacity"))
 	catcher.Add(opts.Base.Validate())
 	return catcher.Resolve()
 }

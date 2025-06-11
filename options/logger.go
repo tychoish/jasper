@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/tychoish/fun/erc"
+	"github.com/tychoish/fun/ers"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/send"
 )
@@ -131,7 +132,7 @@ func NewLoggerConfig(producerType string, format RawLoggerConfigFormat, config [
 func (lc *LoggerConfig) validate() error {
 	catcher := &erc.Collector{}
 
-	erc.When(catcher, lc.info.Type == "", "cannot have empty logger type")
+	catcher.When(lc.info.Type == "", ers.Error("cannot have empty logger type"))
 	if len(lc.info.Config) > 0 {
 		catcher.Add(lc.info.Format.Validate())
 	}

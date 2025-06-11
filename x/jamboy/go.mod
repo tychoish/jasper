@@ -1,14 +1,16 @@
 module github.com/tychoish/jasper/x/jamboy
 
-go 1.20
+go 1.24
+
+toolchain go1.24.3
 
 require (
 	github.com/google/uuid v1.3.1
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/stretchr/testify v1.8.2
-	github.com/tychoish/amboy v0.0.0-20230510194436-098c36e98bc1
-	github.com/tychoish/fun v0.10.9
-	github.com/tychoish/grip v0.3.8-0.20240114232258-7eae5cf3a031
+	github.com/tychoish/amboy v0.0.0-20250611015353-d75fbb494948
+	github.com/tychoish/fun v0.12.0
+	github.com/tychoish/grip v0.4.0
 	github.com/tychoish/jasper v0.1.1
 	github.com/tychoish/jasper/x/remote v0.0.0-20230502230321-07d6256076b2
 )

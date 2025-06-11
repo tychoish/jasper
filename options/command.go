@@ -2,6 +2,7 @@ package options
 
 import (
 	"github.com/tychoish/fun/erc"
+	"github.com/tychoish/fun/ers"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
@@ -35,7 +36,7 @@ func (opts *Command) Validate() error {
 		opts.Process.Args = []string{""}
 	}
 	catcher.Add(opts.Process.Validate())
-	erc.When(catcher, len(opts.Commands) == 0, "must specify at least one command")
+	catcher.When(len(opts.Commands) == 0, ers.Error("must specify at least one command"))
 	return catcher.Resolve()
 }
 

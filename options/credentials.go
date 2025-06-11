@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/tychoish/fun/erc"
+	"github.com/tychoish/fun/ers"
 )
 
 // CertificateCredentials represent a bundle of assets for doing TLS
@@ -68,9 +69,9 @@ func NewCredentialsFromFile(path string) (*CertificateCredentials, error) {
 func (c *CertificateCredentials) Validate() error {
 	catcher := &erc.Collector{}
 
-	erc.When(catcher, len(c.CACert) == 0, "CA certificate should not be empty")
-	erc.When(catcher, len(c.Cert) == 0, "certificate should not be empty")
-	erc.When(catcher, len(c.Key) == 0, "key should not be empty")
+	catcher.When(len(c.CACert) == 0, ers.Error("CA certificate should not be empty"))
+	catcher.When(len(c.Cert) == 0, ers.Error("certificate should not be empty"))
+	catcher.When(len(c.Key) == 0, ers.Error("key should not be empty"))
 
 	return catcher.Resolve()
 }

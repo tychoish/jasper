@@ -149,7 +149,7 @@ func cleanupProcess(pid int) error {
 	if err := syscall.Kill(pid, syscall.SIGTERM); err != nil && err != syscall.ESRCH {
 		ec := &erc.Collector{}
 		ec.Add(fmt.Errorf("sending sigterm to process with PID '%d': %w", pid, err))
-		ec.Add(erc.Wrapf(syscall.Kill(pid, syscall.SIGKILL), "sending sigkill to process with PID '%d'", pid))
+		ec.Wrapf(syscall.Kill(pid, syscall.SIGKILL), "sending sigkill to process with PID '%d'", pid)
 		return ec.Resolve()
 	}
 	return nil
@@ -163,11 +163,11 @@ func cleanupProcess(pid int) error {
 func (t *linuxProcessTracker) Cleanup() error {
 	catcher := &erc.Collector{}
 	if t.validCgroup() {
-		catcher.Add(erc.Wrap(t.doCleanupByCgroup(),
-			"error occurred while cleaning up processes tracked by cgroup"))
+		catcher.Wrap(t.doCleanupByCgroup(),
+			"error occurred while cleaning up processes tracked by cgroup")
 	}
-	catcher.Add(erc.Wrap(t.doCleanupByEnvironmentVariable(),
-		"error occurred while cleaning up processes tracked by environment variable"))
+	catcher.Wrap(t.doCleanupByEnvironmentVariable(),
+		"error occurred while cleaning up processes tracked by environment variable")
 
 	return catcher.Resolve()
 }

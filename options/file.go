@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 
 	"github.com/tychoish/fun/erc"
+	"github.com/tychoish/fun/ers"
 )
 
 // WriteFile represents the options necessary to write to a file.
@@ -46,7 +47,7 @@ func (opts *WriteFile) Validate() error {
 	}
 
 	catcher := &erc.Collector{}
-	erc.When(catcher, opts.Path == "", "path to file must be specified")
+	catcher.When(opts.Path == "", ers.Error("path to file must be specified"))
 	catcher.Add(opts.validateContent())
 	return catcher.Resolve()
 }

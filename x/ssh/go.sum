@@ -2,10 +2,10 @@ github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 h1:El6M4kTTCOh6aBiKaU
 github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510/go.mod h1:pupxD2MaaD3pAXIBCelhxNneeOaAeabZDe5s4K6zSpQ=
 github.com/google/uuid v1.3.1 h1:KjJaJ9iWZ3jOFZIf1Lqf4laDRCasjl0BCmnEGxkdLb4=
 github.com/google/uuid v1.3.1/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
-github.com/tychoish/fun v0.10.9 h1:mTuS1Rp3TN5GAzDLVo09CpPnixBFD7PZKQ30QFOAvlc=
-github.com/tychoish/fun v0.10.9/go.mod h1:ZZfrwtsnHHV81ecZCBPp57DjjYY9Io39JH2QSXNpKn4=
-github.com/tychoish/grip v0.3.8-0.20240114232258-7eae5cf3a031 h1:t9pAbjDAC5D3xamoD9iDxhl9MXund+QCn2zM+Kg/s9I=
-github.com/tychoish/grip v0.3.8-0.20240114232258-7eae5cf3a031/go.mod h1:jCO0mMQqP/Qxy/wgwTj5n5wFUhWK5lB3ZvqcYGORWwA=
+github.com/tychoish/fun v0.12.0 h1:YxYyCTfKL+3Q4wtcPFZsRVOWF12llUCbqkkK53MdwNs=
+github.com/tychoish/fun v0.12.0/go.mod h1:ghjR/9EyWh8h8oBg2+WJhsEcF/W4JXMWpo6btMRNusE=
+github.com/tychoish/grip v0.4.0 h1:5WL5H4raAqj+1eG0p7JsXABvqElPuE3+0G95V0MmrPQ=
+github.com/tychoish/grip v0.4.0/go.mod h1:/0IsKegfHVZ4R2E+3iOB2yarhLh4XL3yyhO2Brv98LA=
 github.com/tychoish/jasper v0.1.1 h1:7Z9pT87BoYqzq/aCssuz4VakKQWnjngaKJGcxqi3kg8=
 github.com/tychoish/jasper v0.1.1/go.mod h1:2EZstU5babAvZN6PFUvc9Phtyed00lxfB+zbxIOaeoY=
 golang.org/x/crypto v0.8.0 h1:pd9TJtTueMTVQXzk8E2XESSMQDj/U7OUu0PqJqPXQjQ=
@@ -13,3 +13,4 @@ golang.org/x/crypto v0.8.0/go.mod h1:mRqEX+O9/h5TFCrQhkgjo2yKi0yYA+9ecGkdQoHrywE
 golang.org/x/sys v0.7.0 h1:3jlCCIQZPdOYu1h8BkNvLz8Kgwtae2cagcG/VamtZRU=
 golang.org/x/sys v0.7.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/term v0.7.0 h1:BEvjmm5fURWqcfbSKTdpkDXYBrUS1c0m8agp14W48vQ=
+golang.org/x/term v0.7.0/go.mod h1:P32HKFT3hSsZrRxla30E9HqToFYAQPCMs/zFMBUFqPY=

@@ -1,17 +1,19 @@
 module github.com/tychoish/jasper/x/remote
 
-go 1.20
+go 1.24
+
+toolchain go1.24.3
 
 require (
 	github.com/golang/protobuf v1.5.3
 	github.com/mholt/archiver v3.1.1+incompatible
-	github.com/tychoish/birch v0.2.3-0.20230825054610-65271000a3aa
-	github.com/tychoish/birch/x/mrpc v0.0.0-20230825054610-65271000a3aa
-	github.com/tychoish/fun v0.10.9
+	github.com/tychoish/birch v0.3.0
+	github.com/tychoish/birch/x/mrpc v0.0.0-20250610225000-f5dba0d9b062
+	github.com/tychoish/fun v0.12.0
 	github.com/tychoish/gimlet v0.0.0-20230130001449-8987c96bb886
-	github.com/tychoish/grip v0.3.8-0.20240114232258-7eae5cf3a031
-	github.com/tychoish/grip/x/metrics v0.0.0-20230824232221-fd39190c3be1
-	github.com/tychoish/grip/x/splunk v0.0.0-20230824232221-fd39190c3be1
+	github.com/tychoish/grip v0.4.0
+	github.com/tychoish/grip/x/metrics v0.0.0-20250608160243-37fab929fbd2
+	github.com/tychoish/grip/x/splunk v0.0.0-20250608160243-37fab929fbd2
 	github.com/tychoish/jasper v0.1.2-0.20230825020900-7d32edd66d81
 	github.com/tychoish/jasper/x/splunk v0.0.0-20230825152828-7bf0c66efca5
 	google.golang.org/grpc v1.54.0
@@ -37,13 +39,13 @@ require (
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/tklauser/go-sysconf v0.3.11 // indirect
 	github.com/tklauser/numcpus v0.6.0 // indirect
-	github.com/tychoish/birch/x/ftdc v0.0.0-20230825153023-79636ce03829 // indirect
+	github.com/tychoish/birch/x/ftdc v0.0.0-20250506204810-3dda113d1b54 // indirect
 	github.com/ulikunitz/xz v0.5.11 // indirect
 	github.com/urfave/negroni v1.0.0 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	golang.org/x/net v0.9.0 // indirect
-	golang.org/x/sys v0.7.0 // indirect
+	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
 	google.golang.org/genproto v0.0.0-20230110181048-76db0878b65f // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
