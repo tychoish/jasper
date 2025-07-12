@@ -14,7 +14,7 @@ require (
 	github.com/tychoish/grip v0.4.0
 	github.com/tychoish/grip/x/metrics v0.0.0-20250608160243-37fab929fbd2
 	github.com/tychoish/grip/x/splunk v0.0.0-20250608160243-37fab929fbd2
-	github.com/tychoish/jasper v0.1.2
+	github.com/tychoish/jasper v0.1.3-0.20250712191228-9a0a31d519ad
 	github.com/tychoish/jasper/x/splunk v0.0.0-20230825152828-7bf0c66efca5
 	google.golang.org/grpc v1.54.0
 	google.golang.org/protobuf v1.30.0

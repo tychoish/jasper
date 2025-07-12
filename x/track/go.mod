@@ -10,7 +10,7 @@ require (
 	github.com/opencontainers/runtime-spec v1.0.3-0.20210326190908-1c3f411f0417
 	github.com/tychoish/fun v0.12.0
 	github.com/tychoish/grip v0.4.0
-	github.com/tychoish/jasper v0.1.2
+	github.com/tychoish/jasper v0.1.3-0.20250712191228-9a0a31d519ad
 )
 
 require (

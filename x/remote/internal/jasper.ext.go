@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/tychoish/fun/dt"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/grip/x/splunk"
@@ -27,7 +28,6 @@ import (
 func (opts *CreateOptions) Export() (*options.Create, error) {
 	out := &options.Create{
 		Args:               opts.Args,
-		Environment:        opts.Environment,
 		WorkingDirectory:   opts.WorkingDirectory,
 		Timeout:            time.Duration(opts.TimeoutSeconds) * time.Second,
 		TimeoutSecs:        int(opts.TimeoutSeconds),
@@ -37,6 +37,11 @@ func (opts *CreateOptions) Export() (*options.Create, error) {
 	}
 	if len(opts.StandardInputBytes) != 0 {
 		out.StandardInput = bytes.NewBuffer(opts.StandardInputBytes)
+	}
+
+	if len(opts.Environment) > 0 {
+		out.Environment = new(dt.List[dt.Pair[string, string]])
+		out.Environment.Populate(dt.NewMap(opts.Environment).Stream()).Ignore().Wait()
 	}
 
 	if opts.Output != nil {
@@ -89,13 +94,17 @@ func ConvertCreateOptions(opts *options.Create) (*CreateOptions, error) {
 
 	co := &CreateOptions{
 		Args:               opts.Args,
-		Environment:        opts.Environment,
 		WorkingDirectory:   opts.WorkingDirectory,
 		TimeoutSeconds:     int64(opts.TimeoutSecs),
 		OverrideEnviron:    opts.OverrideEnviron,
 		Tags:               opts.Tags,
 		Output:             &output,
 		StandardInputBytes: opts.StandardInputBytes,
+	}
+
+	if size := opts.Environment.Len(); size > 0 {
+		co.Environment = make(map[string]string, size)
+		dt.NewMap(co.Environment).ExtendWithStream(opts.Environment.StreamFront()).Ignore().Wait()
 	}
 
 	for _, opt := range opts.OnSuccess {

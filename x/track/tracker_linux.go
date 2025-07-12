@@ -132,14 +132,16 @@ func (t *linuxProcessTracker) doCleanupByCgroup() error {
 // value for environment variable ManagerEnvironID equals this process
 // tracker's name.
 func (t *linuxProcessTracker) doCleanupByEnvironmentVariable() error {
-	catcher := &erc.Collector{}
+	ec := &erc.Collector{}
 	for _, info := range t.infos {
-		if value, ok := info.Options.Environment[jasper.ManagerEnvironID]; ok && value == t.Name {
-			catcher.Add(cleanupProcess(info.PID))
+		for envvar := range info.Options.Environment.Iterator() {
+			if envvar.Key == jasper.ManagerEnvironID && envvar.Value == t.Name {
+				ec.Push(cleanupProcess(info.PID))
+			}
 		}
 	}
 	t.infos = []jasper.ProcessInfo{}
-	return catcher.Resolve()
+	return ec.Resolve()
 }
 
 // cleanupProcess terminates the process given by its PID. If the process has
