@@ -9,13 +9,14 @@ import (
 	"hash"
 	"io"
 	"os"
-	"sort"
 	"time"
 
 	"github.com/google/shlex"
 
+	"github.com/tychoish/fun/dt"
 	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/fun/ers"
+	"github.com/tychoish/fun/ft"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/jasper/executor"
@@ -39,8 +40,8 @@ const (
 // execution configuration, post-execution triggers, and output configuration.
 // It is not safe for concurrent access.
 type Create struct {
-	Args        []string          `bson:"args" json:"args" yaml:"args"`
-	Environment map[string]string `bson:"env,omitempty" json:"env,omitempty" yaml:"env,omitempty"`
+	Args        []string                          `bson:"args" json:"args" yaml:"args"`
+	Environment *dt.List[dt.Pair[string, string]] `bson:"env,omitempty" json:"env,omitempty" yaml:"env,omitempty"`
 	// OverrideEnviron sets the process environment to match the currently
 	// executing process's environment. This is ignored if Remote or Docker
 	// options are specified.
@@ -89,9 +90,12 @@ func MakeCreation(cmdStr string) (*Create, error) {
 		return nil, fmt.Errorf("'%s' did not parse to valid args array", cmdStr)
 	}
 
-	return &Create{
-		Args: args,
-	}, nil
+	o := &Create{
+		Args:        args,
+		Environment: new(dt.List[dt.Pair[string, string]]),
+	}
+
+	return o, nil
 }
 
 // Validate ensures that Create is valid for non-remote interfaces.
@@ -176,14 +180,15 @@ func (opts *Create) Hash() hash.Hash {
 		_, _ = io.WriteString(hash, t)
 	}
 
-	env := []string{}
-	for k, v := range opts.Environment {
-		env = append(env, fmt.Sprintf("%s=%s", k, v))
-	}
+	if num := opts.Environment.Len(); num > 0 {
+		env := make([]string, 0, num)
+		for evar := range opts.Environment.Iterator() {
+			env = append(env, fmt.Sprintf("%s=%s", evar.Key, evar.Value))
+		}
 
-	sort.Strings(env)
-	for _, e := range env {
-		_, _ = io.WriteString(hash, e)
+		for _, e := range env {
+			_, _ = io.WriteString(hash, e)
+		}
 	}
 
 	return hash
@@ -238,8 +243,11 @@ func (opts *Create) Resolve(ctx context.Context) (exe executor.Executor, t time.
 	if !opts.OverrideEnviron && opts.isLocal() {
 		env = os.Environ()
 	}
-	for key, value := range opts.Environment {
-		env = append(env, fmt.Sprintf("%s=%s", key, value))
+
+	if opts.Environment != nil {
+		for evar := range opts.Environment.Iterator() {
+			env = append(env, fmt.Sprintf("%s=%s", evar.Key, evar.Value))
+		}
 	}
 	cmd.SetEnv(env)
 
@@ -278,23 +286,29 @@ func (opts *Create) resolveExecutor(ctx context.Context) (executor.Executor, err
 // ResolveEnvironment returns the (Create).Environment as a slice of environment
 // variables in the form "key=value".
 func (opts *Create) ResolveEnvironment() []string {
-	env := []string{}
-	for k, v := range opts.Environment {
-		env = append(env, fmt.Sprintf("%s=%s", k, v))
+	if num := opts.Environment.Len(); num > 0 {
+		env := make([]string, 0, num)
+		for evar := range opts.Environment.Iterator() {
+			env = append(env, fmt.Sprintf("%s=%s", evar.Key, evar.Value))
+		}
 	}
-	return env
+
+	return []string{}
 }
 
 // AddEnvVar adds an environment variable to the Create struct on which
 // this method is called. If the Environment map is nil, this method will
 // instantiate one.
-func (opts *Create) AddEnvVar(k, v string) {
-	if opts.Environment == nil {
-		opts.Environment = make(map[string]string)
-	}
+func (opts *Create) AddEnvVar(k, v string) { opts.init(); opts.Environment.Append(dt.MakePair(k, v)) }
 
-	opts.Environment[k] = v
+func (opts *Create) init() {
+	opts.Environment = ft.DefaultFuture(
+		opts.Environment, // if this is not nil return it,
+		newEnvList,       // otherwise, call this function and return that.
+	)
 }
+
+func newEnvList() *dt.List[dt.Pair[string, string]] { return new(dt.List[dt.Pair[string, string]]) }
 
 // Close will execute the closer functions assigned to the Create. This
 // function is often called as a trigger at the end of a process' lifetime in
@@ -337,10 +351,7 @@ func (opts *Create) Copy() *Create {
 	}
 
 	if opts.Environment != nil {
-		optsCopy.Environment = make(map[string]string)
-		for key, val := range opts.Environment {
-			optsCopy.Environment[key] = val
-		}
+		optsCopy.Environment = opts.Environment.Copy()
 	}
 
 	if opts.OnSuccess != nil {

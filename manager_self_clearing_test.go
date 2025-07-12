@@ -46,7 +46,7 @@ func TestSelfClearingManager(t *testing.T) {
 			for name, test := range map[string]func(context.Context, *testing.T, *selfClearingProcessManager, testutil.OptsModify){
 				"SucceedsWhenFree": func(ctx context.Context, t *testing.T, manager *selfClearingProcessManager, mod testutil.OptsModify) {
 					proc, err := createFunc(ctx, manager, t, testutil.TrueCreateOpts())
-					check.NotError(t, err)
+					assert.NotError(t, err)
 					check.NotZero(t, proc.ID())
 				},
 				"ErrorsWhenFull": func(ctx context.Context, t *testing.T, manager *selfClearingProcessManager, mod testutil.OptsModify) {
@@ -59,7 +59,7 @@ func TestSelfClearingManager(t *testing.T) {
 				"PartiallySucceedsWhenAlmostFull": func(ctx context.Context, t *testing.T, manager *selfClearingProcessManager, mod testutil.OptsModify) {
 					fillUp(ctx, t, manager, manager.maxProcs-1)
 					firstSleep, err := createFunc(ctx, manager, t, testutil.SleepCreateOpts(10))
-					check.NotError(t, err)
+					assert.NotError(t, err)
 					check.NotZero(t, firstSleep.ID())
 					secondSleep, err := createFunc(ctx, manager, t, testutil.SleepCreateOpts(10))
 					check.Error(t, err)
@@ -78,7 +78,7 @@ func TestSelfClearingManager(t *testing.T) {
 						assert.NotError(t, err)
 					}
 					sleepProc, err = createFunc(ctx, manager, t, sleepOpts)
-					check.NotError(t, err)
+					assert.NotError(t, err)
 					check.True(t, sleepProc != nil)
 				},
 				//"": func(ctx context.Context, t *testing.T, manager *selfClearingProcessManager) {},
@@ -96,7 +96,7 @@ func TestSelfClearingManager(t *testing.T) {
 						test(tctx, t, selfClearingManager.(*selfClearingProcessManager), func(o *options.Create) {
 							o.Implementation = options.ProcessImplementationBlocking
 						})
-						check.NotError(t, selfClearingManager.Close(tctx))
+						assert.NotError(t, selfClearingManager.Close(tctx))
 					})
 				})
 				t.Run("Basic", func(t *testing.T) {
@@ -111,7 +111,7 @@ func TestSelfClearingManager(t *testing.T) {
 						test(tctx, t, selfClearingManager.(*selfClearingProcessManager), func(o *options.Create) {
 							o.Implementation = options.ProcessImplementationBasic
 						})
-						check.NotError(t, selfClearingManager.Close(tctx))
+						assert.NotError(t, selfClearingManager.Close(tctx))
 					})
 				})
 

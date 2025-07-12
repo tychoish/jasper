@@ -158,10 +158,7 @@ func TestDefaultTrigger(t *testing.T) {
 			defer cancel()
 
 			testcase(ctx, t, &synchronizedProcessManager{
-				manager: &basicProcessManager{
-					loggers: NewLoggingCache(),
-					procs:   map[string]Process{},
-				},
+				manager: NewManager().(*basicProcessManager),
 			})
 		})
 	}

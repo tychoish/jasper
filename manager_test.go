@@ -7,6 +7,7 @@ import (
 
 	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
+	"github.com/tychoish/fun/dt"
 	"github.com/tychoish/fun/testt"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/testutil"
@@ -40,13 +41,10 @@ func TestTrackedManager(t *testing.T) {
 
 	for managerName, makeManager := range map[string]func() *basicProcessManager{
 		"Basic": func() *basicProcessManager {
-			return &basicProcessManager{
-				procs:   map[string]Process{},
-				loggers: NewLoggingCache(),
-				tracker: &mockProcessTracker{
+			return NewManager(ManagerOptionSet(
+				ManagerOptions{Tracker: &mockProcessTracker{
 					Infos: []ProcessInfo{},
-				},
-			}
+				}})).(*basicProcessManager)
 		},
 	} {
 		t.Run(managerName, func(t *testing.T) {
@@ -166,13 +164,10 @@ func TestManagerSetsEnvironmentVariables(t *testing.T) {
 
 	for managerName, makeManager := range map[string]func() *basicProcessManager{
 		"Basic": func() *basicProcessManager {
-			return &basicProcessManager{
-				procs:   map[string]Process{},
-				loggers: NewLoggingCache(),
-				tracker: &mockProcessTracker{
+			return NewManager(ManagerOptionSet(
+				ManagerOptions{Tracker: &mockProcessTracker{
 					Infos: []ProcessInfo{},
-				},
-			}
+				}})).(*basicProcessManager)
 		},
 	} {
 		t.Run(managerName, func(t *testing.T) {
@@ -181,16 +176,16 @@ func TestManagerSetsEnvironmentVariables(t *testing.T) {
 					proc, err := manager.CreateProcess(ctx, testutil.SleepCreateOpts(1))
 					assert.NotError(t, err)
 
-					env := proc.Info(ctx).Options.Environment
+					env := dt.MakePairs(proc.Info(ctx).Options.Environment.Slice()...)
 					assert.True(t, env != nil)
-					value, ok := env[ManagerEnvironID]
+					value, ok := env.Map()[ManagerEnvironID]
+					testt.Log(t, env.Slice())
 					assert.True(t, ok)
 					check.Equal(t, value, manager.id)
 					testt.Log(t, "process should have manager environment variable set")
 				},
 				"CreateCommandAddsEnvironmentVariables": func(ctx context.Context, t *testing.T, manager *basicProcessManager) {
-					envVar := ManagerEnvironID
-					value := manager.id
+					expectedValue := manager.id
 
 					cmdArgs := []string{"yes"}
 					cmd := manager.CreateCommand(ctx).AddEnv(ManagerEnvironID, manager.id).Add(cmdArgs).Background(true)
@@ -200,11 +195,11 @@ func TestManagerSetsEnvironmentVariables(t *testing.T) {
 					assert.Equal(t, len(ids), 1)
 					proc, err := manager.Get(ctx, ids[0])
 					assert.NotError(t, err)
-					env := proc.Info(ctx).Options.Environment
+					env := dt.ConsumePairs(proc.Info(ctx).Options.Environment.StreamFront()).Force().Resolve().Map()
 					assert.True(t, env != nil)
-					actualValue, ok := env[envVar]
+					actualValue, ok := env[ManagerEnvironID]
 					assert.True(t, ok)
-					check.Equal(t, value, actualValue)
+					check.Equal(t, expectedValue, actualValue)
 				},
 			} {
 				t.Run(testName, func(t *testing.T) {

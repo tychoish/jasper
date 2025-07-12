@@ -6,9 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/google/uuid"
-
 	"github.com/tychoish/fun"
+	"github.com/tychoish/fun/dt"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/jasper/options"
@@ -16,12 +15,8 @@ import (
 )
 
 func NewManager(opts ...ManagerOptionProvider) Manager {
-	conf := &ManagerOptions{}
+	conf := &ManagerOptions{EnvVars: new(dt.List[dt.Pair[string, string]])}
 	fun.Invariant.Must(fun.JoinOptionProviders(opts...).Apply(conf))
-
-	if conf.ID == "" {
-		conf.ID = uuid.New().String()
-	}
 
 	var mgr Manager
 	m := &basicProcessManager{
@@ -31,6 +26,7 @@ func NewManager(opts ...ManagerOptionProvider) Manager {
 		tracker:  conf.Tracker,
 		remote:   conf.Remote,
 		executor: conf.ExecutorResolver,
+		env:      conf.EnvVars.Copy(),
 	}
 	mgr = m
 
@@ -59,19 +55,24 @@ type basicProcessManager struct {
 	loggers  LoggingCache
 	remote   *options.Remote
 	executor func(context.Context, *options.Create) options.ResolveExecutor
+	env      *dt.List[dt.Pair[string, string]]
 }
 
 func (m *basicProcessManager) ID() string { return m.id }
 
 func (m *basicProcessManager) CreateProcess(ctx context.Context, opts *options.Create) (Process, error) {
-	opts.AddEnvVar(ManagerEnvironID, m.id)
-
 	if opts.Remote == nil && m.remote != nil {
 		opts.Remote = m.remote.Copy()
 	}
 
 	if m.executor != nil {
 		opts.ResolveExecutor = m.executor(ctx, opts)
+	}
+
+	if opts.Environment == nil {
+		opts.Environment = m.env.Copy()
+	} else if err := opts.Environment.Populate(m.env.StreamFront()).Run(ctx); err != nil {
+		return nil, err
 	}
 
 	proc, err := NewProcess(ctx, opts)

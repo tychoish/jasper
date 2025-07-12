@@ -7,6 +7,7 @@ import (
 
 	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
+	"github.com/tychoish/fun/dt"
 	"github.com/tychoish/fun/testt"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
@@ -35,8 +36,10 @@ func GenerateManagerSuite() ManagerSuite {
 			proc, err := manager.CreateProcess(ctx, opts)
 			assert.NotError(t, err)
 			info := proc.Info(ctx)
-			assert.True(t, len(info.Options.Environment) != 0)
-			check.Equal(t, manager.ID(), info.Options.Environment[jasper.ManagerEnvironID])
+			assert.True(t, info.Options.Environment.Len() != 0)
+			lookup := dt.NewMap(map[string]string{})
+			lookup.ExtendWithStream(info.Options.Environment.StreamFront()).Ignore().Wait()
+			check.Equal(t, manager.ID(), lookup.Get(jasper.ManagerEnvironID))
 		},
 		"ListDoesNotErrorWhenEmpty": func(ctx context.Context, t *testing.T, manager jasper.Manager, mod testutil.OptsModify) {
 			all, err := manager.List(ctx, options.All)

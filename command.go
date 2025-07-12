@@ -11,6 +11,7 @@ import (
 	"github.com/google/shlex"
 
 	"github.com/tychoish/fun"
+	"github.com/tychoish/fun/dt"
 	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/fun/ft"
 	"github.com/tychoish/grip"
@@ -362,7 +363,8 @@ func (c *Command) RedirectErrorToOutput(v bool) *Command {
 // map. If this is a remote command, it sets the environment of the command
 // being run remotely.
 func (c *Command) Environment(e map[string]string) *Command {
-	c.opts.Process.Environment = e
+	c.resetEnv()
+	c.opts.Process.Environment.Populate(dt.NewMap(e).Stream()).Ignore().Wait()
 	return c
 }
 
@@ -371,7 +373,8 @@ func (c *Command) Environment(e map[string]string) *Command {
 // environment of the command being run remotely.
 func (c *Command) AddEnv(k, v string) *Command {
 	c.setupEnv()
-	c.opts.Process.Environment[k] = v
+	c.opts.Process.Environment.Append(dt.MakePair(k, v))
+
 	return c
 }
 
@@ -516,12 +519,8 @@ func (c *Command) PostHook(h options.CommandPostHook) *Command { c.opts.PostHook
 // creation option. The PreHook is not run when using SetRunFunction.
 func (c *Command) PreHook(fn options.CommandPreHook) *Command { c.opts.PreHook = fn; return c }
 
-func (c *Command) setupEnv() {
-	if c.opts.Process.Environment == nil {
-		c.opts.Process.Environment = map[string]string{}
-	}
-}
-
+func (c *Command) setupEnv()          { ft.CallWhen(ft.IsNil(c.opts.Process.Environment), c.resetEnv) }
+func (c *Command) resetEnv()          { c.opts.Process.Environment = &dt.List[dt.Pair[string, string]]{} }
 func (c *Command) Worker() fun.Worker { return c.Run }
 
 // Run starts and then waits on the Command's execution.

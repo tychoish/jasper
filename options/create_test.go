@@ -163,9 +163,7 @@ func TestCreate(t *testing.T) {
 			check.Equal(t, len(cmd.Env()), 0)
 		},
 		"EnvironmentVariablesArePropagated": func(t *testing.T, opts *Create) {
-			opts.Environment = map[string]string{
-				"foo": "bar",
-			}
+			opts.AddEnvVar("foo", "bar")
 
 			cmd, _, err := opts.Resolve(ctx)
 			check.NotError(t, err)

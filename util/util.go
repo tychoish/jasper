@@ -19,16 +19,16 @@ func FileExists(path string) bool {
 type CloseFunc func() error
 
 // NewLocalBuffer provides a synchronized read/Write closer.
-func NewLocalBuffer(b bytes.Buffer) *LocalBuffer { return &LocalBuffer{b: b} }
+func NewLocalBuffer(b *bytes.Buffer) *LocalBuffer { return &LocalBuffer{b: b} }
 
 type LocalBuffer struct {
-	b bytes.Buffer
-	sync.RWMutex
+	b *bytes.Buffer
+	sync.Mutex
 }
 
 func (b *LocalBuffer) Read(p []byte) (n int, err error) {
-	b.RLock()
-	defer b.RUnlock()
+	b.Lock()
+	defer b.Unlock()
 	return b.b.Read(p)
 }
 func (b *LocalBuffer) Write(p []byte) (n int, err error) {
@@ -37,8 +37,8 @@ func (b *LocalBuffer) Write(p []byte) (n int, err error) {
 	return b.b.Write(p)
 }
 func (b *LocalBuffer) String() string {
-	b.RLock()
-	defer b.RUnlock()
+	b.Lock()
+	defer b.Unlock()
 	return b.b.String()
 }
 

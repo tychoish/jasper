@@ -28,7 +28,7 @@ const (
 
 func verifyCommandAndGetOutput(ctx context.Context, t *testing.T, cmd *Command, run cmdRunFunc, success bool) string {
 	var buf bytes.Buffer
-	bufCloser := util.NewLocalBuffer(buf)
+	bufCloser := util.NewLocalBuffer(&buf)
 
 	cmd.SetCombinedWriter(bufCloser)
 
@@ -309,7 +309,7 @@ func TestCommandImplementation(t *testing.T) {
 									}).ContinueOnError(true).IgnoreError(true)
 
 									var buf bytes.Buffer
-									bufCloser := util.NewLocalBuffer(buf)
+									bufCloser := util.NewLocalBuffer(&buf)
 
 									subTestCase(ctx, t, cmd, bufCloser)
 								})
@@ -398,8 +398,8 @@ func TestCommandImplementation(t *testing.T) {
 						"CreateOptionsAppliedInGetCreateOptionsForLocalCommand": func(ctx context.Context, t *testing.T, cmd Command) {
 							opts := &options.Create{
 								WorkingDirectory: "foo",
-								Environment:      map[string]string{"foo": "bar"},
 							}
+							opts.AddEnvVar("foo", "bar")
 							args := []string{echo, arg1}
 							cmd.opts.Commands = [][]string{}
 							_ = cmd.ApplyFromOpts(opts).Add(args)
@@ -407,9 +407,11 @@ func TestCommandImplementation(t *testing.T) {
 							assert.NotError(t, err)
 							assert.Equal(t, len(genOpts), 1)
 							check.Equal(t, opts.WorkingDirectory, genOpts[0].WorkingDirectory)
-							for k, v := range opts.Environment {
-								check.Equal(t, v, genOpts[0].Environment[k])
-							}
+
+							assert.Equal(t, opts.Environment.Len(), 1)
+							ev := opts.Environment.PopFront().Value()
+							assert.Equal(t, ev.Key, "foo")
+							assert.Equal(t, ev.Value, "bar")
 						},
 						"TagFunctions": func(ctx context.Context, t *testing.T, cmd Command) {
 							tags := []string{"tag0", "tag1"}
