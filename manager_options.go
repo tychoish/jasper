@@ -2,7 +2,6 @@ package jasper
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/google/uuid"
 
@@ -30,7 +29,6 @@ func (conf *ManagerOptions) Validate() error {
 		conf.ID = uuid.New().String()
 	}
 
-	fmt.Println("called!", conf.EnvVars.Len())
 	if conf.EnvVars.Len() == 0 {
 		conf.EnvVars.PushBack(dt.MakePair(ManagerEnvironID, conf.ID))
 	} else {
