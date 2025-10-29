@@ -11,6 +11,8 @@ import (
 
 	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
+	"github.com/tychoish/fun/dt"
+	"github.com/tychoish/fun/fnx"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/testutil"
@@ -25,7 +27,6 @@ func TestLinuxProcessTrackerWithCgroups(t *testing.T) {
 		"Basic":    jasper.NewBasicProcess,
 	} {
 		t.Run(procName, func(t *testing.T) {
-
 			for name, testCase := range map[string]func(context.Context, *testing.T, *linuxProcessTracker, jasper.Process){
 				"VerifyInitialSetup": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, proc jasper.Process) {
 					assert.True(t, tracker.cgroup != nil)
@@ -194,7 +195,10 @@ func TestLinuxProcessTrackerWithEnvironmentVariables(t *testing.T) {
 				"CleanupIgnoresAddedProcessesWithoutEnvironmentVariable": func(ctx context.Context, t *testing.T, tracker *linuxProcessTracker, opts *options.Create, envVarName string, envVarValue string) {
 					proc, err := makeProc(ctx, opts)
 					assert.NotError(t, err)
-					_, ok := proc.Info(ctx).Options.Environment[envVarName]
+					var ok bool
+
+					err = proc.Info(ctx).Options.Environment.StreamFront().ReadAll(fnx.FromHandler(func(p dt.Pair[string, string]) { ok = p.Key == envVarName })).Run(ctx)
+					assert.NotError(t, err)
 					assert.True(t, !ok)
 
 					check.NotError(t, tracker.Add(proc.Info(ctx)))

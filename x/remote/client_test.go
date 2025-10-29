@@ -18,6 +18,7 @@ import (
 	"github.com/mholt/archiver"
 	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
+	"github.com/tychoish/fun/dt"
 	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
@@ -63,8 +64,10 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 				proc, err := client.CreateProcess(ctx, opts)
 				assert.NotError(t, err)
 				info := proc.Info(ctx)
-				assert.NotEqual(t, len(info.Options.Environment), 0)
-				check.Equal(t, client.ID(), info.Options.Environment[jasper.ManagerEnvironID])
+				assert.NotEqual(t, info.Options.Environment.Len(), 0)
+				mapping := dt.Map[string, string]{}
+				mapping.Append(info.Options.Environment.Slice()...)
+				check.Equal(t, client.ID(), mapping[jasper.ManagerEnvironID])
 			},
 		},
 		{
@@ -1157,7 +1160,7 @@ func TestManager(t *testing.T) {
 
 								assert.NotError(t, err)
 								tmpFile := filepath.Join(tmpdir, "fake_script.go")
-								assert.NotError(t, os.WriteFile(tmpFile, []byte(`package main; import "os"; func main() { os.Exit(0) }`), 0755))
+								assert.NotError(t, os.WriteFile(tmpFile, []byte(`package main; import "os"; func main() { os.Exit(0) }`), 0o755))
 								check.NotError(t, harness.Run(ctx, []string{tmpFile}))
 							},
 						},
@@ -1172,7 +1175,7 @@ func TestManager(t *testing.T) {
 								harness := createTestScriptingHarness(ctx, t, client, tmpdir)
 
 								tmpFile := filepath.Join(tmpdir, "fake_script.go")
-								assert.NotError(t, os.WriteFile(tmpFile, []byte(`package main; import "os"; func main() { os.Exit(42) }`), 0755))
+								assert.NotError(t, os.WriteFile(tmpFile, []byte(`package main; import "os"; func main() { os.Exit(42) }`), 0o755))
 								check.Error(t, harness.Run(ctx, []string{tmpFile}))
 							},
 						},
@@ -1213,7 +1216,7 @@ func TestManager(t *testing.T) {
 								harness := createTestScriptingHarness(ctx, t, client, tmpdir)
 
 								tmpFile := filepath.Join(tmpdir, "fake_script.go")
-								assert.NotError(t, os.WriteFile(tmpFile, []byte(`package main; import "os"; func main() { os.Exit(0) }`), 0755))
+								assert.NotError(t, os.WriteFile(tmpFile, []byte(`package main; import "os"; func main() { os.Exit(0) }`), 0o755))
 								_, err = harness.Build(ctx, tmpdir, []string{
 									"-o",
 									filepath.Join(tmpdir, "fake_script"),
@@ -1235,7 +1238,7 @@ func TestManager(t *testing.T) {
 								harness := createTestScriptingHarness(ctx, t, client, tmpdir)
 
 								tmpFile := filepath.Join(tmpdir, "fake_script_test.go")
-								assert.NotError(t, os.WriteFile(tmpFile, []byte(`package main; import "testing"; func TestMain(t *testing.T) { return }`), 0755))
+								assert.NotError(t, os.WriteFile(tmpFile, []byte(`package main; import "testing"; func TestMain(t *testing.T) { return }`), 0o755))
 								results, err := harness.Test(ctx, tmpdir, scripting.TestOptions{Name: "dummy"})
 								assert.NotError(t, err)
 								assert.Equal(t, len(results), 1)
@@ -1282,8 +1285,8 @@ func AddFileToDirectory(dir string, fileName string, fileContents string) error 
 		defer os.RemoveAll(tmpFile.Name())
 		if _, err := tmpFile.Write([]byte(fileContents)); err != nil {
 			catcher := &erc.Collector{}
-			catcher.Add(err)
-			catcher.Add(tmpFile.Close())
+			catcher.Push(err)
+			catcher.Push(tmpFile.Close())
 			return catcher.Resolve()
 		}
 		if err := tmpFile.Close(); err != nil {
@@ -1302,8 +1305,8 @@ func AddFileToDirectory(dir string, fileName string, fileContents string) error 
 	}
 	if _, err := file.Write([]byte(fileContents)); err != nil {
 		catcher := &erc.Collector{}
-		catcher.Add(err)
-		catcher.Add(file.Close())
+		catcher.Push(err)
+		catcher.Push(file.Close())
 		return catcher.Resolve()
 	}
 	return file.Close()

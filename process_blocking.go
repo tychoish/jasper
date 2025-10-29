@@ -54,17 +54,17 @@ func NewBlockingProcess(ctx context.Context, opts *options.Create) (Process, err
 
 	if err = p.RegisterTrigger(ctx, makeOptionsCloseTrigger()); err != nil {
 		catcher := &erc.Collector{}
-		catcher.Add(errors.New("problem registering options close trigger"))
-		catcher.Add(err)
-		catcher.Add(opts.Close())
+		catcher.Push(errors.New("problem registering options close trigger"))
+		catcher.Push(err)
+		catcher.Push(opts.Close())
 		return nil, catcher.Resolve()
 	}
 
 	if err = exec.Start(); err != nil {
 		catcher := &erc.Collector{}
-		catcher.Add(errors.New("problem starting command"))
-		catcher.Add(err)
-		catcher.Add(opts.Close())
+		catcher.Push(errors.New("problem starting command"))
+		catcher.Push(err)
+		catcher.Push(opts.Close())
 		return nil, catcher.Resolve()
 	}
 
@@ -283,7 +283,6 @@ func (p *blockingProcess) Signal(ctx context.Context, sig syscall.Signal) error 
 		} else {
 			out <- nil
 		}
-
 	}
 	select {
 	case p.ops <- operation:

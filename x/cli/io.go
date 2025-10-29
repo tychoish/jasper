@@ -83,7 +83,6 @@ func ExtractInfoResponse(input []byte) (InfoResponse, error) {
 	resp := InfoResponse{}
 	if err := json.Unmarshal(input, &resp); err != nil {
 		return resp, fmt.Errorf("%s: %w", unmarshalFailed, err)
-
 	}
 	return resp, resp.successOrError()
 }
@@ -101,7 +100,6 @@ func ExtractInfosResponse(input []byte) (InfosResponse, error) {
 	resp := InfosResponse{}
 	if err := json.Unmarshal(input, &resp); err != nil {
 		return resp, fmt.Errorf("%s: %w", unmarshalFailed, err)
-
 	}
 	return resp, resp.successOrError()
 }
@@ -119,7 +117,6 @@ func ExtractTagsResponse(input []byte) (TagsResponse, error) {
 	resp := TagsResponse{}
 	if err := json.Unmarshal(input, &resp); err != nil {
 		return resp, fmt.Errorf("%s: %w", unmarshalFailed, err)
-
 	}
 	return resp, resp.successOrError()
 }
@@ -137,7 +134,6 @@ func ExtractRunningResponse(input []byte) (RunningResponse, error) {
 	resp := RunningResponse{}
 	if err := json.Unmarshal(input, &resp); err != nil {
 		return resp, fmt.Errorf("%s: %w", unmarshalFailed, err)
-
 	}
 	return resp, resp.successOrError()
 }
@@ -155,7 +151,6 @@ func ExtractCompleteResponse(input []byte) (CompleteResponse, error) {
 	resp := CompleteResponse{}
 	if err := json.Unmarshal(input, &resp); err != nil {
 		return resp, fmt.Errorf("%s: %w", unmarshalFailed, err)
-
 	}
 	return resp, resp.successOrError()
 }
@@ -174,7 +169,6 @@ func ExtractWaitResponse(input []byte) (WaitResponse, error) {
 	resp := WaitResponse{}
 	if err := json.Unmarshal(input, &resp); err != nil {
 		return resp, fmt.Errorf("%s: %w", unmarshalFailed, err)
-
 	}
 	if err := resp.successOrError(); err != nil {
 		resp.ExitCode = -1
@@ -196,7 +190,6 @@ func ExtractServiceStatusResponse(input []byte) (ServiceStatusResponse, error) {
 	resp := ServiceStatusResponse{}
 	if err := json.Unmarshal(input, &resp); err != nil {
 		return resp, fmt.Errorf("%s: %w", unmarshalFailed, err)
-
 	}
 	return resp, resp.successOrError()
 }
@@ -214,7 +207,6 @@ func ExtractLogStreamResponse(input []byte) (LogStreamResponse, error) {
 	resp := LogStreamResponse{}
 	if err := json.Unmarshal(input, &resp); err != nil {
 		return resp, fmt.Errorf("%s: %w", unmarshalFailed, err)
-
 	}
 	return resp, resp.successOrError()
 }
@@ -232,7 +224,6 @@ func ExtractBuildloggerURLsResponse(input []byte) (BuildloggerURLsResponse, erro
 	resp := BuildloggerURLsResponse{}
 	if err := json.Unmarshal(input, &resp); err != nil {
 		return resp, fmt.Errorf("%s: %w", unmarshalFailed, err)
-
 	}
 	return resp, resp.successOrError()
 }
@@ -250,7 +241,6 @@ func ExtractIDResponse(input []byte) (IDResponse, error) {
 	resp := IDResponse{}
 	if err := json.Unmarshal(input, &resp); err != nil {
 		return resp, fmt.Errorf("%s: %w", unmarshalFailed, err)
-
 	}
 	return resp, resp.successOrError()
 }
@@ -272,8 +262,8 @@ type ScriptingOptions struct {
 // validated.
 func (opts *ScriptingOptions) Validate() error {
 	catcher := &erc.Collector{}
-	catcher.When(opts.ImplementationType == "", ers.Error("implementation type must be defined"))
-	catcher.When(opts.Payload == nil, ers.Error("implementation type must be defined"))
+	catcher.If(opts.ImplementationType == "", ers.Error("implementation type must be defined"))
+	catcher.If(opts.Payload == nil, ers.Error("implementation type must be defined"))
 
 	return catcher.Resolve()
 }
@@ -340,10 +330,10 @@ type SignalInput struct {
 func (in *SignalInput) Validate() error {
 	catcher := &erc.Collector{}
 	if len(in.ID) == 0 {
-		catcher.Add(errors.New("Jasper process ID must not be empty"))
+		catcher.Push(errors.New("Jasper process ID must not be empty"))
 	}
 	if in.Signal <= 0 {
-		catcher.Add(errors.New("signal must be greater than 0"))
+		catcher.Push(errors.New("signal must be greater than 0"))
 	}
 	return catcher.Resolve()
 }
@@ -360,7 +350,7 @@ type SignalTriggerIDInput struct {
 func (in *SignalTriggerIDInput) Validate() error {
 	catcher := &erc.Collector{}
 	if len(in.ID) == 0 {
-		catcher.Add(errors.New("Jasper process ID must not be empty"))
+		catcher.Push(errors.New("Jasper process ID must not be empty"))
 	}
 	_, ok := jasper.GetSignalTriggerFactory(in.SignalTriggerID)
 	if !ok {
@@ -448,7 +438,7 @@ type LoggingCacheCreateInput struct {
 // are valid.
 func (in *LoggingCacheCreateInput) Validate() error {
 	ec := &erc.Collector{}
-	ec.When(in.ID == "", ers.Error("ID must not be empty"))
+	ec.When(in.ID == "", "ID must not be empty")
 	ec.Wrap(in.Output.Validate(), "invalid output options")
 	return ec.Resolve()
 }

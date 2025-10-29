@@ -31,7 +31,7 @@ func TerminateAll(ctx context.Context, procs []Process) error {
 
 	for _, proc := range procs {
 		if proc.Running(ctx) {
-			catcher.Add(Terminate(ctx, proc))
+			catcher.Push(Terminate(ctx, proc))
 		}
 	}
 
@@ -51,7 +51,7 @@ func KillAll(ctx context.Context, procs []Process) error {
 
 	for _, proc := range procs {
 		if proc.Running(ctx) {
-			catcher.Add(Kill(ctx, proc))
+			catcher.Push(Kill(ctx, proc))
 		}
 	}
 

@@ -44,8 +44,8 @@ func (t *windowsProcessTracker) Cleanup() error {
 		return nil
 	}
 	catcher := &erc.Collector{}
-	catcher.Add(t.job.Terminate(0))
-	catcher.Add(t.job.Close())
+	catcher.Push(t.job.Terminate(0))
+	catcher.Push(t.job.Close())
 	t.job = nil
 	return catcher.Resolve()
 }

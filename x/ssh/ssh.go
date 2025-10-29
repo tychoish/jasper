@@ -115,7 +115,7 @@ func (e *libssh) Start() error {
 func (e *libssh) Wait() error {
 	catcher := &erc.Collector{}
 	e.exitErr = e.session.Wait()
-	catcher.Add(e.exitErr)
+	catcher.Push(e.exitErr)
 	e.exited = true
 	return catcher.Resolve()
 }
@@ -172,10 +172,10 @@ func (e *libssh) SignalInfo() (sig syscall.Signal, signaled bool) {
 func (e *libssh) Close() error {
 	catcher := &erc.Collector{}
 	if err := e.session.Close(); err != nil && err != io.EOF {
-		catcher.Add(fmt.Errorf("error closing SSH session: %w", err))
+		catcher.Push(fmt.Errorf("error closing SSH session: %w", err))
 	}
 	if err := e.client.Close(); err != nil && err != io.EOF {
-		catcher.Add(fmt.Errorf("error closing SSH client: %w", err))
+		catcher.Push(fmt.Errorf("error closing SSH client: %w", err))
 	}
 	return catcher.Resolve()
 }

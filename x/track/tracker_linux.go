@@ -118,13 +118,13 @@ func (t *linuxProcessTracker) doCleanupByCgroup() error {
 	catcher := &erc.Collector{}
 	for _, pid := range pids {
 		if err := cleanupProcess(pid); err != nil {
-			catcher.Add(fmt.Errorf("error while cleaning up process with pid '%d': %w", pid, err))
+			catcher.Push(fmt.Errorf("error while cleaning up process with pid '%d': %w", pid, err))
 		}
 	}
 
 	// Delete the cgroup. If the process tracker is still used, the cgroup must
 	// be re-initialized.
-	catcher.Add(t.cgroup.Delete())
+	catcher.Push(t.cgroup.Delete())
 	return catcher.Resolve()
 }
 
@@ -150,7 +150,7 @@ func cleanupProcess(pid int) error {
 	// A process returns syscall.ESRCH if it already terminated.
 	if err := syscall.Kill(pid, syscall.SIGTERM); err != nil && err != syscall.ESRCH {
 		ec := &erc.Collector{}
-		ec.Add(fmt.Errorf("sending sigterm to process with PID '%d': %w", pid, err))
+		ec.Push(fmt.Errorf("sending sigterm to process with PID '%d': %w", pid, err))
 		ec.Wrapf(syscall.Kill(pid, syscall.SIGKILL), "sending sigkill to process with PID '%d'", pid)
 		return ec.Resolve()
 	}

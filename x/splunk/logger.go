@@ -34,8 +34,8 @@ func NewLoggerProducer() options.LoggerProducer { return &LoggerOptions{} }
 func (opts *LoggerOptions) Validate() error {
 	catcher := &erc.Collector{}
 
-	catcher.When(opts.Splunk.Populated(), ers.Error("missing connection info for output type splunk"))
-	catcher.Add(opts.Base.Validate())
+	catcher.If(opts.Splunk.Populated(), ers.Error("missing connection info for output type splunk"))
+	catcher.Push(opts.Base.Validate())
 	return catcher.Resolve()
 }
 

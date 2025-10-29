@@ -74,24 +74,24 @@ func resolveClient(opts *options.Remote) (*ssh.Client, *ssh.Session, error) {
 		targetConn, err := proxyClient.Dial("tcp", fmt.Sprintf("%s:%d", opts.Host, opts.Port))
 		if err != nil {
 			catcher := &erc.Collector{}
-			catcher.Add(proxyClient.Close())
-			catcher.Add(fmt.Errorf("could not dial target host: %w", err))
+			catcher.Push(proxyClient.Close())
+			catcher.Push(fmt.Errorf("could not dial target host: %w", err))
 			return nil, nil, catcher.Resolve()
 		}
 
 		targetConfig, err := resolveClientConfig(&opts.RemoteConfig)
 		if err != nil {
 			catcher := &erc.Collector{}
-			catcher.Add(proxyClient.Close())
-			catcher.Add(fmt.Errorf("could not create target config: %w", err))
+			catcher.Push(proxyClient.Close())
+			catcher.Push(fmt.Errorf("could not create target config: %w", err))
 			return nil, nil, catcher.Resolve()
 		}
 		gatewayConn, chans, reqs, err := ssh.NewClientConn(targetConn, fmt.Sprintf("%s:%d", opts.Host, opts.Port), targetConfig)
 		if err != nil {
 			catcher := &erc.Collector{}
-			catcher.Add(targetConn.Close())
-			catcher.Add(proxyClient.Close())
-			catcher.Add(fmt.Errorf("could not establish connection to target via proxy: %w", err))
+			catcher.Push(targetConn.Close())
+			catcher.Push(proxyClient.Close())
+			catcher.Push(fmt.Errorf("could not establish connection to target via proxy: %w", err))
 			return nil, nil, catcher.Resolve()
 		}
 		client = ssh.NewClient(gatewayConn, chans, reqs)
@@ -110,8 +110,8 @@ func resolveClient(opts *options.Remote) (*ssh.Client, *ssh.Session, error) {
 	session, err := client.NewSession()
 	if err != nil {
 		catcher := &erc.Collector{}
-		catcher.Add(client.Close())
-		catcher.Add(err)
+		catcher.Push(client.Close())
+		catcher.Push(err)
 		return nil, nil, fmt.Errorf("could not establish session: %w", catcher.Resolve())
 	}
 	return client, session, nil

@@ -56,8 +56,9 @@ func ManagerOptionDefaults() ManagerOptionProvider {
 func ManagerOptionWithEnvVar(name, value string) ManagerOptionProvider {
 	return func(conf *ManagerOptions) error { conf.EnvVars.PushBack(dt.MakePair(name, value)); return nil }
 }
+
 func ManagerOptionWithEnvVarMap(mp map[string]string) ManagerOptionProvider {
-	return func(conf *ManagerOptions) error { return conf.EnvVars.Populate(dt.NewMap(mp).Stream()).Wait() }
+	return func(conf *ManagerOptions) error { return conf.EnvVars.AppendStream(dt.NewMap(mp).Stream()).Wait() }
 }
 
 func ManagerOptionSet(opts ManagerOptions) ManagerOptionProvider {

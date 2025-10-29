@@ -51,19 +51,19 @@ func NewBasicProcess(ctx context.Context, opts *options.Create) (Process, error)
 
 	if err = p.RegisterTrigger(ctx, makeOptionsCloseTrigger()); err != nil {
 		catcher := &erc.Collector{}
-		catcher.Add(errors.New("problem registering options close trigger"))
-		catcher.Add(err)
-		catcher.Add(opts.Close())
-		catcher.Add(exec.Close())
+		catcher.Push(errors.New("problem registering options close trigger"))
+		catcher.Push(err)
+		catcher.Push(opts.Close())
+		catcher.Push(exec.Close())
 		return nil, catcher.Resolve()
 	}
 
 	if err = exec.Start(); err != nil {
 		catcher := &erc.Collector{}
-		catcher.Add(errors.New("problem starting process execution"))
-		catcher.Add(err)
-		catcher.Add(opts.Close())
-		catcher.Add(exec.Close())
+		catcher.Push(errors.New("problem starting process execution"))
+		catcher.Push(err)
+		catcher.Push(opts.Close())
+		catcher.Push(exec.Close())
 		return nil, catcher.Resolve()
 	}
 
@@ -123,6 +123,7 @@ func (p *basicProcess) transition(_ context.Context, deadline time.Time) {
 func (p *basicProcess) ID() string {
 	return p.id
 }
+
 func (p *basicProcess) Info(_ context.Context) ProcessInfo {
 	p.RLock()
 	defer p.RUnlock()

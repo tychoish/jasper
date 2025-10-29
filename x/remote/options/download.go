@@ -27,14 +27,14 @@ func (opts Download) Validate() error {
 	catcher := &erc.Collector{}
 
 	if opts.URL == "" {
-		catcher.Add(errors.New("download url cannot be empty"))
+		catcher.Push(errors.New("download url cannot be empty"))
 	}
 
 	if !filepath.IsAbs(opts.Path) {
-		catcher.Add(errors.New("download path must be an absolute path"))
+		catcher.Push(errors.New("download path must be an absolute path"))
 	}
 
-	catcher.Add(opts.ArchiveOpts.Validate())
+	catcher.Push(opts.ArchiveOpts.Validate())
 
 	return catcher.Resolve()
 }
@@ -126,11 +126,11 @@ func writeFile(reader io.Reader, path string) error {
 
 	catcher := &erc.Collector{}
 	if _, err := io.Copy(file, reader); err != nil {
-		catcher.Add(fmt.Errorf("problem writing file: %w", err))
+		catcher.Push(fmt.Errorf("problem writing file: %w", err))
 	}
 
 	if err := file.Close(); err != nil {
-		catcher.Add(fmt.Errorf("problem closing %q: %w", path, err))
+		catcher.Push(fmt.Errorf("problem closing %q: %w", path, err))
 	}
 
 	return catcher.Resolve()

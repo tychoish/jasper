@@ -25,7 +25,7 @@ func createProcs(ctx context.Context, opts *options.Create, manager Manager, num
 		optsCopy := *opts
 
 		proc, err := manager.CreateProcess(ctx, &optsCopy)
-		catcher.Add(err)
+		catcher.Push(err)
 		if proc != nil {
 			out = append(out, proc)
 		}

@@ -69,31 +69,31 @@ func (o *Output) Validate() error {
 	catcher := &erc.Collector{}
 
 	if o.SuppressOutput && (!o.outputIsNull() || o.outputLogging()) {
-		catcher.Add(errors.New("cannot suppress output if output is defined"))
+		catcher.Push(errors.New("cannot suppress output if output is defined"))
 	}
 
 	if o.SuppressError && (!o.errorIsNull() || o.errorLogging()) {
-		catcher.Add(errors.New("cannot suppress error if error is defined"))
+		catcher.Push(errors.New("cannot suppress error if error is defined"))
 	}
 
 	if o.SuppressOutput && o.SendOutputToError {
-		catcher.Add(errors.New("cannot suppress output and redirect it to error"))
+		catcher.Push(errors.New("cannot suppress output and redirect it to error"))
 	}
 
 	if o.SuppressError && o.SendErrorToOutput {
-		catcher.Add(errors.New("cannot suppress error and redirect it to output"))
+		catcher.Push(errors.New("cannot suppress error and redirect it to output"))
 	}
 
 	if o.SendOutputToError && o.errorIsNull() && !o.errorLogging() {
-		catcher.Add(errors.New("cannot redirect output to error without a defined error writer"))
+		catcher.Push(errors.New("cannot redirect output to error without a defined error writer"))
 	}
 
 	if o.SendErrorToOutput && o.outputIsNull() && !o.outputLogging() {
-		catcher.Add(errors.New("cannot redirect error to output without a defined output writer"))
+		catcher.Push(errors.New("cannot redirect error to output without a defined output writer"))
 	}
 
 	if o.SendOutputToError && o.SendErrorToOutput {
-		catcher.Add(errors.New("cannot create redirect cycle between output and error"))
+		catcher.Push(errors.New("cannot create redirect cycle between output and error"))
 	}
 
 	return catcher.Resolve()
@@ -214,16 +214,16 @@ func (o *Output) Close() error {
 	// Close the outputSender and errorSender, which does not close the
 	// underlying send.Sender.
 	if o.outputSender != nil {
-		catcher.Add(o.outputSender.Close())
+		catcher.Push(o.outputSender.Close())
 	}
 	if o.errorSender != nil {
-		catcher.Add(o.errorSender.Close())
+		catcher.Push(o.errorSender.Close())
 
 		// Close the sender wrapped by the send.WriterSender.
 		// Since senders are shared, only close error's senders if output hasn't
 		// already closed them.
 		if o.SuppressOutput || o.SendOutputToError {
-			catcher.Add(o.errorSender.Close())
+			catcher.Push(o.errorSender.Close())
 		}
 	}
 

@@ -91,14 +91,14 @@ func newCombinedDaemon(rest *restDaemon, rpc *rpcDaemon) *combinedDaemon {
 
 func (d *combinedDaemon) Start(s service.Service) error {
 	catcher := &erc.Collector{}
-	catcher.Add(d.RPCDaemon.Start(s))
-	catcher.Add(d.RESTDaemon.Start(s))
+	catcher.Push(d.RPCDaemon.Start(s))
+	catcher.Push(d.RESTDaemon.Start(s))
 	return catcher.Resolve()
 }
 
 func (d *combinedDaemon) Stop(s service.Service) error {
 	catcher := &erc.Collector{}
-	catcher.Add(d.RPCDaemon.Stop(s))
-	catcher.Add(d.RESTDaemon.Stop(s))
+	catcher.Push(d.RPCDaemon.Stop(s))
+	catcher.Push(d.RESTDaemon.Stop(s))
 	return catcher.Resolve()
 }

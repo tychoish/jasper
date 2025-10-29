@@ -178,7 +178,7 @@ func validateLimits(flagNames ...string) func(*cli.Context) error {
 		for _, flagName := range flagNames {
 			l := c.Int(flagName)
 			if l < -1 {
-				catcher.Add(fmt.Errorf("%d is not a valid limit value for %s", l, flagName))
+				catcher.Push(fmt.Errorf("%d is not a valid limit value for %s", l, flagName))
 			}
 		}
 		return catcher.Resolve()
@@ -411,8 +411,8 @@ func forceReinstall(daemon service.Interface, config *service.Config) error {
 		})
 
 		catcher := &erc.Collector{}
-		catcher.Add(svc.Install())
-		catcher.Add(svc.Start())
+		catcher.Push(svc.Install())
+		catcher.Push(svc.Start())
 		if !catcher.Ok() {
 			grip.Debug(stopErr)
 			grip.Debug(uninstallErr)

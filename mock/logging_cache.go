@@ -82,7 +82,7 @@ func (c *LoggingCache) CloseAndRemove(_ context.Context, id string) error {
 func (c *LoggingCache) Clear(_ context.Context) error {
 	catcher := &erc.Collector{}
 	for _, logger := range c.Cache {
-		catcher.Add(logger.Close())
+		catcher.Push(logger.Close())
 	}
 	c.Cache = map[string]*options.CachedLogger{}
 

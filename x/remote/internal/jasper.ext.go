@@ -41,7 +41,7 @@ func (opts *CreateOptions) Export() (*options.Create, error) {
 
 	if len(opts.Environment) > 0 {
 		out.Environment = new(dt.List[dt.Pair[string, string]])
-		out.Environment.Populate(dt.NewMap(opts.Environment).Stream()).Ignore().Wait()
+		out.Environment.AppendStream(dt.NewMap(opts.Environment).Stream()).Ignore().Wait()
 	}
 
 	if opts.Output != nil {
@@ -337,7 +337,6 @@ func (l *LogLevel) Export() level.Priority {
 // (*LogLevel) Export().
 func ConvertLogLevel(l level.Priority) *LogLevel {
 	return &LogLevel{Threshold: int32(l)}
-
 }
 
 // Export takes a protobuf RPC BufferOptions struct and returns the analogous

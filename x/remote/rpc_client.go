@@ -268,8 +268,8 @@ func (c *rpcClient) WriteFile(ctx context.Context, jopts options.WriteFile) erro
 
 	if err = jopts.WriteBufferedContent(sendOpts); err != nil {
 		catcher := &erc.Collector{}
-		catcher.Add(err)
-		catcher.Add(stream.CloseSend())
+		catcher.Push(err)
+		catcher.Push(stream.CloseSend())
 		return catcher.Resolve()
 	}
 
@@ -333,6 +333,7 @@ func (p *rpcProcess) Info(ctx context.Context) jasper.ProcessInfo {
 
 	return exportedInfo
 }
+
 func (p *rpcProcess) Running(ctx context.Context) bool {
 	if p.info.Complete {
 		return false
@@ -366,7 +367,6 @@ func (p *rpcProcess) Signal(ctx context.Context, sig syscall.Signal) error {
 		ProcessID: &internal.JasperProcessID{Value: p.info.Id},
 		Signal:    internal.ConvertSignal(sig),
 	})
-
 	if err != nil {
 		return err
 	}

@@ -254,8 +254,8 @@ func (e *docker) runIOStream(stream types.HijackedResponse) {
 // the container.
 func (e *docker) withRemoveContainer(err error) error {
 	catcher := &erc.Collector{}
-	catcher.Add(err)
-	catcher.Add(e.removeContainer())
+	catcher.Push(err)
+	catcher.Push(e.removeContainer())
 	return catcher.Resolve()
 }
 
@@ -397,8 +397,8 @@ func (e *docker) SignalInfo() (sig syscall.Signal, signaled bool) {
 // closes the connection to the Docker daemon.
 func (e *docker) Close() error {
 	catcher := &erc.Collector{}
-	catcher.Add(e.removeContainer())
-	catcher.Add(e.client.Close())
+	catcher.Push(e.removeContainer())
+	catcher.Push(e.client.Close())
 	e.setStatus(executor.Closed)
 	return catcher.Resolve()
 }

@@ -10,9 +10,9 @@ import (
 
 	"github.com/google/shlex"
 
-	"github.com/tychoish/fun"
 	"github.com/tychoish/fun/dt"
 	"github.com/tychoish/fun/erc"
+	"github.com/tychoish/fun/fnx"
 	"github.com/tychoish/fun/ft"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
@@ -57,8 +57,9 @@ func splitCmdToArgs(cmd string) []string {
 // New blank Commands will use basicProcess as their default Process for
 // executing sub-commands unless it is changed via ProcConstructor().
 func NewCommand() *Command {
-	return &Command{makeProc: NewBasicProcess,
-		opts: options.Command{Priority: level.Debug},
+	return &Command{
+		makeProc: NewBasicProcess,
+		opts:     options.Command{Priority: level.Debug},
 	}
 }
 
@@ -364,7 +365,7 @@ func (c *Command) RedirectErrorToOutput(v bool) *Command {
 // being run remotely.
 func (c *Command) Environment(e map[string]string) *Command {
 	c.resetEnv()
-	c.opts.Process.Environment.Populate(dt.NewMap(e).Stream()).Ignore().Wait()
+	c.opts.Process.Environment.AppendStream(dt.NewMap(e).Stream()).Ignore().Wait()
 	return c
 }
 
@@ -466,7 +467,6 @@ func (c *Command) Bash(script string) *Command { return c.ShellScript("bash", sc
 func (c *Command) BashWhen(cond bool, script string) *Command {
 	if !cond {
 		return c
-
 	}
 
 	return c.Bash(script)
@@ -521,7 +521,7 @@ func (c *Command) PreHook(fn options.CommandPreHook) *Command { c.opts.PreHook =
 
 func (c *Command) setupEnv()          { ft.CallWhen(ft.IsNil(c.opts.Process.Environment), c.resetEnv) }
 func (c *Command) resetEnv()          { c.opts.Process.Environment = &dt.List[dt.Pair[string, string]]{} }
-func (c *Command) Worker() fun.Worker { return c.Run }
+func (c *Command) Worker() fnx.Worker { return c.Run }
 
 // Run starts and then waits on the Command's execution.
 func (c *Command) Run(ctx context.Context) error {
@@ -542,15 +542,15 @@ func (c *Command) Run(ctx context.Context) error {
 
 	opts, err := c.ExportCreateOptions()
 	if err != nil {
-		catcher.Add(err)
-		catcher.Add(c.Close())
+		catcher.Push(err)
+		catcher.Push(c.Close())
 		return catcher.Resolve()
 	}
 
 	for _, opt := range opts {
 		if err := ctx.Err(); err != nil {
-			catcher.Add(fmt.Errorf("operation canceled: %w", err))
-			catcher.Add(c.Close())
+			catcher.Push(fmt.Errorf("operation canceled: %w", err))
+			catcher.Push(c.Close())
 			return catcher.Resolve()
 		}
 
@@ -562,19 +562,19 @@ func (c *Command) Run(ctx context.Context) error {
 
 		if !c.opts.IgnoreError {
 			if c.opts.PostHook != nil {
-				catcher.Add(c.opts.PostHook(err))
+				catcher.Push(c.opts.PostHook(err))
 			} else {
-				catcher.Add(err)
+				catcher.Push(err)
 			}
 		}
 
 		if err != nil && !c.opts.ContinueOnError {
-			catcher.Add(c.Close())
+			catcher.Push(c.Close())
 			return catcher.Resolve()
 		}
 	}
 
-	catcher.Add(c.Close())
+	catcher.Push(c.Close())
 	return catcher.Resolve()
 }
 
@@ -620,12 +620,12 @@ func (c *Command) RunParallel(ctx context.Context) error {
 		select {
 		case cmdRes := <-cmdResults:
 			if !c.opts.IgnoreError {
-				catcher.Add(cmdRes.err)
+				catcher.Push(cmdRes.err)
 			}
 			c.procs = append(c.procs, cmdRes.procs...)
 		case <-ctx.Done():
 			c.procs = []Process{}
-			catcher.Add(c.Close())
+			catcher.Push(c.Close())
 			catcherErr := catcher.Resolve()
 			if catcherErr != nil {
 				return fmt.Errorf("catcher errors %q: %w", catcherErr.Error(), ctx.Err())
@@ -634,7 +634,7 @@ func (c *Command) RunParallel(ctx context.Context) error {
 		}
 	}
 
-	catcher.Add(c.Close())
+	catcher.Push(c.Close())
 	return catcher.Resolve()
 }
 
@@ -761,7 +761,7 @@ func (c *Command) ExportCreateOptions() ([]*options.Create, error) {
 	for _, args := range c.opts.Commands {
 		cmd, err := c.getCreateOpt(args)
 		if err != nil {
-			catcher.Add(err)
+			catcher.Push(err)
 			continue
 		}
 
@@ -805,7 +805,7 @@ func (c *Command) exec(ctx context.Context, opts *options.Create) error {
 		for _, proc := range c.procs {
 			_, err = proc.Wait(ctx)
 			if err != nil {
-				ec.Add(fmt.Errorf("process(%s) group(%s): %w", proc.ID(), c.opts.ID, err))
+				ec.Push(fmt.Errorf("process(%s) group(%s): %w", proc.ID(), c.opts.ID, err))
 			}
 		}
 		err = ec.Resolve()

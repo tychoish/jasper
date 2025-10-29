@@ -23,10 +23,10 @@ type ClientOptions struct {
 func (opts *ClientOptions) Validate() error {
 	catcher := &erc.Collector{}
 	if opts.BinaryPath == "" {
-		catcher.Add(errors.New("client binary path cannot be empty"))
+		catcher.Push(errors.New("client binary path cannot be empty"))
 	}
 	if opts.Type != RPCService && opts.Type != RESTService {
-		catcher.Add(errors.New("client type must be RPC or REST"))
+		catcher.Push(errors.New("client type must be RPC or REST"))
 	}
 	return catcher.Resolve()
 }

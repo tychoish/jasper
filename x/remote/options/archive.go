@@ -47,10 +47,10 @@ func (opts Archive) Validate() error {
 	catcher := &erc.Collector{}
 
 	if !filepath.IsAbs(opts.TargetPath) {
-		catcher.Add(errors.New("download path must be an absolute path"))
+		catcher.Push(errors.New("download path must be an absolute path"))
 	}
 
-	catcher.Add(opts.Format.Validate())
+	catcher.Push(opts.Format.Validate())
 
 	return catcher.Resolve()
 }

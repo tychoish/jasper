@@ -195,7 +195,9 @@ func TestManagerSetsEnvironmentVariables(t *testing.T) {
 					assert.Equal(t, len(ids), 1)
 					proc, err := manager.Get(ctx, ids[0])
 					assert.NotError(t, err)
-					env := dt.ConsumePairs(proc.Info(ctx).Options.Environment.StreamFront()).Force().Resolve().Map()
+					val := (&dt.Pairs[string, string]{})
+					val.AppendStream(proc.Info(ctx).Options.Environment.StreamFront()).Ignore().Wait()
+					env := val.Map()
 					assert.True(t, env != nil)
 					actualValue, ok := env[ManagerEnvironID]
 					assert.True(t, ok)

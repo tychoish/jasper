@@ -76,11 +76,11 @@ const (
 // the format is valid.
 func (lp *LoggingPayload) Validate() error {
 	catcher := &erc.Collector{}
-	catcher.When(lp.Data == nil, ers.Error("data cannot be empty"))
+	catcher.If(lp.Data == nil, ers.Error("data cannot be empty"))
 	switch lp.Format {
 	case "", LoggingPayloadFormatJSON, LoggingPayloadFormatSTRING:
 	default:
-		catcher.Add(fmt.Errorf("invalid payload format '%s'", lp.Format))
+		catcher.Push(fmt.Errorf("invalid payload format '%s'", lp.Format))
 	}
 	return catcher.Resolve()
 }

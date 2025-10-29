@@ -138,7 +138,7 @@ func (c *loggingCacheImpl) Clear(_ context.Context) error {
 
 	catcher := &erc.Collector{}
 	for _, logger := range c.cache {
-		catcher.Add(logger.Close())
+		catcher.Push(logger.Close())
 	}
 	c.cache = map[string]*options.CachedLogger{}
 

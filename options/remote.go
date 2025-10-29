@@ -60,7 +60,7 @@ const defaultSSHPort = 22
 func (opts *RemoteConfig) validate() error {
 	catcher := &erc.Collector{}
 	if opts.Host == "" {
-		catcher.Add(errors.New("host cannot be empty"))
+		catcher.Push(errors.New("host cannot be empty"))
 	}
 	if opts.Port == 0 {
 		opts.Port = defaultSSHPort
@@ -77,10 +77,10 @@ func (opts *RemoteConfig) validate() error {
 		}
 	}
 	if numAuthMethods != 1 {
-		catcher.Add(fmt.Errorf("must specify exactly one authentication method, found %d", numAuthMethods))
+		catcher.Push(fmt.Errorf("must specify exactly one authentication method, found %d", numAuthMethods))
 	}
 	if opts.Key == "" && opts.KeyFile == "" && opts.KeyPassphrase != "" {
-		catcher.Add(errors.New("cannot set passphrase without specifying key or key file"))
+		catcher.Push(errors.New("cannot set passphrase without specifying key or key file"))
 	}
 	return catcher.Resolve()
 }
@@ -91,10 +91,10 @@ func (opts *Remote) Validate() error {
 	catcher := &erc.Collector{}
 
 	if opts.Proxy != nil {
-		catcher.Add(opts.Proxy.validate())
+		catcher.Push(opts.Proxy.validate())
 	}
 
-	catcher.Add(opts.validate())
+	catcher.Push(opts.validate())
 
 	return catcher.Resolve()
 }

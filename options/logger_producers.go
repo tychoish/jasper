@@ -75,8 +75,8 @@ func NewFileLoggerProducer() LoggerProducer { return &FileLoggerOptions{} }
 func (opts *FileLoggerOptions) Validate() error {
 	catcher := &erc.Collector{}
 
-	catcher.When(opts.Filename == "", ers.Error("must specify a filename"))
-	catcher.Add(opts.Base.Validate())
+	catcher.If(opts.Filename == "", ers.Error("must specify a filename"))
+	catcher.Push(opts.Base.Validate())
 	return catcher.Resolve()
 }
 
@@ -157,8 +157,8 @@ func NewInMemoryLoggerProducer() LoggerProducer { return &InMemoryLoggerOptions{
 func (opts *InMemoryLoggerOptions) Validate() error {
 	catcher := &erc.Collector{}
 
-	catcher.When(opts.InMemoryCap <= 0, ers.Error("invalid in-memory capacity"))
-	catcher.Add(opts.Base.Validate())
+	catcher.If(opts.InMemoryCap <= 0, ers.Error("invalid in-memory capacity"))
+	catcher.Push(opts.Base.Validate())
 	return catcher.Resolve()
 }
 

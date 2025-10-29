@@ -102,40 +102,40 @@ func MakeCreation(cmdStr string) (*Create, error) {
 func (opts *Create) Validate() error {
 	catcher := &erc.Collector{}
 
-	catcher.When(len(opts.Args) == 0, ers.Error("invalid process, must specify at least one argument"))
+	catcher.If(len(opts.Args) == 0, ers.Error("invalid process, must specify at least one argument"))
 
-	catcher.When(opts.Timeout < 0, ers.Error("when specifying a timeout, it must be non-negative"))
-	catcher.When(opts.Timeout > 0 && opts.Timeout < time.Second, ers.Error("when specifying a timeout, it must be greater than one second"))
-	catcher.When(opts.TimeoutSecs < 0, ers.Error("when specifying timeout in seconds, it must be non-negative"))
+	catcher.If(opts.Timeout < 0, ers.Error("when specifying a timeout, it must be non-negative"))
+	catcher.If(opts.Timeout > 0 && opts.Timeout < time.Second, ers.Error("when specifying a timeout, it must be greater than one second"))
+	catcher.If(opts.TimeoutSecs < 0, ers.Error("when specifying timeout in seconds, it must be non-negative"))
 
 	if opts.Timeout > 0 && opts.TimeoutSecs > 0 && time.Duration(opts.TimeoutSecs)*time.Second != opts.Timeout {
-		catcher.Add(fmt.Errorf("cannot specify different timeout (in nanos) (%s) and timeout seconds (%d)",
+		catcher.Push(fmt.Errorf("cannot specify different timeout (in nanos) (%s) and timeout seconds (%d)",
 			opts.Timeout, opts.TimeoutSecs))
 	}
 
 	if err := opts.Output.Validate(); err != nil {
-		catcher.Add(fmt.Errorf("invalid output options: %w", err))
+		catcher.Push(fmt.Errorf("invalid output options: %w", err))
 	}
 
 	if opts.WorkingDirectory != "" && opts.isLocal() {
 		info, err := os.Stat(opts.WorkingDirectory)
 
 		if os.IsNotExist(err) {
-			catcher.Add(fmt.Errorf("cannot not use %s as working directory because it does not exist", opts.WorkingDirectory))
+			catcher.Push(fmt.Errorf("cannot not use %s as working directory because it does not exist", opts.WorkingDirectory))
 		} else if !info.IsDir() {
-			catcher.Add(fmt.Errorf("cannot not use %s as working directory because it is not a directory", opts.WorkingDirectory))
+			catcher.Push(fmt.Errorf("cannot not use %s as working directory because it is not a directory", opts.WorkingDirectory))
 		}
 	}
 
-	catcher.When(opts.Docker != nil && opts.Remote != nil, ers.Error("cannot specify both Docker and SSH options"))
+	catcher.If(opts.Docker != nil && opts.Remote != nil, ers.Error("cannot specify both Docker and SSH options"))
 	if opts.Remote != nil {
 		if err := opts.Remote.Validate(); err != nil {
-			catcher.Add(fmt.Errorf("invalid SSH options: %w", err))
+			catcher.Push(fmt.Errorf("invalid SSH options: %w", err))
 		}
 	}
 	if opts.Docker != nil {
 		if err := opts.Docker.Validate(); err != nil {
-			catcher.Add(fmt.Errorf("invalid Docker options: %w", err))
+			catcher.Push(fmt.Errorf("invalid Docker options: %w", err))
 		}
 	}
 
@@ -316,7 +316,7 @@ func newEnvList() *dt.List[dt.Pair[string, string]] { return new(dt.List[dt.Pair
 func (opts *Create) Close() error {
 	catcher := &erc.Collector{}
 	for _, c := range opts.closers {
-		catcher.Add(c())
+		catcher.Push(c())
 	}
 	return catcher.Resolve()
 }

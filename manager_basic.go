@@ -71,7 +71,7 @@ func (m *basicProcessManager) CreateProcess(ctx context.Context, opts *options.C
 
 	if opts.Environment == nil {
 		opts.Environment = m.env.Copy()
-	} else if err := opts.Environment.Populate(m.env.StreamFront()).Run(ctx); err != nil {
+	} else if err := opts.Environment.AppendStream(m.env.StreamFront()).Run(ctx); err != nil {
 		return nil, err
 	}
 

@@ -35,8 +35,8 @@ func (opts *Command) Validate() error {
 	if len(opts.Process.Args) == 0 {
 		opts.Process.Args = []string{""}
 	}
-	catcher.Add(opts.Process.Validate())
-	catcher.When(len(opts.Commands) == 0, ers.Error("must specify at least one command"))
+	catcher.Push(opts.Process.Validate())
+	catcher.If(len(opts.Commands) == 0, ers.Error("must specify at least one command"))
 	return catcher.Resolve()
 }
 
@@ -91,7 +91,7 @@ func MergePostHooks(fns ...CommandPostHook) CommandPostHook {
 	return func(err error) error {
 		catcher := &erc.Collector{}
 		for _, fn := range fns {
-			catcher.Add(fn(err))
+			catcher.Push(fn(err))
 		}
 		return catcher.Resolve()
 	}

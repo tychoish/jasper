@@ -43,12 +43,12 @@ func (opts *WriteFile) validateContent() error {
 // default permissions if necessary.
 func (opts *WriteFile) Validate() error {
 	if opts.Perm == 0 {
-		opts.Perm = 0666
+		opts.Perm = 0o666
 	}
 
 	catcher := &erc.Collector{}
-	catcher.When(opts.Path == "", ers.Error("path to file must be specified"))
-	catcher.Add(opts.validateContent())
+	catcher.If(opts.Path == "", ers.Error("path to file must be specified"))
+	catcher.Push(opts.validateContent())
 	return catcher.Resolve()
 }
 
@@ -66,7 +66,7 @@ func (opts *WriteFile) DoWrite() error {
 		openFlags |= os.O_TRUNC
 	}
 
-	file, err := os.OpenFile(opts.Path, openFlags, 0666)
+	file, err := os.OpenFile(opts.Path, openFlags, 0o666)
 	if err != nil {
 		return fmt.Errorf("error opening file %q: %w", opts.Path, err)
 	}
@@ -75,15 +75,15 @@ func (opts *WriteFile) DoWrite() error {
 
 	reader, err := opts.ContentReader()
 	if err != nil {
-		catcher.Add(fmt.Errorf("error getting file content as bytes: %w", err))
-		catcher.Add(file.Close())
+		catcher.Push(fmt.Errorf("error getting file content as bytes: %w", err))
+		catcher.Push(file.Close())
 		return catcher.Resolve()
 	}
 
 	bufReader := bufio.NewReader(reader)
 	if _, err = io.Copy(file, bufReader); err != nil {
-		catcher.Add(fmt.Errorf("error writing content to file: %w", err))
-		catcher.Add(file.Close())
+		catcher.Push(fmt.Errorf("error writing content to file: %w", err))
+		catcher.Push(file.Close())
 		return catcher.Resolve()
 	}
 

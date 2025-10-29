@@ -132,9 +132,9 @@ func NewLoggerConfig(producerType string, format RawLoggerConfigFormat, config [
 func (lc *LoggerConfig) validate() error {
 	catcher := &erc.Collector{}
 
-	catcher.When(lc.info.Type == "", ers.Error("cannot have empty logger type"))
+	catcher.If(lc.info.Type == "", ers.Error("cannot have empty logger type"))
 	if len(lc.info.Config) > 0 {
-		catcher.Add(lc.info.Format.Validate())
+		catcher.Push(lc.info.Format.Validate())
 	}
 
 	if lc.Registry == nil {
@@ -267,8 +267,8 @@ func (opts *BaseOptions) Validate() error {
 		opts.Level = level.Trace
 	}
 
-	catcher.Add(opts.Buffer.Validate())
-	catcher.Add(opts.Format.Validate())
+	catcher.Push(opts.Buffer.Validate())
+	catcher.Push(opts.Format.Validate())
 	return catcher.Resolve()
 }
 
@@ -335,12 +335,12 @@ func (s *SafeSender) Close() error {
 	catcher := &erc.Collector{}
 
 	if s.Sender != nil {
-		catcher.Add(s.Sender.Flush(context.TODO()))
-		catcher.Add(s.Sender.Close())
+		catcher.Push(s.Sender.Flush(context.TODO()))
+		catcher.Push(s.Sender.Close())
 	}
 	if s.baseSender != nil {
-		catcher.Add(s.baseSender.Flush(context.TODO()))
-		catcher.Add(s.baseSender.Close())
+		catcher.Push(s.baseSender.Flush(context.TODO()))
+		catcher.Push(s.baseSender.Close())
 	}
 
 	return catcher.Resolve()

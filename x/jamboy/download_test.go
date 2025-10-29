@@ -173,7 +173,7 @@ func TestDoExtract(t *testing.T) {
 			assert.NotError(t, err)
 			defer os.Remove(archiveFile.Name())
 			extractDir := filepath.Join(testutil.BuildDirectory(), "out")
-			assert.NotError(t, os.MkdirAll(extractDir, 0755))
+			assert.NotError(t, os.MkdirAll(extractDir, 0o755))
 			defer os.RemoveAll(extractDir)
 
 			err = testCase.archiveMaker.Archive([]string{file.Name()}, "second-"+archiveFile.Name())
@@ -243,8 +243,8 @@ func AddFileToDirectory(dir string, fileName string, fileContents string) error 
 		defer os.RemoveAll(tmpFile.Name())
 		if _, err := tmpFile.Write([]byte(fileContents)); err != nil {
 			catcher := &erc.Collector{}
-			catcher.Add(err)
-			catcher.Add(tmpFile.Close())
+			catcher.Push(err)
+			catcher.Push(tmpFile.Close())
 			return catcher.Resolve()
 		}
 		if err := tmpFile.Close(); err != nil {
@@ -263,8 +263,8 @@ func AddFileToDirectory(dir string, fileName string, fileContents string) error 
 	}
 	if _, err := file.Write([]byte(fileContents)); err != nil {
 		catcher := &erc.Collector{}
-		catcher.Add(err)
-		catcher.Add(file.Close())
+		catcher.Push(err)
+		catcher.Push(file.Close())
 		return catcher.Resolve()
 	}
 	return file.Close()

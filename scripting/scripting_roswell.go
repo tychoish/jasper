@@ -130,7 +130,7 @@ func (e *roswellEnvironment) Test(ctx context.Context, dir string, tests ...Test
 
 		err := cmd.Run(tctx)
 		if err != nil {
-			catcher.Add(fmt.Errorf("roswell test %q: %w", t, err))
+			catcher.Push(fmt.Errorf("roswell test %q: %w", t, err))
 		}
 
 		out[idx] = t.getResult(ctx, err, startAt)

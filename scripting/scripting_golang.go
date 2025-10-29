@@ -79,7 +79,6 @@ func (e *golangEnvironment) Build(ctx context.Context, dir string, args []string
 		AddEnv("GOROOT", e.opts.Goroot).
 		SetOutputOptions(e.opts.Output).
 		Add(append([]string{e.opts.Interpreter(), "build"}, args...)).Run(ctx)
-
 	if err != nil {
 		return "", err
 	}
@@ -103,7 +102,6 @@ func (e *golangEnvironment) RunScript(ctx context.Context, script string) error 
 		path = filepath.Join(e.opts.Directory, path)
 	} else {
 		path = filepath.Join(e.opts.Gopath, "tmp", path)
-
 	}
 	wo := options.WriteFile{
 		Path:    path,
@@ -154,9 +152,8 @@ func (e *golangEnvironment) Test(ctx context.Context, dir string, tests ...TestO
 			AddEnv("GOROOT", e.opts.Goroot).
 			SetOutputOptions(e.opts.Output).
 			Add(args).Run(ctx)
-
 		if err != nil {
-			catcher.Add(fmt.Errorf("golang test %q: %w", t, err))
+			catcher.Push(fmt.Errorf("golang test %q: %w", t, err))
 		}
 
 		out[idx] = t.getResult(ctx, err, startAt)

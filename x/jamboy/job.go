@@ -11,6 +11,7 @@ import (
 	"github.com/tychoish/amboy/dependency"
 	"github.com/tychoish/amboy/job"
 	"github.com/tychoish/amboy/registry"
+	"github.com/tychoish/fun/dt"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/send"
 	"github.com/tychoish/jasper"
@@ -29,10 +30,10 @@ type amboyJob struct {
 		SendOutputToError bool `bson:"redirect_output_to_error,omitempty" json:"redirect_output_to_error,omitempty" yaml:"redirect_output_to_error,omitempty"`
 		SendErrorToOutput bool `bson:"redirect_error_to_output,omitempty" json:"redirect_error_to_output,omitempty" yaml:"redirect_error_to_output,omitempty"`
 	} `bson:"output_opts,omitempty" json:"output_opts,omitempty" yaml:"output_opts,omitempty"`
-	ExitCode         int               `bson:"exit_code" json:"exit_code" yaml:"exit_code"`
-	Environment      map[string]string `bson:"env" json:"env" yaml:"env"`
-	CmdString        string            `bson:"cmd" json:"cmd" yaml:"cmd"`
-	WorkingDirectory string            `bson:"working_dir" json:"working_dir" yaml:"working_dir"`
+	ExitCode         int                               `bson:"exit_code" json:"exit_code" yaml:"exit_code"`
+	Environment      *dt.List[dt.Pair[string, string]] `bson:"env" json:"env" yaml:"env"`
+	CmdString        string                            `bson:"cmd" json:"cmd" yaml:"cmd"`
+	WorkingDirectory string                            `bson:"working_dir" json:"working_dir" yaml:"working_dir"`
 	Output           struct {
 		Error  string `bson:"error" json:"error" yaml:"error"`
 		Output string `bson:"output" json:"output" yaml:"output"`
@@ -71,7 +72,6 @@ func amboyJobFactory(pc jasper.ProcessConstructor) *amboyJob {
 	}
 	j.SetDependency(dependency.NewAlways())
 	return j
-
 }
 
 // NewJob constructs an amboy job that wraps a provided
@@ -106,10 +106,10 @@ func NewJobBasic(cmd string) amboy.Job {
 //
 // Pass the process constructor to allow the amboy jobs to manipulate
 // processes in an existing Manager.
-func NewJobExtended(pc jasper.ProcessConstructor, cmd string, env map[string]string, wd string) amboy.Job {
+func NewJobExtended(pc jasper.ProcessConstructor, cmd string, env dt.Map[string, string], wd string) amboy.Job {
 	j := amboyJobFactory(pc)
 	j.CmdString = cmd
-	j.Environment = env
+	j.Environment = env.Pairs().List()
 	j.WorkingDirectory = wd
 	j.SetID(fmt.Sprintf("%s.ext.%x", amboyJobName, sha1.Sum([]byte(cmd))))
 	return j
@@ -119,10 +119,10 @@ func NewJobExtended(pc jasper.ProcessConstructor, cmd string, env map[string]str
 // variables and a working directory defined. The identifier of the
 // job includes a hash of the command, so running the same command
 // repeatedly may result in job collisions.
-func NewJobBasicExtended(cmd string, env map[string]string, wd string) Job {
+func NewJobBasicExtended(cmd string, env dt.Map[string, string], wd string) Job {
 	j := amboyJobFactory(jasper.NewBasicProcess)
 	j.CmdString = cmd
-	j.Environment = env
+	j.Environment = env.Pairs().List()
 	j.WorkingDirectory = wd
 	j.SetID(fmt.Sprintf("%s.ext.%x", amboyJobName, sha1.Sum([]byte(cmd))))
 	return j

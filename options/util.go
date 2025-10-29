@@ -33,11 +33,11 @@ func writeFile(reader io.Reader, path string) error {
 
 	catcher := &erc.Collector{}
 	if _, err := io.Copy(file, reader); err != nil {
-		catcher.Add(fmt.Errorf("problem writing file: %w", err))
+		catcher.Push(fmt.Errorf("problem writing file: %w", err))
 	}
 
 	if err := file.Close(); err != nil {
-		catcher.Add(fmt.Errorf("problem closing %q: %w", path, err))
+		catcher.Push(fmt.Errorf("problem closing %q: %w", path, err))
 	}
 
 	return catcher.Resolve()

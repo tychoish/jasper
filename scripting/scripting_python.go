@@ -151,9 +151,8 @@ func (e *pythonEnvironment) Test(ctx context.Context, dir string, tests ...TestO
 		args = append(args, t.Args...)
 
 		err := e.manager.CreateCommand(ctx).Directory(dir).Environment(e.opts.Environment).SetOutputOptions(e.opts.Output).Add(args).Run(ctx)
-
 		if err != nil {
-			catcher.Add(fmt.Errorf("python test %q: %w", t, err))
+			catcher.Push(fmt.Errorf("python test %q: %w", t, err))
 		}
 
 		out[idx] = t.getResult(ctx, err, startAt)

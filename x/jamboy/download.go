@@ -22,7 +22,7 @@ func createDownloadJobs(path string, urls <-chan string, catcher *erc.Collector)
 		for url := range urls {
 			j, err := NewDownloadJob(url, path, true)
 			if err != nil {
-				catcher.Add(fmt.Errorf("problem creating download job for %s: %w", url, err))
+				catcher.Push(fmt.Errorf("problem creating download job for %s: %w", url, err))
 				continue
 			}
 
@@ -51,14 +51,14 @@ func processDownloadJobs(ctx context.Context, processFile func(string) error) fu
 			if !job.Status().Completed {
 				continue
 			}
-			catcher.Add(job.Error())
+			catcher.Push(job.Error())
 			downloadJob, ok := job.(*downloadFileJob)
 			if !ok {
-				catcher.Add(errors.New("problem retrieving download job from queue"))
+				catcher.Push(errors.New("problem retrieving download job from queue"))
 				continue
 			}
 			if err := processFile(filepath.Join(downloadJob.Directory, downloadJob.FileName)); err != nil {
-				catcher.Add(err)
+				catcher.Push(err)
 			}
 		}
 		return catcher.Resolve()

@@ -23,16 +23,16 @@ type Docker struct {
 // none are specified.
 func (opts *Docker) Validate() error {
 	catcher := &erc.Collector{}
-	catcher.When(opts.Port < 0, ers.Error("port must be positive value"))
-	catcher.When(opts.Image == "", ers.Error("Docker image must be specified"))
+	catcher.If(opts.Port < 0, ers.Error("port must be positive value"))
+	catcher.If(opts.Image == "", ers.Error("Docker image must be specified"))
 	if opts.Platform == "" {
 		if PlatformSupportsDocker(runtime.GOOS) {
 			opts.Platform = runtime.GOOS
 		} else {
-			catcher.Add(fmt.Errorf("failed to set default platform to current runtime platform '%s' because it is unsupported", opts.Platform))
+			catcher.Push(fmt.Errorf("failed to set default platform to current runtime platform '%s' because it is unsupported", opts.Platform))
 		}
 	} else if !PlatformSupportsDocker(opts.Platform) {
-		catcher.Add(fmt.Errorf("unrecognized platform '%s'", opts.Platform))
+		catcher.Push(fmt.Errorf("unrecognized platform '%s'", opts.Platform))
 	}
 	return catcher.Resolve()
 }

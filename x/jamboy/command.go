@@ -20,7 +20,7 @@ func EnqueueForeground(ctx context.Context, c *jasper.Command, q amboy.Queue) er
 
 	catcher := &erc.Collector{}
 	for _, j := range jobs {
-		catcher.Add(q.Put(ctx, j))
+		catcher.Push(q.Put(ctx, j))
 	}
 
 	return catcher.Resolve()
@@ -38,7 +38,7 @@ func Enqueue(ctx context.Context, c *jasper.Command, q amboy.Queue) error {
 
 	catcher := &erc.Collector{}
 	for _, j := range jobs {
-		catcher.Add(q.Put(ctx, j))
+		catcher.Push(q.Put(ctx, j))
 	}
 
 	return catcher.Resolve()

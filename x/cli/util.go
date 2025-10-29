@@ -27,7 +27,7 @@ func mergeBeforeFuncs(funcs ...cli.BeforeFunc) cli.BeforeFunc {
 	return func(c *cli.Context) error {
 		catcher := &erc.Collector{}
 		for _, f := range funcs {
-			catcher.Add(f(c))
+			catcher.Push(f(c))
 		}
 		return catcher.Resolve()
 	}
@@ -157,8 +157,8 @@ func withConnection(ctx context.Context, c *cli.Context, operation func(remote.M
 	}
 
 	catcher := &erc.Collector{}
-	catcher.Add(operation(client))
-	catcher.Add(client.CloseConnection())
+	catcher.Push(operation(client))
+	catcher.Push(client.CloseConnection())
 
 	return catcher.Resolve()
 }
@@ -179,7 +179,7 @@ func runServices(ctx context.Context, makeServices ...func(context.Context) (uti
 	closeAllServices := func(closeServices []util.CloseFunc) error {
 		catcher := &erc.Collector{}
 		for _, closeService := range closeServices {
-			catcher.Add(closeService())
+			catcher.Push(closeService())
 		}
 		return catcher.Resolve()
 	}
@@ -188,8 +188,8 @@ func runServices(ctx context.Context, makeServices ...func(context.Context) (uti
 		closeService, err := makeService(ctx)
 		if err != nil {
 			catcher := &erc.Collector{}
-			catcher.Add(fmt.Errorf("failed to create service: %w", err))
-			catcher.Add(closeAllServices(closeServices))
+			catcher.Push(fmt.Errorf("failed to create service: %w", err))
+			catcher.Push(closeAllServices(closeServices))
 			return catcher.Resolve()
 		}
 		closeServices = append(closeServices, closeService)

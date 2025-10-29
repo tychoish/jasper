@@ -69,9 +69,9 @@ func NewCredentialsFromFile(path string) (*CertificateCredentials, error) {
 func (c *CertificateCredentials) Validate() error {
 	catcher := &erc.Collector{}
 
-	catcher.When(len(c.CACert) == 0, ers.Error("CA certificate should not be empty"))
-	catcher.When(len(c.Cert) == 0, ers.Error("certificate should not be empty"))
-	catcher.When(len(c.Key) == 0, ers.Error("key should not be empty"))
+	catcher.If(len(c.CACert) == 0, ers.Error("CA certificate should not be empty"))
+	catcher.If(len(c.Cert) == 0, ers.Error("certificate should not be empty"))
+	catcher.If(len(c.Key) == 0, ers.Error("key should not be empty"))
 
 	return catcher.Resolve()
 }
