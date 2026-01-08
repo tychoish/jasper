@@ -8,8 +8,8 @@ require (
 	github.com/cheynewallace/tabby v1.1.1
 	github.com/evergreen-ci/service v1.0.1-0.20200225230430-d9382e39d768
 	github.com/google/uuid v1.3.1
-	github.com/tychoish/fun v0.13.0
-	github.com/tychoish/grip v0.4.1
+	github.com/tychoish/fun v0.14.0
+	github.com/tychoish/grip v0.4.2
 	github.com/tychoish/grip/x/splunk v0.0.0-20250608160243-37fab929fbd2
 	github.com/tychoish/jasper v0.1.2
 	github.com/tychoish/jasper/x/remote v0.0.0-20230825152828-7bf0c66efca5
@@ -44,11 +44,11 @@ require (
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/tklauser/go-sysconf v0.3.15 // indirect
 	github.com/tklauser/numcpus v0.10.0 // indirect
-	github.com/tychoish/birch v0.3.1 // indirect
-	github.com/tychoish/birch/x/ftdc v0.0.0-20251029024444-91e948b0e397 // indirect
+	github.com/tychoish/birch v0.3.2-0.20260108164004-e93907509812 // indirect
+	github.com/tychoish/birch/x/ftdc v0.0.0-20260108164004-e93907509812 // indirect
 	github.com/tychoish/birch/x/mrpc v0.0.0-20250610225000-f5dba0d9b062 // indirect
 	github.com/tychoish/gimlet v0.0.0-20251028182000-6a35909ebafc // indirect
-	github.com/tychoish/grip/x/metrics v0.0.0-20251029025449-1ae82bef74a7 // indirect
+	github.com/tychoish/grip/x/metrics v0.0.0-20260108164604-8e807edbbafb // indirect
 	github.com/ulikunitz/xz v0.5.11 // indirect
 	github.com/urfave/negroni v1.0.0 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect

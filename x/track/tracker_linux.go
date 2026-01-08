@@ -134,7 +134,7 @@ func (t *linuxProcessTracker) doCleanupByCgroup() error {
 func (t *linuxProcessTracker) doCleanupByEnvironmentVariable() error {
 	ec := &erc.Collector{}
 	for _, info := range t.infos {
-		for envvar := range info.Options.Environment.Iterator() {
+		for envvar := range info.Options.Environment.IteratorFront() {
 			if envvar.Key == jasper.ManagerEnvironID && envvar.Value == t.Name {
 				ec.Push(cleanupProcess(info.PID))
 			}

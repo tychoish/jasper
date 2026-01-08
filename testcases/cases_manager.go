@@ -7,7 +7,8 @@ import (
 
 	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
-	"github.com/tychoish/fun/dt"
+	"github.com/tychoish/fun/irt"
+	"github.com/tychoish/fun/stw"
 	"github.com/tychoish/fun/testt"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
@@ -37,8 +38,8 @@ func GenerateManagerSuite() ManagerSuite {
 			assert.NotError(t, err)
 			info := proc.Info(ctx)
 			assert.True(t, info.Options.Environment.Len() != 0)
-			lookup := dt.NewMap(map[string]string{})
-			lookup.ExtendWithStream(info.Options.Environment.StreamFront()).Ignore().Wait()
+			lookup := stw.NewMap(map[string]string{})
+			lookup.Extend(irt.KVsplit(info.Options.Environment.IteratorFront()))
 			check.Equal(t, manager.ID(), lookup.Get(jasper.ManagerEnvironID))
 		},
 		"ListDoesNotErrorWhenEmpty": func(ctx context.Context, t *testing.T, manager jasper.Manager, mod testutil.OptsModify) {
@@ -131,7 +132,6 @@ func GenerateManagerSuite() ManagerSuite {
 
 			assert.Equal(t, len(listOut), 1)
 			check.Equal(t, listOut[0].ID(), proc.ID())
-
 		},
 		"GetMethodErrorsWithNoResponse": func(ctx context.Context, t *testing.T, manager jasper.Manager, mod testutil.OptsModify) {
 			proc, err := manager.Get(ctx, "foo")

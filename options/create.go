@@ -16,7 +16,7 @@ import (
 	"github.com/tychoish/fun/dt"
 	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/fun/ers"
-	"github.com/tychoish/fun/ft"
+	"github.com/tychoish/fun/irt"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/jasper/executor"
@@ -40,8 +40,8 @@ const (
 // execution configuration, post-execution triggers, and output configuration.
 // It is not safe for concurrent access.
 type Create struct {
-	Args        []string                          `bson:"args" json:"args" yaml:"args"`
-	Environment *dt.List[dt.Pair[string, string]] `bson:"env,omitempty" json:"env,omitempty" yaml:"env,omitempty"`
+	Args        []string                         `bson:"args" json:"args" yaml:"args"`
+	Environment *dt.List[irt.KV[string, string]] `bson:"env,omitempty" json:"env,omitempty" yaml:"env,omitempty"`
 	// OverrideEnviron sets the process environment to match the currently
 	// executing process's environment. This is ignored if Remote or Docker
 	// options are specified.
@@ -92,7 +92,7 @@ func MakeCreation(cmdStr string) (*Create, error) {
 
 	o := &Create{
 		Args:        args,
-		Environment: new(dt.List[dt.Pair[string, string]]),
+		Environment: new(dt.List[irt.KV[string, string]]),
 	}
 
 	return o, nil
@@ -182,7 +182,7 @@ func (opts *Create) Hash() hash.Hash {
 
 	if num := opts.Environment.Len(); num > 0 {
 		env := make([]string, 0, num)
-		for evar := range opts.Environment.Iterator() {
+		for evar := range opts.Environment.IteratorFront() {
 			env = append(env, fmt.Sprintf("%s=%s", evar.Key, evar.Value))
 		}
 
@@ -245,7 +245,7 @@ func (opts *Create) Resolve(ctx context.Context) (exe executor.Executor, t time.
 	}
 
 	if opts.Environment != nil {
-		for evar := range opts.Environment.Iterator() {
+		for evar := range opts.Environment.IteratorFront() {
 			env = append(env, fmt.Sprintf("%s=%s", evar.Key, evar.Value))
 		}
 	}
@@ -288,7 +288,7 @@ func (opts *Create) resolveExecutor(ctx context.Context) (executor.Executor, err
 func (opts *Create) ResolveEnvironment() []string {
 	if num := opts.Environment.Len(); num > 0 {
 		env := make([]string, 0, num)
-		for evar := range opts.Environment.Iterator() {
+		for evar := range opts.Environment.IteratorFront() {
 			env = append(env, fmt.Sprintf("%s=%s", evar.Key, evar.Value))
 		}
 	}
@@ -299,16 +299,15 @@ func (opts *Create) ResolveEnvironment() []string {
 // AddEnvVar adds an environment variable to the Create struct on which
 // this method is called. If the Environment map is nil, this method will
 // instantiate one.
-func (opts *Create) AddEnvVar(k, v string) { opts.init(); opts.Environment.Append(dt.MakePair(k, v)) }
+func (opts *Create) AddEnvVar(k, v string) { opts.init(); opts.Environment.Append(irt.MakeKV(k, v)) }
 
 func (opts *Create) init() {
-	opts.Environment = ft.DefaultFuture(
-		opts.Environment, // if this is not nil return it,
-		newEnvList,       // otherwise, call this function and return that.
-	)
+	if opts.Environment == nil {
+		opts.Environment = newEnvList()
+	}
 }
 
-func newEnvList() *dt.List[dt.Pair[string, string]] { return new(dt.List[dt.Pair[string, string]]) }
+func newEnvList() *dt.List[irt.KV[string, string]] { return new(dt.List[irt.KV[string, string]]) }
 
 // Close will execute the closer functions assigned to the Create. This
 // function is often called as a trigger at the end of a process' lifetime in

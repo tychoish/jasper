@@ -7,12 +7,12 @@ toolchain go1.24.3
 require (
 	github.com/golang/protobuf v1.5.3
 	github.com/mholt/archiver v3.1.1+incompatible
-	github.com/tychoish/birch v0.3.1
+	github.com/tychoish/birch v0.3.2-0.20260108164004-e93907509812
 	github.com/tychoish/birch/x/mrpc v0.0.0-20250610225000-f5dba0d9b062
-	github.com/tychoish/fun v0.13.0
+	github.com/tychoish/fun v0.14.0
 	github.com/tychoish/gimlet v0.0.0-20251028182000-6a35909ebafc
-	github.com/tychoish/grip v0.4.1
-	github.com/tychoish/grip/x/metrics v0.0.0-20251028025321-45b14fae21ba
+	github.com/tychoish/grip v0.4.2
+	github.com/tychoish/grip/x/metrics v0.0.0-20260108164604-8e807edbbafb
 	github.com/tychoish/grip/x/splunk v0.0.0-20250608160243-37fab929fbd2
 	github.com/tychoish/jasper v0.1.3-0.20250712191228-9a0a31d519ad
 	github.com/tychoish/jasper/x/splunk v0.0.0-20230825152828-7bf0c66efca5
@@ -39,7 +39,7 @@ require (
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/tklauser/go-sysconf v0.3.15 // indirect
 	github.com/tklauser/numcpus v0.10.0 // indirect
-	github.com/tychoish/birch/x/ftdc v0.0.0-20251029024444-91e948b0e397 // indirect
+	github.com/tychoish/birch/x/ftdc v0.0.0-20260108164004-e93907509812 // indirect
 	github.com/ulikunitz/xz v0.5.11 // indirect
 	github.com/urfave/negroni v1.0.0 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect

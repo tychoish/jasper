@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/tychoish/fun/dt"
+	"github.com/tychoish/fun/irt"
+	"github.com/tychoish/fun/stw"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/grip/x/splunk"
@@ -40,8 +42,8 @@ func (opts *CreateOptions) Export() (*options.Create, error) {
 	}
 
 	if len(opts.Environment) > 0 {
-		out.Environment = new(dt.List[dt.Pair[string, string]])
-		out.Environment.AppendStream(dt.NewMap(opts.Environment).Stream()).Ignore().Wait()
+		out.Environment = new(dt.List[irt.KV[string, string]])
+		out.Environment.Extend(irt.KVjoin(stw.NewMap(opts.Environment).Iterator()))
 	}
 
 	if opts.Output != nil {
@@ -104,7 +106,7 @@ func ConvertCreateOptions(opts *options.Create) (*CreateOptions, error) {
 
 	if size := opts.Environment.Len(); size > 0 {
 		co.Environment = make(map[string]string, size)
-		dt.NewMap(co.Environment).ExtendWithStream(opts.Environment.StreamFront()).Ignore().Wait()
+		stw.NewMap(co.Environment).Extend(irt.KVsplit(opts.Environment.IteratorFront()))
 	}
 
 	for _, opt := range opts.OnSuccess {

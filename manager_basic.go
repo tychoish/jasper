@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/tychoish/fun"
 	"github.com/tychoish/fun/dt"
+	"github.com/tychoish/fun/erc"
+	"github.com/tychoish/fun/irt"
+	"github.com/tychoish/fun/opt"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/message"
 	"github.com/tychoish/jasper/options"
@@ -15,8 +17,8 @@ import (
 )
 
 func NewManager(opts ...ManagerOptionProvider) Manager {
-	conf := &ManagerOptions{EnvVars: new(dt.List[dt.Pair[string, string]])}
-	fun.Invariant.Must(fun.JoinOptionProviders(opts...).Apply(conf))
+	conf := &ManagerOptions{EnvVars: new(dt.List[irt.KV[string, string]])}
+	erc.Invariant(opt.Join(opts...).Apply(conf))
 
 	var mgr Manager
 	m := &basicProcessManager{
@@ -55,7 +57,7 @@ type basicProcessManager struct {
 	loggers  LoggingCache
 	remote   *options.Remote
 	executor func(context.Context, *options.Create) options.ResolveExecutor
-	env      *dt.List[dt.Pair[string, string]]
+	env      *dt.List[irt.KV[string, string]]
 }
 
 func (m *basicProcessManager) ID() string { return m.id }
@@ -71,8 +73,8 @@ func (m *basicProcessManager) CreateProcess(ctx context.Context, opts *options.C
 
 	if opts.Environment == nil {
 		opts.Environment = m.env.Copy()
-	} else if err := opts.Environment.AppendStream(m.env.StreamFront()).Run(ctx); err != nil {
-		return nil, err
+	} else {
+		opts.Environment.Extend(m.env.IteratorFront())
 	}
 
 	proc, err := NewProcess(ctx, opts)

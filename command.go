@@ -13,7 +13,7 @@ import (
 	"github.com/tychoish/fun/dt"
 	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/fun/fnx"
-	"github.com/tychoish/fun/ft"
+	"github.com/tychoish/fun/irt"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/message"
@@ -365,7 +365,7 @@ func (c *Command) RedirectErrorToOutput(v bool) *Command {
 // being run remotely.
 func (c *Command) Environment(e map[string]string) *Command {
 	c.resetEnv()
-	c.opts.Process.Environment.AppendStream(dt.NewMap(e).Stream()).Ignore().Wait()
+	c.opts.Process.Environment.Extend(irt.KVjoin(irt.Map(e)))
 	return c
 }
 
@@ -374,7 +374,7 @@ func (c *Command) Environment(e map[string]string) *Command {
 // environment of the command being run remotely.
 func (c *Command) AddEnv(k, v string) *Command {
 	c.setupEnv()
-	c.opts.Process.Environment.Append(dt.MakePair(k, v))
+	c.opts.Process.Environment.PushBack(irt.MakeKV(k, v))
 
 	return c
 }
@@ -519,8 +519,12 @@ func (c *Command) PostHook(h options.CommandPostHook) *Command { c.opts.PostHook
 // creation option. The PreHook is not run when using SetRunFunction.
 func (c *Command) PreHook(fn options.CommandPreHook) *Command { c.opts.PreHook = fn; return c }
 
-func (c *Command) setupEnv()          { ft.CallWhen(ft.IsNil(c.opts.Process.Environment), c.resetEnv) }
-func (c *Command) resetEnv()          { c.opts.Process.Environment = &dt.List[dt.Pair[string, string]]{} }
+func (c *Command) setupEnv() {
+	if c.opts.Process.Environment == nil {
+		c.resetEnv()
+	}
+}
+func (c *Command) resetEnv()          { c.opts.Process.Environment = &dt.List[irt.KV[string, string]]{} }
 func (c *Command) Worker() fnx.Worker { return c.Run }
 
 // Run starts and then waits on the Command's execution.
@@ -796,7 +800,7 @@ func (c *Command) exec(ctx context.Context, opts *options.Create) error {
 	}
 	msg["cmd"] = cstr
 
-	if opts.WorkingDirectory != ft.Must(os.Getwd()) {
+	if opts.WorkingDirectory != erc.Must(os.Getwd()) {
 		msg["path"] = opts.WorkingDirectory
 	}
 

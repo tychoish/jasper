@@ -16,10 +16,10 @@ github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO+kdMU+MU=
 github.com/stretchr/testify v1.8.2 h1:+h33VjcLVPDHtOdpUCuF+7gSuG3yGIftsP1YvFihtJ8=
 github.com/stretchr/testify v1.8.2/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
-github.com/tychoish/fun v0.13.0 h1:gH4QIeLJkYsNa1Zu/g4MgmUAhWoGN4PEMu4hj/GqkOU=
-github.com/tychoish/fun v0.13.0/go.mod h1:ghjR/9EyWh8h8oBg2+WJhsEcF/W4JXMWpo6btMRNusE=
-github.com/tychoish/grip v0.4.1 h1:3f6+41qIUY8VxMeQfJdyR++5PEZDxiV6gePfjouoqq0=
-github.com/tychoish/grip v0.4.1/go.mod h1:xt8TlwbfmdkROe3cB/RMhrIfwyrP6enodZn6QrjGBqU=
+github.com/tychoish/fun v0.14.0 h1:KhCAkfn/52xT88LsPwcl1LmMordnT8blyxN9tS5V3n8=
+github.com/tychoish/fun v0.14.0/go.mod h1:ghjR/9EyWh8h8oBg2+WJhsEcF/W4JXMWpo6btMRNusE=
+github.com/tychoish/grip v0.4.2 h1:eMjJzTFUnljw43PmQ84SQX8if7dyXh82+ZapfvbGmRk=
+github.com/tychoish/grip v0.4.2/go.mod h1:IRxtoZ4xe0fDH5W2Yg/JwpNW9dYQojg7ev+1gCw4Tv8=
 github.com/tychoish/grip/x/splunk v0.0.0-20250608160243-37fab929fbd2 h1:4IyaNRZbGbLh+pDmnmCV8uF8bVnreNGDrcCrxUyVvls=
 github.com/tychoish/grip/x/splunk v0.0.0-20250608160243-37fab929fbd2/go.mod h1:MGjmzAvymCkClOoYKceq9PS+Aexr7MSJ7lcZ+0W5/UI=
 github.com/tychoish/jasper v0.1.2 h1:UHnnMb+w04x5zENKEvPCxZTErmzYPjo/s1tp/mc7emQ=

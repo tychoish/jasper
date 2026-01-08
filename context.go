@@ -3,7 +3,7 @@ package jasper
 import (
 	"context"
 
-	"github.com/tychoish/fun"
+	"github.com/tychoish/fun/erc"
 )
 
 type ctxKey string
@@ -47,10 +47,10 @@ func WithNewContextManager(ctx context.Context, name string, fn func() Manager) 
 // is returned.
 func ContextManager(ctx context.Context, name string) Manager {
 	val := ctx.Value(ctxKey(name))
-	fun.Invariant.Ok(val != nil, "jasper", name, "manager must be stored")
+	erc.InvariantOk(val != nil, "jasper", name, "manager must be stored")
 
 	mgr, ok := val.(Manager)
-	fun.Invariant.Ok(ok, "stored jasper manager", name, "must be of the correct type")
+	erc.InvariantOk(ok, "stored jasper manager", name, "must be of the correct type")
 
 	return mgr
 }

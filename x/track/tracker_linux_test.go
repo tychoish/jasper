@@ -11,8 +11,6 @@ import (
 
 	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
-	"github.com/tychoish/fun/dt"
-	"github.com/tychoish/fun/fnx"
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/testutil"
@@ -197,8 +195,10 @@ func TestLinuxProcessTrackerWithEnvironmentVariables(t *testing.T) {
 					assert.NotError(t, err)
 					var ok bool
 
-					err = proc.Info(ctx).Options.Environment.StreamFront().ReadAll(fnx.FromHandler(func(p dt.Pair[string, string]) { ok = p.Key == envVarName })).Run(ctx)
-					assert.NotError(t, err)
+					for p := range proc.Info(ctx).Options.Environment.IteratorFront() {
+						ok = p.Key == envVarName
+					}
+
 					assert.True(t, !ok)
 
 					check.NotError(t, tracker.Add(proc.Info(ctx)))

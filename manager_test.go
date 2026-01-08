@@ -8,6 +8,7 @@ import (
 	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
 	"github.com/tychoish/fun/dt"
+	"github.com/tychoish/fun/irt"
 	"github.com/tychoish/fun/testt"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/testutil"
@@ -176,10 +177,11 @@ func TestManagerSetsEnvironmentVariables(t *testing.T) {
 					proc, err := manager.CreateProcess(ctx, testutil.SleepCreateOpts(1))
 					assert.NotError(t, err)
 
-					env := dt.MakePairs(proc.Info(ctx).Options.Environment.Slice()...)
+					env := irt.Collect2(irt.KVsplit(proc.Info(ctx).Options.Environment.IteratorFront()))
 					assert.True(t, env != nil)
-					value, ok := env.Map()[ManagerEnvironID]
-					testt.Log(t, env.Slice())
+					assert.True(t, len(env) > 0)
+					value, ok := env[ManagerEnvironID]
+					testt.Log(t, env)
 					assert.True(t, ok)
 					check.Equal(t, value, manager.id)
 					testt.Log(t, "process should have manager environment variable set")
@@ -195,10 +197,12 @@ func TestManagerSetsEnvironmentVariables(t *testing.T) {
 					assert.Equal(t, len(ids), 1)
 					proc, err := manager.Get(ctx, ids[0])
 					assert.NotError(t, err)
-					val := (&dt.Pairs[string, string]{})
-					val.AppendStream(proc.Info(ctx).Options.Environment.StreamFront()).Ignore().Wait()
-					env := val.Map()
+					val := (&dt.List[irt.KV[string, string]]{})
+					val.Extend(proc.Info(ctx).Options.Environment.IteratorFront())
+
+					env := irt.Collect2(irt.KVsplit(val.IteratorFront()))
 					assert.True(t, env != nil)
+					assert.True(t, len(env) > 0)
 					actualValue, ok := env[ManagerEnvironID]
 					assert.True(t, ok)
 					check.Equal(t, expectedValue, actualValue)
