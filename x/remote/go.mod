@@ -8,7 +8,7 @@ require (
 	github.com/golang/protobuf v1.5.3
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/tychoish/birch v0.3.2-0.20260108164004-e93907509812
-	github.com/tychoish/birch/x/mrpc v0.0.0-20250610225000-f5dba0d9b062
+	github.com/tychoish/birch/x/mrpc v0.0.0-20260108191314-6f6344e1149a
 	github.com/tychoish/fun v0.14.0
 	github.com/tychoish/gimlet v0.0.0-20251028182000-6a35909ebafc
 	github.com/tychoish/grip v0.4.2

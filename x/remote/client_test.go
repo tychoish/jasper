@@ -18,8 +18,9 @@ import (
 	"github.com/mholt/archiver"
 	"github.com/tychoish/fun/assert"
 	"github.com/tychoish/fun/assert/check"
-	"github.com/tychoish/fun/dt"
 	"github.com/tychoish/fun/erc"
+	"github.com/tychoish/fun/irt"
+	"github.com/tychoish/fun/stw"
 	"github.com/tychoish/grip"
 	"github.com/tychoish/grip/level"
 	"github.com/tychoish/grip/send"
@@ -65,8 +66,8 @@ func addBasicClientTests(modify testutil.OptsModify, tests ...clientTestCase) []
 				assert.NotError(t, err)
 				info := proc.Info(ctx)
 				assert.NotEqual(t, info.Options.Environment.Len(), 0)
-				mapping := dt.Map[string, string]{}
-				mapping.Append(info.Options.Environment.Slice()...)
+				mapping := stw.Map[string, string]{}
+				mapping.Extend(irt.KVsplit(info.Options.Environment.IteratorFront()))
 				check.Equal(t, client.ID(), mapping[jasper.ManagerEnvironID])
 			},
 		},

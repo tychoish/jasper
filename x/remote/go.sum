@@ -67,6 +67,10 @@ github.com/tychoish/birch/x/ftdc v0.0.0-20260108164004-e93907509812 h1:fUFyDrFQU
 github.com/tychoish/birch/x/ftdc v0.0.0-20260108164004-e93907509812/go.mod h1:G9BRMEjHxBdS6TjlKZpjTXeZqy7hPDuYnp4Qd5zrejQ=
 github.com/tychoish/birch/x/mrpc v0.0.0-20250610225000-f5dba0d9b062 h1:ZSgjHXxTPdfSG+sfCg/2qV6mTEl1kq/etiM8EgzPBys=
 github.com/tychoish/birch/x/mrpc v0.0.0-20250610225000-f5dba0d9b062/go.mod h1:SCZ/Pe4adApKxN/XJbGLIsDyzCDbQpw53XRO1WxUmeM=
+github.com/tychoish/birch/x/mrpc v0.0.0-20260108164004-e93907509812 h1:XhWhctVfr6dFzwGdc5X8w7Th5m+CA9fHjIN3Zf6ysgk=
+github.com/tychoish/birch/x/mrpc v0.0.0-20260108164004-e93907509812/go.mod h1:D4oXUpj0pMYX1RCWJfnXnXtMfVXgzDchhb0xB9sgDaw=
+github.com/tychoish/birch/x/mrpc v0.0.0-20260108191314-6f6344e1149a h1:pDvccLLdHswAZY+zHEfVSvnN9bFxUPC0lQat0ck3Igs=
+github.com/tychoish/birch/x/mrpc v0.0.0-20260108191314-6f6344e1149a/go.mod h1:D4oXUpj0pMYX1RCWJfnXnXtMfVXgzDchhb0xB9sgDaw=
 github.com/tychoish/fun v0.14.0 h1:KhCAkfn/52xT88LsPwcl1LmMordnT8blyxN9tS5V3n8=
 github.com/tychoish/fun v0.14.0/go.mod h1:ghjR/9EyWh8h8oBg2+WJhsEcF/W4JXMWpo6btMRNusE=
 github.com/tychoish/gimlet v0.0.0-20251028182000-6a35909ebafc h1:y4H20p6MC55U627sgNezPaNSdvotW2QuHgq4emamn5U=
