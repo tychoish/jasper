@@ -18,7 +18,6 @@ var (
 
 func init() {
 	hostNameCache = &adt.Once[string]{}
-	homeDirCache = &adt.Once[string]{}
 
 	hostNameCache.Set(func() string {
 		name, err := os.Hostname()
@@ -28,6 +27,7 @@ func init() {
 		return name
 	})
 
+	homeDirCache = &adt.Once[string]{}
 	homeDirCache.Set(func() string {
 		if runtime.GOOS == "windows" {
 			if dir := os.Getenv("HOME"); dir != "" {
