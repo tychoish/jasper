@@ -13,11 +13,11 @@ require (
 	github.com/tychoish/gimlet v0.0.0-20251028182000-6a35909ebafc
 	github.com/tychoish/grip v0.4.3
 	github.com/tychoish/grip/x/metrics v0.0.0-20260114024627-63e5c6d2f062
-	github.com/tychoish/grip/x/splunk v0.0.0-20250608160243-37fab929fbd2
+	github.com/tychoish/grip/x/splunk v0.0.0-20260114024627-63e5c6d2f062
 	github.com/tychoish/jasper v0.1.4-0.20260114025018-121022e9c9e2
-	github.com/tychoish/jasper/x/splunk v0.0.0-20230825152828-7bf0c66efca5
+	github.com/tychoish/jasper/x/splunk v0.0.0-20260114025018-121022e9c9e2
 	google.golang.org/grpc v1.54.0
-	google.golang.org/protobuf v1.30.0
+	google.golang.org/protobuf v1.36.11
 )
 
 require (
