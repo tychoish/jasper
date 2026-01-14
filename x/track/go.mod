@@ -6,11 +6,11 @@ toolchain go1.24.3
 
 require (
 	github.com/containerd/cgroups/v3 v3.0.1
-	github.com/google/uuid v1.3.1
+	github.com/google/uuid v1.6.0
 	github.com/opencontainers/runtime-spec v1.0.3-0.20210326190908-1c3f411f0417
 	github.com/tychoish/fun v0.14.1
 	github.com/tychoish/grip v0.4.3
-	github.com/tychoish/jasper v0.1.3-0.20250712191228-9a0a31d519ad
+	github.com/tychoish/jasper v0.1.4-0.20260114025018-121022e9c9e2
 )
 
 require (
@@ -19,6 +19,6 @@ require (
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
-	golang.org/x/sys v0.37.0 // indirect
+	golang.org/x/sys v0.40.0 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 )

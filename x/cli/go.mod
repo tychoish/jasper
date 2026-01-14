@@ -7,11 +7,11 @@ toolchain go1.24.3
 require (
 	github.com/cheynewallace/tabby v1.1.1
 	github.com/evergreen-ci/service v1.0.1-0.20200225230430-d9382e39d768
-	github.com/google/uuid v1.3.1
+	github.com/google/uuid v1.6.0
 	github.com/tychoish/fun v0.14.1
 	github.com/tychoish/grip v0.4.3
 	github.com/tychoish/grip/x/splunk v0.0.0-20250608160243-37fab929fbd2
-	github.com/tychoish/jasper v0.1.2
+	github.com/tychoish/jasper v0.1.4-0.20260114025018-121022e9c9e2
 	github.com/tychoish/jasper/x/remote v0.0.0-20230825152828-7bf0c66efca5
 	github.com/tychoish/jasper/x/splunk v0.0.0-20230825152828-7bf0c66efca5
 	github.com/tychoish/jasper/x/track v0.0.0-20230825152828-7bf0c66efca5
@@ -42,20 +42,20 @@ require (
 	github.com/rs/cors v1.8.3 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
-	github.com/tklauser/go-sysconf v0.3.15 // indirect
-	github.com/tklauser/numcpus v0.10.0 // indirect
-	github.com/tychoish/birch v0.3.2-0.20260108164004-e93907509812 // indirect
-	github.com/tychoish/birch/x/ftdc v0.0.0-20260108164004-e93907509812 // indirect
-	github.com/tychoish/birch/x/mrpc v0.0.0-20260108191314-6f6344e1149a // indirect
+	github.com/tklauser/go-sysconf v0.3.16 // indirect
+	github.com/tklauser/numcpus v0.11.0 // indirect
+	github.com/tychoish/birch v0.3.1 // indirect
+	github.com/tychoish/birch/x/ftdc v0.0.0-20260114025157-d2102f5441c3 // indirect
+	github.com/tychoish/birch/x/mrpc v0.0.0-20260114025157-d2102f5441c3 // indirect
 	github.com/tychoish/gimlet v0.0.0-20251028182000-6a35909ebafc // indirect
-	github.com/tychoish/grip/x/metrics v0.0.0-20260108164604-8e807edbbafb // indirect
+	github.com/tychoish/grip/x/metrics v0.0.0-20230824232221-fd39190c3be1 // indirect
 	github.com/ulikunitz/xz v0.5.11 // indirect
 	github.com/urfave/negroni v1.0.0 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	golang.org/x/net v0.9.0 // indirect
-	golang.org/x/sys v0.37.0 // indirect
+	golang.org/x/sys v0.40.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
 	google.golang.org/genproto v0.0.0-20230110181048-76db0878b65f // indirect
 	google.golang.org/grpc v1.54.0 // indirect
