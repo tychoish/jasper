@@ -5,8 +5,8 @@ go 1.24
 toolchain go1.24.3
 
 require (
-	github.com/tychoish/fun v0.14.0
-	github.com/tychoish/grip v0.4.2
+	github.com/tychoish/fun v0.14.1
+	github.com/tychoish/grip v0.4.3
 	github.com/tychoish/grip/x/splunk v0.0.0-20250608160243-37fab929fbd2
 	github.com/tychoish/jasper v0.1.2
 )
