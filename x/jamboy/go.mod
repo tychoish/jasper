@@ -7,7 +7,7 @@ toolchain go1.24.3
 require (
 	github.com/google/uuid v1.6.0
 	github.com/mholt/archiver v3.1.1+incompatible
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.11.1
 	github.com/tychoish/amboy v0.0.0-20251029022950-fd67e89301e2
 	github.com/tychoish/fun v0.14.2
 	github.com/tychoish/grip v0.4.4

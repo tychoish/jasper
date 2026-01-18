@@ -37,6 +37,7 @@ require (
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
 	github.com/rs/cors v1.8.3 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
+	github.com/stretchr/testify v1.11.1 // indirect
 	github.com/tklauser/go-sysconf v0.3.16 // indirect
 	github.com/tklauser/numcpus v0.11.0 // indirect
 	github.com/tychoish/birch/x/ftdc v0.0.0-20260114025157-d2102f5441c3 // indirect
