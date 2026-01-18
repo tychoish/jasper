@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 const (
@@ -23,7 +23,7 @@ func Jasper() *cli.Command {
 	return &cli.Command{
 		Name:  JasperCommand,
 		Usage: "Jasper CLI to interact with Jasper services",
-		Subcommands: []*cli.Command{
+		Commands: []*cli.Command{
 			Client(),
 			Service(),
 			RunCMD(),

@@ -7,7 +7,7 @@ import (
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/x/remote"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // Constants representing the Jasper Manager interface as CLI commands.
@@ -31,7 +31,7 @@ const (
 func Manager() *cli.Command {
 	return &cli.Command{
 		Name: ManagerCommand,
-		Subcommands: []*cli.Command{
+		Commands: []*cli.Command{
 			managerID(),
 			managerCreateProcess(),
 			managerCreateCommand(),
@@ -50,7 +50,7 @@ func managerID() *cli.Command {
 		Name:   IDCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			return doPassthroughOutput(c, func(ctx context.Context, client remote.Manager) interface{} {
 				id := client.ID()
 				return &IDResponse{OutcomeResponse: *makeOutcomeResponse(nil), ID: id}
@@ -64,7 +64,7 @@ func managerCreateProcess() *cli.Command {
 		Name:   CreateProcessCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			opts := &options.Create{}
 			return doPassthroughInputOutput(c, opts, func(ctx context.Context, client remote.Manager) interface{} {
 				proc, err := client.CreateProcess(ctx, opts)
@@ -82,7 +82,7 @@ func managerCreateScripting() *cli.Command {
 		Name:   CreateScriptingCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			opts := &ScriptingOptions{}
 			return doPassthroughInputOutput(c, opts, func(ctx context.Context, client remote.Manager) interface{} {
 				harnessOpts, err := opts.Export()
@@ -105,7 +105,7 @@ func managerCreateCommand() *cli.Command {
 		Name:   CreateCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			opts := &options.Command{}
 			return doPassthroughInputOutput(c, opts, func(ctx context.Context, client remote.Manager) interface{} {
 				cmd := client.CreateCommand(ctx).Extend(opts.Commands).
@@ -129,7 +129,7 @@ func managerGet() *cli.Command {
 		Name:   GetCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			input := &IDInput{}
 			return doPassthroughInputOutput(c, input, func(ctx context.Context, client remote.Manager) interface{} {
 				proc, err := client.Get(ctx, input.ID)
@@ -147,7 +147,7 @@ func managerList() *cli.Command {
 		Name:   ListCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			input := &FilterInput{}
 			return doPassthroughInputOutput(c, input, func(ctx context.Context, client remote.Manager) interface{} {
 				procs, err := client.List(ctx, input.Filter)
@@ -169,7 +169,7 @@ func managerGroup() *cli.Command {
 		Name:   GroupCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			input := &TagInput{}
 			return doPassthroughInputOutput(c, input, func(ctx context.Context, client remote.Manager) interface{} {
 				procs, err := client.Group(ctx, input.Tag)
@@ -191,7 +191,7 @@ func managerClear() *cli.Command {
 		Name:   ClearCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			return doPassthroughOutput(c, func(ctx context.Context, client remote.Manager) interface{} {
 				client.Clear(ctx)
 				return makeOutcomeResponse(nil)
@@ -205,7 +205,7 @@ func managerClose() *cli.Command {
 		Name:   CloseCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			return doPassthroughOutput(c, func(ctx context.Context, client remote.Manager) interface{} {
 				return makeOutcomeResponse(client.Close(ctx))
 			})

@@ -18,7 +18,7 @@ import (
 	"github.com/tychoish/jasper/testutil"
 	"github.com/tychoish/jasper/util"
 	"github.com/tychoish/jasper/x/remote"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 func TestReadInputValidJSON(t *testing.T) {
@@ -116,8 +116,8 @@ func TestCLICommon(t *testing.T) {
 		RPCService:  makeTestRPCServiceAndClient,
 	} {
 		t.Run(remoteType, func(t *testing.T) {
-			for testName, testCase := range map[string]func(ctx context.Context, t *testing.T, c *cli.Context, client remote.Manager) error{
-				"CreateProcessWithConnection": func(ctx context.Context, t *testing.T, c *cli.Context, client remote.Manager) error {
+			for testName, testCase := range map[string]func(ctx context.Context, t *testing.T, c *cli.Command, client remote.Manager) error{
+				"CreateProcessWithConnection": func(ctx context.Context, t *testing.T, c *cli.Command, client remote.Manager) error {
 					return withConnection(ctx, c, func(client remote.Manager) error {
 						proc, err := client.CreateProcess(ctx, testutil.TrueCreateOpts())
 						assert.NotError(t, err)
@@ -126,7 +126,7 @@ func TestCLICommon(t *testing.T) {
 						return nil
 					})
 				},
-				"DoPassthroughInputOutputReadsFromStdin": func(ctx context.Context, t *testing.T, c *cli.Context, client remote.Manager) error {
+				"DoPassthroughInputOutputReadsFromStdin": func(ctx context.Context, t *testing.T, c *cli.Command, client remote.Manager) error {
 					return withMockStdin(t, `{"value":"foo"}`, func(stdin *os.File) error {
 						return withMockStdout(t, func(*os.File) error {
 							input := &mockInput{}
@@ -138,7 +138,7 @@ func TestCLICommon(t *testing.T) {
 						})
 					})
 				},
-				"DoPassthroughInputOutputSetsAndValidatesInput": func(ctx context.Context, t *testing.T, c *cli.Context, client remote.Manager) error {
+				"DoPassthroughInputOutputSetsAndValidatesInput": func(ctx context.Context, t *testing.T, c *cli.Command, client remote.Manager) error {
 					expectedInput := "foo"
 					return withMockStdin(t, fmt.Sprintf(`{"value":"%s"}`, expectedInput), func(*os.File) error {
 						return withMockStdout(t, func(*os.File) error {
@@ -152,7 +152,7 @@ func TestCLICommon(t *testing.T) {
 						})
 					})
 				},
-				"DoPassthroughInputOutputWritesResponseToStdout": func(ctx context.Context, t *testing.T, c *cli.Context, client remote.Manager) error {
+				"DoPassthroughInputOutputWritesResponseToStdout": func(ctx context.Context, t *testing.T, c *cli.Command, client remote.Manager) error {
 					return withMockStdin(t, `{"value":"foo"}`, func(*os.File) error {
 						return withMockStdout(t, func(stdout *os.File) error {
 							input := &mockInput{}
@@ -171,7 +171,7 @@ func TestCLICommon(t *testing.T) {
 						})
 					})
 				},
-				"DoPassthroughOutputIgnoresStdin": func(ctx context.Context, t *testing.T, c *cli.Context, client remote.Manager) error {
+				"DoPassthroughOutputIgnoresStdin": func(ctx context.Context, t *testing.T, c *cli.Command, client remote.Manager) error {
 					input := "foo"
 					return withMockStdin(t, input, func(stdin *os.File) error {
 						return withMockStdout(t, func(*os.File) error {
@@ -180,11 +180,10 @@ func TestCLICommon(t *testing.T) {
 							assert.NotError(t, err)
 							assert.Equal(t, len(output), len(input))
 							return nil
-
 						})
 					})
 				},
-				"DoPassthroughOutputWritesResponseToStdout": func(ctx context.Context, t *testing.T, c *cli.Context, client remote.Manager) error {
+				"DoPassthroughOutputWritesResponseToStdout": func(ctx context.Context, t *testing.T, c *cli.Command, client remote.Manager) error {
 					return withMockStdout(t, func(stdout *os.File) error {
 						outputVal := "bar"
 						assert.NotError(t, doPassthroughOutput(c, mockRequest(outputVal)))
@@ -198,7 +197,7 @@ func TestCLICommon(t *testing.T) {
 						return nil
 					})
 				},
-				// "": func(ctx context.Context, t *testing.T, c *cli.Context, client remote.Manager) err {},
+				// "": func(ctx context.Context, t *testing.T, c *cli.Command, client remote.Manager) err {},
 			} {
 				t.Run(testName, func(t *testing.T) {
 					ctx, cancel := context.WithTimeout(context.Background(), testutil.TestTimeout)

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/tychoish/fun/assert"
@@ -15,18 +16,26 @@ import (
 	"github.com/tychoish/jasper/testutil"
 	"github.com/tychoish/jasper/util"
 	"github.com/tychoish/jasper/x/remote"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // mockCLIContext creates a *cli.Context on localhost with the given service
 // type and port.
-func mockCLIContext(service string, port int) *cli.Context {
+func mockCLIContext(service string, port int) *cli.Command {
 	flags := &flag.FlagSet{}
 	_ = flags.String(serviceFlagName, service, "")
 	_ = flags.Int(portFlagName, port, "")
 	_ = flags.String(hostFlagName, "localhost", "")
 	_ = flags.String(credsFilePathFlagName, "", "")
-	return cli.NewContext(nil, flags, nil)
+
+	return &cli.Command{
+		Flags: []cli.Flag{
+			&cli.StringFlag{Name: serviceFlagName, Value: service},
+			&cli.StringFlag{Name: hostFlagName, Value: "localhost"},
+			&cli.IntFlag{Name: portFlagName, Value: port},
+			&cli.StringFlag{Name: credsFilePathFlagName},
+		},
+	}
 }
 
 type mockInput struct {
@@ -91,17 +100,17 @@ func withMockStdout(t *testing.T, operation func(*os.File) error) error {
 
 // execCLICommandInputOutput runs the CLI command with the given input to stdin
 // and writes the result from stdout to output.
-func execCLICommandInputOutput(t *testing.T, c *cli.Context, cmd *cli.Command, input []byte, output interface{}) error {
-	return withMockStdin(t, string(input), func(*os.File) error {
-		return execCLICommandOutput(t, c, cmd, output)
+func execCLICommandInputOutput(t *testing.T, cmd *cli.Command, input []string, output interface{}) error {
+	return withMockStdin(t, strings.Join(input, "::"), func(*os.File) error {
+		return execCLICommandOutput(t, cmd, input, output)
 	})
 }
 
 // execCLICommandInputOutput runs the CLI command and writes the result from
 // stdout to output.
-func execCLICommandOutput(t *testing.T, c *cli.Context, cmd *cli.Command, output interface{}) error {
+func execCLICommandOutput(t *testing.T, cmd *cli.Command, inputArgs []string, output interface{}) error {
 	return withMockStdout(t, func(stdout *os.File) error {
-		if err := cli.HandleAction(cmd.Action, c); err != nil {
+		if err := cmd.Run(t.Context(), inputArgs); err != nil {
 			return err
 		}
 		if _, err := stdout.Seek(0, 0); err != nil {

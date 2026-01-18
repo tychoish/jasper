@@ -42,10 +42,13 @@ github.com/rogpeppe/go-internal v1.9.0/go.mod h1:WtVeX8xhTBvf0smdhujwtBcq4Qrzq/f
 github.com/rogpeppe/go-internal v1.10.0 h1:TMyTOH3F/DB16zRVcYyreMH6GnZZrwQVAoYjRBZyWFQ=
 github.com/rogpeppe/go-internal v1.10.0/go.mod h1:UQnix2H7Ngw/k4C5ijL5+65zddjncjaFoBhdsK/akog=
 github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U=
+github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
 github.com/tychoish/amboy v0.0.0-20251029022950-fd67e89301e2 h1:sknx6ns1eKYpASHczaYXspdLZlgdj0NoH2fvMy7M6Bs=
 github.com/tychoish/amboy v0.0.0-20251029022950-fd67e89301e2/go.mod h1:1I1UJPjSwf3kv/Q5jf628k9KRwMf6uv12hk93Kt/mC0=
 github.com/tychoish/fun v0.14.2 h1:2ZNRAnOWi5nymBDNiOPD12LuvEKhPdiMSWC85pw6fzQ=
+github.com/tychoish/fun v0.14.2/go.mod h1:ghjR/9EyWh8h8oBg2+WJhsEcF/W4JXMWpo6btMRNusE=
 github.com/tychoish/grip v0.4.4 h1:rhNwCDC9n3wl9gFeCwvSnhzvvyJDOZkeFMcw4fmUV3U=
+github.com/tychoish/grip v0.4.4/go.mod h1:rsQaL/y3avHi8G8UHhTDGwttebcm/eDD7+MYdxrCQv8=
 github.com/tychoish/jasper v0.1.4-0.20260114025018-121022e9c9e2 h1:H4Lmbtr5t4NIODvrvnoT69N6lNM4oDRyaozGvJCoaxA=
 github.com/tychoish/jasper v0.1.4-0.20260114025018-121022e9c9e2/go.mod h1:5EBobMpk2eZ4Be6cXhj8naKGLJrdyDa4/bpl7YQVcXw=
 github.com/tychoish/jasper/x/remote v0.0.0-20230502230321-07d6256076b2 h1:VZ2G5bYNSETw2+dsMGKXi5OMUwQpIU9opuu1Z4lDKI4=

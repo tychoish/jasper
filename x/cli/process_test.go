@@ -10,14 +10,14 @@ import (
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/testutil"
 	"github.com/tychoish/jasper/util"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
-func tagProcess(t *testing.T, c *cli.Context, jasperProcID string, tag string) OutcomeResponse {
+func tagProcess(t *testing.T, jasperProcID string, tag string) OutcomeResponse {
 	input, err := json.Marshal(TagIDInput{ID: jasperProcID, Tag: tag})
 	assert.NotError(t, err)
 	resp := OutcomeResponse{}
-	assert.NotError(t, execCLICommandInputOutput(t, c, processTag(), input, &resp))
+	assert.NotError(t, execCLICommandInputOutput(t, processTag(), []string{string(input)}, &resp))
 	return resp
 }
 
@@ -29,145 +29,145 @@ func TestCLIProcess(t *testing.T) {
 		RPCService:  makeTestRPCService,
 	} {
 		t.Run(remoteType, func(t *testing.T) {
-			for testName, testCase := range map[string]func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string){
-				"InfoWithExistingIDSucceeds": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
+			for testName, testCase := range map[string]func(ctx context.Context, t *testing.T, c *cli.Command, jasperProcID string){
+				"InfoWithExistingIDSucceeds": func(ctx context.Context, t *testing.T, c *cli.Command, jasperProcID string) {
 					input, err := json.Marshal(IDInput{jasperProcID})
 					assert.NotError(t, err)
 					resp := &InfoResponse{}
-					assert.NotError(t, execCLICommandInputOutput(t, c, processInfo(), input, resp))
+					assert.NotError(t, execCLICommandInputOutput(t, processInfo(), []string{string(input)}, resp))
 					assert.True(t, resp.Successful())
 					assert.Equal(t, jasperProcID, resp.Info.ID)
 					check.True(t, resp.Info.IsRunning)
 				},
-				"InfoWithNonexistentIDFails": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
+				"InfoWithNonexistentIDFails": func(ctx context.Context, t *testing.T, c *cli.Command, jasperProcID string) {
 					input, err := json.Marshal(IDInput{nonexistentID})
 					assert.NotError(t, err)
 					resp := &InfoResponse{}
-					assert.NotError(t, execCLICommandInputOutput(t, c, processInfo(), input, resp))
+					assert.NotError(t, execCLICommandInputOutput(t, processInfo(), []string{string(input)}, resp))
 					assert.True(t, !resp.Successful())
 				},
-				"InfoWithEmptyIDFails": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
+				"InfoWithEmptyIDFails": func(ctx context.Context, t *testing.T, c *cli.Command, jasperProcID string) {
 					input, err := json.Marshal(IDInput{})
 					assert.NotError(t, err)
-					assert.Error(t, execCLICommandInputOutput(t, c, processInfo(), input, &InfoResponse{}))
+					assert.Error(t, execCLICommandInputOutput(t, processInfo(), []string{string(input)}, &InfoResponse{}))
 				},
-				"RunningWithExistingIDSucceeds": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
+				"RunningWithExistingIDSucceeds": func(ctx context.Context, t *testing.T, c *cli.Command, jasperProcID string) {
 					input, err := json.Marshal(IDInput{jasperProcID})
 					assert.NotError(t, err)
 					resp := &RunningResponse{}
-					assert.NotError(t, execCLICommandInputOutput(t, c, processRunning(), input, resp))
+					assert.NotError(t, execCLICommandInputOutput(t, processRunning(), []string{string(input)}, resp))
 					assert.True(t, resp.Successful())
 					check.True(t, resp.Running)
 				},
-				"RunningWithNonexistentIDFails": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
+				"RunningWithNonexistentIDFails": func(ctx context.Context, t *testing.T, c *cli.Command, jasperProcID string) {
 					input, err := json.Marshal(IDInput{nonexistentID})
 					assert.NotError(t, err)
 					resp := &RunningResponse{}
-					assert.NotError(t, execCLICommandInputOutput(t, c, processRunning(), input, resp))
+					assert.NotError(t, execCLICommandInputOutput(t, processRunning(), []string{string(input)}, resp))
 					assert.True(t, !resp.Successful())
 				},
-				"RunningWithEmptyIDFails": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
+				"RunningWithEmptyIDFails": func(ctx context.Context, t *testing.T, c *cli.Command, jasperProcID string) {
 					input, err := json.Marshal(IDInput{})
 					assert.NotError(t, err)
-					assert.Error(t, execCLICommandInputOutput(t, c, processRunning(), input, &RunningResponse{}))
+					assert.Error(t, execCLICommandInputOutput(t, processRunning(), []string{string(input)}, &RunningResponse{}))
 				},
-				"CompleteWithExistingIDSucceeds": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
+				"CompleteWithExistingIDSucceeds": func(ctx context.Context, t *testing.T, c *cli.Command, jasperProcID string) {
 					input, err := json.Marshal(IDInput{jasperProcID})
 					assert.NotError(t, err)
 					resp := &CompleteResponse{}
-					assert.NotError(t, execCLICommandInputOutput(t, c, processComplete(), input, resp))
+					assert.NotError(t, execCLICommandInputOutput(t, processComplete(), []string{string(input)}, resp))
 					assert.True(t, resp.Successful())
 					assert.True(t, !resp.Complete)
 				},
-				"CompleteWithNonexistentIDFails": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
+				"CompleteWithNonexistentIDFails": func(ctx context.Context, t *testing.T, c *cli.Command, jasperProcID string) {
 					input, err := json.Marshal(IDInput{nonexistentID})
 					assert.NotError(t, err)
 					resp := &CompleteResponse{}
-					assert.NotError(t, execCLICommandInputOutput(t, c, processComplete(), input, resp))
+					assert.NotError(t, execCLICommandInputOutput(t, processComplete(), []string{string(input)}, resp))
 					assert.True(t, !resp.Successful())
 				},
-				"CompleteWithEmptyIDFails": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
+				"CompleteWithEmptyIDFails": func(ctx context.Context, t *testing.T, c *cli.Command, jasperProcID string) {
 					input, err := json.Marshal(IDInput{})
 					assert.NotError(t, err)
-					assert.Error(t, execCLICommandInputOutput(t, c, processComplete(), input, &CompleteResponse{}))
+					assert.Error(t, execCLICommandInputOutput(t, processComplete(), []string{string(input)}, &CompleteResponse{}))
 				},
-				"WaitWithExistingIDSucceeds": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
+				"WaitWithExistingIDSucceeds": func(ctx context.Context, t *testing.T, c *cli.Command, jasperProcID string) {
 					input, err := json.Marshal(IDInput{jasperProcID})
 					assert.NotError(t, err)
 					resp := &WaitResponse{}
-					assert.NotError(t, execCLICommandInputOutput(t, c, processWait(), input, resp))
+					assert.NotError(t, execCLICommandInputOutput(t, processWait(), []string{string(input)}, resp))
 					assert.True(t, resp.Successful())
 					assert.Equal(t, len(resp.Error), 0)
 					assert.Zero(t, resp.ExitCode)
 				},
-				"WaitWithNonexistentIDFails": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
+				"WaitWithNonexistentIDFails": func(ctx context.Context, t *testing.T, c *cli.Command, jasperProcID string) {
 					input, err := json.Marshal(IDInput{nonexistentID})
 					assert.NotError(t, err)
 					resp := &WaitResponse{}
-					assert.NotError(t, execCLICommandInputOutput(t, c, processWait(), input, resp))
+					assert.NotError(t, execCLICommandInputOutput(t, processWait(), []string{string(input)}, resp))
 					assert.True(t, !resp.Successful())
 				},
-				"WaitWithEmptyIDFails": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
+				"WaitWithEmptyIDFails": func(ctx context.Context, t *testing.T, c *cli.Command, jasperProcID string) {
 					input, err := json.Marshal(IDInput{})
 					assert.NotError(t, err)
-					assert.Error(t, execCLICommandInputOutput(t, c, processWait(), input, &WaitResponse{}))
+					assert.Error(t, execCLICommandInputOutput(t, processWait(), []string{string(input)}, &WaitResponse{}))
 				},
-				"Respawn": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
+				"Respawn": func(ctx context.Context, t *testing.T, c *cli.Command, jasperProcID string) {
 					input, err := json.Marshal(IDInput{jasperProcID})
 					assert.NotError(t, err)
 					resp := &InfoResponse{}
-					assert.NotError(t, execCLICommandInputOutput(t, c, processRespawn(), input, resp))
+					assert.NotError(t, execCLICommandInputOutput(t, processRespawn(), []string{string(input)}, resp))
 					assert.True(t, resp.Successful())
 					assert.NotZero(t, resp.Info.ID)
 					assert.NotEqual(t, resp.Info.ID, jasperProcID)
 				},
-				"RegisterSignalTriggerID": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
+				"RegisterSignalTriggerID": func(ctx context.Context, t *testing.T, c *cli.Command, jasperProcID string) {
 					input, err := json.Marshal(SignalTriggerIDInput{ID: jasperProcID, SignalTriggerID: jasper.CleanTerminationSignalTrigger})
 					assert.NotError(t, err)
 					resp := &OutcomeResponse{}
-					assert.NotError(t, execCLICommandInputOutput(t, c, processRegisterSignalTriggerID(), input, resp))
+					assert.NotError(t, execCLICommandInputOutput(t, processRegisterSignalTriggerID(), []string{string(input)}, resp))
 					assert.True(t, resp.Successful())
 				},
-				"Tag": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
-					assert.True(t, tagProcess(t, c, jasperProcID, "foo").Successful())
+				"Tag": func(ctx context.Context, t *testing.T, c *cli.Command, jasperProcID string) {
+					assert.True(t, tagProcess(t, jasperProcID, "foo").Successful())
 				},
-				"TagNonexistentIDFails": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
-					assert.True(t, !tagProcess(t, c, nonexistentID, "foo").Successful())
+				"TagNonexistentIDFails": func(ctx context.Context, t *testing.T, c *cli.Command, jasperProcID string) {
+					assert.True(t, !tagProcess(t, nonexistentID, "foo").Successful())
 				},
-				"TagEmptyIDFails": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
-					assert.True(t, !tagProcess(t, c, nonexistentID, "foo").Successful())
+				"TagEmptyIDFails": func(ctx context.Context, t *testing.T, c *cli.Command, jasperProcID string) {
+					assert.True(t, !tagProcess(t, nonexistentID, "foo").Successful())
 				},
-				"TagEmptyTagFails": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
+				"TagEmptyTagFails": func(ctx context.Context, t *testing.T, c *cli.Command, jasperProcID string) {
 					input, err := json.Marshal(TagIDInput{ID: jasperProcID})
 					assert.NotError(t, err)
-					assert.Error(t, execCLICommandInputOutput(t, c, processTag(), input, &OutcomeResponse{}))
+					assert.Error(t, execCLICommandInputOutput(t, processTag(), []string{string(input)}, &OutcomeResponse{}))
 				},
-				"GetTags": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
+				"GetTags": func(ctx context.Context, t *testing.T, c *cli.Command, jasperProcID string) {
 					tag := "foo"
-					assert.True(t, tagProcess(t, c, jasperProcID, tag).Successful())
+					assert.True(t, tagProcess(t, jasperProcID, tag).Successful())
 
 					input, err := json.Marshal(IDInput{jasperProcID})
 					assert.NotError(t, err)
 					resp := &TagsResponse{}
-					assert.NotError(t, execCLICommandInputOutput(t, c, processGetTags(), input, resp))
+					assert.NotError(t, execCLICommandInputOutput(t, processGetTags(), []string{string(input)}, resp))
 					assert.True(t, resp.Successful())
 					assert.Equal(t, len(resp.Tags), 1)
 					assert.Equal(t, tag, resp.Tags[0])
 				},
-				"ResetTags": func(ctx context.Context, t *testing.T, c *cli.Context, jasperProcID string) {
+				"ResetTags": func(ctx context.Context, t *testing.T, c *cli.Command, jasperProcID string) {
 					tag := "foo"
-					assert.True(t, tagProcess(t, c, jasperProcID, tag).Successful())
+					assert.True(t, tagProcess(t, jasperProcID, tag).Successful())
 
 					input, err := json.Marshal(IDInput{jasperProcID})
 					assert.NotError(t, err)
 					resp := &OutcomeResponse{}
-					assert.NotError(t, execCLICommandInputOutput(t, c, processResetTags(), input, resp))
+					assert.NotError(t, execCLICommandInputOutput(t, processResetTags(), []string{string(input)}, resp))
 					assert.True(t, resp.Successful())
 
 					getTagsInput, err := json.Marshal(IDInput{jasperProcID})
 					assert.NotError(t, err)
 					getTagsResp := &TagsResponse{}
-					assert.NotError(t, execCLICommandInputOutput(t, c, processGetTags(), getTagsInput, getTagsResp))
+					assert.NotError(t, execCLICommandInputOutput(t, processGetTags(), []string{string(getTagsInput)}, getTagsResp))
 					assert.True(t, getTagsResp.Successful())
 					assert.Equal(t, len(getTagsResp.Tags), 0)
 				},
@@ -186,7 +186,7 @@ func TestCLIProcess(t *testing.T) {
 					resp := &InfoResponse{}
 					input, err := json.Marshal(testutil.SleepCreateOpts(1))
 					assert.NotError(t, err)
-					assert.NotError(t, execCLICommandInputOutput(t, c, managerCreateProcess(), input, resp))
+					assert.NotError(t, execCLICommandInputOutput(t, managerCreateProcess(), []string{string(input)}, resp))
 					assert.True(t, resp.Successful())
 					assert.NotZero(t, resp.Info.ID)
 

@@ -11,7 +11,7 @@ import (
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/testutil"
 	"github.com/tychoish/jasper/util"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 func TestCLIRemoteWindows(t *testing.T) {
@@ -37,7 +37,6 @@ func TestCLIRemoteWindows(t *testing.T) {
 					check.True(t, resp.Successful())
 				},
 			} {
-
 				t.Run(testName, func(t *testing.T) {
 					ctx, cancel := context.WithTimeout(context.Background(), testutil.TestTimeout)
 					defer cancel()

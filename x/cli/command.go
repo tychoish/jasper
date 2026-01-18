@@ -17,7 +17,7 @@ import (
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/x/remote"
 	roptions "github.com/tychoish/jasper/x/remote/options"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // RunCMD provides a simple user-centered command-line interface for
@@ -73,23 +73,24 @@ func RunCMD() *cli.Command { //nolint: gocognit
 				Usage: "block until the process returns (subject to service timeouts), propagating the exit code from the process. if set, writes the output of each command to stdout; otherwise, prints the process IDs.",
 			},
 		),
-		Before: mergeBeforeFuncs(clientBefore(),
-			func(c *cli.Context) error {
+		Before: mergeBeforeFuncs(
+			clientBefore(),
+			func(ctx context.Context, c *cli.Command) (context.Context, error) {
 				if len(c.StringSlice(commandFlagName)) == 0 {
 					if c.NArg() == 0 {
-						return errors.New("must specify at least one command")
+						return ctx, errors.New("must specify at least one command")
 					}
-					return c.Set(commandFlagName, strings.Join(c.Args().Slice(), " "))
+					return ctx, c.Set(commandFlagName, strings.Join(c.Args().Slice(), " "))
 				}
-				return nil
+				return ctx, nil
 			},
-			func(c *cli.Context) error {
+			func(ctx context.Context, c *cli.Command) (context.Context, error) {
 				if c.String(idFlagName) == "" {
-					return c.Set(idFlagName, defaultID.String())
+					return ctx, c.Set(idFlagName, defaultID.String())
 				}
-				return nil
+				return ctx, nil
 			}),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			envvars := c.StringSlice(envFlagName)
 			cmds := c.StringSlice(commandFlagName)
 			useSudo := c.Bool(sudoFlagName)
@@ -98,8 +99,6 @@ func RunCMD() *cli.Command { //nolint: gocognit
 			cmdID := c.String(idFlagName)
 			tags := c.StringSlice(tagFlagName)
 			wait := c.Bool(waitFlagName)
-			ctx, cancel := context.WithCancel(context.Background())
-			defer cancel()
 
 			inMemoryCap := 1000
 			logger, err := jasper.NewInMemoryLogger(inMemoryCap)
@@ -135,7 +134,7 @@ func RunCMD() *cli.Command { //nolint: gocognit
 
 				if err := cmd.Run(ctx); err != nil {
 					if wait {
-						// Don't return on error, because if any of the
+						// Don't return ctx, on error, because if any of the
 						// sub-commands fail, it will fail to print the log
 						// lines.
 						grip.Error(fmt.Errorf("problem encountered while running commands: %w", err))
@@ -238,26 +237,23 @@ func ListCMD() *cli.Command {
 			},
 		),
 		Before: mergeBeforeFuncs(clientBefore(),
-			func(c *cli.Context) error {
+			func(ctx context.Context, c *cli.Command) (context.Context, error) {
 				if c.String(filterFlagName) != "" && c.String(groupFlagName) != "" {
-					return errors.New("cannot set both filter and group")
+					return ctx, errors.New("cannot set both filter and group")
 				}
 				if c.String(groupFlagName) != "" {
-					return nil
+					return ctx, nil
 				}
 				filter := options.Filter(c.String(filterFlagName))
 				if filter == "" {
 					filter = options.All
-					return c.Set(filterFlagName, string(filter))
+					return ctx, c.Set(filterFlagName, string(filter))
 				}
-				return fmt.Errorf("invalid filter '%s': %w", filter, filter.Validate())
+				return ctx, fmt.Errorf("invalid filter '%s': %w", filter, filter.Validate())
 			}),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			filter := options.Filter(c.String(filterFlagName))
 			group := c.String(groupFlagName)
-
-			ctx, cancel := context.WithCancel(context.Background())
-			defer cancel()
 
 			return withConnection(ctx, c, func(client remote.Manager) error {
 				var (
@@ -269,7 +265,6 @@ func ListCMD() *cli.Command {
 					procs, err = client.List(ctx, filter)
 				} else {
 					procs, err = client.Group(ctx, group)
-
 				}
 
 				if err != nil {
@@ -310,19 +305,16 @@ func KillCMD() *cli.Command {
 		),
 		Before: mergeBeforeFuncs(
 			clientBefore(),
-			func(c *cli.Context) error {
+			func(ctx context.Context, c *cli.Command) (context.Context, error) {
 				if len(c.String(idFlagName)) == 0 {
 					if c.NArg() != 1 {
-						return errors.New("must specify a process ID")
+						return ctx, errors.New("must specify a process ID")
 					}
-					return c.Set(idFlagName, c.Args().First())
+					return ctx, c.Set(idFlagName, c.Args().First())
 				}
-				return nil
+				return ctx, nil
 			}),
-		Action: func(c *cli.Context) error {
-			ctx, cancel := context.WithCancel(context.Background())
-			defer cancel()
-
+		Action: func(ctx context.Context, c *cli.Command) error {
 			sendKill := c.Bool(killFlagName)
 			procID := c.String(idFlagName)
 			return withConnection(ctx, c, func(client remote.Manager) error {
@@ -347,10 +339,7 @@ func ClearCMD() *cli.Command {
 		Usage:  "clean up terminated processes",
 		Flags:  clientFlags(),
 		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
-			ctx, cancel := context.WithCancel(context.Background())
-			defer cancel()
-
+		Action: func(ctx context.Context, c *cli.Command) error {
 			return withConnection(ctx, c, func(client remote.Manager) error {
 				client.Clear(ctx)
 				return nil
@@ -382,16 +371,13 @@ func KillAllCMD() *cli.Command {
 		),
 		Before: mergeBeforeFuncs(
 			clientBefore(),
-			func(c *cli.Context) error {
+			func(ctx context.Context, c *cli.Command) (context.Context, error) {
 				if c.String(groupFlagName) == "" {
-					return fmt.Errorf("flag '--%s' was not specified", groupFlagName)
+					return ctx, fmt.Errorf("flag '--%s' was not specified", groupFlagName)
 				}
-				return nil
+				return ctx, nil
 			}),
-		Action: func(c *cli.Context) error {
-			ctx, cancel := context.WithCancel(context.Background())
-			defer cancel()
-
+		Action: func(ctx context.Context, c *cli.Command) error {
 			sendKill := c.Bool(killFlagName)
 			group := c.String(groupFlagName)
 			return withConnection(ctx, c, func(client remote.Manager) error {
@@ -437,16 +423,16 @@ func DownloadCMD() *cli.Command {
 			clientBefore(),
 
 			requireStringFlag(pathFlagName),
-			func(c *cli.Context) error {
+			func(ctx context.Context, c *cli.Command) (context.Context, error) {
 				if c.String(urlFlagName) == "" {
 					if c.NArg() != 1 {
-						return errors.New("must specify a URL")
+						return ctx, errors.New("must specify a URL")
 					}
-					return c.Set(urlFlagName, c.Args().First())
+					return ctx, c.Set(urlFlagName, c.Args().First())
 				}
-				return nil
+				return ctx, nil
 			}),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			opts := roptions.Download{
 				URL:  c.String(urlFlagName),
 				Path: c.String(pathFlagName),
@@ -460,13 +446,9 @@ func DownloadCMD() *cli.Command {
 				}
 			}
 
-			ctx, cancel := context.WithCancel(context.Background())
-			defer cancel()
-
 			return withConnection(ctx, c, func(client remote.Manager) error {
 				return client.DownloadFile(ctx, opts)
 			})
 		},
 	}
-
 }

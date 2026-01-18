@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/tychoish/jasper/x/remote"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // Constants representing the jasper.LoggingCache interface as CLI commands.
@@ -27,7 +27,7 @@ const (
 func LoggingCache() *cli.Command {
 	return &cli.Command{
 		Name: LoggingCacheCommand,
-		Subcommands: []*cli.Command{
+		Commands: []*cli.Command{
 			loggingCacheCreate(),
 			loggingCacheGet(),
 			loggingCacheRemove(),
@@ -44,7 +44,7 @@ func loggingCacheCreate() *cli.Command {
 		Name:   LoggingCacheCreateCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			input := LoggingCacheCreateInput{}
 			return doPassthroughInputOutput(c, &input, func(ctx context.Context, client remote.Manager) interface{} {
 				lc := client.LoggingCache(ctx)
@@ -66,7 +66,7 @@ func loggingCacheGet() *cli.Command {
 		Name:   LoggingCacheGetCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			input := IDInput{}
 			return doPassthroughInputOutput(c, &input, func(ctx context.Context, client remote.Manager) interface{} {
 				lc := client.LoggingCache(ctx)
@@ -88,7 +88,7 @@ func loggingCacheRemove() *cli.Command {
 		Name:   LoggingCacheRemoveCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			input := IDInput{}
 			return doPassthroughInputOutput(c, &input, func(ctx context.Context, client remote.Manager) interface{} {
 				lc := client.LoggingCache(ctx)
@@ -107,7 +107,7 @@ func loggingCacheCloseAndRemove() *cli.Command {
 		Name:   LoggingCacheCloseAndRemoveCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			input := IDInput{}
 			return doPassthroughInputOutput(c, &input, func(ctx context.Context, client remote.Manager) interface{} {
 				lc := client.LoggingCache(ctx)
@@ -126,7 +126,7 @@ func loggingCacheClear() *cli.Command {
 		Name:   LoggingCacheClearCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			return doPassthroughOutput(c, func(ctx context.Context, client remote.Manager) interface{} {
 				lc := client.LoggingCache(ctx)
 				if lc == nil {
@@ -144,7 +144,7 @@ func loggingCachePrune() *cli.Command {
 		Name:   LoggingCachePruneCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			input := LoggingCachePruneInput{}
 			return doPassthroughInputOutput(c, &input, func(ctx context.Context, client remote.Manager) interface{} {
 				lc := client.LoggingCache(ctx)
@@ -163,7 +163,7 @@ func loggingCacheLen() *cli.Command {
 		Name:   LoggingCacheLenCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			return doPassthroughOutput(c, func(ctx context.Context, client remote.Manager) interface{} {
 				lc := client.LoggingCache(ctx)
 				if lc == nil {

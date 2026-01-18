@@ -6,7 +6,7 @@ import (
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/x/remote"
 	roptions "github.com/tychoish/jasper/x/remote/options"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // Constants representing the Jasper RemoteClient interface as CLI commands.
@@ -25,7 +25,7 @@ const (
 func Remote() *cli.Command {
 	return &cli.Command{
 		Name: RemoteCommand,
-		Subcommands: []*cli.Command{
+		Commands: []*cli.Command{
 			remoteDownloadFile(),
 			remoteGetLogStream(),
 			remoteSignalEvent(),
@@ -40,7 +40,7 @@ func remoteWriteFile() *cli.Command {
 		Name:   WriteFileCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			input := options.WriteFile{}
 			return doPassthroughInputOutput(c, &input, func(ctx context.Context, client remote.Manager) interface{} {
 				return makeOutcomeResponse(client.WriteFile(ctx, input))
@@ -54,7 +54,7 @@ func remoteDownloadFile() *cli.Command {
 		Name:   DownloadFileCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			input := roptions.Download{}
 			return doPassthroughInputOutput(c, &input, func(ctx context.Context, client remote.Manager) interface{} {
 				return makeOutcomeResponse(client.DownloadFile(ctx, input))
@@ -68,7 +68,7 @@ func remoteGetLogStream() *cli.Command {
 		Name:   GetLogStreamCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			input := LogStreamInput{}
 			return doPassthroughInputOutput(c, &input, func(ctx context.Context, client remote.Manager) interface{} {
 				logs, err := client.GetLogStream(ctx, input.ID, input.Count)
@@ -86,7 +86,7 @@ func remoteSignalEvent() *cli.Command {
 		Name:   SignalEventCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			input := EventInput{}
 			return doPassthroughInputOutput(c, &input, func(ctx context.Context, client remote.Manager) interface{} {
 				if err := client.SignalEvent(ctx, input.Name); err != nil {
@@ -103,7 +103,7 @@ func remoteSendMessages() *cli.Command {
 		Name:   SendMessagesCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			input := options.LoggingPayload{}
 			return doPassthroughInputOutput(c, &input, func(ctx context.Context, client remote.Manager) interface{} {
 				if err := client.SendMessages(ctx, input); err != nil {

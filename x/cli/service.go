@@ -19,7 +19,7 @@ import (
 	"github.com/tychoish/grip/x/splunk"
 	"github.com/tychoish/jasper/options"
 	jsplunk "github.com/tychoish/jasper/x/splunk"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // Constants representing the Jasper service interface as a CLI command.
@@ -73,7 +73,7 @@ func Service() *cli.Command {
 	return &cli.Command{
 		Name:  ServiceCommand,
 		Usage: "tools for running Jasper services",
-		Subcommands: []*cli.Command{
+		Commands: []*cli.Command{
 			serviceCommand(ForceReinstallCommand, forceReinstall),
 			serviceCommand(InstallCommand, install),
 			serviceCommand(UninstallCommand, uninstall),
@@ -118,7 +118,7 @@ func serviceFlags() []cli.Flag {
 		&cli.StringFlag{
 			Name:    passwordFlagName,
 			Usage:   "the password for the user running the service",
-			EnvVars: []string{"JASPER_USER_PASSWORD"},
+			Sources: cli.EnvVars("JASPER_USER_PASSWORD"),
 		},
 		&cli.StringSliceFlag{
 			Name:  envFlagName,
@@ -137,12 +137,12 @@ func serviceFlags() []cli.Flag {
 		&cli.StringFlag{
 			Name:    splunkURLFlagName,
 			Usage:   "the URL of the splunk server",
-			EnvVars: []string{"GRIP_SPLUNK_SERVER_URL"},
+			Sources: cli.EnvVars("GRIP_SPLUNK_SERVER_URL"),
 		},
 		&cli.StringFlag{
 			Name:    splunkTokenFlagName,
 			Usage:   "the splunk token",
-			EnvVars: []string{"GRIP_SPLUNK_CLIENT_TOKEN"},
+			Sources: cli.EnvVars("GRIP_SPLUNK_CLIENT_TOKEN"),
 		},
 		&cli.StringFlag{
 			Name:  splunkTokenFilePathFlagName,
@@ -151,7 +151,7 @@ func serviceFlags() []cli.Flag {
 		&cli.StringFlag{
 			Name:    splunkChannelFlagName,
 			Usage:   "the splunk channel",
-			EnvVars: []string{"GRIP_SPLUNK_CHANNEL"},
+			Sources: cli.EnvVars("GRIP_SPLUNK_CHANNEL"),
 		},
 		&cli.IntFlag{
 			Name:  limitNumFilesFlagName,
@@ -172,8 +172,8 @@ func serviceFlags() []cli.Flag {
 	}
 }
 
-func validateLimits(flagNames ...string) func(*cli.Context) error {
-	return func(c *cli.Context) error {
+func validateLimits(flagNames ...string) func(context.Context, *cli.Command) (context.Context, error) {
+	return func(ctx context.Context, c *cli.Command) (context.Context, error) {
 		catcher := &erc.Collector{}
 		for _, flagName := range flagNames {
 			l := c.Int(flagName)
@@ -181,25 +181,25 @@ func validateLimits(flagNames ...string) func(*cli.Context) error {
 				catcher.Push(fmt.Errorf("%d is not a valid limit value for %s", l, flagName))
 			}
 		}
-		return catcher.Resolve()
+		return ctx, catcher.Resolve()
 	}
 }
 
-func validateLogLevel(flagName string) func(*cli.Context) error {
-	return func(c *cli.Context) error {
+func validateLogLevel(flagName string) func(context.Context, *cli.Command) (context.Context, error) {
+	return func(ctx context.Context, c *cli.Command) (context.Context, error) {
 		l := c.String(logLevelFlagName)
 		priority := level.FromString(l)
 		if priority == level.Invalid {
-			return fmt.Errorf("%s is not a valid log level", l)
+			return ctx, fmt.Errorf("%s is not a valid log level", l)
 		}
 
-		return nil
+		return ctx, nil
 	}
 }
 
 // makeLogger creates a splunk logger. It may return nil if the splunk flags are
 // not populated or the splunk logger is not registered.
-func makeLogger(c *cli.Context) *options.LoggerConfig {
+func makeLogger(c *cli.Command) *options.LoggerConfig {
 	info := splunk.ConnectionInfo{
 		ServerURL: c.String(splunkURLFlagName),
 		Token:     c.String(splunkTokenFlagName),
@@ -248,8 +248,8 @@ func setupLogger(opts *options.LoggerConfig) error {
 }
 
 // buildRunCommand builds the command arguments to run the Jasper service with
-// the flags set in the cli.Context.
-func buildRunCommand(c *cli.Context, serviceType string) []string {
+// the flags set in the cli.Command.
+func buildRunCommand(c *cli.Command, serviceType string) []string {
 	args := unparseFlagSet(c, serviceType)
 	subCmd := []string{JasperCommand, ServiceCommand, RunCommand, serviceType}
 	return append(subCmd, args...)
@@ -257,7 +257,7 @@ func buildRunCommand(c *cli.Context, serviceType string) []string {
 
 // serviceOptions returns all options specific to particular service management
 // systems.
-func serviceOptions(c *cli.Context) service.KeyValue {
+func serviceOptions(c *cli.Command) service.KeyValue {
 	opts := service.KeyValue{
 		// launchd-specific options
 		"RunAtLoad":     true,
@@ -309,7 +309,7 @@ func resourceLimit(limit int) string {
 }
 
 // serviceConfig returns the daemon service configuration.
-func serviceConfig(serviceType string, c *cli.Context, args []string) *service.Config {
+func serviceConfig(serviceType string, c *cli.Command, args []string) *service.Config {
 	return &service.Config{
 		Name:        fmt.Sprintf("%s_jasperd", serviceType),
 		DisplayName: fmt.Sprintf("Jasper %s service", serviceType),
@@ -384,7 +384,7 @@ func serviceCommand(cmd string, operation serviceOperation) *cli.Command {
 	return &cli.Command{
 		Name:  cmd,
 		Usage: fmt.Sprintf("%s a daemon service", cmd),
-		Subcommands: []*cli.Command{
+		Commands: []*cli.Command{
 			serviceCommandREST(cmd, operation),
 			serviceCommandRPC(cmd, operation),
 			serviceCommandCombined(cmd, operation),

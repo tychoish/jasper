@@ -1,11 +1,12 @@
 package cli
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"time"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 const (
@@ -26,7 +27,7 @@ func Client() *cli.Command {
 	return &cli.Command{
 		Name:  ClientCommand,
 		Usage: "tools for making requests to Jasper services, oriented for machine use",
-		Subcommands: []*cli.Command{
+		Commands: []*cli.Command{
 			Manager(),
 			Process(),
 			Remote(),
@@ -58,30 +59,30 @@ func clientFlags() []cli.Flag {
 }
 
 // clientBefore returns the cli.BeforeFunc used by all client commands.
-func clientBefore() func(*cli.Context) error {
+func clientBefore() func(context.Context, *cli.Command) (context.Context, error) {
 	return mergeBeforeFuncs(
-		func(c *cli.Context) error {
+		func(ctx context.Context, c *cli.Command) (context.Context, error) {
 			service := c.String(serviceFlagName)
 			if service != RESTService && service != RPCService {
-				return fmt.Errorf("service must be '%s' or '%s'", RESTService, RPCService)
+				return ctx, fmt.Errorf("service must be '%s' or '%s'", RESTService, RPCService)
 			}
-			return nil
+			return ctx, nil
 		},
-		func(c *cli.Context) error {
+		func(ctx context.Context, c *cli.Command) (context.Context, error) {
 			if c.Int(portFlagName) != 0 {
-				return nil
+				return ctx, nil
 			}
 			switch c.String(serviceFlagName) {
 			case RESTService:
 				if err := c.Set(portFlagName, strconv.Itoa(defaultRESTPort)); err != nil {
-					return err
+					return ctx, err
 				}
 			case RPCService:
 				if err := c.Set(portFlagName, strconv.Itoa(defaultRPCPort)); err != nil {
-					return err
+					return ctx, err
 				}
 			}
-			return validatePort(portFlagName)(c)
+			return validatePort(portFlagName)(ctx, c)
 		},
 	)
 }

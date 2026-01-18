@@ -111,7 +111,8 @@ func NewJobBasic(cmd string) amboy.Job {
 func NewJobExtended(pc jasper.ProcessConstructor, cmd string, env stw.Map[string, string], wd string) amboy.Job {
 	j := amboyJobFactory(pc)
 	j.CmdString = cmd
-	j.Environment = dt.IteratorList(irt.KVjoin(env.Iterator()))
+	el := &dt.List[irt.KV[string, string]]{}
+	j.Environment = el.Extend(irt.KVjoin(env.Iterator()))
 	j.WorkingDirectory = wd
 	j.SetID(fmt.Sprintf("%s.ext.%x", amboyJobName, sha1.Sum([]byte(cmd))))
 	return j
@@ -124,7 +125,8 @@ func NewJobExtended(pc jasper.ProcessConstructor, cmd string, env stw.Map[string
 func NewJobBasicExtended(cmd string, env stw.Map[string, string], wd string) Job {
 	j := amboyJobFactory(jasper.NewBasicProcess)
 	j.CmdString = cmd
-	j.Environment = dt.IteratorList(irt.KVjoin(env.Iterator()))
+	el := &dt.List[irt.KV[string, string]]{}
+	j.Environment = el.Extend(irt.KVjoin(env.Iterator()))
 	j.WorkingDirectory = wd
 	j.SetID(fmt.Sprintf("%s.ext.%x", amboyJobName, sha1.Sum([]byte(cmd))))
 	return j

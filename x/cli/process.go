@@ -6,7 +6,7 @@ import (
 	"syscall"
 
 	"github.com/tychoish/jasper/x/remote"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // Constants representing the Jasper Process interface as CLI commands.
@@ -30,7 +30,7 @@ const (
 func Process() *cli.Command {
 	return &cli.Command{
 		Name: ProcessCommand,
-		Subcommands: []*cli.Command{
+		Commands: []*cli.Command{
 			processInfo(),
 			processRunning(),
 			processComplete(),
@@ -50,7 +50,7 @@ func processInfo() *cli.Command {
 		Name:   InfoCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			input := &IDInput{}
 			return doPassthroughInputOutput(c, input, func(ctx context.Context, client remote.Manager) interface{} {
 				proc, err := client.Get(ctx, input.ID)
@@ -68,7 +68,7 @@ func processRunning() *cli.Command {
 		Name:   RunningCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			input := &IDInput{}
 			return doPassthroughInputOutput(c, input, func(ctx context.Context, client remote.Manager) interface{} {
 				proc, err := client.Get(ctx, input.ID)
@@ -86,7 +86,7 @@ func processComplete() *cli.Command {
 		Name:   CompleteCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			input := &IDInput{}
 			return doPassthroughInputOutput(c, input, func(ctx context.Context, client remote.Manager) interface{} {
 				proc, err := client.Get(ctx, input.ID)
@@ -104,7 +104,7 @@ func processSignal() *cli.Command {
 		Name:   SignalCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			input := &SignalInput{}
 			return doPassthroughInputOutput(c, input, func(ctx context.Context, client remote.Manager) interface{} {
 				proc, err := client.Get(ctx, input.ID)
@@ -122,7 +122,7 @@ func processWait() *cli.Command {
 		Name:   WaitCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			input := &IDInput{}
 			return doPassthroughInputOutput(c, input, func(ctx context.Context, client remote.Manager) interface{} {
 				proc, err := client.Get(ctx, input.ID)
@@ -144,7 +144,7 @@ func processRespawn() *cli.Command {
 		Name:   RespawnCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			input := &IDInput{}
 			return doPassthroughInputOutput(c, input, func(ctx context.Context, client remote.Manager) interface{} {
 				proc, err := client.Get(ctx, input.ID)
@@ -166,7 +166,7 @@ func processRegisterSignalTriggerID() *cli.Command {
 		Name:   RegisterSignalTriggerIDCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			input := &SignalTriggerIDInput{}
 			return doPassthroughInputOutput(c, input, func(ctx context.Context, client remote.Manager) interface{} {
 				proc, err := client.Get(ctx, input.ID)
@@ -187,7 +187,7 @@ func processTag() *cli.Command {
 		Name:   TagCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			input := &TagIDInput{}
 			return doPassthroughInputOutput(c, input, func(ctx context.Context, client remote.Manager) interface{} {
 				proc, err := client.Get(ctx, input.ID)
@@ -206,7 +206,7 @@ func processGetTags() *cli.Command {
 		Name:   GetTagsCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			input := &IDInput{}
 			return doPassthroughInputOutput(c, input, func(ctx context.Context, client remote.Manager) interface{} {
 				proc, err := client.Get(ctx, input.ID)
@@ -224,7 +224,7 @@ func processResetTags() *cli.Command {
 		Name:   ResetTagsCommand,
 		Flags:  clientFlags(),
 		Before: clientBefore(),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			input := &IDInput{}
 			return doPassthroughInputOutput(c, input, func(ctx context.Context, client remote.Manager) interface{} {
 				proc, err := client.Get(ctx, input.ID)

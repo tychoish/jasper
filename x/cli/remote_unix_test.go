@@ -13,7 +13,7 @@ import (
 	"github.com/tychoish/jasper"
 	"github.com/tychoish/jasper/testutil"
 	"github.com/tychoish/jasper/util"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 func TestCLIRemoteUnix(t *testing.T) {
@@ -22,12 +22,12 @@ func TestCLIRemoteUnix(t *testing.T) {
 		RPCService:  makeTestRPCService,
 	} {
 		t.Run(remoteType, func(t *testing.T) {
-			for testName, testCase := range map[string]func(ctx context.Context, t *testing.T, c *cli.Context){
-				"SignalEventPasses": func(ctx context.Context, t *testing.T, c *cli.Context) {
+			for testName, testCase := range map[string]func(ctx context.Context, t *testing.T, c *cli.Command){
+				"SignalEventPasses": func(ctx context.Context, t *testing.T, c *cli.Command) {
 					input, err := json.Marshal(EventInput{Name: "id"})
 					assert.NotError(t, err)
 					resp := &OutcomeResponse{}
-					assert.NotError(t, execCLICommandInputOutput(t, c, remoteSignalEvent(), input, resp))
+					assert.NotError(t, execCLICommandInputOutput(t, remoteSignalEvent(), []string{string(input)}, resp))
 					check.True(t, resp.Successful())
 				},
 			} {

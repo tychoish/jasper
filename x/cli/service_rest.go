@@ -2,9 +2,8 @@ package cli
 
 import (
 	"context"
-	"fmt"
-
 	"errors"
+	"fmt"
 
 	"github.com/evergreen-ci/service"
 
@@ -15,7 +14,7 @@ import (
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/util"
 	"github.com/tychoish/jasper/x/remote"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 const (
@@ -31,13 +30,13 @@ func serviceCommandREST(cmd string, operation serviceOperation) *cli.Command {
 		Flags: append(serviceFlags(),
 			&cli.StringFlag{
 				Name:    hostFlagName,
-				EnvVars: []string{restHostEnvVar},
+				Sources: cli.EnvVars(restHostEnvVar),
 				Usage:   "the host running the REST service",
 				Value:   defaultLocalHostName,
 			},
 			&cli.IntFlag{
 				Name:    portFlagName,
-				EnvVars: []string{restPortEnvVar},
+				Sources: cli.EnvVars(restPortEnvVar),
 				Usage:   "the port running the REST service",
 				Value:   defaultRESTPort,
 			},
@@ -47,7 +46,7 @@ func serviceCommandREST(cmd string, operation serviceOperation) *cli.Command {
 			validateLogLevel(logLevelFlagName),
 			validateLimits(limitNumFilesFlagName, limitNumProcsFlagName, limitLockedMemoryFlagName, limitVirtualMemoryFlagName),
 		),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			manager := jasper.NewManager(jasper.ManagerOptionSet(jasper.ManagerOptions{Synchronized: true}))
 
 			daemon := newRESTDaemon(c.String(hostFlagName), c.Int(portFlagName), manager, makeLogger(c))

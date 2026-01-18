@@ -18,18 +18,21 @@ import (
 	"github.com/tychoish/fun/erc"
 	"github.com/tychoish/jasper/util"
 	"github.com/tychoish/jasper/x/remote"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 // mergeBeforeFuncs returns a cli.BeforeFunc that runs all funcs and accumulates
 // the errors.
 func mergeBeforeFuncs(funcs ...cli.BeforeFunc) cli.BeforeFunc {
-	return func(c *cli.Context) error {
+	return func(ctx context.Context, cc *cli.Command) (context.Context, error) {
 		catcher := &erc.Collector{}
+		var err error
 		for _, f := range funcs {
-			catcher.Push(f(c))
+			// TODO avoid saving nil contexts
+			ctx, err = f(ctx, cc)
+			catcher.Push(err)
 		}
-		return catcher.Resolve()
+		return ctx, catcher.Resolve()
 	}
 }
 
@@ -40,7 +43,7 @@ func joinFlagNames(names ...string) string {
 
 // unparseFlagSet returns all flags set in the given context in the form
 // --flag=value.
-func unparseFlagSet(c *cli.Context, serviceType string) []string {
+func unparseFlagSet(c *cli.Command, serviceType string) []string {
 	for i, arg := range os.Args {
 		if arg == serviceType && i+1 < len(os.Args) {
 			return os.Args[i+1:]
@@ -50,11 +53,11 @@ func unparseFlagSet(c *cli.Context, serviceType string) []string {
 }
 
 func requireStringFlag(name string) cli.BeforeFunc {
-	return func(c *cli.Context) error {
+	return func(ctx context.Context, c *cli.Command) (context.Context, error) {
 		if c.String(name) == "" {
-			return fmt.Errorf("must specify string for flag '--%s'", name)
+			return ctx, fmt.Errorf("must specify string for flag '--%s'", name)
 		}
-		return nil
+		return ctx, nil
 	}
 }
 
@@ -64,13 +67,13 @@ const (
 )
 
 // validatePort validates that the flag given by the name is a valid port value.
-func validatePort(flagName string) func(*cli.Context) error {
-	return func(c *cli.Context) error {
+func validatePort(flagName string) func(context.Context, *cli.Command) (context.Context, error) {
+	return func(ctx context.Context, c *cli.Command) (context.Context, error) {
 		port := c.Int(flagName)
 		if port < minPort || port > maxPort {
-			return fmt.Errorf("port must be between %d-%d exclusive", minPort, maxPort)
+			return ctx, fmt.Errorf("port must be between %d-%d exclusive", minPort, maxPort)
 		}
-		return nil
+		return ctx, nil
 	}
 }
 
@@ -116,7 +119,7 @@ func newRemoteClient(ctx context.Context, service, host string, port int, credsF
 // doPassthroughInputOutput passes input from standard input to the input validator,
 // validates the input, runs the request, and writes the response of the request
 // to standard output.
-func doPassthroughInputOutput(c *cli.Context, input Validator, request func(context.Context, remote.Manager) (response interface{})) error {
+func doPassthroughInputOutput(c *cli.Command, input Validator, request func(context.Context, remote.Manager) (response interface{})) error {
 	ctx, cancel := context.WithTimeout(context.Background(), clientConnectionTimeout)
 	defer cancel()
 
@@ -134,7 +137,7 @@ func doPassthroughInputOutput(c *cli.Context, input Validator, request func(cont
 
 // doPassthroughOutput runs the request and writes the output of the request to
 // standard output.
-func doPassthroughOutput(c *cli.Context, request func(context.Context, remote.Manager) (response interface{})) error {
+func doPassthroughOutput(c *cli.Command, request func(context.Context, remote.Manager) (response interface{})) error {
 	ctx, cancel := context.WithTimeout(context.Background(), clientConnectionTimeout)
 	defer cancel()
 
@@ -145,7 +148,7 @@ func doPassthroughOutput(c *cli.Context, request func(context.Context, remote.Ma
 
 // withConnection runs the operation within the scope of a remote client
 // connection.
-func withConnection(ctx context.Context, c *cli.Context, operation func(remote.Manager) error) error {
+func withConnection(ctx context.Context, c *cli.Command, operation func(remote.Manager) error) error {
 	host := c.String(hostFlagName)
 	port := c.Int(portFlagName)
 	service := c.String(serviceFlagName)

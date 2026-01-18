@@ -7,7 +7,7 @@ import (
 	"github.com/tychoish/fun/assert/check"
 )
 
-func TestBuildSubcommands(t *testing.T) {
+func TestBuildCommands(t *testing.T) {
 	binary := "binary"
 
 	for _, testCase := range []struct {

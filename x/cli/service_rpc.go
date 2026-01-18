@@ -14,7 +14,7 @@ import (
 	"github.com/tychoish/jasper/options"
 	"github.com/tychoish/jasper/util"
 	"github.com/tychoish/jasper/x/remote"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 const (
@@ -30,13 +30,13 @@ func serviceCommandRPC(cmd string, operation serviceOperation) *cli.Command {
 		Flags: append(serviceFlags(),
 			&cli.StringFlag{
 				Name:    hostFlagName,
-				EnvVars: []string{rpcHostEnvVar},
+				Sources: cli.EnvVars(rpcHostEnvVar),
 				Usage:   "the host running the RPC service",
 				Value:   defaultLocalHostName,
 			},
 			&cli.IntFlag{
 				Name:    portFlagName,
-				EnvVars: []string{rpcPortEnvVar},
+				Sources: cli.EnvVars(rpcPortEnvVar),
 				Usage:   "the port running the RPC service",
 				Value:   defaultRPCPort,
 			},
@@ -50,7 +50,7 @@ func serviceCommandRPC(cmd string, operation serviceOperation) *cli.Command {
 			validateLogLevel(logLevelFlagName),
 			validateLimits(limitNumFilesFlagName, limitNumProcsFlagName, limitLockedMemoryFlagName, limitVirtualMemoryFlagName),
 		),
-		Action: func(c *cli.Context) error {
+		Action: func(ctx context.Context, c *cli.Command) error {
 			manager := jasper.NewManager(jasper.ManagerOptionSet(jasper.ManagerOptions{Synchronized: true}))
 
 			daemon := newRPCDaemon(c.String(hostFlagName), c.Int(portFlagName), manager, c.String(credsFilePathFlagName), makeLogger(c))

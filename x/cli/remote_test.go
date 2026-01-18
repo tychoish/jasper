@@ -13,7 +13,7 @@ import (
 	"github.com/tychoish/jasper/testutil"
 	"github.com/tychoish/jasper/util"
 	roptions "github.com/tychoish/jasper/x/remote/options"
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 )
 
 func TestCLIRemote(t *testing.T) {
@@ -22,8 +22,8 @@ func TestCLIRemote(t *testing.T) {
 		RPCService:  makeTestRPCService,
 	} {
 		t.Run(remoteType, func(t *testing.T) {
-			for testName, testCase := range map[string]func(ctx context.Context, t *testing.T, c *cli.Context){
-				"DownloadFileSucceeds": func(ctx context.Context, t *testing.T, c *cli.Context) {
+			for testName, testCase := range map[string]func(ctx context.Context, t *testing.T, c *cli.Command){
+				"DownloadFileSucceeds": func(ctx context.Context, t *testing.T, c *cli.Command) {
 					tmpFile, err := os.CreateTemp(testutil.BuildDirectory(), "out.txt")
 					assert.NotError(t, err)
 					defer func() {
@@ -38,12 +38,12 @@ func TestCLIRemote(t *testing.T) {
 					assert.NotError(t, err)
 
 					resp := &OutcomeResponse{}
-					assert.NotError(t, execCLICommandInputOutput(t, c, remoteDownloadFile(), input, resp))
+					assert.NotError(t, execCLICommandInputOutput(t, remoteDownloadFile(), []string{string(input)}, resp))
 
 					_, err = os.Stat(tmpFile.Name())
 					assert.NotError(t, err)
 				},
-				"GetLogStreamSucceeds": func(ctx context.Context, t *testing.T, c *cli.Context) {
+				"GetLogStreamSucceeds": func(ctx context.Context, t *testing.T, c *cli.Command) {
 					inMemLogger, err := jasper.NewInMemoryLogger(10)
 					assert.NotError(t, err)
 					opts := testutil.TrueCreateOpts()
@@ -51,16 +51,16 @@ func TestCLIRemote(t *testing.T) {
 					createInput, err := json.Marshal(opts)
 					assert.NotError(t, err)
 					createResp := &InfoResponse{}
-					assert.NotError(t, execCLICommandInputOutput(t, c, managerCreateProcess(), createInput, createResp))
+					assert.NotError(t, execCLICommandInputOutput(t, managerCreateProcess(), []string{string(createInput)}, createResp))
 
 					input, err := json.Marshal(LogStreamInput{ID: createResp.Info.ID, Count: 100})
 					assert.NotError(t, err)
 					resp := &LogStreamResponse{}
-					assert.NotError(t, execCLICommandInputOutput(t, c, remoteGetLogStream(), input, resp))
+					assert.NotError(t, execCLICommandInputOutput(t, remoteGetLogStream(), []string{string(input)}, resp))
 
 					check.True(t, resp.Successful())
 				},
-				"WriteFileSucceeds": func(ctx context.Context, t *testing.T, c *cli.Context) {
+				"WriteFileSucceeds": func(ctx context.Context, t *testing.T, c *cli.Command) {
 					tmpFile, err := os.CreateTemp(testutil.BuildDirectory(), "write_file")
 					assert.NotError(t, err)
 					defer func() {
@@ -73,7 +73,7 @@ func TestCLIRemote(t *testing.T) {
 					assert.NotError(t, err)
 					resp := &OutcomeResponse{}
 
-					assert.NotError(t, execCLICommandInputOutput(t, c, remoteWriteFile(), input, resp))
+					assert.NotError(t, execCLICommandInputOutput(t, remoteWriteFile(), []string{string(input)}, resp))
 
 					check.True(t, resp.Successful())
 
