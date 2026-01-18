@@ -68,12 +68,10 @@ github.com/tychoish/birch/x/ftdc v0.0.0-20260114025157-d2102f5441c3 h1:hh79vTSyb
 github.com/tychoish/birch/x/ftdc v0.0.0-20260114025157-d2102f5441c3/go.mod h1:WLuES9ZPLnGQmBYLqFHELsuBEziBS21j6CjYGY6Cv20=
 github.com/tychoish/birch/x/mrpc v0.0.0-20260114025157-d2102f5441c3 h1:UzxUxx3BxL7yzaN3GMA2u0c00AAAXW5PVPg3ofjmtmQ=
 github.com/tychoish/birch/x/mrpc v0.0.0-20260114025157-d2102f5441c3/go.mod h1:ti97arickkcLJOcaew4SW9uZmEgIwyAILINSvyc0uBM=
-github.com/tychoish/fun v0.14.1 h1:fMeLxEPUjiFa13KyPtf/JZb8m7KXJrB5sHipyMEFJIk=
-github.com/tychoish/fun v0.14.1/go.mod h1:ghjR/9EyWh8h8oBg2+WJhsEcF/W4JXMWpo6btMRNusE=
+github.com/tychoish/fun v0.14.2 h1:2ZNRAnOWi5nymBDNiOPD12LuvEKhPdiMSWC85pw6fzQ=
 github.com/tychoish/gimlet v0.0.0-20251028182000-6a35909ebafc h1:y4H20p6MC55U627sgNezPaNSdvotW2QuHgq4emamn5U=
 github.com/tychoish/gimlet v0.0.0-20251028182000-6a35909ebafc/go.mod h1:pH2mprJw9cYWMtLsrd0YrxDajjixYyd7K0c65aDDUBQ=
-github.com/tychoish/grip v0.4.3 h1:EoEQokYw6Q237PPGvg3z/tpO58kOnhPG1u53XVn7wu0=
-github.com/tychoish/grip v0.4.3/go.mod h1:XgcJowQHu1d92E95C6aQfpc/x4fskoxuv7KrCdaYd8Q=
+github.com/tychoish/grip v0.4.4 h1:rhNwCDC9n3wl9gFeCwvSnhzvvyJDOZkeFMcw4fmUV3U=
 github.com/tychoish/grip/x/metrics v0.0.0-20260114024627-63e5c6d2f062 h1:qbuceDQ8ZMzhu5LeZVzBzhcFGgvYHsW6QVKBz+30lMM=
 github.com/tychoish/grip/x/metrics v0.0.0-20260114024627-63e5c6d2f062/go.mod h1:OlB7SrsE82Af+9UAIH1pKZzh4tu+c9x+SMmKR0zPGWk=
 github.com/tychoish/grip/x/splunk v0.0.0-20260114024627-63e5c6d2f062 h1:Qyz+FDc5WmR1CDKrOtSVE3UKkl88QGIiniBfwXpqqp8=

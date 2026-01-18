@@ -43,10 +43,8 @@ github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO+kdMU+MU=
 github.com/stretchr/testify v1.8.2 h1:+h33VjcLVPDHtOdpUCuF+7gSuG3yGIftsP1YvFihtJ8=
 github.com/stretchr/testify v1.8.2/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
-github.com/tychoish/fun v0.14.1 h1:fMeLxEPUjiFa13KyPtf/JZb8m7KXJrB5sHipyMEFJIk=
-github.com/tychoish/fun v0.14.1/go.mod h1:ghjR/9EyWh8h8oBg2+WJhsEcF/W4JXMWpo6btMRNusE=
-github.com/tychoish/grip v0.4.3 h1:EoEQokYw6Q237PPGvg3z/tpO58kOnhPG1u53XVn7wu0=
-github.com/tychoish/grip v0.4.3/go.mod h1:XgcJowQHu1d92E95C6aQfpc/x4fskoxuv7KrCdaYd8Q=
+github.com/tychoish/fun v0.14.2 h1:2ZNRAnOWi5nymBDNiOPD12LuvEKhPdiMSWC85pw6fzQ=
+github.com/tychoish/grip v0.4.4 h1:rhNwCDC9n3wl9gFeCwvSnhzvvyJDOZkeFMcw4fmUV3U=
 github.com/tychoish/jasper v0.1.4-0.20260114025018-121022e9c9e2 h1:H4Lmbtr5t4NIODvrvnoT69N6lNM4oDRyaozGvJCoaxA=
 github.com/tychoish/jasper v0.1.4-0.20260114025018-121022e9c9e2/go.mod h1:5EBobMpk2eZ4Be6cXhj8naKGLJrdyDa4/bpl7YQVcXw=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=

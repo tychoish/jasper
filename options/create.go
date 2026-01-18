@@ -299,7 +299,7 @@ func (opts *Create) ResolveEnvironment() []string {
 // AddEnvVar adds an environment variable to the Create struct on which
 // this method is called. If the Environment map is nil, this method will
 // instantiate one.
-func (opts *Create) AddEnvVar(k, v string) { opts.init(); opts.Environment.Append(irt.MakeKV(k, v)) }
+func (opts *Create) AddEnvVar(k, v string) { opts.init(); opts.Environment.PushBack(irt.MakeKV(k, v)) }
 
 func (opts *Create) init() {
 	if opts.Environment == nil {

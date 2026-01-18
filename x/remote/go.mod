@@ -9,9 +9,9 @@ require (
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/tychoish/birch v0.3.2-0.20260108164004-e93907509812
 	github.com/tychoish/birch/x/mrpc v0.0.0-20260114025157-d2102f5441c3
-	github.com/tychoish/fun v0.14.1
+	github.com/tychoish/fun v0.14.2
 	github.com/tychoish/gimlet v0.0.0-20251028182000-6a35909ebafc
-	github.com/tychoish/grip v0.4.3
+	github.com/tychoish/grip v0.4.4
 	github.com/tychoish/grip/x/metrics v0.0.0-20260114024627-63e5c6d2f062
 	github.com/tychoish/grip/x/splunk v0.0.0-20260114024627-63e5c6d2f062
 	github.com/tychoish/jasper v0.1.4-0.20260114025018-121022e9c9e2
