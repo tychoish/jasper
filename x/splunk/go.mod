@@ -11,6 +11,8 @@ require (
 	github.com/tychoish/jasper v0.1.4-0.20260114025018-121022e9c9e2
 )
 
+replace github.com/tychoish/jasper => ../../
+
 require (
 	github.com/fuyufjh/splunk-hec-go v0.4.0 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect

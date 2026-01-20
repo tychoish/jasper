@@ -13,10 +13,18 @@ require (
 	github.com/tychoish/grip/x/splunk v0.0.0-20260114024627-63e5c6d2f062
 	github.com/tychoish/jasper v0.1.4-0.20260114025018-121022e9c9e2
 	github.com/tychoish/jasper/x/remote v0.0.0-20230825152828-7bf0c66efca5
-	github.com/tychoish/jasper/x/splunk v0.0.0-20230825152828-7bf0c66efca5
+	github.com/tychoish/jasper/x/splunk v0.0.0-20260114025018-121022e9c9e2
 	github.com/tychoish/jasper/x/track v0.0.0-20230825152828-7bf0c66efca5
 	github.com/urfave/cli/v3 v3.6.2
 )
+
+replace github.com/tychoish/jasper/x/remote => ../remote/
+
+replace github.com/tychoish/jasper/x/splunk => ../splunk/
+
+replace github.com/tychoish/jasper/x/track => ../track/
+
+replace github.com/tychoish/jasper => ../../
 
 require (
 	github.com/containerd/cgroups/v3 v3.0.1 // indirect
@@ -42,9 +50,8 @@ require (
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/tklauser/go-sysconf v0.3.16 // indirect
 	github.com/tklauser/numcpus v0.11.0 // indirect
-	github.com/tychoish/birch v0.3.2-0.20260108164004-e93907509812 // indirect
-	github.com/tychoish/birch/x/ftdc v0.0.0-20260114025157-d2102f5441c3 // indirect
-	github.com/tychoish/birch/x/mrpc v0.0.0-20260114025157-d2102f5441c3 // indirect
+	github.com/tychoish/birch v0.3.2-0.20260120031640-50aa42790fba // indirect
+	github.com/tychoish/birch/x/ftdc v0.0.0-20260120031640-50aa42790fba // indirect
 	github.com/tychoish/gimlet v0.0.0-20251028182000-6a35909ebafc // indirect
 	github.com/tychoish/grip/x/metrics v0.0.0-20260114024627-63e5c6d2f062 // indirect
 	github.com/ulikunitz/xz v0.5.11 // indirect

@@ -10,6 +10,8 @@ require (
 	golang.org/x/crypto v0.8.0
 )
 
+replace github.com/tychoish/jasper => ../../
+
 require (
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
 	github.com/google/uuid v1.6.0 // indirect

@@ -16,7 +16,5 @@ github.com/tychoish/grip v0.4.4 h1:rhNwCDC9n3wl9gFeCwvSnhzvvyJDOZkeFMcw4fmUV3U=
 github.com/tychoish/grip v0.4.4/go.mod h1:rsQaL/y3avHi8G8UHhTDGwttebcm/eDD7+MYdxrCQv8=
 github.com/tychoish/grip/x/splunk v0.0.0-20260114024627-63e5c6d2f062 h1:Qyz+FDc5WmR1CDKrOtSVE3UKkl88QGIiniBfwXpqqp8=
 github.com/tychoish/grip/x/splunk v0.0.0-20260114024627-63e5c6d2f062/go.mod h1:Jf97+6r6x6VjT11il5FEDNHlgXtSFqZnEQxryoUJ0Iw=
-github.com/tychoish/jasper v0.1.4-0.20260114025018-121022e9c9e2 h1:H4Lmbtr5t4NIODvrvnoT69N6lNM4oDRyaozGvJCoaxA=
-github.com/tychoish/jasper v0.1.4-0.20260114025018-121022e9c9e2/go.mod h1:5EBobMpk2eZ4Be6cXhj8naKGLJrdyDa4/bpl7YQVcXw=
 gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
 gopkg.in/yaml.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=

@@ -62,12 +62,9 @@ github.com/tklauser/go-sysconf v0.3.16 h1:frioLaCQSsF5Cy1jgRBrzr6t502KIIwQ0MArYI
 github.com/tklauser/go-sysconf v0.3.16/go.mod h1:/qNL9xxDhc7tx3HSRsLWNnuzbVfh3e7gh/BmM179nYI=
 github.com/tklauser/numcpus v0.11.0 h1:nSTwhKH5e1dMNsCdVBukSZrURJRoHbSEQjdEbY+9RXw=
 github.com/tklauser/numcpus v0.11.0/go.mod h1:z+LwcLq54uWZTX0u/bGobaV34u6V7KNlTZejzM6/3MQ=
-github.com/tychoish/birch v0.3.2-0.20260108164004-e93907509812 h1:5sDG4h1bnK3/MMULseBG2kaT4spxoSbuxTj6e37tq54=
-github.com/tychoish/birch v0.3.2-0.20260108164004-e93907509812/go.mod h1:wHhIEoc3z92ufXa6TwTecFmEJC50L0vs1LDcPR5vdRY=
-github.com/tychoish/birch/x/ftdc v0.0.0-20260114025157-d2102f5441c3 h1:hh79vTSybPBFDxEIAGln+frt3niJZDkmPoIzqStSgtQ=
-github.com/tychoish/birch/x/ftdc v0.0.0-20260114025157-d2102f5441c3/go.mod h1:WLuES9ZPLnGQmBYLqFHELsuBEziBS21j6CjYGY6Cv20=
-github.com/tychoish/birch/x/mrpc v0.0.0-20260114025157-d2102f5441c3 h1:UzxUxx3BxL7yzaN3GMA2u0c00AAAXW5PVPg3ofjmtmQ=
-github.com/tychoish/birch/x/mrpc v0.0.0-20260114025157-d2102f5441c3/go.mod h1:ti97arickkcLJOcaew4SW9uZmEgIwyAILINSvyc0uBM=
+github.com/tychoish/birch v0.3.2-0.20260120031640-50aa42790fba h1:ptZc8Hg2cjNoiKm84E1O0jtR5pFElQnpQUi1M8B0Sj4=
+github.com/tychoish/birch v0.3.2-0.20260120031640-50aa42790fba/go.mod h1:j3LvOWGAcUSd7gZ/jc7YR9z9FhiKe/kJhxP7egZAjWM=
+github.com/tychoish/birch/x/ftdc v0.0.0-20260120031640-50aa42790fba h1:K8pyErWv9MGhbUQF1OP4uJMRJJvMLkJLC+o8kKVbI0o=
 github.com/tychoish/fun v0.14.2 h1:2ZNRAnOWi5nymBDNiOPD12LuvEKhPdiMSWC85pw6fzQ=
 github.com/tychoish/fun v0.14.2/go.mod h1:ghjR/9EyWh8h8oBg2+WJhsEcF/W4JXMWpo6btMRNusE=
 github.com/tychoish/gimlet v0.0.0-20251028182000-6a35909ebafc h1:y4H20p6MC55U627sgNezPaNSdvotW2QuHgq4emamn5U=
@@ -78,10 +75,6 @@ github.com/tychoish/grip/x/metrics v0.0.0-20260114024627-63e5c6d2f062 h1:qbuceDQ
 github.com/tychoish/grip/x/metrics v0.0.0-20260114024627-63e5c6d2f062/go.mod h1:OlB7SrsE82Af+9UAIH1pKZzh4tu+c9x+SMmKR0zPGWk=
 github.com/tychoish/grip/x/splunk v0.0.0-20260114024627-63e5c6d2f062 h1:Qyz+FDc5WmR1CDKrOtSVE3UKkl88QGIiniBfwXpqqp8=
 github.com/tychoish/grip/x/splunk v0.0.0-20260114024627-63e5c6d2f062/go.mod h1:Jf97+6r6x6VjT11il5FEDNHlgXtSFqZnEQxryoUJ0Iw=
-github.com/tychoish/jasper v0.1.4-0.20260114025018-121022e9c9e2 h1:H4Lmbtr5t4NIODvrvnoT69N6lNM4oDRyaozGvJCoaxA=
-github.com/tychoish/jasper v0.1.4-0.20260114025018-121022e9c9e2/go.mod h1:5EBobMpk2eZ4Be6cXhj8naKGLJrdyDa4/bpl7YQVcXw=
-github.com/tychoish/jasper/x/splunk v0.0.0-20260114025018-121022e9c9e2 h1:jtoQ8IozqOsYs78x+n+xyhqMWO5/vwsQlomVW0YncyU=
-github.com/tychoish/jasper/x/splunk v0.0.0-20260114025018-121022e9c9e2/go.mod h1:YmKc+d+CfxW8QLN6twUPYEBiWrMviM2rDfqcuVF/BTg=
 github.com/ulikunitz/xz v0.5.6/go.mod h1:2bypXElzHzzJZwzH67Y6wb67pO62Rzfn7BSiF4ABRW8=
 github.com/ulikunitz/xz v0.5.11 h1:kpFauv27b6ynzBNT/Xy+1k+fK4WswhN/6PN5WhFAGw8=
 github.com/ulikunitz/xz v0.5.11/go.mod h1:nbz6k7qbPmH4IRqmfOplQw/tblSgqTqBwxkY0oWt/14=

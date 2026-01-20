@@ -13,6 +13,8 @@ require (
 	github.com/tychoish/jasper v0.1.4-0.20260114025018-121022e9c9e2
 )
 
+replace github.com/tychoish/jasper => ../../
+
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
 	github.com/Microsoft/go-winio v0.6.0 // indirect

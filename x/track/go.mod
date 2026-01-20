@@ -13,6 +13,8 @@ require (
 	github.com/tychoish/jasper v0.1.4-0.20260114025018-121022e9c9e2
 )
 
+replace github.com/tychoish/jasper => ../../
+
 require (
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
