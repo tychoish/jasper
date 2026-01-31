@@ -2,16 +2,12 @@ module github.com/tychoish/jasper/x/splunk
 
 go 1.24
 
-toolchain go1.24.3
-
 require (
 	github.com/tychoish/fun v0.14.5
 	github.com/tychoish/grip v0.4.6
-	github.com/tychoish/grip/x/splunk v0.0.0-20260114024627-63e5c6d2f062
-	github.com/tychoish/jasper v0.1.4-0.20260114025018-121022e9c9e2
+	github.com/tychoish/grip/x/splunk v0.1.0
+	github.com/tychoish/jasper v0.1.4
 )
-
-replace github.com/tychoish/jasper => ../../
 
 require (
 	github.com/fuyufjh/splunk-hec-go v0.4.0 // indirect

@@ -4,5 +4,5 @@ github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/tychoish/fun v0.14.5 h1:cXfyEBl6i4nShmXAa1vNUjMJDAKzjuXSnQ4QCVYevCA=
 github.com/tychoish/fun v0.14.5/go.mod h1:ghjR/9EyWh8h8oBg2+WJhsEcF/W4JXMWpo6btMRNusE=
-github.com/tychoish/grip v0.4.6 h1:YX3hV0OzK8rym9ylrugt2QEaPpl6VjvXRgW7GIbth8A=
-github.com/tychoish/grip v0.4.6/go.mod h1:SNSfWI1ta65sQf7TxxXXNI4JjuTCMTuNRwoYqXHjCDs=
+github.com/tychoish/grip v0.4.6 h1:cZgpT+4QqH/L+vIOFQAPEewLnga4tpBtc3bmsd7A5HY=
+github.com/tychoish/grip v0.4.6/go.mod h1:IWoJE/PVFaez0vQdOj04SDPG+fNB9u1ONw9DL3Y76rk=

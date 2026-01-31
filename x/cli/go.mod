@@ -10,11 +10,11 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/tychoish/fun v0.14.5
 	github.com/tychoish/grip v0.4.6
-	github.com/tychoish/grip/x/splunk v0.0.0-20260114024627-63e5c6d2f062
-	github.com/tychoish/jasper v0.1.4-0.20260114025018-121022e9c9e2
+	github.com/tychoish/grip/x/splunk v0.1.0
+	github.com/tychoish/jasper v0.1.4
 	github.com/tychoish/jasper/x/remote v0.0.0-20230825152828-7bf0c66efca5
 	github.com/tychoish/jasper/x/splunk v0.0.0-20260114025018-121022e9c9e2
-	github.com/tychoish/jasper/x/track v0.0.0-20230825152828-7bf0c66efca5
+	github.com/tychoish/jasper/x/track v0.1.0
 	github.com/urfave/cli/v3 v3.6.2
 )
 
@@ -51,9 +51,9 @@ require (
 	github.com/tklauser/go-sysconf v0.3.16 // indirect
 	github.com/tklauser/numcpus v0.11.0 // indirect
 	github.com/tychoish/birch v0.4.0 // indirect
-	github.com/tychoish/birch/x/ftdc v0.0.0-20260131172350-b2ec5200a119 // indirect
+	github.com/tychoish/birch/x/ftdc v0.1.0 // indirect
 	github.com/tychoish/gimlet v0.0.0-20251028182000-6a35909ebafc // indirect
-	github.com/tychoish/grip/x/metrics v0.0.0-20260114024627-63e5c6d2f062 // indirect
+	github.com/tychoish/grip/x/metrics v0.1.0 // indirect
 	github.com/ulikunitz/xz v0.5.11 // indirect
 	github.com/urfave/negroni v1.0.0 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
