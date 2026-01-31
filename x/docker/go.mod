@@ -8,8 +8,8 @@ require (
 	github.com/docker/docker v23.0.3+incompatible
 	github.com/google/uuid v1.6.0
 	github.com/opencontainers/image-spec v1.1.0-rc2
-	github.com/tychoish/fun v0.14.2
-	github.com/tychoish/grip v0.4.4
+	github.com/tychoish/fun v0.14.5
+	github.com/tychoish/grip v0.4.6
 	github.com/tychoish/jasper v0.1.4-0.20260114025018-121022e9c9e2
 )
 

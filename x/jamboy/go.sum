@@ -44,10 +44,10 @@ github.com/stretchr/testify v1.11.1 h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu
 github.com/stretchr/testify v1.11.1/go.mod h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=
 github.com/tychoish/amboy v0.0.0-20251029022950-fd67e89301e2 h1:sknx6ns1eKYpASHczaYXspdLZlgdj0NoH2fvMy7M6Bs=
 github.com/tychoish/amboy v0.0.0-20251029022950-fd67e89301e2/go.mod h1:1I1UJPjSwf3kv/Q5jf628k9KRwMf6uv12hk93Kt/mC0=
-github.com/tychoish/fun v0.14.2 h1:2ZNRAnOWi5nymBDNiOPD12LuvEKhPdiMSWC85pw6fzQ=
-github.com/tychoish/fun v0.14.2/go.mod h1:ghjR/9EyWh8h8oBg2+WJhsEcF/W4JXMWpo6btMRNusE=
-github.com/tychoish/grip v0.4.4 h1:rhNwCDC9n3wl9gFeCwvSnhzvvyJDOZkeFMcw4fmUV3U=
-github.com/tychoish/grip v0.4.4/go.mod h1:rsQaL/y3avHi8G8UHhTDGwttebcm/eDD7+MYdxrCQv8=
+github.com/tychoish/fun v0.14.5 h1:cXfyEBl6i4nShmXAa1vNUjMJDAKzjuXSnQ4QCVYevCA=
+github.com/tychoish/fun v0.14.5/go.mod h1:ghjR/9EyWh8h8oBg2+WJhsEcF/W4JXMWpo6btMRNusE=
+github.com/tychoish/grip v0.4.6 h1:YX3hV0OzK8rym9ylrugt2QEaPpl6VjvXRgW7GIbth8A=
+github.com/tychoish/grip v0.4.6/go.mod h1:SNSfWI1ta65sQf7TxxXXNI4JjuTCMTuNRwoYqXHjCDs=
 github.com/ulikunitz/xz v0.5.6/go.mod h1:2bypXElzHzzJZwzH67Y6wb67pO62Rzfn7BSiF4ABRW8=
 github.com/ulikunitz/xz v0.5.11 h1:kpFauv27b6ynzBNT/Xy+1k+fK4WswhN/6PN5WhFAGw8=
 github.com/ulikunitz/xz v0.5.11/go.mod h1:nbz6k7qbPmH4IRqmfOplQw/tblSgqTqBwxkY0oWt/14=
