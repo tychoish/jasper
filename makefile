@@ -15,8 +15,8 @@ docker-cleanup:
 # end Docker
 
 proto:
-	@mkdir -p x/remote/internal
-	protoc --go_out=plugins=grpc:x/remote/internal *.proto
+	@mkdir -p ./x/remote/internal
+	protoc --go_opt=paths=source_relative --go_out=./x/remote/internal --go-grpc_out=. *.proto
 
 go-mod-tidy:
 	go mod tidy

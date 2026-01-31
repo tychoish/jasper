@@ -56,6 +56,7 @@ type jasperService struct {
 	hostID    string
 	manager   jasper.Manager
 	scripting scripting.HarnessCache
+	UnimplementedJasperProcessManagerServer
 }
 
 func (s *jasperService) Status(ctx context.Context, _ *empty.Empty) (*StatusResponse, error) {
@@ -492,6 +493,7 @@ func (s *jasperService) ScriptingHarnessCreate(ctx context.Context, opts *Script
 		Setup: true,
 	}, nil
 }
+
 func (s *jasperService) ScriptingHarnessCheck(ctx context.Context, id *ScriptingHarnessID) (*OperationOutcome, error) {
 	se, err := s.scripting.Get(id.Id)
 	if err != nil {
@@ -520,7 +522,6 @@ func (s *jasperService) ScriptingHarnessSetup(ctx context.Context, id *Scripting
 	}
 
 	err = se.Setup(ctx)
-
 	if err != nil {
 		return &OperationOutcome{
 			Success:  false,
@@ -547,7 +548,6 @@ func (s *jasperService) ScriptingHarnessCleanup(ctx context.Context, id *Scripti
 	}
 
 	err = se.Cleanup(ctx)
-
 	if err != nil {
 		return &OperationOutcome{
 			Success:  false,
@@ -623,7 +623,8 @@ func (s *jasperService) ScriptingHarnessBuild(ctx context.Context, args *Scripti
 				Success:  false,
 				Text:     err.Error(),
 				ExitCode: -1,
-			}}, nil
+			},
+		}, nil
 	}
 
 	path, err := se.Build(ctx, args.Directory, args.Args)
@@ -634,7 +635,8 @@ func (s *jasperService) ScriptingHarnessBuild(ctx context.Context, args *Scripti
 				Success:  false,
 				Text:     err.Error(),
 				ExitCode: -2,
-			}}, nil
+			},
+		}, nil
 	}
 
 	return &ScriptingHarnessBuildResponse{
@@ -643,7 +645,8 @@ func (s *jasperService) ScriptingHarnessBuild(ctx context.Context, args *Scripti
 			Success:  true,
 			Text:     se.ID(),
 			ExitCode: 0,
-		}}, nil
+		},
+	}, nil
 }
 
 func (s *jasperService) ScriptingHarnessTest(ctx context.Context, args *ScriptingHarnessTestArgs) (*ScriptingHarnessTestResponse, error) {
