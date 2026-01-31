@@ -2,8 +2,6 @@ module github.com/tychoish/jasper/x/cli
 
 go 1.24.0
 
-toolchain go1.24.3
-
 require (
 	github.com/cheynewallace/tabby v1.1.1
 	github.com/evergreen-ci/service v1.0.1-0.20200225230430-d9382e39d768
@@ -12,19 +10,11 @@ require (
 	github.com/tychoish/grip v0.4.6
 	github.com/tychoish/grip/x/splunk v0.1.0
 	github.com/tychoish/jasper v0.1.4
-	github.com/tychoish/jasper/x/remote v0.0.0-20230825152828-7bf0c66efca5
+	github.com/tychoish/jasper/x/remote v0.1.0
 	github.com/tychoish/jasper/x/splunk v0.1.0
 	github.com/tychoish/jasper/x/track v0.1.0
 	github.com/urfave/cli/v3 v3.6.2
 )
-
-replace github.com/tychoish/jasper/x/remote => ../remote/
-
-replace github.com/tychoish/jasper/x/splunk => ../splunk/
-
-replace github.com/tychoish/jasper/x/track => ../track/
-
-replace github.com/tychoish/jasper => ../../
 
 require (
 	github.com/containerd/cgroups/v3 v3.0.1 // indirect

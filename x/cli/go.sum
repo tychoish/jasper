@@ -90,6 +90,14 @@ github.com/tychoish/grip/x/metrics v0.1.0 h1:pU+NPniEqEy4b4Wsp18BZDlJk28EIJ7Pjjq
 github.com/tychoish/grip/x/metrics v0.1.0/go.mod h1:EFyM3LfpCPf3Kw6u1fGULa10B2kIfYmKrCEcJITuW8k=
 github.com/tychoish/grip/x/splunk v0.1.0 h1:1ov/EkInabiY0m8XOsHnvB4XyPy5w9LYZCfgBllHIRE=
 github.com/tychoish/grip/x/splunk v0.1.0/go.mod h1:TDN0neS0Sgaxm04P0lYlyiS//XdOkViUSPIRo+HmzoA=
+github.com/tychoish/jasper v0.1.4 h1:8/QtShBmjfc19V1zzmMWJGhoJ2WvuvOTuHXbcv8vP/U=
+github.com/tychoish/jasper v0.1.4/go.mod h1:Yg99wn/aw8Fm6LmAYYlNgbum6LH/gLZVYjTGHw9eMJk=
+github.com/tychoish/jasper/x/remote v0.1.0 h1:oqFzRKcBodyPJKrpRPmG+2pzVYDd43ZV6JD9xUexhbA=
+github.com/tychoish/jasper/x/remote v0.1.0/go.mod h1:DiR/7etTcJR7a0ZIuV6LNiiresQXgrZoh8M++S86VMQ=
+github.com/tychoish/jasper/x/splunk v0.1.0 h1:GzdbqIjpf4nlt2Nkr9h8goHTX8D5E/5/QT5cPVUqT1w=
+github.com/tychoish/jasper/x/splunk v0.1.0/go.mod h1:xIpkWta66cG4j9Zr6aC7sdOFz6txAD57I3ipHHoyZI8=
+github.com/tychoish/jasper/x/track v0.1.0 h1:pxv/sQVYWAlQ64eVAYp01Je3odZ/dKoDGdTamL3KYag=
+github.com/tychoish/jasper/x/track v0.1.0/go.mod h1:C1BMr5TUkzljjHeQfp93PDAqOuie5nHb1pZSAVmEMPU=
 github.com/ulikunitz/xz v0.5.6/go.mod h1:2bypXElzHzzJZwzH67Y6wb67pO62Rzfn7BSiF4ABRW8=
 github.com/ulikunitz/xz v0.5.11 h1:kpFauv27b6ynzBNT/Xy+1k+fK4WswhN/6PN5WhFAGw8=
 github.com/ulikunitz/xz v0.5.11/go.mod h1:nbz6k7qbPmH4IRqmfOplQw/tblSgqTqBwxkY0oWt/14=
