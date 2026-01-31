@@ -5,7 +5,7 @@ go 1.24.0
 require (
 	github.com/tychoish/fun v0.14.5
 	github.com/tychoish/jasper v0.1.4
-	golang.org/x/crypto v0.8.0
+	golang.org/x/crypto v0.44.0
 )
 
 require (
