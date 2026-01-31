@@ -13,7 +13,7 @@ require (
 	github.com/tychoish/grip/x/splunk v0.1.0
 	github.com/tychoish/jasper v0.1.4
 	github.com/tychoish/jasper/x/remote v0.0.0-20230825152828-7bf0c66efca5
-	github.com/tychoish/jasper/x/splunk v0.0.0-20260114025018-121022e9c9e2
+	github.com/tychoish/jasper/x/splunk v0.1.0
 	github.com/tychoish/jasper/x/track v0.1.0
 	github.com/urfave/cli/v3 v3.6.2
 )
@@ -38,7 +38,7 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
-	github.com/gorilla/mux v1.8.0 // indirect
+	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/mholt/archiver v3.1.1+incompatible // indirect
 	github.com/nwaples/rardecode v1.1.3 // indirect
@@ -46,13 +46,13 @@ require (
 	github.com/phyber/negroni-gzip v1.0.0 // indirect
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/rs/cors v1.8.3 // indirect
+	github.com/rs/cors v1.11.1 // indirect
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/tklauser/go-sysconf v0.3.16 // indirect
 	github.com/tklauser/numcpus v0.11.0 // indirect
 	github.com/tychoish/birch v0.4.0 // indirect
 	github.com/tychoish/birch/x/ftdc v0.1.0 // indirect
-	github.com/tychoish/gimlet v0.0.0-20251028182000-6a35909ebafc // indirect
+	github.com/tychoish/gimlet v0.0.0-20260131191610-eac0aaade579 // indirect
 	github.com/tychoish/grip/x/metrics v0.1.0 // indirect
 	github.com/ulikunitz/xz v0.5.11 // indirect
 	github.com/urfave/negroni v1.0.0 // indirect
