@@ -42,6 +42,7 @@ require (
 	golang.org/x/net v0.47.0 // indirect
 	golang.org/x/sys v0.40.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
+	google.golang.org/grpc v1.78.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gotest.tools/v3 v3.4.0 // indirect
 )
