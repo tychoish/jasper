@@ -25,7 +25,7 @@ import (
 )
 
 type docker struct {
-	execOpts types.ExecConfig
+	execOpts container.ExecOptions
 	stdin    io.Reader
 	stdout   io.Writer
 	stderr   io.Writer
@@ -68,7 +68,7 @@ func ExecutorResolver(ctx context.Context, opts *options.Create) options.Resolve
 func NewDocker(ctx context.Context, client *client.Client, platform, image string, args []string) executor.Executor {
 	return &docker{
 		ctx: ctx,
-		execOpts: types.ExecConfig{
+		execOpts: container.ExecOptions{
 			Cmd: args,
 		},
 		platform: platform,
@@ -181,7 +181,7 @@ func (e *docker) startContainer() error {
 		return e.withRemoveContainer(fmt.Errorf("problem setting up I/O streaming to process in container: %w", err))
 	}
 
-	if err := e.client.ContainerStart(e.ctx, e.getContainerID(), types.ContainerStartOptions{}); err != nil {
+	if err := e.client.ContainerStart(e.ctx, e.getContainerID(), container.StartOptions{}); err != nil {
 		return e.withRemoveContainer(fmt.Errorf("problem starting container for process: %w", err))
 	}
 
@@ -196,7 +196,7 @@ func (e *docker) setupIOStream() error {
 		return nil
 	}
 
-	stream, err := e.client.ContainerAttach(e.ctx, e.getContainerID(), types.ContainerAttachOptions{
+	stream, err := e.client.ContainerAttach(e.ctx, e.getContainerID(), container.AttachOptions{
 		Stream: true,
 		Stdin:  e.execOpts.AttachStdin,
 		Stdout: e.execOpts.AttachStdout,
@@ -270,7 +270,7 @@ func (e *docker) removeContainer() error {
 	// Executor's context, which may already be done.
 	rmCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	if err := e.client.ContainerRemove(rmCtx, e.containerID, types.ContainerRemoveOptions{
+	if err := e.client.ContainerRemove(rmCtx, e.containerID, container.RemoveOptions{
 		Force: true,
 	}); err != nil {
 		return fmt.Errorf("problem cleaning up container for process: %w", err)

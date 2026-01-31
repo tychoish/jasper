@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 
 	"github.com/tychoish/fun/assert"
@@ -41,10 +41,10 @@ func TestProcessImplementations(t *testing.T) {
 					defer func() {
 						client, err := client.NewClientWithOpts(client.WithAPIVersionNegotiation())
 						assert.NotError(t, err)
-						containers, err := client.ContainerList(ctx, types.ContainerListOptions{All: true})
+						containers, err := client.ContainerList(ctx, container.ListOptions{All: true})
 						assert.NotError(t, err)
-						for _, container := range containers {
-							grip.Error(message.WrapError(client.ContainerRemove(ctx, container.ID, types.ContainerRemoveOptions{Force: true}), "problem cleaning up container"))
+						for _, ct := range containers {
+							grip.Error(message.WrapError(client.ContainerRemove(ctx, ct.ID, container.RemoveOptions{Force: true}), "problem cleaning up container"))
 						}
 					}()
 				}
