@@ -10,10 +10,8 @@ require (
 	github.com/opencontainers/runtime-spec v1.0.3-0.20210326190908-1c3f411f0417
 	github.com/tychoish/fun v0.14.5
 	github.com/tychoish/grip v0.4.6
-	github.com/tychoish/jasper v0.1.4-0.20260114025018-121022e9c9e2
+	github.com/tychoish/jasper v0.1.4
 )
-
-replace github.com/tychoish/jasper => ../../
 
 require (
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
