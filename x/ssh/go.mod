@@ -2,15 +2,11 @@ module github.com/tychoish/jasper/x/ssh
 
 go 1.24.0
 
-toolchain go1.24.3
-
 require (
 	github.com/tychoish/fun v0.14.5
-	github.com/tychoish/jasper v0.1.4-0.20260114025018-121022e9c9e2
+	github.com/tychoish/jasper v0.1.4
 	golang.org/x/crypto v0.8.0
 )
-
-replace github.com/tychoish/jasper => ../../
 
 require (
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
