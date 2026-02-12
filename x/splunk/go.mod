@@ -3,8 +3,8 @@ module github.com/tychoish/jasper/x/splunk
 go 1.24
 
 require (
-	github.com/tychoish/fun v0.14.5
-	github.com/tychoish/grip v0.4.6
+	github.com/tychoish/fun v0.14.6
+	github.com/tychoish/grip v0.4.8
 	github.com/tychoish/grip/x/splunk v0.1.0
 	github.com/tychoish/jasper v0.1.4
 )

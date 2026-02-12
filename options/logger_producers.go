@@ -41,7 +41,7 @@ func (opts *DefaultLoggerOptions) Configure() (send.Sender, error) {
 		return nil, fmt.Errorf("invalid options: %w", err)
 	}
 
-	sender := send.MakePlain()
+	sender := send.MakeStdOut()
 
 	// TODO fix logger so that you can prefix the logger with the
 	// name somehow
@@ -86,7 +86,7 @@ func (opts *FileLoggerOptions) Configure() (send.Sender, error) {
 		return nil, fmt.Errorf("invalid options: %w", err)
 	}
 
-	sender, err := send.MakePlainFile(opts.Filename)
+	sender, err := send.MakeFile(opts.Filename)
 	if err != nil {
 		return nil, fmt.Errorf("problem creating base file logger: %w", err)
 	}

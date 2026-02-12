@@ -291,8 +291,8 @@ func (j *amboyForegroundOutputJob) Run(ctx context.Context) {
 	}
 
 	// TODO make these loggers log at different levels (sender.Clone())
-	j.Options.Output.Error = send.MakeWriter(grip.Sender())
-	j.Options.Output.Output = send.MakeWriter(grip.Sender())
+	j.Options.Output.Error = send.MakeWriterSender(grip.Sender())
+	j.Options.Output.Output = send.MakeWriterSender(grip.Sender())
 
 	p, err := j.makep(ctx, j.Options)
 	if err != nil {

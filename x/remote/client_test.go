@@ -1261,8 +1261,8 @@ func TestManager(t *testing.T) {
 func createTestScriptingHarness(ctx context.Context, t *testing.T, client Manager, dir string) scripting.Harness {
 	opts := options.NewGolangScriptingEnvironment(filepath.Join(dir, "gopath"), runtime.GOROOT()).(*options.ScriptingGolang)
 
-	opts.Output.Error = send.MakeWriter(grip.Sender())
-	opts.Output.Output = send.MakeWriter(grip.Sender())
+	opts.Output.Error = send.MakeWriterSender(grip.Sender())
+	opts.Output.Output = send.MakeWriterSender(grip.Sender())
 
 	harness, err := client.CreateScripting(ctx, opts)
 	assert.NotError(t, err)

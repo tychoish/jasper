@@ -31,11 +31,13 @@ func (b *LocalBuffer) Read(p []byte) (n int, err error) {
 	defer b.Unlock()
 	return b.b.Read(p)
 }
+
 func (b *LocalBuffer) Write(p []byte) (n int, err error) {
 	b.Lock()
 	defer b.Unlock()
 	return b.b.Write(p)
 }
+
 func (b *LocalBuffer) String() string {
 	b.Lock()
 	defer b.Unlock()
@@ -49,5 +51,5 @@ func ConvertWriter(wr io.Writer, err error) send.Sender {
 		return nil
 	}
 
-	return send.WrapWriter(wr)
+	return send.MakeWriter(wr)
 }

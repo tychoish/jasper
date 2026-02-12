@@ -133,7 +133,7 @@ func (o *Output) GetOutput() (io.Writer, error) {
 			outMulti = send.NewMulti(DefaultLogName, outLoggers)
 			outMulti.SetPriority(level.Trace)
 		}
-		o.outputSender = send.MakeWriter(outMulti)
+		o.outputSender = send.MakeWriterSender(outMulti)
 	}
 
 	if !o.outputIsNull() && o.outputLogging() {
@@ -176,7 +176,7 @@ func (o *Output) GetError() (io.Writer, error) {
 		errMulti := send.NewMulti(DefaultLogName, errSenders)
 		errMulti.SetPriority(level.Trace)
 		// This will not close the Loggers' underlying senders.
-		o.errorSender = send.MakeWriter(errMulti)
+		o.errorSender = send.MakeWriterSender(errMulti)
 	}
 
 	if !o.errorIsNull() && o.errorLogging() {
