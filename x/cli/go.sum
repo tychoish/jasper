@@ -92,8 +92,8 @@ github.com/tychoish/grip/x/metrics v0.1.0 h1:pU+NPniEqEy4b4Wsp18BZDlJk28EIJ7Pjjq
 github.com/tychoish/grip/x/metrics v0.1.0/go.mod h1:EFyM3LfpCPf3Kw6u1fGULa10B2kIfYmKrCEcJITuW8k=
 github.com/tychoish/grip/x/splunk v0.1.0 h1:1ov/EkInabiY0m8XOsHnvB4XyPy5w9LYZCfgBllHIRE=
 github.com/tychoish/grip/x/splunk v0.1.0/go.mod h1:TDN0neS0Sgaxm04P0lYlyiS//XdOkViUSPIRo+HmzoA=
-github.com/tychoish/jasper v0.1.4 h1:8/QtShBmjfc19V1zzmMWJGhoJ2WvuvOTuHXbcv8vP/U=
-github.com/tychoish/jasper v0.1.4/go.mod h1:Yg99wn/aw8Fm6LmAYYlNgbum6LH/gLZVYjTGHw9eMJk=
+github.com/tychoish/jasper v0.1.5 h1:IOwQzHKcHdjClSaCkkS+zScsC3SNvUfPq3aE2bafVNc=
+github.com/tychoish/jasper v0.1.5/go.mod h1:OIV4XKEJSZyZL8oXc3lB/5wTVwOgPhuND0AF6jWfyBg=
 github.com/tychoish/jasper/x/remote v0.1.1 h1:iID1qMwLc8+CnhD/2aUKXWkQUogCYr99E+Ct7yewYeM=
 github.com/tychoish/jasper/x/remote v0.1.1/go.mod h1:Lvvn/5knttu/1yuZ4+us2488wc6P4Jh97NtjiOzO3ms=
 github.com/tychoish/jasper/x/splunk v0.1.0 h1:GzdbqIjpf4nlt2Nkr9h8goHTX8D5E/5/QT5cPVUqT1w=

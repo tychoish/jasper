@@ -13,7 +13,7 @@ require (
 	github.com/tychoish/grip v0.4.8
 	github.com/tychoish/grip/x/metrics v0.1.0
 	github.com/tychoish/grip/x/splunk v0.1.0
-	github.com/tychoish/jasper v0.1.4
+	github.com/tychoish/jasper v0.1.5
 	github.com/tychoish/jasper/x/splunk v0.1.0
 	google.golang.org/grpc v1.78.0
 	google.golang.org/protobuf v1.36.11
