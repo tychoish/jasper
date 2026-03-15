@@ -2,7 +2,7 @@ github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 h1:El6M4kTTCOh6aBiKaU
 github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510/go.mod h1:pupxD2MaaD3pAXIBCelhxNneeOaAeabZDe5s4K6zSpQ=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
-github.com/tychoish/fun v0.14.6 h1:1J8OJ/Iug764QE9q9Ge4Mi2V8ViqmbfMVqtdNG3OrEE=
-github.com/tychoish/fun v0.14.6/go.mod h1:ghjR/9EyWh8h8oBg2+WJhsEcF/W4JXMWpo6btMRNusE=
-github.com/tychoish/grip v0.4.8 h1:dnV1OnCwuY7AjYQ5l6tLn7jSRJGNdZmNnrdKDqn3XRU=
-github.com/tychoish/grip v0.4.8/go.mod h1:3kHQdYRkvy+zcLySCqyg/b+JmWxasUe341y+YpgqUug=
+github.com/tychoish/fun v0.14.7 h1:5aLb90tbNVBf+jo5tfEGFCW9Chle5yQ2SUxNQHUH1vs=
+github.com/tychoish/fun v0.14.7/go.mod h1:ghjR/9EyWh8h8oBg2+WJhsEcF/W4JXMWpo6btMRNusE=
+github.com/tychoish/grip v0.4.9 h1:zOLeXzodVaPeJt8RhIA06jxJSRCSCNckKe0J8hoKXxI=
+github.com/tychoish/grip v0.4.9/go.mod h1:thscUfqMHgtG8/HwJN2uVA8VFVVbv/e/Q2/KedIXHnk=

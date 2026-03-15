@@ -6,8 +6,8 @@ require (
 	github.com/cheynewallace/tabby v1.1.1
 	github.com/evergreen-ci/service v1.0.1-0.20200225230430-d9382e39d768
 	github.com/google/uuid v1.6.0
-	github.com/tychoish/fun v0.14.6
-	github.com/tychoish/grip v0.4.8
+	github.com/tychoish/fun v0.14.7
+	github.com/tychoish/grip v0.4.9
 	github.com/tychoish/grip/x/splunk v0.1.0
 	github.com/tychoish/jasper v0.1.5
 	github.com/tychoish/jasper/x/remote v0.1.1
@@ -40,8 +40,8 @@ require (
 	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
 	github.com/tklauser/go-sysconf v0.3.16 // indirect
 	github.com/tklauser/numcpus v0.11.0 // indirect
-	github.com/tychoish/birch v0.4.0 // indirect
-	github.com/tychoish/birch/x/ftdc v0.1.0 // indirect
+	github.com/tychoish/birch v0.4.1 // indirect
+	github.com/tychoish/birch/x/ftdc v0.1.1 // indirect
 	github.com/tychoish/gimlet v0.0.0-20260131191610-eac0aaade579 // indirect
 	github.com/tychoish/grip/x/metrics v0.1.0 // indirect
 	github.com/ulikunitz/xz v0.5.15 // indirect

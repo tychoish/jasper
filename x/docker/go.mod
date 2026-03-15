@@ -6,8 +6,8 @@ require (
 	github.com/docker/docker v28.5.2+incompatible
 	github.com/google/uuid v1.6.0
 	github.com/opencontainers/image-spec v1.1.0-rc2
-	github.com/tychoish/fun v0.14.6
-	github.com/tychoish/grip v0.4.8
+	github.com/tychoish/fun v0.14.7
+	github.com/tychoish/grip v0.4.9
 	github.com/tychoish/jasper v0.1.5
 )
 

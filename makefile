@@ -1,5 +1,9 @@
 VERSION?=main
 
+build-all:
+	for i in $(shell find . -name "go.mod"); do pushd $$(dirname $$i); echo $(dirname $i); go get github.com/tychoish/fun@$(VERSION); go mod tidy; go build ./... ; popd; done
+
+
 # Docker-related
 docker_image := $(DOCKER_IMAGE)
 ifeq ($(docker_image),)

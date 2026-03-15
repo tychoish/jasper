@@ -8,9 +8,9 @@ require (
 	github.com/golang/protobuf v1.5.4
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/tychoish/birch v0.4.0
-	github.com/tychoish/fun v0.14.6
+	github.com/tychoish/fun v0.14.7
 	github.com/tychoish/gimlet v0.0.0-20260131191610-eac0aaade579
-	github.com/tychoish/grip v0.4.8
+	github.com/tychoish/grip v0.4.9
 	github.com/tychoish/grip/x/metrics v0.1.0
 	github.com/tychoish/grip/x/splunk v0.1.0
 	github.com/tychoish/jasper v0.1.5
