@@ -286,7 +286,7 @@ func (p *mdbProcess) Tag(tag string) {
 	}
 	req, err := shell.RequestToMessage(mongowire.OP_QUERY, payload)
 	if err != nil {
-		grip.Warningf("failed to tag process %s with tag %s", p.ID(), tag)
+		grip.Warning(grip.MPrintf("failed to tag process %s with tag %s", p.ID(), tag))
 		return
 	}
 	msg, err := p.doRequest(context.Background(), req)
@@ -312,12 +312,12 @@ func (p *mdbProcess) GetTags() []string {
 
 	req, err := shell.RequestToMessage(mongowire.OP_QUERY, payload)
 	if err != nil {
-		grip.Warningf("failed to get tags for process %s", p.ID())
+		grip.Warning(grip.MPrintf("failed to get tags for process %s", p.ID()))
 		return nil
 	}
 	msg, err := p.doRequest(context.Background(), req)
 	if err != nil {
-		grip.Warningf("failed to get tags for process %s", p.ID())
+		grip.Warning(grip.MPrintf("failed to get tags for process %s", p.ID()))
 		return nil
 	}
 
@@ -339,14 +339,14 @@ func (p *mdbProcess) ResetTags() {
 
 	req, err := shell.RequestToMessage(mongowire.OP_QUERY, payload)
 	if err != nil {
-		grip.Warningf("failed to reset tags for process %s", p.ID())
+		grip.Warning(grip.MPrintf("failed to reset tags for process %s", p.ID()))
 		return
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	msg, err := p.doRequest(ctx, req)
 	if err != nil {
-		grip.Warningf("failed to reset tags for process %s", p.ID())
+		grip.Warning(grip.MPrintf("failed to reset tags for process %s", p.ID()))
 		return
 	}
 	var resp shell.ErrorResponse

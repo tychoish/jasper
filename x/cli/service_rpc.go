@@ -125,7 +125,7 @@ func (d *rpcDaemon) newService(ctx context.Context) (util.CloseFunc, error) {
 		return nil, errors.New("manager is not set on RPC service")
 	}
 
-	grip.Infof("starting RPC service at '%s:%d'", d.Host, d.Port)
+	grip.Info(grip.MPrintf("starting RPC service at '%s:%d'", d.Host, d.Port))
 
 	return newRPCService(ctx, d.Host, d.Port, d.Manager, d.CredsFilePath)
 }

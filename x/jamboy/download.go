@@ -36,7 +36,7 @@ func createDownloadJobs(path string, urls <-chan string, catcher *erc.Collector)
 
 func processDownloadJobs(ctx context.Context, processFile func(string) error) func(amboy.Queue) error {
 	return func(q amboy.Queue) error {
-		grip.Infof("waiting for %d download jobs to complete", q.Stats(ctx).Total)
+		grip.Info(grip.MPrintf("waiting for %d download jobs to complete", q.Stats(ctx).Total))
 		if !amboy.WaitInterval(ctx, q, time.Second) {
 			return errors.New("download job timed out")
 		}

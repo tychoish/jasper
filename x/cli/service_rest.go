@@ -118,7 +118,7 @@ func (d *restDaemon) newService(ctx context.Context) (util.CloseFunc, error) {
 	if d.Manager == nil {
 		return nil, errors.New("manager is not set on REST service")
 	}
-	grip.Infof("starting REST service at '%s:%d'", d.Host, d.Port)
+	grip.Info(grip.MPrintf("starting REST service at '%s:%d'", d.Host, d.Port))
 	return newRESTService(ctx, d.Host, d.Port, d.Manager)
 }
 

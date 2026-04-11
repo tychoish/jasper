@@ -8,8 +8,8 @@ require (
 	github.com/containerd/cgroups/v3 v3.0.1
 	github.com/google/uuid v1.6.0
 	github.com/opencontainers/runtime-spec v1.0.3-0.20210326190908-1c3f411f0417
-	github.com/tychoish/fun v0.14.7
-	github.com/tychoish/grip v0.4.9
+	github.com/tychoish/fun v0.14.10-0.20260411005334-0f84bb0bc3c5
+	github.com/tychoish/grip v0.5.0
 	github.com/tychoish/jasper v0.1.5
 )
 

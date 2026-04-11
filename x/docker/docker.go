@@ -164,10 +164,10 @@ func (e *docker) setupContainer() error {
 	if err != nil {
 		return fmt.Errorf("problem creating container for process: %w", err)
 	}
-	grip.WarningWhen(len(createResp.Warnings) != 0, message.Fields{
+	grip.Warning(grip.When(len(createResp.Warnings) != 0, message.Fields{
 		"message":  "warnings during container creation for process",
 		"warnings": createResp.Warnings,
-	})
+	}))
 
 	e.setContainerID(createResp.ID)
 

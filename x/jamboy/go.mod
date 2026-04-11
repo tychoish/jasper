@@ -6,11 +6,9 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/mholt/archiver v3.1.1+incompatible
 	github.com/stretchr/testify v1.11.1
-	github.com/tychoish/amboy v0.1.0
-	github.com/tychoish/fun v0.14.7
-	github.com/tychoish/grip v0.4.9
-	github.com/tychoish/jasper v0.1.5
-	github.com/tychoish/jasper/x/remote v0.1.1
+	github.com/tychoish/amboy v0.1.1
+	github.com/tychoish/fun v0.14.9
+	github.com/tychoish/grip v0.5.0
 )
 
 replace github.com/tychoish/jasper/x/remote => ../remote/
